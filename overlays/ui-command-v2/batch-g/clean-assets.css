@@ -1,0 +1,11 @@
+/* Command V2 Batch G — clean standalone cinematic assets.
+   Replaces all UI-reference screenshot crops with text-free artwork. */
+:root{
+  --v2-wolf:url('/ui/fenrir.webp');
+  --v2-lifter:url('/ui/train-lifter.webp');
+  --v2-mountain:url('/ui/mountain-foundation.svg');
+}
+.bc-phase.volume,
+.bc-phase.intensity{
+  background-image:url('/ui/mountain-volume.svg')!important;
+}
