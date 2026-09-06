@@ -1,0 +1,22 @@
+/* Command V2 Batch B — Option 1 Home / Train / primary mobile nav visual pass. */
+
+/* Header: minimal, premium, phone-first. */
+@media(max-width:780px){
+  .topbar{min-height:58px;padding:7px 11px;background:rgba(2,6,9,.985)}
+  .topbar-context{display:none}
+  .topbar .sync-pill{width:10px;height:10px;min-width:10px;padding:0;border:0;background:transparent;font-size:0;overflow:hidden}
+  .topbar .sync-pill .dot{width:8px;height:8px;margin:1px}
+  .brand-mark{font-size:13px}.brand-word{font-size:16px;letter-spacing:.19em}.brand-word small{font-size:5px;letter-spacing:.16em}
+}
+
+/* HOME — closer to the approved Command Dashboard reference. */
+.command-hero{min-height:500px;border-radius:13px;border-color:#263540;background:#05090d;box-shadow:0 20px 45px rgba(0,0,0,.48)}
+.command-hero .hero-content{padding-bottom:94px;max-width:720px}
+.command-hero .hero-brandline{margin-bottom:9px}.command-hero .hero-brandline em{background:#17222c;border:1px solid #32414c;color:#ced5da}
+.command-hero .hero-title{max-width:650px;font-size:clamp(38px,8vw,64px);line-height:.94}
+.command-hero .hero-copy{max-width:520px;color:#c4ccd2}
+.command-hero .hero-tags{gap:5px}.command-hero .hero-tags span{background:#0b141b;border:1px solid #31404a;padding:5px 9px;border-radius:4px}
+.command-hero .hero-start{width:min(430px,100%);min-height:48px;justify-content:center;margin-top:14px;box-shadow:0 12px 28px rgba(255,23,49,.20)}
+.command-hero .hero-actions .ghost{display:none}
+.command-hero .hero-progress{left:22px;right:22px;bottom:16px;padding:10px 12px;border:1px solid #263640;border-radius:7px;background:rgba(5,11,15,.82);backdrop-filter:blur(8px)}
+.command-hero .hero-progress>div:first-child{display
