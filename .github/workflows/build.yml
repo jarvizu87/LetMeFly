@@ -39,6 +39,15 @@ jobs:
           cd .build-src/letmefly_app
           sha256sum -c MANIFEST.sha256
 
+      - name: Apply audited UI overlay
+        working-directory: .build-src/letmefly_app
+        run: |
+          set -euo pipefail
+          PATCH="$GITHUB_WORKSPACE/patches/ui-command-v54/mobile-set-layout.patch"
+          test -f "$PATCH"
+          patch --dry-run -p0 < "$PATCH"
+          patch -p0 < "$PATCH"
+
       - name: Install dependencies
         working-directory: .build-src/letmefly_app
         run: npm install --no-audit --no-fund
