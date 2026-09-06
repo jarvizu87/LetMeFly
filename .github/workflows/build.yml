@@ -84,6 +84,10 @@ jobs:
           grep -Fq ".navbar .nav-secondary{display:none!important}" src/styles.css
           grep -Fq ".swipe-page:not(.active-page)" src/styles.css
           grep -Fq "dayStrip.scrollLeft" src/main.ts
+          grep -Fq ".session-track button{min-height:44px}" src/styles.css
+          grep -Fq ".program-week-nav button{min-width:44px;min-height:44px}" src/styles.css
+          grep -Fq ".swipe-page{flex-basis:min(920px,100%)}" src/styles.css
+          ! grep -Fq "LOWER + BENCH FREQUENCY + GLUTES" src/main.ts
 
       - name: Typecheck
         working-directory: .build-src/letmefly_app
