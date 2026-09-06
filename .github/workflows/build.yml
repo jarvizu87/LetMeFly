@@ -46,12 +46,15 @@ jobs:
           for PATCH in \
             "$GITHUB_WORKSPACE/patches/ui-command-v54/mobile-set-layout.patch" \
             "$GITHUB_WORKSPACE/patches/ui-command-v54/galaxy-ultra-ergonomics.patch" \
-            "$GITHUB_WORKSPACE/patches/ui-command-v54/android-pwa-safearea.patch"
+            "$GITHUB_WORKSPACE/patches/ui-command-v54/android-pwa-safearea.patch" \
+            "$GITHUB_WORKSPACE/patches/ui-command-v54/visual-qa-fixes.patch"
           do
             test -f "$PATCH"
             patch --dry-run -p0 < "$PATCH"
             patch -p0 < "$PATCH"
           done
+          test -f "$GITHUB_WORKSPACE/patches/ui-command-v54/visual-qa.css"
+          cat "$GITHUB_WORKSPACE/patches/ui-command-v54/visual-qa.css" >> src/styles.css
 
       - name: Install dependencies
         working-directory: .build-src/letmefly_app
@@ -72,6 +75,15 @@ jobs:
       - name: Command UI regression audit
         working-directory: .build-src/letmefly_app
         run: npm run audit:ui
+
+      - name: Rendered UX regression audit
+        working-directory: .build-src/letmefly_app
+        run: |
+          set -euo pipefail
+          grep -Fq "active-page" src/main.ts
+          grep -Fq ".navbar .nav-secondary{display:none!important}" src/styles.css
+          grep -Fq ".swipe-page:not(.active-page)" src/styles.css
+          grep -Fq "dayStrip.scrollLeft" src/main.ts
 
       - name: Typecheck
         working-directory: .build-src/letmefly_app
