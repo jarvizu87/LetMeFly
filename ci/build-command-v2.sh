@@ -14,6 +14,8 @@ EXPECTED_BATCH_C_PATCH_SHA="31f06fa6fed51822eed01b18617888ddc6a6afb92577d7757c56
 EXPECTED_BATCH_C_TYPES_SHA="15b51f49a450cfa379aeee5a14ff8d4cc91644d42934393c6034eb0508fae0f5"
 EXPECTED_BATCH_C_CSS_SHA="9c1b66c5ea5164e889eae5fa9d122ffe8a4e6719fefda078501f8148085a71b1"
 EXPECTED_BATCH_D_CSS_SHA="04ae539cfde68fe7b404d17bc586232563c9d22a938cabb6416edd45363777c5"
+EXPECTED_BATCH_E_PATCH_SHA="bb2f7812e4bafc5d64e1fb4ae26a6ae420fcf079fd2a596545a18029cff0f2cd"
+EXPECTED_BATCH_E_CSS_SHA="abcb1085c11a1761ee0878e9613ead439b581a87651c992b923ac231f9af8a35"
 
 PATCH_FILE="$(mktemp)"
 CSS_FILE="$(mktemp)"
@@ -23,7 +25,9 @@ BATCH_C_PATCH_FILE="$(mktemp)"
 BATCH_C_TYPES_FILE="$(mktemp)"
 BATCH_C_CSS_FILE="$(mktemp)"
 BATCH_D_CSS_FILE="$(mktemp)"
-trap 'rm -f "$PATCH_FILE" "$CSS_FILE" "$ASSET_CSS_FILE" "$BATCH_B_CSS_FILE" "$BATCH_C_PATCH_FILE" "$BATCH_C_TYPES_FILE" "$BATCH_C_CSS_FILE" "$BATCH_D_CSS_FILE"' EXIT
+BATCH_E_PATCH_FILE="$(mktemp)"
+BATCH_E_CSS_FILE="$(mktemp)"
+trap 'rm -f "$PATCH_FILE" "$CSS_FILE" "$ASSET_CSS_FILE" "$BATCH_B_CSS_FILE" "$BATCH_C_PATCH_FILE" "$BATCH_C_TYPES_FILE" "$BATCH_C_CSS_FILE" "$BATCH_D_CSS_FILE" "$BATCH_E_PATCH_FILE" "$BATCH_E_CSS_FILE"' EXIT
 
 # Reconstruct the immutable audited V5.4 base.
 test -f "$ARCHIVE"
@@ -48,6 +52,8 @@ cat overlays/ui-command-v2/batch-c/program-progress-v2.patch > "$BATCH_C_PATCH_F
 cat overlays/ui-command-v2/batch-c/program-progress-types.patch > "$BATCH_C_TYPES_FILE"
 cat overlays/ui-command-v2/batch-c/program-progress-v2.css > "$BATCH_C_CSS_FILE"
 cat overlays/ui-command-v2/batch-d/exercises-coach.css > "$BATCH_D_CSS_FILE"
+cat overlays/ui-command-v2/batch-e/profile-calendar-more.patch > "$BATCH_E_PATCH_FILE"
+cat overlays/ui-command-v2/batch-e/profile-calendar-more.css > "$BATCH_E_CSS_FILE"
 echo "$EXPECTED_PATCH_SHA  $PATCH_FILE" | sha256sum -c -
 echo "$EXPECTED_CSS_SHA  $CSS_FILE" | sha256sum -c -
 echo "$EXPECTED_ASSET_CSS_SHA  $ASSET_CSS_FILE" | sha256sum -c -
@@ -56,6 +62,8 @@ echo "$EXPECTED_BATCH_C_PATCH_SHA  $BATCH_C_PATCH_FILE" | sha256sum -c -
 echo "$EXPECTED_BATCH_C_TYPES_SHA  $BATCH_C_TYPES_FILE" | sha256sum -c -
 echo "$EXPECTED_BATCH_C_CSS_SHA  $BATCH_C_CSS_FILE" | sha256sum -c -
 echo "$EXPECTED_BATCH_D_CSS_SHA  $BATCH_D_CSS_FILE" | sha256sum -c -
+echo "$EXPECTED_BATCH_E_PATCH_SHA  $BATCH_E_PATCH_FILE" | sha256sum -c -
+echo "$EXPECTED_BATCH_E_CSS_SHA  $BATCH_E_CSS_FILE" | sha256sum -c -
 
 test "$(wc -c < "$ASSET_CSS_FILE")" = "53990"
 test "$(wc -c < "$BATCH_B_CSS_FILE")" = "7375"
@@ -63,6 +71,8 @@ test "$(wc -c < "$BATCH_C_PATCH_FILE")" = "14888"
 test "$(wc -c < "$BATCH_C_TYPES_FILE")" = "1048"
 test "$(wc -c < "$BATCH_C_CSS_FILE")" = "5940"
 test "$(wc -c < "$BATCH_D_CSS_FILE")" = "6563"
+test "$(wc -c < "$BATCH_E_PATCH_FILE")" = "5514"
+test "$(wc -c < "$BATCH_E_CSS_FILE")" = "4641"
 
 cd .build-src/letmefly_app
 patch --dry-run -p0 < "$PATCH_FILE"
@@ -71,11 +81,14 @@ patch --dry-run -p0 < "$BATCH_C_PATCH_FILE"
 patch -p0 < "$BATCH_C_PATCH_FILE"
 patch --dry-run -p0 < "$BATCH_C_TYPES_FILE"
 patch -p0 < "$BATCH_C_TYPES_FILE"
+patch --dry-run -p0 < "$BATCH_E_PATCH_FILE"
+patch -p0 < "$BATCH_E_PATCH_FILE"
 cp "$CSS_FILE" src/command-v2.css
 cat "$ASSET_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_B_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_C_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_D_CSS_FILE" >> src/command-v2.css
+cat "$BATCH_E_CSS_FILE" >> src/command-v2.css
 
 # Full governed-source and UI release gates.
 npm install --no-audit --no-fund
@@ -99,5 +112,7 @@ grep -Rq "STRENGTH PROFILE" dist/assets
 grep -Rq "VERIFIED WEEKS" dist/assets
 grep -Rq "library-card" dist/assets
 grep -Rq "coach-banner" dist/assets
+grep -Rq "command-menu-grid" dist/assets
+grep -Rq "calendar-month-card" dist/assets
 
 echo "LetMeFly Command V2 build: PASS"
