@@ -1,0 +1,64 @@
+/* LetMeFly Command V2 Batch J — final interaction QA / Galaxy touch-target hardening.
+   Presentation only: no program, exercise-intelligence, or athlete-data behavior changes. */
+
+@media (max-width:780px){
+  /* Sticky controls must clear the real mobile/PWA header, including Android safe area. */
+  .exercise-search-card,
+  .program-week-nav{
+    top:max(64px,calc(46px + env(safe-area-inset-top)))!important;
+  }
+  .program-week-drawer{
+    scroll-margin-top:calc(116px + env(safe-area-inset-top));
+  }
+}
+
+@media (max-width:520px){
+  /* Restore the Galaxy-class interaction targets established by the V5.4 ergonomics gate. */
+  .session-nav-btn{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+  }
+  .day-chip{min-height:48px!important}
+  .filter-chips button{
+    min-height:44px!important;
+    padding:0 12px!important;
+  }
+  .readiness-options span{
+    height:44px!important;
+    min-height:44px!important;
+  }
+  .program-week-nav button{
+    height:44px!important;
+    min-height:44px!important;
+  }
+  .quick-prompts button{min-height:44px!important}
+  .coach-composer .btn{min-height:44px!important}
+
+  /* Exercise intelligence keeps all three primary actions thumb-friendly without widening cards. */
+  .library-card .btn-row{
+    gap:4px!important;
+    overflow:visible!important;
+  }
+  .library-card .btn.small{
+    flex:1 1 0!important;
+    min-width:0!important;
+    min-height:44px!important;
+    padding:0 5px!important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:8px!important;
+  }
+  .library-card .btn.small:nth-child(1),
+  .library-card .btn.small:nth-child(2){flex:.75 1 0!important}
+  .library-card .btn.small:nth-child(3){flex:1.4 1 0!important}
+
+  .calendar-cell{min-height:44px!important}
+}
+
+@media (max-width:420px){
+  /* Do not let the smallest breakpoint undo the mobile interaction floor. */
+  .calendar-cell{min-height:44px!important}
+}
