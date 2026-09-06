@@ -1,0 +1,112 @@
+/* Command V2 Batch H — image fidelity / aspect-ratio correction.
+   Cinematic artwork must crop to its frame; it must never be stretched. */
+
+/* Shared rule for any real <img> that is later introduced into these visual frames. */
+.hero-art img,
+.library-thumb img,
+.exercise-media img,
+.program-hero > img,
+.profile-hero > img,
+.coach-banner > img,
+.more-brand > img,
+.settings-brand > img,
+.bc-phase > img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+
+/* HOME — preserve both source ratios independently. */
+.command-hero::before{
+  background-size:auto,auto,auto 96%,cover!important;
+  background-position:center,center,84% 22%,center top!important;
+}
+
+/* TRAIN — 4:3 lifter art crops inside the feature frame instead of deforming. */
+.active-exercise:first-child::before,
+.preview-card:first-child::before{
+  background-size:auto,cover!important;
+  background-position:center,center 30%!important;
+}
+
+/* PROGRAM — previous 60% 100% / 78% 100% rules distorted the 16:9 mountain art. */
+.program-hero{
+  background-size:auto,cover!important;
+  background-position:0 0,center center!important;
+}
+.black-crown-copy{
+  background-size:auto,auto 170%!important;
+  background-position:0 0,right 34%!important;
+}
+.bc-phase{
+  background-size:cover!important;
+  background-position:center!important;
+}
+.bc-phase.foundation{background-position:center 52%!important}
+.bc-phase.volume,.bc-phase.intensity{background-position:center 48%!important}
+.bc-phase.realization{background-position:center 55%!important}
+
+/* EXERCISES — square thumbnails keep a consistent crop across all movement types. */
+.library-thumb{
+  aspect-ratio:1 / 1!important;
+  height:auto!important;
+  min-height:0!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+}
+.library-card[data-filter-tags~="barbell"] .library-thumb,
+.library-card[data-filter-tags~="sled"] .library-thumb{
+  background-size:cover!important;
+  background-position:center 40%!important;
+}
+.library-card[data-filter-tags~="kb"] .library-thumb,
+.library-card[data-filter-tags~="carry"] .library-thumb{
+  background-size:cover!important;
+  background-position:center 34%!important;
+}
+
+/* COACH — preserve the portrait Fenrir ratio and crop intentionally from the right. */
+.coach-banner{
+  background-size:auto,auto 175%!important;
+  background-position:0 0,right 34%!important;
+}
+
+/* PROFILE — remove the explicit 58% 100% / 78% 100% mountain stretch. */
+.profile-hero{
+  background-size:auto,cover!important;
+  background-position:0 0,center center!important;
+}
+
+/* Decorative mountain panels are crop-only surfaces. */
+.more-brand,.settings-brand{
+  background-size:auto,cover!important;
+  background-position:0 0,center center!important;
+}
+
+@media (max-width:780px){
+  .command-hero::before{
+    background-size:auto,auto,auto 94%,cover!important;
+    background-position:center,center,88% 20%,center top!important;
+  }
+  .program-hero{
+    background-size:auto,cover!important;
+    background-position:0 0,60% center!important;
+  }
+  .profile-hero{
+    background-size:auto,cover!important;
+    background-position:0 0,68% center!important;
+  }
+  .coach-banner{
+    background-size:auto,auto 190%!important;
+    background-position:0 0,right 32%!important;
+  }
+}
+
+@media (max-width:420px){
+  .program-hero{background-position:0 0,64% center!important}
+  .profile-hero{background-position:0 0,72% center!important}
+  .active-exercise:first-child::before,
+  .preview-card:first-child::before{background-position:center,center 26%!important}
+}
