@@ -1,7 +1,8 @@
 --- src/main.ts
 +++ src/main.ts
 @@ -157,7 +157,7 @@
-   const title = beforeStart ? 'LOWER + BENCH FREQUENCY + GLUTES' : day ? day.title : 'CROWNFORGE'
+-  const title = beforeStart ? 'LOWER + BENCH FREQUENCY + GLUTES' : day ? day.title : 'CROWNFORGE'
++  const title = day ? day.title : 'CROWNFORGE'
    const sub = beforeStart ? 'Foundation • Week 1 • Day 1 • Sep 7' : day ? `Week ${today?.week} • Day ${today?.day}` : 'Your current training block'
    const completed = state.workout ? completionStats(state.workout) : { done: 0, total: 0, percent: 0 }
 -  const focus = (day?.sections ?? []).slice(0, 4).map((section, index) => `<div class="focus-chip"><span>${['01','02','03','04'][index] ?? '•'}</span>${esc(section.title.replace(/^\w+\s*•?\s*/, ''))}</div>`).join('')
