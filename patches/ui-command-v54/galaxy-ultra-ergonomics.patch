@@ -1,0 +1,32 @@
+--- src/styles.css
++++ src/styles.css
+@@ -108,6 +108,17 @@
+ .status-dot.yellow{background:#facc15;box-shadow:0 0 0 4px rgba(250,204,21,.10)}
+ .status-dot.red{background:#fb7185;box-shadow:0 0 0 4px rgba(251,113,133,.10)}
+ 
++
++/* Galaxy Ultra-class Android PWA ergonomics. */
++@media (max-width:520px){
++  .nav-item{min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center}
++  .session-nav-btn{width:44px;height:44px}
++  .day-chip{min-height:48px}
++  .filter-chips button{min-height:44px;padding:9px 12px}
++  .btn.small{min-height:44px}
++  .readiness-options span{height:44px}
++}
++
+ /* Small-phone workout logging: preserve touch targets and readable prescription context. */
+ @media (max-width:420px){
+   .set-row{
+--- scripts/audit-command-ui.mjs
++++ scripts/audit-command-ui.mjs
+@@ -31,6 +31,9 @@
+   ['small-phone set field semantics', /class="set-field reps-field".*class="set-field load-field"/s],
+   ['small-phone two-row set layout', /@media\s*\(max-width:420px\)[\s\S]*grid-template-areas:[\s\S]*reps reps load load rpe rpe/],
+   ['small-phone completion touch target', /\.set-check\{grid-area:check;width:44px;height:44px/],
++  ['Galaxy-class nav touch target', /@media\s*\(max-width:520px\)[\s\S]*\.nav-item\{min-height:52px/],
++  ['Galaxy-class workout navigation target', /\.session-nav-btn\{width:44px;height:44px/],
++  ['Galaxy-class filter touch target', /\.filter-chips button\{min-height:44px/],
+   ['Command UI PWA cache version', /letmefly-shell-v5-4-command-1/],
+   ['PWA top safe-area handling', /safe-area-inset-top/],
+   ['PWA bottom navigation clearance', /padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)/],

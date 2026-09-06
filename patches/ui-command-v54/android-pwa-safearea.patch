@@ -1,0 +1,37 @@
+--- src/styles.css
++++ src/styles.css
+@@ -38,8 +38,8 @@
+ button,input,select,textarea{font:inherit}button,a{ -webkit-tap-highlight-color:transparent }
+ button{cursor:pointer}
+ a{color:inherit}
+-.app-shell{min-height:100vh;padding-bottom:78px}
+-.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:70px;padding:10px 16px;background:linear-gradient(180deg,rgba(5,7,10,.98),rgba(5,7,10,.88));backdrop-filter:blur(18px);border-bottom:1px solid var(--line-soft)}
++.app-shell{min-height:100vh;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
++.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:70px;padding:calc(10px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left));background:linear-gradient(180deg,rgba(5,7,10,.98),rgba(5,7,10,.88));backdrop-filter:blur(18px);border-bottom:1px solid var(--line-soft)}
+ .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--condensed);font-weight:900;letter-spacing:.14em}
+ .brand-mark{width:38px;height:38px;display:grid;place-items:center;border:1px solid rgba(255,38,56,.55);clip-path:polygon(8% 0,100% 0,100% 78%,78% 100%,0 100%,0 8%);background:linear-gradient(145deg,rgba(255,38,56,.95),rgba(122,9,27,.92));font-size:22px;box-shadow:0 0 28px rgba(255,38,56,.16)}
+ .brand-word{font-size:16px}.brand small{display:block;font-family:var(--sans);font-size:8px;color:var(--muted);letter-spacing:.18em;margin-top:2px}
+@@ -85,9 +85,9 @@
+ @media (min-width:980px){
+   .app-shell{padding-bottom:22px;padding-left:92px}.topbar{padding-left:22px}.topbar-context{display:flex}.navbar{top:70px;bottom:0;right:auto;width:92px;grid-template-columns:1fr;grid-auto-rows:min-content;align-content:start;padding:14px 8px;background:rgba(6,8,11,.96);border-right:1px solid #202733;border-top:0}.nav-item{padding:10px 4px;margin-bottom:3px}.nav-item span{font-size:19px}.nav-secondary{display:block}.nav-more{display:none}main{padding:22px 24px 46px}.command-hero{min-height:430px}.hero-content{padding-top:20px}}
+ @media (max-width:780px){
+-  .grid-2,.grid-3,.dashboard-grid,.profile-grid,.program-hero,.black-crown-panel,.coach-layout{grid-template-columns:1fr}.phase-roadmap{grid-template-columns:1fr}.week-grid,.exercise-library,.more-grid{grid-template-columns:1fr}.progress-score-grid{grid-template-columns:1fr 1fr}.score-card:last-child{grid-column:1/-1}.tm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.data-actions{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.command-hero{min-height:470px;padding:20px}.hero-art{width:80%;right:-22%;opacity:.32}.hero-progress{left:20px;right:20px;bottom:18px;width:auto}.hero-title{font-size:clamp(36px,11vw,54px)}.focus-strip{grid-template-columns:repeat(2,1fr)}.readiness-field{grid-template-columns:1fr;gap:7px}.set-row{grid-template-columns:42px minmax(86px,1.4fr) 58px 78px 54px 40px;gap:5px;padding:8px}.set-target-cell strong{font-size:9px}.set-input{padding:7px 5px;font-size:11px}.workout-panel{padding:14px;min-height:570px}.swipe-page{min-height:570px}.profile-hero{grid-template-columns:auto 1fr}.profile-program{grid-column:1/-1;text-align:left}.danger-zone{align-items:flex-start;flex-direction:column}.coach-banner h1{font-size:32px}.library-card{grid-template-columns:68px 1fr auto}.library-thumb{height:90px}.topbar{padding:9px 11px}.brand small{display:none}.sync-pill{max-width:116px;overflow:hidden;text-overflow:ellipsis}.toast{max-width:calc(100vw - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
++  .grid-2,.grid-3,.dashboard-grid,.profile-grid,.program-hero,.black-crown-panel,.coach-layout{grid-template-columns:1fr}.phase-roadmap{grid-template-columns:1fr}.week-grid,.exercise-library,.more-grid{grid-template-columns:1fr}.progress-score-grid{grid-template-columns:1fr 1fr}.score-card:last-child{grid-column:1/-1}.tm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.data-actions{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.command-hero{min-height:470px;padding:20px}.hero-art{width:80%;right:-22%;opacity:.32}.hero-progress{left:20px;right:20px;bottom:18px;width:auto}.hero-title{font-size:clamp(36px,11vw,54px)}.focus-strip{grid-template-columns:repeat(2,1fr)}.readiness-field{grid-template-columns:1fr;gap:7px}.set-row{grid-template-columns:42px minmax(86px,1.4fr) 58px 78px 54px 40px;gap:5px;padding:8px}.set-target-cell strong{font-size:9px}.set-input{padding:7px 5px;font-size:11px}.workout-panel{padding:14px;min-height:570px}.swipe-page{min-height:570px}.profile-hero{grid-template-columns:auto 1fr}.profile-program{grid-column:1/-1;text-align:left}.danger-zone{align-items:flex-start;flex-direction:column}.coach-banner h1{font-size:32px}.library-card{grid-template-columns:68px 1fr auto}.library-thumb{height:90px}.topbar{padding:calc(9px + env(safe-area-inset-top)) max(11px,env(safe-area-inset-right)) 9px max(11px,env(safe-area-inset-left))}.brand small{display:none}.sync-pill{max-width:116px;overflow:hidden;text-overflow:ellipsis}.toast{max-width:calc(100vw - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+ @media (max-width:520px){
+-  main{padding:13px 10px 32px}.command-hero{border-radius:19px}.hero-tags span:nth-child(3){display:none}.readiness-rings{gap:7px}.readiness-ring{border-width:3px}.readiness-ring::after{inset:-3px;border-width:3px}.readiness-ring strong{font-size:21px}.set-row{grid-template-columns:36px 1fr 50px 67px 48px 37px}.set-label strong{font-size:20px}.rpe-field label{font-size:6px}.tm-grid{grid-template-columns:1fr 1fr}.action-tile{min-height:96px}.session-track button{min-width:47px}.brand-mark{width:34px;height:34px}.brand-word{font-size:14px}}
++  main{padding:13px 10px 32px}.command-hero{border-radius:19px;padding-bottom:110px}.hero-tags span:nth-child(3){display:none}.readiness-rings{gap:7px}.readiness-ring{border-width:3px}.readiness-ring::after{inset:-3px;border-width:3px}.readiness-ring strong{font-size:21px}.set-row{grid-template-columns:36px 1fr 50px 67px 48px 37px}.set-label strong{font-size:20px}.rpe-field label{font-size:6px}.tm-grid{grid-template-columns:1fr 1fr}.action-tile{min-height:96px}.session-track button{min-width:47px}.brand-mark{width:34px;height:34px}.brand-word{font-size:14px}}
+ 
+ /* V5.4 Exercise Intelligence + current Command UI integration */
+ .exercise-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;margin-top:10px}
+--- scripts/audit-command-ui.mjs
++++ scripts/audit-command-ui.mjs
+@@ -35,6 +35,9 @@
+   ['Galaxy-class workout navigation target', /\.session-nav-btn\{width:44px;height:44px/],
+   ['Galaxy-class filter touch target', /\.filter-chips button\{min-height:44px/],
+   ['Command UI PWA cache version', /letmefly-shell-v5-4-command-1/],
++  ['PWA top safe-area handling', /safe-area-inset-top/],
++  ['PWA content bottom safe-area clearance', /padding-bottom:calc\(78px \+ env\(safe-area-inset-bottom\)\)/],
++  ['small-phone hero progress clearance', /@media\s*\(max-width:520px\)[\s\S]*command-hero\{border-radius:19px;padding-bottom:110px/],
+ ]
+ 
+ const failures = checks.filter(([, pattern]) => !(pattern.test(main) || pattern.test(css) || pattern.test(serviceWorker))).map(([label]) => label)

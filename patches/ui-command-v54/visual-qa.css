@@ -1,0 +1,26 @@
+
+/* Rendered QA fixes: preserve five-item mobile nav and active swipe height. */
+@media (max-width:979px){
+  .navbar .nav-secondary{display:none!important}
+}
+.swipe-viewport{align-items:flex-start}
+.swipe-page:not(.active-page){max-height:590px;overflow:hidden}
+@media (max-width:780px){
+  .swipe-page:not(.active-page){max-height:570px}
+}
+@media (min-width:980px){
+  .swipe-viewport{margin-left:0;margin-right:0;padding:1px 0 18px;max-width:100%}
+  .swipe-page{flex-basis:min(920px,100%)}
+}
+
+/* Galaxy Ultra-class touch audit: secondary controls must still be thumb-safe. */
+@media (max-width:520px){
+  .brand{min-height:44px}
+  .session-track button{min-height:44px}
+  .program-week-nav button{min-width:44px;min-height:44px}
+  .icon-btn{min-width:44px;min-height:44px}
+  .tm-input,.tm-unit{min-height:44px}
+  .tm-unit{min-width:44px}
+  .filter-chips button{min-width:44px}
+  .quick-prompts button{min-height:44px}
+}
