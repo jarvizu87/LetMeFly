@@ -1,0 +1,61 @@
+ORGE.weekData.flatMap((week) => week.days.map((day) => ({ ...day, week: week.week })))
++  const dates = days.map((day) => day.date).filter(Boolean).sort()
++  const anchor = dates[0] ? new Date(`${dates[0]}T12:00:00`) : new Date()
++  const year = anchor.getFullYear()
++  const month = anchor.getMonth()
++  const monthName = anchor.toLocaleString(undefined, { month: 'long', year: 'numeric' })
++  const firstDay = new Date(year, month, 1).getDay()
++  const totalDays = new Date(year, month + 1, 0).getDate()
++  const byDate = new Map(days.map((day) => [day.date, day]))
++  const cells: string[] = []
++  for (let i = 0; i < firstDay; i++) cells.push('<div class="calendar-cell empty"></div>')
++  for (let d = 1; d <= totalDays; d++) {
++    const iso = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
++    const item = byDate.get(iso)
++    const rest = item?.restDay ?? false
++    cells.push(`<div class="calendar-cell ${rest ? 'rest' : ''}"><strong>${d}</strong>${item ? `<span class="dot"></span><button data-calendar-week="${item.week}" data-calendar-day="${item.day}" aria-label="Open ${esc(item.title)}"></button>` : ''}</div>`)
++  }
++  return `<div class="calendar-shell"><div class="page-head cinematic-head"><div class="page-kicker">Plan & stay on track</div><h1>CALENDAR</h1><p class="muted">${esc(monthName)} • governed Crownforge schedule</p></div><section class="card"><div class="calendar-grid">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((x) => `<div class="calendar-head">${x}</div>`).join('')}${cells.join('')}</div></section><div class="calendar-list">${days.slice(0,12).map((day) => `<div class="calendar-event ${day.restDay ? 'rest' : ''}"><i></i><div><strong>${esc(day.date)} • ${esc(day.title)}</strong><small>${esc(day.role)}</small></div><span>W${day.week} D${day.day}</span></div>`).join('')}</div></div>`
++}
++
++function settingsPage(): string {
++  return `<div class="settings-shell"><div class="page-head cinematic-head"><div class="page-kicker">Customize your experience</div><h1>SETTINGS</h1><p class="muted">Command presentation on top of protected program logic and private athlete data.</p></div><div class="settings-list">
++    <a class="settings-row" href="#/profile"><span>⚙</span><div><strong>App & Athlete Settings</strong><small>Profile, units, sync, and private athlete data.</small></div><i>›</i></a>
++    <a class="settings-row" href="#/profile"><span>⌂</span><div><strong>Equipment</strong><small>Manage available equipment through the athlete profile.</small></div><i>›</i></a>
++    <a class="settings-row" href="#/profile"><span>⇩</span><div><strong>Data & Backup</strong><small>Export, restore, migrate, and sync safely.</small></div><i>›</i></a>
++    <a class="settings-row" href="#/coach"><span>?</span><div><strong>Help & Coaching</strong><small>Ask LetMeFly Coach about training and app context.</small></div><i>›</i></a>
++    <a class="settings-row" href="#/home"><span>♛</span><div><strong>About LetMeFly</strong><small>Command UI • ${APP_VERSION} • local-first athlete ownership.</small></div><i>›</i></a>
++  </div><div class="settings-brand">DISCIPLINE BUILDS FREEDOM</div></div>`
++}
++
+ function onboardingModal(): string {
+   return `<div class="modal-backdrop"><div class="modal"><div class="brand"><div class="brand-mark">♛</div><div>LETMEFLY<small>LOCAL-FIRST SETUP</small></div></div><h1 style="margin-top:18px">Build the athlete vault.</h1><p class="muted">No account is required. Your profile and workout history start in private browser storage.</p>${state.legacy ? `<div class="callout warning"><strong>Legacy LetMeFly data detected.</strong><br>${state.legacy.snapshot.candidates.length} browser storage key(s) can be snapshotted and migrated without deleting the original.</div><div class="btn-row" style="margin:12px 0"><button class="btn purple" data-action="migrate-legacy-onboard">Inspect & Migrate Existing Data</button></div><hr style="border-color:var(--line)">` : ''}<div class="field"><label>Display name</label><input id="onboard-name" class="input" placeholder="Athlete name"></div><div class="field" style="margin-top:10px"><label>Default weight unit</label><select id="onboard-unit" class="select"><option value="lb">lb</option><option value="kg">kg</option></select></div><button class="btn primary" style="width:100%;margin-top:14px" data-action="create-athlete">Create Local Athlete</button><p class="source-note" style="margin-top:12px">This rebuilt public shell does not contain personal TMs, bodyweight, goals, or workout history. Those live only in your private vault.</p></div></div>`
+ }
+@@ -456,6 +502,16 @@
+   if (state.route === 'exercises') bindExerciseEvents()
+   if (state.route === 'coach') bindCoachEvents()
+   if (state.route === 'profile') bindProfileEvents()
++  if (state.route === 'calendar') bindCalendarEvents()
++}
++
++function bindCalendarEvents(): void {
++  document.querySelectorAll<HTMLElement>('[data-calendar-week]').forEach((el) => el.addEventListener('click', async () => {
++    state.selectedWeek = Number(el.dataset.calendarWeek ?? 1)
++    state.selectedDay = Number(el.dataset.calendarDay ?? 1)
++    await refreshWorkout()
++    location.hash = '#/train'
++  }))
+ }
+ 
+ function bindTrainEvents(): void {
+@@ -465,6 +521,9 @@
+     render()
+   }))
+   bindSwipeNavigation()
++  const activeDay = document.querySelector<HTMLElement>('.day-chip.active')
++  const dayStrip = document.querySelector<HTMLElement>('.day-strip')
++  if (activeDay && dayStrip) dayStrip.scrollLeft = Math.max(0, activeDay.offsetLeft - (dayStrip.clientWidth - activeDay.clientWidth) / 2)
+   document.querySelectorAll('[data-action="save-readiness"]').forEach((el) => el.addEventListener('click', saveReadinessFromForm))
+   document.querySelectorAll('[data-action="start-workout"]').forEach((el) => el.addEventListener('click', startSelectedWorkout))
+   document.querySelectorAll<HTMLElement>('[data-action="toggle-set"]').forEach((el) => el.addEventListener('click', toggleSetFromRow))
+@@ -487,6 
