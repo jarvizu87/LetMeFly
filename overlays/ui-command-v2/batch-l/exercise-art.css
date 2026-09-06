@@ -1,0 +1,28 @@
+/* LetMeFly Command V2 Batch L — asset-driven exercise artwork.
+   Cards without a matching local asset deliberately retain the Command V2 fallback art. */
+
+/* Generated rules set --exercise-art only for image files that actually ship. */
+.exercise-stack .exercise-card[data-exercise-art]::before{
+  background-image:linear-gradient(180deg,rgba(2,5,8,.14),rgba(2,5,8,.20) 48%,rgba(2,5,8,.86)),var(--exercise-art,var(--v2-mountain))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+.exercise-stack .exercise-card:first-child[data-exercise-art]::before{
+  background-image:linear-gradient(180deg,rgba(2,5,8,.05),rgba(2,5,8,.12) 44%,rgba(2,5,8,.84)),var(--exercise-art,var(--v2-lifter))!important;
+}
+.library-thumb[data-exercise-art]{
+  background-image:linear-gradient(180deg,rgba(1,5,8,.04),rgba(1,5,8,.72)),var(--exercise-art,var(--v2-mountain))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+
+/* Keep thumbnails clean even when only some exercises have completed artwork. */
+.library-thumb[data-exercise-art]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+}
