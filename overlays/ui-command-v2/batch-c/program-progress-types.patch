@@ -1,0 +1,13 @@
+--- src/main.ts
++++ src/main.ts
+@@ -321,8 +321,8 @@
+   if (!target) return
+   const tms = await getLatestTrainingMaxes(state.athlete.id)
+   const workouts = await recentWorkoutSessions(state.athlete.id, 8)
+-  const bodyweights = (await getAll('bodyweightEntries')).filter((row) => row.athlete_id === state.athlete?.id).sort((a,b) => String(b.recorded_at ?? '').localeCompare(String(a.recorded_at ?? '')))
+-  const prs = (await getAll('personalRecords')).filter((row) => row.athlete_id === state.athlete?.id)
++  const bodyweights = (await getAll<LocalDomainRecord>('bodyweightEntries')).filter((row) => row.athlete_id === state.athlete?.id).sort((a,b) => String(b.recorded_at ?? '').localeCompare(String(a.recorded_at ?? '')))
++  const prs = (await getAll<LocalDomainRecord>('personalRecords')).filter((row) => row.athlete_id === state.athlete?.id)
+   const lifts = [
+     ['front-squat','Front Squat'], ['back-squat','Back Squat'], ['bench-press','Bench Press'], ['deadlift','Deadlift'], ['overhead-press','Overhead Press'], ['clean','Clean'],
+   ]
