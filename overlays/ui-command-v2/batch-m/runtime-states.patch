@@ -1,0 +1,63 @@
+--- src/main.ts
++++ src/main.ts
+@@ -93,7 +93,7 @@
+       })
+     }
+   } catch (error) {
+-    root.innerHTML = `<main><div class="card"><h1>LetMeFly could not open local storage</h1><p class="muted">${esc(errorMessage(error))}</p></div></main>`
++    root.innerHTML = `<main><div class="card empty-state"><div class="page-kicker">Private vault unavailable</div><h1>LetMeFly could not open local storage</h1><p class="muted">Your athlete data was not deleted. The app could not open the private local vault on this attempt.</p><div class="callout warning">${esc(errorMessage(error))}</div><a class="btn primary" href="/" style="margin-top:12px">RETRY LETMEFLY</a></div></main>`
+   }
+ }
+@@ -321,6 +321,7 @@
+   if (state.route !== 'progress' || !state.athlete) return
+   const target = document.querySelector('#progress-content')
+   if (!target) return
++  try {
+   const tms = await getLatestTrainingMaxes(state.athlete.id)
+   const workouts = await recentWorkoutSessions(state.athlete.id, 8)
+   const bodyweights = (await getAll<LocalDomainRecord>('bodyweightEntries')).filter((row) => row.athlete_id === state.athlete?.id).sort((a,b) => String(b.recorded_at ?? '').localeCompare(String(a.recorded_at ?? '')))
+@@ -335,7 +336,7 @@
+   const strengthCards = lifts.slice(0,4).map(([key,name]) => {
+     const row = tms[key]
+     const value = Number(row?.tm_value ?? 0)
+-    return `<div class="strength-metric"><span>${esc(name)}</span><strong>${value ? esc(String(value)) : '—'}<small>${value ? ` ${esc(String(row?.tm_unit ?? 'lb'))}` : ''}</small></strong><i style="--strength:${value ? Math.max(12, Math.min(100, value / 4.5)) : 8}%"></i></div>`
++    return `<div class="strength-metric ${value ? '' : 'empty'}"><span>${esc(name)}</span><strong>${value ? esc(String(value)) : '—'}<small>${value ? ` ${esc(String(row?.tm_unit ?? 'lb'))}` : ''}</small></strong><i style="--strength:${value ? Math.max(12, Math.min(100, value / 4.5)) : 0}%"></i></div>`
+   }).join('')
+   target.innerHTML = `<div class="progress-score-grid command-metrics">
+       <div class="score-card hero-score"><span>SESSIONS</span><strong>${workouts.length}</strong><small>Recent history window</small></div>
+@@ -345,11 +346,17 @@
+     </div>
+     <section class="card strength-progress-card"><div class="v2-chart-title"><div><span>STRENGTH PROFILE</span><strong>Current training maxes</strong></div><span>${savedTms.length} tracked</span></div><div class="strength-metric-grid">${strengthCards}</div></section>
+     <div class="v2-analytics">
+-      <section class="v2-chart"><div class="v2-chart-title"><div><span>TM SNAPSHOT</span><strong>${savedTms.length ? `${savedTms.length} tracked lifts` : 'Build the profile'}</strong></div><span>Relative visual scale</span></div><div class="v2-bars">${lifts.map(([key], index) => { const value = Number(tms[key]?.tm_value ?? 0); const scaled = value > 0 ? Math.max(12, Math.min(100, value / 4.5)) : 8 + index * 3; return `<i style="height:${scaled}%"></i>` }).join('')}</div></section>
++      <section class="v2-chart"><div class="v2-chart-title"><div><span>TM SNAPSHOT</span><strong>${savedTms.length ? `${savedTms.length} tracked lifts` : 'Build the profile'}</strong></div><span>${savedTms.length ? 'Relative visual scale' : 'No TM data yet'}</span></div><div class="v2-bars">${lifts.map(([key]) => { const value = Number(tms[key]?.tm_value ?? 0); const scaled = value > 0 ? Math.max(12, Math.min(100, value / 4.5)) : 0; return `<i class="${value > 0 ? '' : 'empty'}" style="height:${scaled}%"></i>` }).join('')}</div></section>
+       <section class="v2-volume"><div class="v2-chart-title"><div><span>CONSISTENCY</span><strong>${workouts.length}/8</strong></div><span>Recent sessions</span></div><div class="v2-volume-grid">${Array.from({ length: 8 }, (_, index) => { const workout = workouts[index]; const status = String(workout?.status ?? ''); const className = !workout ? 'empty' : status === 'completed' ? 'completed' : 'active'; return `<span class="${className}" title="${workout ? esc(String(workout.workout_name ?? 'Workout')) : 'No session'}"></span>` }).join('')}</div></section>
+     </div>
+     <div class="card tm-board"><div class="card-head"><div><div class="page-kicker">Strength Dashboard</div><h2>Training Maxes</h2><p class="muted">Updates append new effective-dated records.</p></div><span class="badge mandatory">PRIVATE</span></div><div class="tm-grid">${lifts.map(([key,name]) => { const row=tms[key]; return `<div class="tm-card"><span>${esc(name)}</span><div class="tm-input-wrap"><input class="tm-input" data-tm-key="${key}" type="number" min="0" step="2.5" value="${esc(String(row?.tm_value ?? ''))}" placeholder="—"><select class="tm-unit" data-tm-unit="${key}"><option value="lb" ${row?.tm_unit === 'kg' ? '' : 'selected'}>lb</option><option value="kg" ${row?.tm_unit === 'kg' ? 'selected' : ''}>kg</option></select></div></div>` }).join('')}</div><button class="btn primary" data-action="save-tms">SAVE TM UPDATES</button></div>
+-    <div class="section-title"><div><div class="page-kicker">History</div><h2>Recent Workouts</h2></div></div><div class="history-list">${workouts.length ? workouts.map((w) => `<div class="history-card"><div class="history-icon">✓</div><div><span>${esc(String(w.started_at ?? w.scheduled_for ?? '')).slice(0,10)}</span><strong>${esc(String(w.workout_name ?? 'Workout'))}</strong><small>${esc(String(w.program_key ?? ''))} • W${esc(String(w.week_number ?? ''))} • ${esc(String(w.day_key ?? ''))}</small></div><em>${esc(String(w.status ?? ''))}</em></div>`).join('') : '<div class="card empty">No workouts logged yet.</div>'}</div>`
++    <div class="section-title"><div><div class="page-kicker">History</div><h2>Recent Workouts</h2></div></div><div class="history-list">${workouts.length ? workouts.map((w) => `<div class="history-card"><div class="history-icon">✓</div><div><span>${esc(String(w.started_at ?? w.scheduled_for ?? '')).slice(0,10)}</span><strong>${esc(String(w.workout_name ?? 'Workout'))}</strong><small>${esc(String(w.program_key ?? ''))} • W${esc(String(w.week_number ?? ''))} • ${esc(String(w.day_key ?? ''))}</small></div><em>${esc(String(w.status ?? ''))}</em></div>`).join('') : '<div class="card empty empty-state"><div class="page-kicker">History starts here</div><h3>No workouts logged yet.</h3><p class="muted">Your first started session will appear here without changing the programmed workout.</p><a class="btn ghost" href="#/train">OPEN TRAIN</a></div>'}</div>`
+   bindProgressEvents()
++  } catch (error) {
++    console.warn('Progress history unavailable', error)
++    target.innerHTML = `<div class="card empty empty-state"><div class="page-kicker">Progress unavailable</div><h2>Training history could not be read.</h2><p class="muted">Your workout data remains in the private local vault. You can keep training locally and retry this view.</p><div class="callout warning">${esc(errorMessage(error))}</div><button class="btn ghost" data-action="retry-progress" style="margin-top:12px">RETRY PROGRESS</button></div>`
++    target.querySelector('[data-action="retry-progress"]')?.addEventListener('click', () => void renderProgressAsync())
++  }
+ }
+@@ -466,6 +473,10 @@
+ 
+ 
+ function openExerciseDemo(programName: string): void {
++  if (!navigator.onLine) {
++    showModal(`<div class="page-kicker">Exercise demo offline</div><h2>${esc(programName)}</h2><div class="callout warning">Video and search links need an internet connection. Workout logging, prescriptions, Exercise Info, and approved substitution guidance remain available offline.</div><button class="btn primary" data-close-modal style="margin-top:12px">Close</button>`)
++    return
++  }
+   const matches = getExerciseMatches(programName)
+   if (matches.length === 0) {
+     window.open(safeFallbackSearchUrl(programName), '_blank', 'noopener,noreferrer')
+@@ -850,6 +861,7 @@
+     updateSyncPill()
+   } catch (error) {
+     showToast(`Saved locally • cloud pending: ${errorMessage(error)}`)
++    updateSyncPill()
+   }
+ }
