@@ -45,7 +45,8 @@ jobs:
           set -euo pipefail
           for PATCH in \
             "$GITHUB_WORKSPACE/patches/ui-command-v54/mobile-set-layout.patch" \
-            "$GITHUB_WORKSPACE/patches/ui-command-v54/galaxy-ultra-ergonomics.patch"
+            "$GITHUB_WORKSPACE/patches/ui-command-v54/galaxy-ultra-ergonomics.patch" \
+            "$GITHUB_WORKSPACE/patches/ui-command-v54/android-pwa-safearea.patch"
           do
             test -f "$PATCH"
             patch --dry-run -p0 < "$PATCH"
