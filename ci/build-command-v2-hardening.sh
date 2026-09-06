@@ -8,6 +8,8 @@ READINESS_PATCH="overlays/ui-command-v2/batch-k/workout-readiness.patch"
 ART_HOOKS_PATCH="overlays/ui-command-v2/batch-l/exercise-art-hooks.patch"
 ART_CSS="overlays/ui-command-v2/batch-l/exercise-art.css"
 ART_SOURCE_DIR="overlays/exercise-art"
+STATE_PATCH="overlays/ui-command-v2/batch-m/runtime-states.patch"
+STATE_CSS="overlays/ui-command-v2/batch-m/runtime-states.css"
 
 # Reconstruct and validate the full locked Command V2 release first.
 bash ci/build-command-v2-polish2.sh
@@ -16,6 +18,8 @@ test -s "$READINESS_PATCH"
 test -s "$ART_HOOKS_PATCH"
 test -s "$ART_CSS"
 test -f "$ART_SOURCE_DIR/README.md"
+test -s "$STATE_PATCH"
+test -s "$STATE_CSS"
 
 cd .build-src/letmefly_app
 
@@ -74,6 +78,20 @@ cat "$GENERATED_ART_CSS" >> src/command-v2.css
 rm -f "$GENERATED_ART_CSS"
 echo "Exercise artwork assets activated: $ART_COUNT"
 
+# Runtime states must remain truthful and recoverable when data/network features are unavailable.
+patch --dry-run -p0 < "$ROOT_DIR/$STATE_PATCH"
+patch -p0 < "$ROOT_DIR/$STATE_PATCH"
+cat "$ROOT_DIR/$STATE_CSS" >> src/command-v2.css
+
+grep -Fq "Private vault unavailable" src/main.ts
+grep -Fq "Progress history unavailable" src/main.ts
+grep -Fq "No TM data yet" src/main.ts
+grep -Fq "Exercise demo offline" src/main.ts
+grep -Fq "navigator.onLine" src/main.ts
+grep -Fq "retry-progress" src/main.ts
+grep -Fq ".v2-bars i.empty" src/command-v2.css
+! grep -Fq "8 + index * 3" src/main.ts
+
 # Re-run all protected-boundary audits against the hardened source that will actually ship.
 npm run audit:source
 npm run audit:crownforge
@@ -91,10 +109,12 @@ grep -Rq "SAVE READINESS & START WORKOUT" dist/assets
 grep -Rq "Complete readiness before starting" dist/assets
 grep -Rq "data-exercise-art" dist/assets
 grep -Rq "var(--exercise-art" dist/assets
+grep -Rq "Exercise demo offline" dist/assets
+grep -Rq "No TM data yet" dist/assets
 
 for art_file in "${ART_FILES[@]}"; do
   art_name="$(basename "$art_file")"
   test -f "dist/ui/exercises/$art_name"
 done
 
-echo "LetMeFly Command V2 Monday hardening + readiness/session linkage + partial exercise-art pipeline: PASS"
+echo "LetMeFly Command V2 hardening + partial exercise-art + truthful runtime states: PASS"
