@@ -1,0 +1,31 @@
+--- src/main.ts
++++ src/main.ts
+@@ -157,7 +157,7 @@
+   const title = beforeStart ? 'LOWER + BENCH FREQUENCY + GLUTES' : day ? day.title : 'CROWNFORGE'
+   const sub = beforeStart ? 'Foundation • Week 1 • Day 1 • Sep 7' : day ? `Week ${today?.week} • Day ${today?.day}` : 'Your current training block'
+   const completed = state.workout ? completionStats(state.workout) : { done: 0, total: 0, percent: 0 }
+-  const focus = (day?.sections ?? []).slice(0, 4).map((section, index) => `<div class="focus-chip"><span>${['01','02','03','04'][index] ?? '•'}</span>${esc(section.title.replace(/^\w+\s*•?\s*/, ''))}</div>`).join('')
++  const focus = (day?.sections ?? []).slice(0, 4).map((section, index) => `<div class="focus-chip"><span>${['01','02','03','04'][index] ?? '•'}</span>${esc(section.title)}</div>`).join('')
+   return `
+     <section class="command-hero">
+       <div class="hero-art" aria-hidden="true"></div>
+@@ -465,6 +465,11 @@
+     render()
+   }))
+   bindSwipeNavigation()
++  const activeDay = document.querySelector<HTMLElement>('.day-chip.active')
++  const dayStrip = document.querySelector<HTMLElement>('.day-strip')
++  if (activeDay && dayStrip) {
++    dayStrip.scrollLeft = Math.max(0, activeDay.offsetLeft - (dayStrip.clientWidth - activeDay.clientWidth) / 2)
++  }
+   document.querySelectorAll('[data-action="save-readiness"]').forEach((el) => el.addEventListener('click', saveReadinessFromForm))
+   document.querySelectorAll('[data-action="start-workout"]').forEach((el) => el.addEventListener('click', startSelectedWorkout))
+   document.querySelectorAll<HTMLElement>('[data-action="toggle-set"]').forEach((el) => el.addEventListener('click', toggleSetFromRow))
+@@ -487,6 +492,7 @@
+   const sectionLabel = (index: number): string => index === 0 ? 'READINESS' : index === pages.length - 1 ? 'REVIEW' : `BLOCK ${String.fromCharCode(64 + index)}`
+   const setActive = (index: number): void => {
+     activeIndex = Math.max(0, Math.min(pages.length - 1, index))
++    pages.forEach((page, pageIndex) => page.classList.toggle('active-page', pageIndex === activeIndex))
+     track.forEach((item, itemIndex) => {
+       item.classList.toggle('active', itemIndex === activeIndex)
+       item.setAttribute('aria-current', itemIndex === activeIndex ? 'step' : 'false')
