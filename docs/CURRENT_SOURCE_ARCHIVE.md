@@ -37,7 +37,8 @@ This archive is V5_2 with the selected cinematic LetMeFly UI applied. It preserv
 - Source/security static audit: **PASS**
 - Crownforge Week 1 source/regression audit: **PASS**
 - Crownforge Week 2 source audit: **PASS**
+- Full TypeScript typecheck using the rebuild's temporary Supabase audit declaration: **PASS**
 - No private athlete data hard-coded into public source
-- Local TypeScript/Vite build remains blocked in the current offline runtime because `@supabase/supabase-js` cannot be installed here; this is an environment dependency limitation, not an audit failure.
+- Real npm/Vite production bundle remains pending because this offline runtime cannot install `@supabase/supabase-js` / Vite from npm.
 
 Do not treat this branch as production until a networked npm/Vite build and browser integration pass are completed. Main remains untouched until this UI branch is reviewed.
