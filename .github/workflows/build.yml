@@ -74,3 +74,11 @@ jobs:
           test -f .build-src/letmefly_app/dist/manifest.webmanifest
           test -f .build-src/letmefly_app/dist/service-worker.js
           ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" .build-src/letmefly_app/dist
+
+      - name: Publish production build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: letmefly-command-ui-dist
+          path: .build-src/letmefly_app/dist
+          if-no-files-found: error
+          retention-days: 7
