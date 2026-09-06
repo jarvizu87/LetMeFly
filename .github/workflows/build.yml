@@ -1,8 +1,8 @@
-name: LetMeFly Build Audit
+name: LetMeFly V5.4 Command UI Build Audit
 
 on:
   push:
-    branches: [main]
+    branches: [main, ui-command-v54]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,23 +22,42 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
-          cache: 'npm'
-          cache-dependency-path: source/package-lock.json
 
-      - name: Expand rebuilt source
+      - name: Verify and expand audited source
         run: |
+          set -euo pipefail
+          ARCHIVE="source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip"
+          EXPECTED_SHA="514c538a9442d5c12c534a914f79c7f1988f2a416077b72bc5e9fafbd4ef89d4"
+          test -f "$ARCHIVE"
+          test "$(stat -c%s "$ARCHIVE")" = "154947"
+          echo "$EXPECTED_SHA  $ARCHIVE" | sha256sum -c -
+          unzip -tq "$ARCHIVE"
           rm -rf .build-src
           mkdir -p .build-src
-          unzip -q source/LETMEFLY_REBUILT_SOURCE_V5.zip -d .build-src
+          unzip -q "$ARCHIVE" -d .build-src
           test -f .build-src/letmefly_app/package.json
+          cd .build-src/letmefly_app
+          sha256sum -c MANIFEST.sha256
 
       - name: Install dependencies
         working-directory: .build-src/letmefly_app
         run: npm install --no-audit --no-fund
 
-      - name: Source audit
+      - name: Source and security audit
         working-directory: .build-src/letmefly_app
         run: npm run audit:source
+
+      - name: Crownforge Weeks 1-6 audit
+        working-directory: .build-src/letmefly_app
+        run: npm run audit:crownforge
+
+      - name: Exercise Intelligence audit
+        working-directory: .build-src/letmefly_app
+        run: npm run audit:exercise-library
+
+      - name: Command UI regression audit
+        working-directory: .build-src/letmefly_app
+        run: npm run audit:ui
 
       - name: Typecheck
         working-directory: .build-src/letmefly_app
@@ -50,6 +69,7 @@ jobs:
 
       - name: Verify production output
         run: |
+          set -euo pipefail
           test -f .build-src/letmefly_app/dist/index.html
           test -f .build-src/letmefly_app/dist/manifest.webmanifest
           test -f .build-src/letmefly_app/dist/service-worker.js
