@@ -1,0 +1,10 @@
+
+/* Rendered QA fixes: preserve five-item mobile nav and active swipe height. */
+@media (max-width:979px){
+  .navbar .nav-secondary{display:none!important}
+}
+.swipe-viewport{align-items:flex-start}
+.swipe-page:not(.active-page){max-height:590px;overflow:hidden}
+@media (max-width:780px){
+  .swipe-page:not(.active-page){max-height:570px}
+}
