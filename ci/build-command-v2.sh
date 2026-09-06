@@ -107,12 +107,21 @@ test -f dist/service-worker.js
 
 grep -Fq "letmefly-shell-v5-4-command-v2-1" dist/service-worker.js
 grep -Rq "data:image/webp;base64" dist/assets
-grep -Rq "Recent training signal" dist/assets
-grep -Rq "STRENGTH PROFILE" dist/assets
-grep -Rq "VERIFIED WEEKS" dist/assets
-grep -Rq "library-card" dist/assets
-grep -Rq "coach-banner" dist/assets
-grep -Rq "command-menu-grid" dist/assets
-grep -Rq "calendar-month-card" dist/assets
+
+# Command V2 release markers: all ten approved screen families must survive compilation.
+for marker in \
+  "Recent training signal" \
+  "session-track" \
+  "VERIFIED WEEKS" \
+  "STRENGTH PROFILE" \
+  "library-card" \
+  "coach-banner" \
+  "profile-hero" \
+  "calendar-month-card" \
+  "settings-list" \
+  "command-menu-grid"
+do
+  grep -Rq "$marker" dist/assets
+ done
 
 echo "LetMeFly Command V2 build: PASS"
