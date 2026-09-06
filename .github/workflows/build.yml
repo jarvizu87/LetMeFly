@@ -1,8 +1,8 @@
-name: LetMeFly V5.4 Command UI Build Audit
+name: LetMeFly Command V2 Build Audit
 
 on:
   push:
-    branches: [main, ui-command-v54]
+    branches: [main, ui-command-v2]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -23,92 +23,13 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Verify and expand audited source
-        run: |
-          set -euo pipefail
-          ARCHIVE="source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip"
-          EXPECTED_SHA="514c538a9442d5c12c534a914f79c7f1988f2a416077b72bc5e9fafbd4ef89d4"
-          test -f "$ARCHIVE"
-          test "$(stat -c%s "$ARCHIVE")" = "154947"
-          echo "$EXPECTED_SHA  $ARCHIVE" | sha256sum -c -
-          unzip -tq "$ARCHIVE"
-          rm -rf .build-src
-          mkdir -p .build-src
-          unzip -q "$ARCHIVE" -d .build-src
-          test -f .build-src/letmefly_app/package.json
-          cd .build-src/letmefly_app
-          sha256sum -c MANIFEST.sha256
-
-      - name: Apply audited UI overlays
-        working-directory: .build-src/letmefly_app
-        run: |
-          set -euo pipefail
-          for PATCH in \
-            "$GITHUB_WORKSPACE/patches/ui-command-v54/mobile-set-layout.patch" \
-            "$GITHUB_WORKSPACE/patches/ui-command-v54/galaxy-ultra-ergonomics.patch" \
-            "$GITHUB_WORKSPACE/patches/ui-command-v54/android-pwa-safearea.patch" \
-            "$GITHUB_WORKSPACE/patches/ui-command-v54/visual-qa-fixes.patch"
-          do
-            test -f "$PATCH"
-            patch --dry-run -p0 < "$PATCH"
-            patch -p0 < "$PATCH"
-          done
-          test -f "$GITHUB_WORKSPACE/patches/ui-command-v54/visual-qa.css"
-          cat "$GITHUB_WORKSPACE/patches/ui-command-v54/visual-qa.css" >> src/styles.css
-
-      - name: Install dependencies
-        working-directory: .build-src/letmefly_app
-        run: npm install --no-audit --no-fund
-
-      - name: Source and security audit
-        working-directory: .build-src/letmefly_app
-        run: npm run audit:source
-
-      - name: Crownforge Weeks 1-6 audit
-        working-directory: .build-src/letmefly_app
-        run: npm run audit:crownforge
-
-      - name: Exercise Intelligence audit
-        working-directory: .build-src/letmefly_app
-        run: npm run audit:exercise-library
-
-      - name: Command UI regression audit
-        working-directory: .build-src/letmefly_app
-        run: npm run audit:ui
-
-      - name: Rendered UX regression audit
-        working-directory: .build-src/letmefly_app
-        run: |
-          set -euo pipefail
-          grep -Fq "active-page" src/main.ts
-          grep -Fq ".navbar .nav-secondary{display:none!important}" src/styles.css
-          grep -Fq ".swipe-page:not(.active-page)" src/styles.css
-          grep -Fq "dayStrip.scrollLeft" src/main.ts
-          grep -Fq ".session-track button{min-height:44px}" src/styles.css
-          grep -Fq ".program-week-nav button{min-width:44px;min-height:44px}" src/styles.css
-          grep -Fq ".swipe-page{flex-basis:min(920px,100%)}" src/styles.css
-          ! grep -Fq "LOWER + BENCH FREQUENCY + GLUTES" src/main.ts
-
-      - name: Typecheck
-        working-directory: .build-src/letmefly_app
-        run: npm run typecheck
-
-      - name: Production build
-        working-directory: .build-src/letmefly_app
-        run: npm run build
-
-      - name: Verify production output
-        run: |
-          set -euo pipefail
-          test -f .build-src/letmefly_app/dist/index.html
-          test -f .build-src/letmefly_app/dist/manifest.webmanifest
-          test -f .build-src/letmefly_app/dist/service-worker.js
-          ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" .build-src/letmefly_app/dist
+      - name: Build and audit Command V2
+        run: bash ci/build-command-v2.sh
 
       - name: Publish production build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: letmefly-command-ui-dist
+          name: letmefly-command-v2-dist
           path: .build-src/letmefly_app/dist
           if-no-files-found: error
           retention-days: 7
