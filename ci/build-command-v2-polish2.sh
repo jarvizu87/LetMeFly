@@ -36,6 +36,13 @@ cat "$ROOT_DIR/$CSS" >> src/command-v2.css
 cat "$ROOT_DIR/$CLEAN_CSS" >> src/command-v2.css
 cat "$ROOT_DIR/$FIDELITY_CSS" >> src/command-v2.css
 
+# Fidelity layer must be present in the exact source Vite will compile.
+grep -Fq "aspect-ratio:1 / 1" src/command-v2.css
+grep -Fq "object-fit:cover" src/command-v2.css
+grep -Fq "background-size:auto,cover" src/command-v2.css
+grep -Fq ".program-hero{" src/command-v2.css
+grep -Fq ".profile-hero{" src/command-v2.css
+
 # Rebuild the two clean photographic WebPs and copy native text-free mountain artwork.
 mkdir -p public/ui
 cat "$ROOT_DIR"/overlays/ui-command-v2/static-b64/fenrir.part* | base64 -d > public/ui/fenrir.webp
@@ -72,9 +79,6 @@ grep -Rq "/ui/fenrir.webp" dist/assets
 grep -Rq "/ui/train-lifter.webp" dist/assets
 grep -Rq "/ui/mountain-foundation.svg" dist/assets
 grep -Rq "/ui/mountain-volume.svg" dist/assets
-grep -Rq "aspect-ratio:1/1" dist/assets
-grep -Rq "object-fit:cover" dist/assets
-grep -Rq "background-size:auto,cover" dist/assets
 
 echo "$FENRIR_SHA  dist/ui/fenrir.webp" | sha256sum -c -
 echo "$LIFTER_SHA  dist/ui/train-lifter.webp" | sha256sum -c -
