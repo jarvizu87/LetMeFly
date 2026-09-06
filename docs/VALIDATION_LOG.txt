@@ -1,0 +1,17 @@
+LetMeFly rebuilt-source validation log
+Date: 2026-09-05
+
+PASS: source/security static audit
+PASS: no private athlete state hard-coded
+PASS: no service-role/database/admin secrets in client source
+PASS: local-first IndexedDB architecture reconstructed
+PASS: atomic onboarding/workout skeleton creation fixes included
+PASS: backup/restore safety fixes included
+PASS: service worker excludes private/auth Supabase requests
+PASS: Crownforge opening-week structure audit (7 calendar days; 101 exercise instances)
+PASS: Black Crown missing detail is not fabricated
+OPEN: npm install + real Vite production build in a networked environment
+OPEN: browser/PWA smoke tests
+OPEN: legacy-state migration against the actual old browser profile
+OPEN: synthetic OTP/bootstrap/new-device test from the rebuilt UI
+OPEN: full Crownforge v2.1 + Black Crown v2.0 structured program import
