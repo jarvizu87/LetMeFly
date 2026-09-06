@@ -1,0 +1,9 @@
+/* LetMeFly Command V2 Batch M — truthful empty/offline/error states. */
+.empty-state{padding:16px!important;border-style:dashed!important;border-color:#33424d!important;background:linear-gradient(150deg,#091119,#060b0f)!important}
+.empty-state h2,.empty-state h3{margin:4px 0 6px!important}
+.empty-state .btn{margin-top:10px}
+.strength-metric.empty i,.v2-bars i.empty{opacity:0!important}
+@media(max-width:520px){
+  .empty-state{padding:13px!important}
+  .empty-state .btn{min-height:44px!important;width:100%}
+}
