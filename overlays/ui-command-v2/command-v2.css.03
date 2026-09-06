@@ -1,0 +1,40 @@
+font-size:32px}.profile-card,.vault-card,.data-card,.danger-zone{border-radius:7px}.data-actions{gap:6px}.action-tile{border-radius:6px!important}
+
+/* MORE / Calendar / Settings */
+.more-grid{gap:5px}.more-card{border-radius:6px!important;padding:9px!important}.more-card>span{border-radius:5px;background:#090f15;color:#ff3348}.more-card strong{font-size:17px}.more-brand{min-height:185px;border-radius:8px;background:linear-gradient(180deg,rgba(3,7,10,.28),#05090d 85%),var(--v2-mountain) center/cover no-repeat}.more-brand .crown-seal{color:#ff1731}.more-brand strong{font-size:26px}
+.calendar-shell,.settings-shell{max-width:760px;margin:0 auto}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.calendar-head{font-size:8px;text-align:center;color:#68757f;padding:6px 0}.calendar-cell{min-height:68px;border:1px solid #202d36;background:#071016;border-radius:5px;padding:6px;position:relative}.calendar-cell.empty{opacity:.15}.calendar-cell strong{font-size:10px}.calendar-cell .dot{position:absolute;left:7px;bottom:7px;width:7px;height:7px;border-radius:50%;background:#ff1731}.calendar-cell.rest .dot{background:#42d995}.calendar-cell button{position:absolute;inset:0;opacity:0;cursor:pointer}.calendar-list{margin-top:8px;display:grid;gap:5px}.calendar-event{display:grid;grid-template-columns:9px 1fr auto;gap:8px;align-items:center;border:1px solid #22303a;background:#071016;border-radius:5px;padding:9px}.calendar-event i{width:8px;height:8px;border-radius:50%;background:#ff1731}.calendar-event.rest i{background:#42d995}.settings-list{display:grid;gap:5px}.settings-row{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid #25323c;background:#071016;border-radius:6px;text-decoration:none}.settings-row>span{width:40px;height:40px;display:grid;place-items:center;border-radius:6px;border:1px solid #33414c;color:#fff}.settings-row strong{display:block;font-size:12px}.settings-row small{display:block;font-size:8px;color:#77838d;margin-top:2px}.settings-brand{min-height:190px;margin-top:10px;border-radius:7px;background:linear-gradient(180deg,rgba(3,7,10,.35),#05090d 88%),var(--v2-mountain) center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding:20px;letter-spacing:.3em;color:#c7cdd2}
+
+@media (min-width:980px){
+  .topbar{min-height:70px}.navbar{width:80px}.app-shell{padding-left:80px}.command-hero{min-height:520px}.hero-content{padding:40px 42px 120px}.hero-progress{left:42px;right:auto;width:380px}.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.focus-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.train-shell{max-width:920px}.black-crown-panel{grid-template-columns:.7fr 1.3fr}.black-crown-phases{grid-template-columns:repeat(2,1fr)}.v2-analytics{grid-template-columns:1.7fr .7fr}
+}
+@media (max-width:780px){
+  main{padding:8px 8px calc(76px + env(safe-area-inset-bottom))}.topbar{padding:calc(7px + env(safe-area-inset-top)) 10px 7px}.sync-pill{max-width:94px}.command-hero{min-height:452px}.hero-content{padding:20px 16px 102px}.hero-title{font-size:38px}.hero-copy{font-size:10px}.hero-actions{display:grid;grid-template-columns:1fr}.hero-start{width:100%;min-width:0}.hero-actions .ghost{display:none}.hero-progress{left:16px;right:16px}.focus-strip{grid-template-columns:repeat(4,1fr)}.focus-chip{min-height:58px;font-size:7px}.focus-chip span{font-size:15px}.dashboard-grid{grid-template-columns:1fr}.status-card,.milestone-card,.coach-focus-card{padding:10px}.session-track button{font-size:5px}.workout-panel{min-height:520px}.exercise-actions{grid-template-columns:repeat(3,1fr)}.program-hero{display:block}.program-progress{margin-top:12px}.black-crown-panel{display:block}.black-crown-phases{grid-template-columns:1fr}.v2-analytics{grid-template-columns:1fr}.library-card{grid-template-columns:68px 1fr 12px!important}.library-thumb{height:68px!important}.exercise-search-card{top:58px}.profile-hero{grid-template-columns:auto 1fr}.calendar-cell{min-height:52px;padding:4px}.calendar-cell .dot{left:5px;bottom:5px}
+}
+@media (max-width:420px){
+  .hero-title{font-size:34px}.hero-copy{max-width:92%}.command-hero::before{background-position:center top,center,88% 22%,center top;background-size:auto,auto,auto 94%,110% auto}.focus-chip{padding:6px 2px}.focus-chip span{font-size:14px}.readiness-ring{width:74px;height:74px}.exercise-actions .btn{font-size:6px}.library-copy h3{font-size:15px}.calendar-cell{min-height:46px}.calendar-cell strong{font-size:8px}
+}
+
+
+/* Active swipe page owns the visible height; off-screen blocks stay clipped. */
+.swipe-viewport{max-width:100%;width:100%;align-items:flex-start;box-sizing:border-box}
+.swipe-page:not(.active-page){max-height:590px;overflow:hidden}
+.train-shell{min-width:0;overflow:hidden}
+@media (max-width:780px){.swipe-page:not(.active-page){max-height:520px}}
+@media (min-width:980px){
+  .swipe-viewport{margin-left:0;margin-right:0;padding:1px 0 18px}
+  .swipe-page{flex-basis:100%;min-width:100%}
+}
+@media (max-width:420px){
+  .set-row{
+    grid-template-columns:36px repeat(6,minmax(0,1fr)) 44px;
+    grid-template-areas:
+      "set target target target target target target check"
+      ". reps reps load load rpe rpe .";
+    gap:6px;
+    padding:9px 7px;
+  }
+  .set-label{grid-area:set}.set-target-cell{grid-area:target}
+  .reps-field{grid-area:reps}.load-field{grid-area:load}.rpe-field{grid-area:rpe}
+  .set-check{grid-area:check;width:44px;height:44px}
+  .set-input{min-height:44px}
+}
