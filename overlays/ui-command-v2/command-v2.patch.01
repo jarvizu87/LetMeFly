@@ -1,0 +1,33 @@
+-input" inputmode="decimal" value="${esc(String(load))}"><small>${esc(plate)}</small></div><div class="set-field rpe-field"><label>RPE</label><input class="set-input rpe-input" inputmode="decimal" value="${esc(String(rpe))}"></div><button class="set-check ${set.completed ? 'done' : ''}" data-action="toggle-set">${set.completed ? '✓' : '○'}</button></div>`
+ }function programPage(): string {
+   const embeddedWeeks = CROWNFORGE.weekData
+   const weekCards = CROWNFORGE.weekData.map((week) => {
+@@ -325,6 +334,10 @@
+       <div class="score-card"><span>TRAINING MAXES</span><strong>${savedTms.length}</strong><small>Current lift records</small></div>
+       <div class="score-card"><span>PROGRAM</span><strong>CROWNFORGE</strong><small>Week ${state.selectedWeek} • Day ${state.selectedDay}</small></div>
+     </div>
++    <div class="v2-analytics">
++      <section class="v2-chart"><div class="v2-chart-title"><div><span>STRENGTH SNAPSHOT</span><strong>${savedTms.length ? `${savedTms.length} tracked lifts` : 'Build the trend'}</strong></div><span>Current TM profile</span></div><div class="v2-bars">${lifts.map(([key], index) => { const value = Number(tms[key]?.tm_value ?? 0); const scaled = value > 0 ? Math.max(12, Math.min(100, value / 4.5)) : 8 + index * 3; return `<i style="height:${scaled}%"></i>` }).join('')}</div></section>
++      <section class="v2-volume"><div class="v2-chart-title"><div><span>CONSISTENCY</span><strong>${workouts.length}/8</strong></div><span>Recent sessions</span></div><div class="v2-volume-grid">${Array.from({ length: 8 }, (_, index) => `<span style="height:${index < workouts.length ? 35 + ((index * 13) % 55) : 8}%"></span>`).join('')}</div></section>
++    </div>
+     <div class="card tm-board"><div class="card-head"><div><div class="page-kicker">Strength Dashboard</div><h2>Training Maxes</h2><p class="muted">Updates append new effective-dated records.</p></div><span class="badge mandatory">Private</span></div><div class="tm-grid">${lifts.map(([key,name]) => { const row=tms[key]; return `<div class="tm-card"><span>${esc(name)}</span><div class="tm-input-wrap"><input class="tm-input" data-tm-key="${key}" type="number" min="0" step="2.5" value="${esc(String(row?.tm_value ?? ''))}" placeholder="—"><select class="tm-unit" data-tm-unit="${key}"><option value="lb" ${row?.tm_unit === 'kg' ? '' : 'selected'}>lb</option><option value="kg" ${row?.tm_unit === 'kg' ? 'selected' : ''}>kg</option></select></div></div>` }).join('')}</div><button class="btn primary" data-action="save-tms">SAVE TM UPDATES</button></div>
+     <div class="section-title"><div><div class="page-kicker">History</div><h2>Recent Workouts</h2></div></div><div class="history-list">${workouts.length ? workouts.map((w) => `<div class="history-card"><div class="history-icon">✓</div><div><span>${esc(String(w.started_at ?? w.scheduled_for ?? '')).slice(0,10)}</span><strong>${esc(String(w.workout_name ?? 'Workout'))}</strong><small>${esc(String(w.program_key ?? ''))} • W${esc(String(w.week_number ?? ''))} • ${esc(String(w.day_key ?? ''))}</small></div><em>${esc(String(w.status ?? ''))}</em></div>`).join('') : '<div class="card empty">No workouts logged yet.</div>'}</div>`
+   bindProgressEvents()
+@@ -388,14 +401,47 @@
+   <div class="section-title"><div><div class="page-kicker">Migration</div><h2>Legacy LetMeFly</h2></div></div><section class="card"><p class="muted">Old LetMeFly localStorage is never deleted automatically.</p>${state.legacy ? `<div class="callout warning">Legacy state detected: ${state.legacy.snapshot.candidates.length} candidate key(s), ${state.legacy.plan.unmappedPaths.length} unmapped paths preserved.</div><div class="btn-row"><button class="btn ghost" data-action="download-legacy">DOWNLOAD RAW SNAPSHOT</button><button class="btn primary" data-action="migrate-legacy">MIGRATE SAFELY</button></div>` : '<div class="vault-status"><span>STATUS</span><strong>No legacy migration pending</strong></div>'}</section>
+   <div class="section-title"><div><div class="page-kicker">Device Privacy</div><h2>Local Data</h2></div></div><section class="card danger-zone"><div><strong>Remove private data from this device</strong><p>A verified backup is prepared first.</p></div><button class="btn danger" data-action="wipe-device">REMOVE DEVICE DATA</button></section>`
+ }function morePage(): string {
+-  return `<div class="page-head cinematic-head"><div class="page-kicker">Everything else</div><h1>MORE</h1><p class="muted">Exercise intelligence, coaching, profile, and data tools.</p></div><div class="more-grid">
++  return `<div class="page-head cinematic-head"><div class="page-kicker">Everything else</div><h1>MORE</h1><p class="muted">Your complete LetMeFly command menu.</p></div><div class="more-grid">
+     <a class="more-card" href="#/exercises"><span>◫</span><div><strong>Exercises</strong><small>Search, watch, substitute.</small></div><i>›</i></a>
+     <a class="more-card" href="#/coach"><span>◉</span><div><strong>Coach</strong><small>Program-aware guidance.</small></div><i>›</i></a>
+-    <a class="more-card" href="#/profile"><span>●</span><div><strong>Profile</strong><small>Athlete vault and backups.</small></div><i>›</i></a>
++    <a class="more-card" href="#/profile"><span>●</span><div><strong>Profile</strong><small>Athlete dossier and private vault.</small></div><i>›</i></a>
++    <a class="more-card" href="#/calendar"><span>□</span><div><strong>Calendar</strong><small>Plan, train, and stay on track.</small></div><i>›</i></a>
++    <a class="more-card" href="#/settings"><span>⚙</span><div><strong>Settings</strong><small>App, equipment, data, support.</small></div><i>›</i></a>
+     <a class="more-card" href="#/program"><span>▦</span><div><strong>Program</strong><small>Crownforge and Black Crown roadmap.</small></div><i>›</i></a>
+   </div><section class="more-brand"><div class="crown-seal">♛</div><strong>LETMEFLY</strong><span>DISCIPLINE BUILDS FREEDOM</span></section>`
+ }
+ 
++function calendarPage(): string {
++  const days = CROWNF
