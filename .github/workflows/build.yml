@@ -2,7 +2,7 @@ name: LetMeFly Command V2 Build Audit
 
 on:
   push:
-    branches: [main, ui-command-v2]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
