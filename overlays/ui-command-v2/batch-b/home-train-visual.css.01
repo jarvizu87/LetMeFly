@@ -1,0 +1,9 @@
+:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.command-hero .hero-progress span{font-size:7px;letter-spacing:.13em}.command-hero .hero-progress strong{font-size:10px}
+
+.focus-strip{margin:10px 0 8px;gap:6px}.focus-chip{min-height:70px;border-radius:7px;background:linear-gradient(180deg,#0b141b,#081016);border-color:#24323c;padding:7px 3px;font-family:var(--condensed);font-size:7px;line-height:1.12;letter-spacing:.02em}.focus-chip span{font-size:18px;color:var(--v2-gold)}
+.dashboard-grid{gap:8px}.dashboard-grid>.card{border-radius:8px}.readiness-card{order:1}.dashboard-grid>.status-card:not(.readiness-card){order:2}.milestone-card{order:3}.coach-focus-card{order:4}
+.readiness-card .card-head h2{font-size:19px}.readiness-rings{margin:8px 0}.readiness-ring{background:#071016;border-width:2px}.readiness-ring strong{font-size:20px}.readiness-ring span{font-size:7px}
+.dashboard-grid>.status-card:not(.readiness-card) .card-head .page-kicker::after{content:' PERFORMANCE';color:#fff}.dashboard-grid>.status-card:not(.readiness-card) .card-head h2{font-size:0}.dashboard-grid>.status-card:not(.readiness-card) .card-head h2::after{content:'Recent training signal.';font-size:19px}
+.performance-list>div{padding:8px 0;border-color:#1b2730}.performance-list span{font-size:8px}.performance-list strong{font-size:10px}
+.milestone-card{background:linear-gradient(110deg,rgba(93,27,10,.34),#091118 46%)!important}.milestone-icon{color:var(--v2-gold);border-color:#76552a}
+@media(max-width:520px){.coach-focus-card{display:none}.command-hero{min-height:448px}.command-hero .hero-content{padding:27px 16px 90px}.command-hero .hero-title{font-size:38px}.command-hero .hero-cop
