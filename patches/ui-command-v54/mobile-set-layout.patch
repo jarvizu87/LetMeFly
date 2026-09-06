@@ -41,14 +41,35 @@
 +  .tm-grid{grid-template-columns:1fr}
 +}
 --- scripts/audit-command-ui.mjs	2026-09-06 03:33:44.000000000 +0000
-+++ scripts/audit-command-ui.mjs	2026-09-06 03:58:12.700005063 +0000
-@@ -27,6 +27,9 @@
++++ scripts/audit-command-ui.mjs	2026-09-06 04:00:08.244215160 +0000
+@@ -2,6 +2,7 @@
+ 
+ const main = fs.readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8')
+ const css = fs.readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
++const serviceWorker = fs.readFileSync(new URL('../public/service-worker.js', import.meta.url), 'utf8')
+ const checks = [
+   ['all major routes', /type Route = 'home' \| 'train' \| 'program' \| 'progress' \| 'exercises' \| 'coach' \| 'profile' \| 'more'/],
+   ['mobile primary navigation', /\['home'.*'primary'\].*\['train'.*'primary'\].*\['program'.*'primary'\].*\['progress'.*'primary'\]/s],
+@@ -27,9 +28,13 @@
    ['responsive mobile breakpoint', /@media\s*\(max-width:\s*(?:760|780)px\)/],
    ['Command UI session track styling', /\.session-track button/],
    ['Command UI filter styling', /\.filter-chips button/],
 +  ['small-phone set field semantics', /class="set-field reps-field".*class="set-field load-field"/s],
 +  ['small-phone two-row set layout', /@media\s*\(max-width:420px\)[\s\S]*grid-template-areas:[\s\S]*reps reps load load rpe rpe/],
 +  ['small-phone completion touch target', /\.set-check\{grid-area:check;width:44px;height:44px/],
++  ['Command UI PWA cache version', /letmefly-shell-v5-4-command-1/],
  ]
  
- const failures = checks.filter(([, pattern]) => !(pattern.test(main) || pattern.test(css))).map(([label]) => label)
+-const failures = checks.filter(([, pattern]) => !(pattern.test(main) || pattern.test(css))).map(([label]) => label)
++const failures = checks.filter(([, pattern]) => !(pattern.test(main) || pattern.test(css) || pattern.test(serviceWorker))).map(([label]) => label)
+ if (failures.length) {
+   console.error(JSON.stringify({ result: 'FAIL', failures }, null, 2))
+   process.exit(1)
+--- public/service-worker.js	2026-09-06 00:32:44.000000000 +0000
++++ public/service-worker.js	2026-09-06 04:00:08.243885867 +0000
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'letmefly-shell-v5-rebuild-1'
++const CACHE_NAME = 'letmefly-shell-v5-4-command-1'
+ const PRECACHE = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png']
+ 
+ self.addEventListener('install', (event) => {
