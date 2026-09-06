@@ -72,7 +72,7 @@ grep -Rq "/ui/fenrir.webp" dist/assets
 grep -Rq "/ui/train-lifter.webp" dist/assets
 grep -Rq "/ui/mountain-foundation.svg" dist/assets
 grep -Rq "/ui/mountain-volume.svg" dist/assets
-grep -Rq "aspect-ratio:1 / 1" dist/assets
+grep -Rq "aspect-ratio:1/1" dist/assets
 grep -Rq "object-fit:cover" dist/assets
 grep -Rq "background-size:auto,cover" dist/assets
 
