@@ -1,0 +1,132 @@
+/* LetMeFly Command V2 Batch I — final Galaxy Train + Progress hierarchy polish.
+   UI-only: preserve program prescriptions, exercise intelligence, and athlete data. */
+
+@media (max-width:520px){
+  /* TRAIN — readiness is a compact first swipe page, not a tall form wall. */
+  .readiness-panel.workout-panel{
+    min-height:0!important;
+    padding:8px 9px 9px!important;
+  }
+  .readiness-panel .workout-panel-head{
+    margin:0;
+    padding:0 0 4px!important;
+  }
+  .readiness-panel .workout-panel-head h2{
+    font-size:17px!important;
+    line-height:1;
+    margin:0;
+  }
+  .readiness-panel .workout-panel-head p{
+    font-size:7px!important;
+    line-height:1.25;
+    margin:2px 0 0;
+  }
+  .readiness-graphic{
+    min-height:0!important;
+    margin:0 0 5px!important;
+    gap:6px!important;
+  }
+  .readiness-graphic span{
+    font-size:36px!important;
+    line-height:1!important;
+  }
+  .readiness-graphic b{
+    font-size:16px!important;
+    line-height:1!important;
+  }
+  .readiness-stack{
+    gap:5px!important;
+    margin:5px 0 7px!important;
+  }
+  .readiness-field{
+    grid-template-columns:66px minmax(0,1fr)!important;
+    gap:5px!important;
+    min-height:36px;
+  }
+  .readiness-label strong{font-size:9px!important;line-height:1.05}
+  .readiness-label span{font-size:6px!important;line-height:1.15;margin-top:1px!important}
+  .readiness-options{gap:3px!important}
+  .readiness-options span{
+    height:36px!important;
+    min-height:36px!important;
+    padding:0 2px!important;
+    font-size:11px!important;
+  }
+  .readiness-panel .field{margin-top:4px!important}
+  .readiness-panel .field label{margin-bottom:2px!important}
+  .readiness-panel textarea{
+    min-height:46px!important;
+    max-height:50px!important;
+    padding:7px 9px!important;
+  }
+  .readiness-panel .btn.primary{
+    min-height:42px!important;
+    margin-top:5px!important;
+  }
+
+  /* PROGRESS — primary signal first, editing controls visually secondary. */
+  .progress-page-head{padding-bottom:4px!important}
+  .progress-page-head h1{font-size:32px!important;line-height:.95}
+  .progress-page-head p{font-size:9px;line-height:1.3}
+  .command-metrics{
+    gap:6px!important;
+    margin:0 0 6px!important;
+  }
+  .command-metrics .score-card{
+    min-height:84px!important;
+    padding:9px!important;
+  }
+  .command-metrics .score-card span{font-size:6px!important}
+  .command-metrics .score-card strong{font-size:20px!important}
+  .command-metrics .score-card small{font-size:6px!important;line-height:1.2}
+  .command-metrics .hero-score{
+    border-color:#5c2731!important;
+    box-shadow:inset 3px 0 0 var(--v2-red);
+  }
+  .strength-progress-card{
+    margin:6px 0!important;
+    padding:9px!important;
+    border-color:#33424d!important;
+  }
+  .strength-progress-card .v2-chart-title{margin-bottom:6px!important}
+  .strength-progress-card .v2-chart-title strong{font-size:19px!important}
+  .strength-metric-grid{
+    gap:5px!important;
+    margin-top:6px!important;
+  }
+  .strength-metric{
+    min-height:78px!important;
+    padding:8px!important;
+  }
+  .strength-metric span{font-size:6px!important}
+  .strength-metric strong{font-size:18px!important;margin-top:3px!important}
+  .strength-metric strong small{font-size:7px!important}
+  .v2-analytics{
+    gap:6px!important;
+    margin:6px 0!important;
+  }
+  .v2-chart,.v2-volume{padding:8px!important}
+  .v2-chart-title{margin-bottom:6px!important}
+  .v2-chart-title span{font-size:7px!important}
+  .v2-chart-title strong{font-size:20px!important}
+  .v2-bars,.v2-volume-grid{height:92px!important}
+  .tm-board{
+    margin-top:6px!important;
+    padding:10px!important;
+    border-color:#26343e!important;
+    background:#060c11!important;
+  }
+  .tm-board .card-head{margin-bottom:7px}
+  .tm-board .card-head h2{font-size:18px}
+  .tm-grid{gap:5px!important}
+  .tm-card{padding:7px!important}
+  .history-list{gap:5px!important}
+  .history-card{padding:8px!important}
+}
+
+@media (max-width:380px){
+  .readiness-field{grid-template-columns:60px minmax(0,1fr)!important}
+  .readiness-options span{font-size:10px!important}
+  .command-metrics .score-card{min-height:80px!important}
+  .strength-metric{min-height:74px!important}
+}
