@@ -1,29 +1,43 @@
-# Current LetMeFly Source Archive
+# Current LetMeFly Source Archive — UI Command Branch
 
-Current audited rebuild: **V5_2**
+Branch: **ui-command-v1**
 
-- Google Drive file ID: `1JqvjI6vhHRLWlEhN136EdA2Nffrl9Gju`
-- Drive filename: `LETMEFLY_REBUILT_SOURCE_V5_2.zip`
-- SHA-256: `24ff93eb5f1fbd83148325b6de4b13030175e44f2e9d6381d7b113b976af9c91`
-- Local package version inside archive: `5.2.0-rebuild.1`
+Parent audited rebuild: **V5_2**
 
-This Drive archive supersedes the earlier V5 and V5_1 source archives.
+- Parent Google Drive file ID: `1JqvjI6vhHRLWlEhN136EdA2Nffrl9Gju`
+- Parent filename: `LETMEFLY_REBUILT_SOURCE_V5_2.zip`
+- Parent SHA-256: `24ff93eb5f1fbd83148325b6de4b13030175e44f2e9d6381d7b113b976af9c91`
+- Package version: `5.2.0-rebuild.1`
 
-## Why this pointer exists
+## Command UI source checkpoint
 
-The original LetMeFly source was previously lost across chat/runtime boundaries. The exact current source archive is therefore persisted outside the temporary runtime and identified by checksum before further work proceeds.
+- Google Drive file ID: `1MxLfzIIruDm_JZK62GFuuWarTBWt3tiY`
+- Drive filename: `LETMEFLY_REBUILT_SOURCE_V5_2_UI_COMMAND.zip`
+- SHA-256: `914cd1e9be7bfc23c4d283c92a9ea634bd3128547d4dd5f1fe8c7aa1a3de327f`
+- UI system: `Command V1`
 
-## Current audit state
+This archive is V5_2 with the selected cinematic LetMeFly UI applied. It preserves the V5_2 program, private-data, IndexedDB, auth, sync, backup/restore, migration, and workout-write architecture. It does not intentionally change Crownforge or Black Crown prescriptions.
 
-- Rebuild architecture audit: PASS WITH OPEN INTEGRATION ITEMS
-- Crownforge Week 1 source audit: PASS
-- Crownforge Week 2 source audit: PASS
-- Week 1 regression audit after Week 2 import: PASS
-- `src/data/programs.ts` strict TypeScript check: PASS
-- Source/security static audit: PASS
-- Crownforge structured source coverage: Weeks 1–2
-- Crownforge Weeks 3–14: intentionally not extrapolated; import one governed week at a time
-- Real npm/Vite production build: still requires a networked build environment
-- Netlify production deploy: not yet completed
+## UI scope
 
-Do not deploy the older V5 or V5_1 archive as though it were current. Use V5_2 or a later checksum-recorded archive.
+- Cinematic dark graphite / crimson LetMeFly shell
+- Rich Home command center
+- Mobile five-item navigation with expanded desktop navigation
+- Swipe-based Train experience retained and visually rebuilt
+- Crownforge / Black Crown Program roadmap
+- Progress performance dashboard
+- Exercise library with search and substitutions
+- Coach context interface
+- Athlete dossier / Private Vault profile treatment
+- More / utility navigation screen
+- CSS-built crown, mountain, steel, and atmospheric branding layers
+
+## Validation after UI integration
+
+- Source/security static audit: **PASS**
+- Crownforge Week 1 source/regression audit: **PASS**
+- Crownforge Week 2 source audit: **PASS**
+- No private athlete data hard-coded into public source
+- Local TypeScript/Vite build remains blocked in the current offline runtime because `@supabase/supabase-js` cannot be installed here; this is an environment dependency limitation, not an audit failure.
+
+Do not treat this branch as production until a networked npm/Vite build and browser integration pass are completed. Main remains untouched until this UI branch is reviewed.
