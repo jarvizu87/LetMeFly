@@ -8,6 +8,10 @@
 @media (max-width:780px){
   .swipe-page:not(.active-page){max-height:570px}
 }
+@media (min-width:980px){
+  .swipe-viewport{margin-left:0;margin-right:0;padding:1px 0 18px;max-width:100%}
+  .swipe-page{flex-basis:min(920px,100%)}
+}
 
 /* Galaxy Ultra-class touch audit: secondary controls must still be thumb-safe. */
 @media (max-width:520px){
