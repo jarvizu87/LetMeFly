@@ -26,6 +26,9 @@ jobs:
       - name: Build and audit Command V2
         run: bash ci/build-command-v2.sh
 
+      - name: Install and validate safe refresh utility
+        run: bash ci/install-command-refresh.sh
+
       - name: Publish production build artifact
         uses: actions/upload-artifact@v4
         with:
