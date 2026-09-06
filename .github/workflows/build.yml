@@ -2,7 +2,7 @@ name: LetMeFly Command V2 Build Audit
 
 on:
   push:
-    branches: [main, ui-command-v2]
+    branches: [main, ui-command-v2, ui-command-v2-polish2]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -23,8 +23,8 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Build and audit Command V2
-        run: bash ci/build-command-v2.sh
+      - name: Build and audit Command V2 + Galaxy polish
+        run: bash ci/build-command-v2-polish2.sh
 
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
