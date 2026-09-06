@@ -1,6 +1,6 @@
 --- src/main.ts
 +++ src/main.ts
-@@ -93,7 +93,7 @@
+@@ -93,6 +93,6 @@
        })
      }
    } catch (error) {
@@ -25,7 +25,7 @@
    }).join('')
    target.innerHTML = `<div class="progress-score-grid command-metrics">
        <div class="score-card hero-score"><span>SESSIONS</span><strong>${workouts.length}</strong><small>Recent history window</small></div>
-@@ -345,11 +346,17 @@
+@@ -345,10 +346,15 @@
      </div>
      <section class="card strength-progress-card"><div class="v2-chart-title"><div><span>STRENGTH PROFILE</span><strong>Current training maxes</strong></div><span>${savedTms.length} tracked</span></div><div class="strength-metric-grid">${strengthCards}</div></section>
      <div class="v2-analytics">
@@ -54,7 +54,7 @@
    const matches = getExerciseMatches(programName)
    if (matches.length === 0) {
      window.open(safeFallbackSearchUrl(programName), '_blank', 'noopener,noreferrer')
-@@ -850,6 +861,7 @@
+@@ -850,5 +861,6 @@
      updateSyncPill()
    } catch (error) {
      showToast(`Saved locally • cloud pending: ${errorMessage(error)}`)
