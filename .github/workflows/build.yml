@@ -36,3 +36,14 @@ jobs:
           path: .build-src/letmefly_app/dist
           if-no-files-found: error
           retention-days: 7
+
+      - name: Publish hardening source diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: letmefly-hardening-source
+          path: |
+            .build-src/letmefly_app/src/main.ts
+            .build-src/letmefly_app/src/services/workout-service.ts
+            .build-src/letmefly_app/src/services/readiness-service.ts
+          if-no-files-found: error
+          retention-days: 1
