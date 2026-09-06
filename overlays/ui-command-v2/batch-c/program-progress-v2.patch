@@ -5,7 +5,7 @@
  }function programPage(): string {
    const embeddedWeeks = CROWNFORGE.weekData
 -  const weekCards = CROWNFORGE.weekData.map((week) => {
-+  const weekCards = embeddedWeeks.map((week) => {
++  const weekCards = CROWNFORGE.weekData.map((week) => {
      const start = week.days[0]?.date ?? ''
      const end = week.days[week.days.length - 1]?.date ?? ''
 -    return `<section id="program-week-${week.week}" class="program-week ${week.week === state.selectedWeek ? 'active' : ''}"><div class="section-title"><div><div class="page-kicker">Week ${week.week} • ${esc(start)}–${esc(end.slice(5))}</div><h2>${week.week === state.selectedWeek ? 'Current Embedded Week' : `Week ${week.week}`}</h2></div><span class="badge mandatory">Governed source</span></div><div class="week-grid">${week.days.map((day) => `<button class="week-day-card ${week.week === state.selectedWeek && day.day === state.selectedDay ? 'active' : ''}" data-open-day="${day.day}" data-open-week="${week.week}"><span>DAY ${day.day}</span><strong>${esc(day.title)}</strong><small>${esc(day.role)}</small><i>›</i></button>`).join('')}</div></section>`
