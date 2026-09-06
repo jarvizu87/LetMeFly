@@ -1,0 +1,106 @@
+--- src/services/workout-service.ts
++++ src/services/workout-service.ts
+@@ -37,6 +37,7 @@
+   programInstanceId: string | null,
+   week: number,
+   day: ProgramDay,
++  readinessId: string,
+ ): Promise<WorkoutBundle> {
+   const existing = await findWorkoutForDay(athleteId, 'crownforge', week, day.day)
+   if (existing) return existing
+@@ -60,6 +61,7 @@
+         id: sessionId,
+         athlete_id: athleteId,
+         program_instance_id: programInstanceId,
++        readiness_id: readinessId,
+         originating_device_id: null,
+         program_key: 'crownforge',
+         program_version: 'v2.1',
+--- src/main.ts
++++ src/main.ts
+@@ -248,7 +248,7 @@
+   return `
+     ${readinessPage(day, false)}
+     ${day.sections.map((section, index) => `<section class="swipe-page workout-panel"><div class="workout-panel-head"><div><div class="page-kicker">${String.fromCharCode(65 + index)} • Training Block</div><h2>${esc(section.title)}</h2>${section.subtitle ? `<p class="muted">${esc(section.subtitle)}</p>` : ''}</div><span class="section-number">${index + 1}/${day.sections.length}</span></div><div class="exercise-stack">${section.exercises.map(programExerciseCard).join('')}</div></section>`).join('')}
+-    <section class="swipe-page workout-panel review-panel"><div class="review-mark">♛</div><div class="page-kicker">Session Review</div><h2>${day.restDay ? 'Recovery is programmed.' : 'Ready to earn the work.'}</h2><p class="muted">Your first tap writes locally. Cloud is optional and asynchronous.</p><button class="btn primary hero-start" data-action="start-workout">${day.restDay ? 'LOG REST DAY' : 'START WORKOUT'}</button></section>
++    <section class="swipe-page workout-panel review-panel"><div class="review-mark">♛</div><div class="page-kicker">Session Review</div><h2>${day.restDay ? 'Recovery is programmed.' : 'Ready to earn the work.'}</h2><p class="muted">Your first tap writes locally. Cloud is optional and asynchronous.</p><button class="btn primary hero-start" data-action="start-workout">${day.restDay ? 'SAVE READINESS & LOG REST DAY' : 'SAVE READINESS & START WORKOUT'}</button></section>
+   `
+ }function workoutSwipePages(day: ProgramDay, workout: WorkoutBundle): string {
+   const bySection = new Map<string, typeof workout.exercises>()
+@@ -264,8 +264,8 @@
+     <section class="swipe-page workout-panel review-panel"><div class="review-mark">♛</div><div class="page-kicker">Session Review</div><h2>${stats.done} / ${stats.total} sets logged</h2><div class="progress-bar large"><span style="width:${stats.percent}%"></span></div><p class="muted">History records what actually happened. Program updates never rewrite this session.</p><div class="btn-row"><button class="btn primary hero-start" data-action="complete-workout" ${workout.session.status === 'completed' ? 'disabled' : ''}>${workout.session.status === 'completed' ? 'WORKOUT COMPLETE' : 'COMPLETE WORKOUT'}</button><button class="btn ghost" data-action="sync-now">Sync Now</button></div></section>
+   `
+ }function readinessPage(day: ProgramDay, hasWorkout: boolean): string {
+-  const scale = (name: string, hint: string) => `<div class="readiness-field"><div class="readiness-label"><strong>${esc(name)}</strong><span>${esc(hint)}</span></div><div class="readiness-options">${[1,2,3,4,5].map((v) => `<label><input type="radio" name="readiness-${slug(name)}" value="${v}" ${v === 3 ? 'checked' : ''}><span>${v}</span></label>`).join('')}</div></div>`
+-  return `<section class="swipe-page workout-panel readiness-panel"><div class="readiness-graphic"><span>01</span><b>READINESS</b></div><div class="page-kicker">Front of every training day</div><h2>How are you showing up?</h2><p class="muted">This controls allowed auto-regulation. It does not rewrite Crownforge.</p><div class="readiness-stack">${scale('Sleep quality', '1 low • 5 high')}${scale('Energy', '1 low • 5 high')}${scale('Soreness', '1 low • 5 high')}${scale('Stress', '1 low • 5 high')}<div class="field"><label>Coach notes</label><textarea id="readiness-notes" class="input" rows="3" placeholder="Anything the coach should know?"></textarea></div></div><div class="btn-row"><button class="btn purple" data-action="save-readiness">SAVE READINESS</button>${!hasWorkout ? `<button class="btn primary" data-action="start-workout">${day.restDay ? 'LOG REST DAY' : 'START WORKOUT'}</button>` : ''}</div></section>`
++  const scale = (name: string, hint: string) => `<div class="readiness-field"><div class="readiness-label"><strong>${esc(name)}</strong><span>${esc(hint)}</span></div><div class="readiness-options">${[1,2,3,4,5].map((v) => `<label><input type="radio" name="readiness-${slug(name)}" value="${v}"><span>${v}</span></label>`).join('')}</div></div>`
++  return `<section class="swipe-page workout-panel readiness-panel"><div class="readiness-graphic"><span>01</span><b>READINESS</b></div><div class="page-kicker">Front of every training day</div><h2>How are you showing up?</h2><p class="muted">This controls allowed auto-regulation. It does not rewrite Crownforge.</p><div class="readiness-stack">${scale('Sleep quality', '1 low • 5 high')}${scale('Energy', '1 low • 5 high')}${scale('Soreness', '1 low • 5 high')}${scale('Stress', '1 low • 5 high')}<div class="field"><label>Coach notes</label><textarea id="readiness-notes" class="input" rows="3" placeholder="Anything the coach should know?"></textarea></div></div><div class="btn-row">${hasWorkout ? `<button class="btn purple" data-action="save-readiness">UPDATE READINESS</button>` : `<button class="btn primary" data-action="start-workout">${day.restDay ? 'SAVE READINESS & LOG REST DAY' : 'SAVE READINESS & START WORKOUT'}</button>`}</div></section>`
+ }function programExerciseCard(exercise: ProgramExercise): string {
+   const library = getPrimaryExerciseMatch(exercise.name)
+   const status = library ? exerciseVideoStatusLabel(library.videoStatus) : 'Library match pending'
+@@ -761,30 +761,54 @@
+   render()
+ }
+ 
+-async function saveReadinessFromForm(): Promise<void> {
+-  if (!state.athlete) return
+-  const get = (label: string) =>
+-    Number(document.querySelector<HTMLInputElement>(`input[name="readiness-${slug(label)}"]:checked`)?.value ?? 3)
+-  const input = {
+-    sleepQuality: get('Sleep quality'),
+-    energy: get('Energy'),
+-    soreness: get('Soreness'),
+-    stress: get('Stress'),
++function readinessInputFromForm(): { sleepQuality: number; energy: number; soreness: number; stress: number; notes: string | null } | null {
++  const get = (label: string): number | null => {
++    const value = document.querySelector<HTMLInputElement>(`input[name="readiness-${slug(label)}"]:checked`)?.value
++    return value ? Number(value) : null
++  }
++  const sleepQuality = get('Sleep quality')
++  const energy = get('Energy')
++  const soreness = get('Soreness')
++  const stress = get('Stress')
++  if ([sleepQuality, energy, soreness, stress].some((value) => value === null)) return null
++  return {
++    sleepQuality: sleepQuality!,
++    energy: energy!,
++    soreness: soreness!,
++    stress: stress!,
+     notes: document.querySelector<HTMLTextAreaElement>('#readiness-notes')?.value ?? null,
+   }
++}
++
++async function saveReadinessFromForm(): Promise<void> {
++  if (!state.athlete) return
++  const input = readinessInputFromForm()
++  if (!input) return showToast('Rate sleep, energy, soreness, and stress first')
+   await saveReadiness(state.athlete.id, input)
+   const color = readinessColor(input)
+   state.cloud.syncSoon()
+-  showToast(`Readiness saved • ${color.toUpperCase()}`)
++  showToast(`Readiness updated • ${color.toUpperCase()}`)
+ }
+ 
+ async function startSelectedWorkout(): Promise<void> {
+   if (!state.athlete) return
+   const day = getCrownforgeDay(state.selectedWeek, state.selectedDay)
+   if (!day) return
+-  state.workout = await startWorkout(state.athlete.id, state.programInstance?.id ?? null, state.selectedWeek, day)
++  const input = readinessInputFromForm()
++  if (!input) {
++    document.querySelector<HTMLButtonElement>('[data-session-index="0"]')?.click()
++    return showToast('Complete readiness before starting')
++  }
++  const readiness = await saveReadiness(state.athlete.id, input)
++  state.workout = await startWorkout(
++    state.athlete.id,
++    state.programInstance?.id ?? null,
++    state.selectedWeek,
++    day,
++    readiness.id,
++  )
+   state.cloud.syncSoon()
+-  showToast('Workout saved locally • cloud sync pending if needed')
++  showToast(`Readiness ${readinessColor(input).toUpperCase()} • workout saved locally`)
+   render()
+ }
