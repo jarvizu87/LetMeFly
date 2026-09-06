@@ -1,37 +1,62 @@
 # Deployment Notes
 
-## Existing hosted services
+## Canonical hosted services
 
+### Official LetMeFly app
+- Netlify project: `let-me-fly`
+- Site URL: `https://let-me-fly.netlify.app`
+- Netlify site ID: `ae10a4fd-b70d-4e13-b320-3e57c2ff7d11`
+- Production branch: `main`
+- Deployment mode: Git-connected continuous deployment
+- Visitor access: Netlify team SSO required
+
+This is the canonical LetMeFly application. All approved production UI and app-shell releases deploy here from GitHub `main`.
+
+### Legacy/quarantined site
 - Netlify project: `let-me-fly-public`
-- Supabase project ref: `dvdooeipptaqelvlaept`
+- Site URL: `https://let-me-fly-public.netlify.app`
+- Netlify site ID: `5e21db36-d363-4d79-a259-1e026703c7b3`
+- Status: legacy / do not use for production
+- Visitor access: Netlify team SSO required
 
-The Netlify project already has the public Supabase URL and publishable key configured.
+Do not rename or delete the legacy site yet. Browser-local data is origin-scoped, so keeping the original URL intact preserves the possibility of recovering any old localStorage/IndexedDB data from devices that used that site.
 
-## Recommended flow
+The legacy project contains only normal frontend Supabase client configuration at the Netlify project level. Do not treat that configuration as athlete data.
 
-1. Put this source in a persistent Git repository.
-2. Connect that repository to the existing `let-me-fly-public` Netlify project.
-3. Run a Deploy Preview first.
-4. Verify IndexedDB onboarding without signing in.
-5. Verify service-worker offline launch.
-6. Create a synthetic athlete and test OTP/bootstrap/sync.
-7. Test a second browser profile/device hydration.
-8. Run conflict and backup/restore tests.
-9. Only after those pass, migrate the real athlete browser state.
-10. Keep the old legacy localStorage until several real sessions and a full restore drill succeed.
+## Data architecture
 
-## Netlify build
+The hosted app shell and training/program logic are separate from private athlete state.
+
+Private athlete data belongs in local/private browser storage and authenticated cloud storage. Do not hard-code athlete profile data, workout history, TMs, readiness, PRs, notes, or other private athlete state into the public Git repository or static Netlify bundle.
+
+## Production deployment flow
+
+1. Make changes on a feature branch.
+2. Run the governed source, Crownforge, Exercise Intelligence, UI, TypeScript, and production-build audits.
+3. Merge approved changes into `main`.
+4. Netlify automatically builds and deploys `main` to `let-me-fly`.
+5. Verify the resulting production deploy before treating the release as complete.
+
+Do not manually drop ZIPs into Netlify for normal releases.
+
+## Command V2 Netlify build
+
+Netlify reads the repository root `netlify.toml`.
 
 ```text
-Build command: npm run build
-Publish directory: dist
+Build command: bash ci/build-command-v2.sh
+Publish directory: .build-src/letmefly_app/dist
 ```
 
-## Required environment variables
+## Required frontend environment variables
 
 ```text
 VITE_SUPABASE_URL
 VITE_SUPABASE_PUBLISHABLE_KEY
 ```
 
-Do not create a frontend variable containing a secret/service-role key.
+Never create or expose a frontend variable containing a Supabase secret/service-role key.
+
+## Legacy-data handling
+
+If old athlete data may exist under `let-me-fly-public.netlify.app`, recover/export it from that exact origin before deleting or renaming the legacy project. Netlify cannot inspect browser-local localStorage/IndexedDB remotely.
