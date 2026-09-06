@@ -1,0 +1,11 @@
+sition:center 42%;border-bottom:1px solid #2a3944}
+.exercise-stack .exercise-card:not(:first-child)::before{content:'';display:block;height:86px;margin:-1px -1px 8px;background-image:linear-gradient(180deg,rgba(2,5,8,.20),rgba(2,5,8,.82)),var(--v2-mountain);background-size:cover;background-position:center;border-bottom:1px solid #24323c}
+.exercise-title{padding-top:1px}.exercise-title h3{font-size:21px;line-height:1}.exercise-eyebrow{color:#ff3147}.exercise-source-status{font-size:7px}
+.prescription-block{margin-top:8px;border:1px solid #1d2b35;border-radius:6px;background:#081118}.prescription-row{padding:9px 10px}.prescription-row strong{font-size:9px}.prescription-row span{font-size:10px}
+.set-table{margin-top:8px}.set-row{background:#081118;border-color:#22313b}.set-check{border-radius:5px}.set-check.done{background:#ff1731!important;border-color:#ff1731!important}
+.exercise-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.exercise-actions .btn{min-height:42px;padding:6px 3px!important;font-size:6.5px!important}.exercise-actions [data-exercise-info]{display:none}
+.readiness-panel{min-height:0}.readiness-graphic{margin-bottom:5px}.readiness-graphic span{font-size:62px;line-height:.85}.readiness-graphic b{font-size:23px}.readiness-stack{gap:9px}.readiness-options span{min-height:44px;display:grid;place-items:center}.readiness-panel textarea{min-height:82px}
+@media(max-width:520px){
+  .train-header h1{font-size:23px}.train-header p{font-size:8px}
+  .session-track{overflow-x:auto;display:flex;scrollbar-width:none}.session-track::-webkit-scrollbar{display:none}.session-track button{flex:1 0 55px;min-width:55px!important}
+  .exercise-sta
