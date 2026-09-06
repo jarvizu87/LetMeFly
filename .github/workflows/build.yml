@@ -23,8 +23,8 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Build and audit Command V2 + Galaxy polish
-        run: bash ci/build-command-v2-polish2.sh
+      - name: Build and audit Command V2 + Monday hardening
+        run: bash ci/build-command-v2-hardening.sh
 
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
@@ -36,14 +36,3 @@ jobs:
           path: .build-src/letmefly_app/dist
           if-no-files-found: error
           retention-days: 7
-
-      - name: Publish hardening source diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: letmefly-hardening-source
-          path: |
-            .build-src/letmefly_app/src/main.ts
-            .build-src/letmefly_app/src/services/workout-service.ts
-            .build-src/letmefly_app/src/services/readiness-service.ts
-          if-no-files-found: error
-          retention-days: 1
