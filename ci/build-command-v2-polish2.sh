@@ -6,7 +6,7 @@ cd "$ROOT_DIR"
 
 PATCH="overlays/ui-command-v2/batch-f/release-polish.patch"
 CSS="overlays/ui-command-v2/batch-f/release-polish.css"
-EXPECTED_PATCH_SHA="1a6f477a3ae96198ef26b6ff1d2d165fe7d470b6c8fd1631cf0d11c826177ff1"
+EXPECTED_PATCH_SHA="a032822402c18a2860516a27fda7fc00160678b8a67a36b9d84b91c74398067e"
 EXPECTED_CSS_SHA="a54b68b994a19fcc7049081d7fe7927f354eb20464d0f33740f2dcd08a50b657"
 
 # First reconstruct and validate the already-proven Command V2 release.
@@ -15,7 +15,7 @@ bash ci/build-command-v2.sh
 # Then apply the small release-polish delta to that exact audited source.
 echo "$EXPECTED_PATCH_SHA  $PATCH" | sha256sum -c -
 echo "$EXPECTED_CSS_SHA  $CSS" | sha256sum -c -
-test "$(wc -c < "$PATCH")" = "4580"
+test "$(wc -c < "$PATCH")" = "5321"
 test "$(wc -c < "$CSS")" = "4616"
 
 cd .build-src/letmefly_app
