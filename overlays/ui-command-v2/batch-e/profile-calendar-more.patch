@@ -1,0 +1,33 @@
+--- src/main.ts
++++ src/main.ts
+@@ -411,13 +411,18 @@
+   <div class="section-title"><div><div class="page-kicker">Migration</div><h2>Legacy LetMeFly</h2></div></div><section class="card"><p class="muted">Old LetMeFly localStorage is never deleted automatically.</p>${state.legacy ? `<div class="callout warning">Legacy state detected: ${state.legacy.snapshot.candidates.length} candidate key(s), ${state.legacy.plan.unmappedPaths.length} unmapped paths preserved.</div><div class="btn-row"><button class="btn ghost" data-action="download-legacy">DOWNLOAD RAW SNAPSHOT</button><button class="btn primary" data-action="migrate-legacy">MIGRATE SAFELY</button></div>` : '<div class="vault-status"><span>STATUS</span><strong>No legacy migration pending</strong></div>'}</section>
+   <div class="section-title"><div><div class="page-kicker">Device Privacy</div><h2>Local Data</h2></div></div><section class="card danger-zone"><div><strong>Remove private data from this device</strong><p>A verified backup is prepared first.</p></div><button class="btn danger" data-action="wipe-device">REMOVE DEVICE DATA</button></section>`
+ }function morePage(): string {
+-  return `<div class="page-head cinematic-head"><div class="page-kicker">Everything else</div><h1>MORE</h1><p class="muted">Your complete LetMeFly command menu.</p></div><div class="more-grid">
++  return `<div class="page-head cinematic-head"><div class="page-kicker">Everything else</div><h1>MORE</h1><p class="muted">Every LetMeFly screen and athlete utility in one command menu.</p></div><div class="more-grid command-menu-grid">
++    <a class="more-card" href="#/home"><span>⌂</span><div><strong>Home</strong><small>Command dashboard.</small></div><i>›</i></a>
++    <a class="more-card" href="#/train"><span>⚔</span><div><strong>Train</strong><small>Immersive workout mode.</small></div><i>›</i></a>
++    <a class="more-card" href="#/program"><span>▦</span><div><strong>Program</strong><small>Crownforge and Black Crown roadmap.</small></div><i>›</i></a>
++    <a class="more-card" href="#/progress"><span>↗</span><div><strong>Progress</strong><small>Strength and training analytics.</small></div><i>›</i></a>
+     <a class="more-card" href="#/exercises"><span>◫</span><div><strong>Exercises</strong><small>Search, watch, substitute.</small></div><i>›</i></a>
+     <a class="more-card" href="#/coach"><span>◉</span><div><strong>Coach</strong><small>Program-aware guidance.</small></div><i>›</i></a>
+     <a class="more-card" href="#/profile"><span>●</span><div><strong>Profile</strong><small>Athlete dossier and private vault.</small></div><i>›</i></a>
+     <a class="more-card" href="#/calendar"><span>□</span><div><strong>Calendar</strong><small>Plan, train, and stay on track.</small></div><i>›</i></a>
+-    <a class="more-card" href="#/settings"><span>⚙</span><div><strong>Settings</strong><small>App, equipment, data, support.</small></div><i>›</i></a>
+-    <a class="more-card" href="#/program"><span>▦</span><div><strong>Program</strong><small>Crownforge and Black Crown roadmap.</small></div><i>›</i></a>
++    <a class="more-card" href="#/settings"><span>⚙</span><div><strong>Settings</strong><small>App and equipment settings.</small></div><i>›</i></a>
++    <a class="more-card" href="#/profile"><span>⇩</span><div><strong>Data & Backup</strong><small>Export, restore, migrate, sync.</small></div><i>›</i></a>
++    <a class="more-card" href="#/coach"><span>?</span><div><strong>Help & Support</strong><small>Coaching and app guidance.</small></div><i>›</i></a>
+   </div><section class="more-brand"><div class="crown-seal">♛</div><strong>LETMEFLY</strong><span>DISCIPLINE BUILDS FREEDOM</span></section>`
+ }
+ 
+@@ -439,7 +444,7 @@
+     const rest = item?.restDay ?? false
+     cells.push(`<div class="calendar-cell ${rest ? 'rest' : ''}"><strong>${d}</strong>${item ? `<span class="dot"></span><button data-calendar-week="${item.week}" data-calendar-day="${item.day}" aria-label="Open ${esc(item.title)}"></button>` : ''}</div>`)
+   }
+-  return `<div class="calendar-shell"><div class="page-head cinematic-head"><div class="page-kicker">Plan & stay on track</div><h1>CALENDAR</h1><p class="muted">${esc(monthName)} • governed Crownforge schedule</p></div><section class="card"><div class="calendar-grid">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((x) => `<div class="calendar-head">${x}</div>`).join('')}${cells.join('')}</div></section><div class="calendar-list">${days.slice(0,12).map((day) => `<div class="calendar-event ${day.restDay ? 'rest' : ''}"><i></i><div><strong>${esc(day.date)} • ${esc(day.title)}</strong><small>${esc(day.role)}</small></div><span>W${day.week} D${day.day}</span></div>`).join('')}</div></div>`
++  return `<div class="calendar-shell"><div class="page-head cinematic-head"><div class="page-kicker">Plan & stay on track</div><h1>CALENDAR</h1><p class="muted">${esc(monthName)} • governed Crownforge schedule</p></div><section class="card calendar-month-card"><div class="calendar-grid">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((x) => `<div class="calendar-head">${x}</div>`).join('')}${cells.join('')}</div></section><div class="calendar-list">${days.slice(0,12).map((day) => `<div class="calendar-event ${day.restDay ? 'rest' : ''}"><i></i><div><span>${esc(day.date)}</span><strong>${esc(day.title)}</strong><small>${esc(day.role)}</small></div><em>W${day.week} D${day.day}</em></div>`).join('')}</div></div>`
+ }
+ 
+ function settingsPage(): string {

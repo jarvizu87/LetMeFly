@@ -1,0 +1,77 @@
+--- src/main.ts
++++ src/main.ts
+@@ -1,4 +1,5 @@
+ import './styles.css'
++import './command-v2.css'
+ import { openLetMeFlyDb, recoverStaleOutboxOperations, getAll, type LocalDomainRecord } from './db/local-db'
+ import { CROWNFORGE, BLACK_CROWN, getCalendarDay, getCrownforgeDay, getCrownforgeWeek, type ProgramDay, type ProgramExercise } from './data/programs'
+ import {
+@@ -27,7 +28,7 @@
+ const APP_VERSION = '5.4.0-rebuild.1'
+ const root = document.querySelector<HTMLDivElement>('#app')!
+ 
+-type Route = 'home' | 'train' | 'program' | 'progress' | 'exercises' | 'coach' | 'profile' | 'more'
++type Route = 'home' | 'train' | 'program' | 'progress' | 'exercises' | 'coach' | 'profile' | 'calendar' | 'settings' | 'more'
+ 
+ interface AppState {
+   route: Route
+@@ -120,7 +121,7 @@
+ 
+ function topbar(): string {
+   const routeNames: Record<Route, string> = {
+-    home: 'Command', train: 'Train', program: 'Program', progress: 'Progress', exercises: 'Exercises', coach: 'Coach', profile: 'Profile', more: 'More',
++    home: 'Command', train: 'Train', program: 'Program', progress: 'Progress', exercises: 'Exercises', coach: 'Coach', profile: 'Profile', calendar: 'Calendar', settings: 'Settings', more: 'More',
+   }
+   return `
+     <header class="topbar">
+@@ -133,11 +134,18 @@
+     </header>
+   `
+ }function navbar(): string {
+-  const items: Array<[Route, string, string, string]> = [
+-    ['home', '⌂', 'Home', 'primary'], ['train', '⚔', 'Train', 'primary'], ['program', '▦', 'Program', 'primary'], ['progress', '↗', 'Progress', 'primary'],
+-    ['exercises', '◫', 'Exercises', 'secondary'], ['coach', '◉', 'Coach', 'secondary'], ['profile', '●', 'Profile', 'secondary'], ['more', '☰', 'More', 'more'],
++  const items: Array<[Route, string, string]> = [
++    ['home', '⌂', 'Home'],
++    ['train', '⚔', 'Train'],
++    ['program', '▦', 'Program'],
++    ['progress', '↗', 'Progress'],
++    ['more', '☰', 'More'],
+   ]
+-  return `<nav class="navbar" aria-label="Primary navigation">${items.map(([route, icon, label, group]) => `<a class="nav-item nav-${group} ${state.route === route ? 'active' : ''}" href="#/${route}"><span>${icon}</span>${label}</a>`).join('')}</nav>`
++  const moreActive = ['exercises', 'coach', 'profile', 'calendar', 'settings', 'more'].includes(state.route)
++  return `<nav class="navbar" aria-label="Primary navigation">${items.map(([route, icon, label]) => {
++    const active = route === 'more' ? moreActive : state.route === route
++    return `<a class="nav-item ${active ? 'active' : ''}" href="#/${route}"><span>${icon}</span>${label}</a>`
++  }).join('')}</nav>`
+ }function routeContent(): string {
+   if (!state.athlete) return `<div class="hero onboarding-hero"><div class="page-kicker">Private local vault</div><h1>Your training data starts on this device.</h1><p class="muted">Create a local athlete or safely inspect the legacy LetMeFly state detected in this browser. No account is required.</p></div>`
+   switch (state.route) {
+@@ -148,16 +156,17 @@
+     case 'exercises': return exercisesPage()
+     case 'coach': return coachPage()
+     case 'profile': return profilePage()
++    case 'calendar': return calendarPage()
++    case 'settings': return settingsPage()
+     case 'more': return morePage()
+   }
+ }function homePage(): string {
+   const today = getCalendarDay(new Date())
+   const day = getCrownforgeDay(today?.week ?? state.selectedWeek, today?.day ?? state.selectedDay)
+-  const beforeStart = new Date() < new Date('2026-09-07T00:00:00')
+-  const title = beforeStart ? 'LOWER + BENCH FREQUENCY + GLUTES' : day ? day.title : 'CROWNFORGE'
+-  const sub = beforeStart ? 'Foundation • Week 1 • Day 1 • Sep 7' : day ? `Week ${today?.week} • Day ${today?.day}` : 'Your current training block'
++  const title = day?.title ?? 'CROWNFORGE'
++  const sub = day ? `Crownforge • Week ${today?.week ?? state.selectedWeek} • Day ${today?.day ?? state.selectedDay}` : 'Your current training block'
+   const completed = state.workout ? completionStats(state.workout) : { done: 0, total: 0, percent: 0 }
+-  const focus = (day?.sections ?? []).slice(0, 4).map((section, index) => `<div class="focus-chip"><span>${['01','02','03','04'][index] ?? '•'}</span>${esc(section.title.replace(/^\w+\s*•?\s*/, ''))}</div>`).join('')
++  const focus = (day?.sections ?? []).slice(0, 4).map((section, index) => `<div class="focus-chip"><span>${['01','02','03','04'][index] ?? '•'}</span>${esc(section.title)}</div>`).join('')
+   return `
+     <section class="command-hero">
+       <div class="hero-art" aria-hidden="true"></div>
+@@ -278,7 +287,7 @@
+   const load = set.load_value ?? ''
+   const rpe = set.rpe ?? ''
+   const plate = typeof load === 'number' && set.load_unit === 'lb' ? formatPlates(calculatePlates(load)) : ''
+-  return `<div class="set-row" data-set-id="${esc(set.id)}"><div class="set-label"><span>SET</span><strong>${esc(String(set.set_number))}</strong></div><div class="set-target-cell"><span>Target</span><strong>${esc(target)}</strong></div><div class="set-field"><label>Reps</label><input class="set-input reps-input" inputmode="numeric" value="${esc(String(reps))}"></div><div class="set-field"><label>Load</label><input class="set-input load-input" inputmode="decimal" value="${esc(String(load))}"><small>${esc(plate)}</small></div><div class="set-field rpe-field"><label>RPE</label><input class="set-input rpe-input" inputmode="decimal" value="${esc(String(rpe))}"></div><button class="set-check ${set.completed ? 'done' : ''}" data-action="toggle-set">${set.completed ? '✓' : '○'}</button></div>`
++  return `<div class="set-row" data-set-id="${esc(set.id)}"><div class="set-label"><span>SET</span><strong>${esc(String(set.set_number))}</strong></div><div class="set-target-cell"><span>Target</span><strong>${esc(target)}</strong></div><div class="set-field reps-field"><label>Reps</label><input class="set-input reps-input" inputmode="numeric" value="${esc(String(reps))}"></div><div class="set-field load-field"><label>Load</label><input class="set-input load

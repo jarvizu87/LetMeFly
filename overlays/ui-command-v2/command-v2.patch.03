@@ -1,0 +1,88 @@
++546,7 @@
+   const sectionLabel = (index: number): string => index === 0 ? 'READINESS' : index === pages.length - 1 ? 'REVIEW' : `BLOCK ${String.fromCharCode(64 + index)}`
+   const setActive = (index: number): void => {
+     activeIndex = Math.max(0, Math.min(pages.length - 1, index))
++    pages.forEach((page, pageIndex) => page.classList.toggle('active-page', pageIndex === activeIndex))
+     track.forEach((item, itemIndex) => {
+       item.classList.toggle('active', itemIndex === activeIndex)
+       item.setAttribute('aria-current', itemIndex === activeIndex ? 'step' : 'false')
+@@ -912,7 +972,7 @@
+ 
+ function routeFromHash(): Route {
+   const value = location.hash.replace(/^#\//, '') as Route
+-  return ['home','train','program','progress','exercises','coach','profile','more'].includes(value) ? value : 'home'
++  return ['home','train','program','progress','exercises','coach','profile','calendar','settings','more'].includes(value) ? value : 'home'
+ }
+ 
+ function registerServiceWorker(): void {
+--- scripts/audit-command-ui.mjs
++++ scripts/audit-command-ui.mjs
+@@ -2,18 +2,26 @@
+ 
+ const main = fs.readFileSync(new URL('../src/main.ts', import.meta.url), 'utf8')
+ const css = fs.readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
++const command = fs.readFileSync(new URL('../src/command-v2.css', import.meta.url), 'utf8')
++const serviceWorker = fs.readFileSync(new URL('../public/service-worker.js', import.meta.url), 'utf8')
++const corpus = `${main}\n${css}\n${command}\n${serviceWorker}`
++
+ const checks = [
+-  ['all major routes', /type Route = 'home' \| 'train' \| 'program' \| 'progress' \| 'exercises' \| 'coach' \| 'profile' \| 'more'/],
+-  ['mobile primary navigation', /\['home'.*'primary'\].*\['train'.*'primary'\].*\['program'.*'primary'\].*\['progress'.*'primary'\]/s],
++  ['all major routes', /type Route = 'home' \| 'train' \| 'program' \| 'progress' \| 'exercises' \| 'coach' \| 'profile' \| 'calendar' \| 'settings' \| 'more'/],
++  ['five-item mobile primary navigation', /\['home'.*'Home'\].*\['train'.*'Train'\].*\['program'.*'Program'\].*\['progress'.*'Progress'\].*\['more'.*'More'\]/s],
+   ['Home command hero', /class="command-hero"/],
++  ['Home cinematic wolf art', /--v2-wolf:url/],
+   ['Home private readiness hydration', /latestReadiness\(state\.athlete\.id\)/],
+   ['Train swipe viewport', /id="swipe-viewport"/],
+   ['Train readiness first', /readinessPage\(day,/],
+   ['Train section tap navigation', /data-session-index/],
+   ['Train previous next controls', /data-session-step/],
+-  ['Train live section sync', /bindSwipeNavigation\(\)/],
++  ['Train active page height', /active-page/],
++  ['Train exercise media art', /--v2-lifter:url/],
+   ['Program generic embedded weeks', /CROWNFORGE\.weekData\.map/],
+   ['Program week jump navigator', /data-jump-week/],
++  ['Program Black Crown visual phases', /\.bc-phase\.foundation.*\.bc-phase\.volume.*\.bc-phase\.intensity.*\.bc-phase\.realization/s],
++  ['Progress analytics board', /class="v2-analytics"/],
+   ['Exercise intelligence source counts', /EXERCISE_LIBRARY_SOURCE_TOTAL/],
+   ['Exercise text search', /id="exercise-search"/],
+   ['Exercise functional filters', /data-exercise-filter/],
+@@ -23,13 +31,14 @@
+   ['Coach quick prompts', /data-coach-prompt/],
+   ['Coach previous history', /What did I do last time\?/],
+   ['Profile private vault', /Private Vault/],
++  ['Calendar route', /function calendarPage/],
++  ['Settings route', /function settingsPage/],
+   ['More utility route', /function morePage/],
+-  ['responsive mobile breakpoint', /@media\s*\(max-width:\s*(?:760|780)px\)/],
+-  ['Command UI session track styling', /\.session-track button/],
+-  ['Command UI filter styling', /\.filter-chips button/],
++  ['Galaxy mobile breakpoint', /@media\s*\(max-width:420px\)/],
++  ['Command V2 PWA cache', /letmefly-shell-v5-4-command-v2-1/],
+ ]
+ 
+-const failures = checks.filter(([, pattern]) => !(pattern.test(main) || pattern.test(css))).map(([label]) => label)
++const failures = checks.filter(([, pattern]) => !pattern.test(corpus)).map(([label]) => label)
+ if (failures.length) {
+   console.error(JSON.stringify({ result: 'FAIL', failures }, null, 2))
+   process.exit(1)
+@@ -39,8 +48,8 @@
+   result: 'PASS',
+   checks: checks.map(([label]) => label),
+   protectedBoundaries: [
+-    'UI audit does not modify Crownforge/Black Crown prescriptions',
+-    'Readiness hydration reads private local data only',
+-    'Exercise filters do not alter source-approved substitutions',
++    'Command V2 changes presentation and navigation, not Crownforge/Black Crown prescriptions',
++    'Readiness continues to read/write private athlete data only',
++    'Exercise filters and substitutions remain non-mutating public-program intelligence',
+   ],
+ }, null, 2))
+--- public/service-worker.js
++++ public/service-worker.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'letmefly-shell-v5-rebuild-1'
++const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-1'
+ const PRECACHE = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png']
+ 
+ self.addEventListener('install', (event) => {

@@ -1,0 +1,6 @@
+ck .exercise-card:first-child::before{height:185px}.exercise-title h3{font-size:20px}.exercise-actions .btn{font-size:6px!important}
+  .readiness-panel{padding:10px}.readiness-graphic span{font-size:56px}.readiness-graphic b{font-size:21px}
+}
+
+/* Five-item bottom navigation is always one row on Galaxy Ultra-class phones. */
+@media(max-width:979px){.navbar{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}.navbar .nav-item{min-width:0!important;min-height:56px!important}.navbar .nav-item span{font-size:15px}.navbar .nav-item{font-size:7px}}

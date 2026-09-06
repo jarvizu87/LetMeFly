@@ -1,0 +1,64 @@
+/* Command V2 Batch D — Exercises + Coach */
+.exercises-page-head{padding-bottom:8px!important}
+.exercise-safety{display:flex!important;align-items:center;gap:10px;padding:9px 11px!important;margin-bottom:9px!important;background:linear-gradient(90deg,rgba(255,35,59,.11),rgba(8,14,20,.92))!important;border-color:rgba(255,55,76,.32)!important}
+.exercise-safety strong{font:800 10px/1 var(--font-condensed,Arial Narrow,sans-serif);letter-spacing:.14em;color:#ff344c;white-space:nowrap}
+.exercise-safety span{font-size:11px;color:#9cabb5}
+.exercise-search-card{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:8px!important;align-items:center}
+.exercise-search-card .search-wrap{grid-column:1/-1}
+.filter-chips{display:flex!important;gap:5px!important;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
+.filter-chips::-webkit-scrollbar{display:none}
+.filter-chips button{flex:0 0 auto;min-height:34px!important;padding:0 11px!important;border-radius:4px!important;text-transform:none!important;font-size:11px!important}
+.exercise-results{min-width:80px;text-align:right}
+.exercise-library{gap:6px!important}
+.library-card{position:relative;overflow:hidden;min-height:96px!important;grid-template-columns:92px minmax(0,1fr) 14px!important;padding:5px!important;background:linear-gradient(90deg,#091017,#071016)!important}
+.library-thumb{height:84px!important;min-height:84px;border-radius:4px!important;overflow:hidden;background-image:linear-gradient(180deg,rgba(1,5,8,.05),rgba(1,5,8,.72)),var(--v2-mountain)!important;background-size:cover!important;background-position:center!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.library-card[data-filter-tags~="barbell"] .library-thumb,.library-card[data-filter-tags~="sled"] .library-thumb{background-image:linear-gradient(180deg,rgba(1,5,8,.02),rgba(1,5,8,.7)),var(--v2-lifter)!important;background-position:center 40%!important}
+.library-card[data-filter-tags~="kb"] .library-thumb,.library-card[data-filter-tags~="carry"] .library-thumb{background-image:linear-gradient(180deg,rgba(1,5,8,.04),rgba(1,5,8,.72)),var(--v2-wolf)!important;background-position:center 38%!important}
+.library-thumb span{position:absolute!important;left:8px;top:8px;background:rgba(2,6,9,.78);border:1px solid rgba(255,255,255,.12);border-radius:3px;padding:2px 4px;color:#dfe7ec!important;font-size:9px!important}
+.library-thumb b{display:none!important}
+.library-copy{min-width:0}
+.library-copy h3{font-size:17px!important;margin:1px 0 2px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.library-copy .exercise-eyebrow{font-size:9px!important;color:#ff344c!important;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.library-copy p{font-size:10px!important;line-height:1.25!important;margin:0!important;color:#82919d!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.library-card .btn-row{display:flex!important;gap:4px!important;margin-top:6px!important;flex-wrap:nowrap!important;overflow:hidden}
+.library-card .btn.small{min-height:27px!important;padding:0 7px!important;font-size:9px!important;border-radius:3px!important}
+.library-card>i{font-size:18px!important;color:#788995!important}
+.coach-shell{max-width:1050px;margin:0 auto}
+.coach-banner{position:relative;overflow:hidden;display:flex!important;align-items:center!important;min-height:112px!important;padding:16px!important;background-image:linear-gradient(90deg,rgba(3,8,12,.97) 8%,rgba(3,8,12,.82) 54%,rgba(3,8,12,.2)),var(--v2-wolf)!important;background-position:0 0,right 34%!important;background-repeat:no-repeat!important;background-size:auto,54% auto!important}
+.coach-banner:after{content:"";position:absolute;inset:auto 0 0;height:2px;background:linear-gradient(90deg,#ff1737,transparent 68%)}
+.coach-avatar{width:60px!important;height:60px!important;border-color:rgba(255,255,255,.25)!important;background:rgba(3,8,12,.76)!important;box-shadow:0 0 30px rgba(255,24,55,.12)}
+.coach-banner-copy{position:relative;z-index:1}
+.coach-banner-copy h1{font-size:30px!important;letter-spacing:.025em!important;margin:2px 0 0!important}
+.coach-banner-copy p{margin:2px 0 0;color:#aebbc4;font-size:12px}
+.coach-status{position:relative;z-index:1;margin-left:auto;align-self:flex-start;border:1px solid rgba(74,255,172,.25);background:rgba(4,24,19,.72);color:#5bf1ad;border-radius:999px;padding:5px 8px;font-size:8px;font-weight:800;letter-spacing:.08em}
+.coach-context{border-left:2px solid #ff1e3d!important}
+.coach-context>h2{font-size:24px!important;margin:2px 0 12px!important}
+.context-grid{gap:6px!important}
+.context-grid>div{background:#081017!important;border-color:#23313b!important;border-radius:5px!important;padding:8px!important}
+.coach-chat{background:linear-gradient(160deg,#091119,#05090d)!important}
+.coach-message{background:linear-gradient(130deg,#09131b,#071017)!important;border-color:#293943!important}
+.quick-prompts{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+.quick-prompts button{text-align:left!important;min-height:40px!important;padding:0 10px!important;border-radius:4px!important;background:#071016!important}
+.coach-composer{gap:7px!important}
+.coach-composer textarea{min-height:54px!important;background:#05090d!important;border-color:#2d3d48!important}
+@media(max-width:780px){
+ .exercise-search-card{top:58px!important;grid-template-columns:1fr!important}
+ .exercise-search-card .search-wrap,.filter-chips,.exercise-results{grid-column:1!important}
+ .exercise-results{text-align:left;display:flex!important;gap:5px;align-items:baseline}
+ .library-card{grid-template-columns:86px minmax(0,1fr) 12px!important;min-height:92px!important}
+ .library-thumb{height:80px!important;min-height:80px!important}
+ .library-copy h3{font-size:16px!important}
+ .coach-banner{min-height:106px!important;padding:12px!important;background-size:auto,72% auto!important}
+ .coach-avatar{width:50px!important;height:50px!important}
+ .coach-banner-copy h1{font-size:24px!important}
+ .coach-status{display:none!important}
+ .coach-layout{grid-template-columns:1fr!important}
+ .quick-prompts{grid-template-columns:1fr!important}
+}
+@media(max-width:420px){
+ .library-card{grid-template-columns:78px minmax(0,1fr) 10px!important;min-height:88px!important}
+ .library-thumb{height:76px!important;min-height:76px!important}
+ .library-card .btn.small{padding:0 6px!important;font-size:8px!important}
+ .coach-banner-copy h1{font-size:22px!important}
+ .coach-banner-copy p{font-size:11px!important}
+}

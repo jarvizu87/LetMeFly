@@ -1,0 +1,51 @@
+/* Command V2 Batch E — Profile / Calendar / Settings / More */
+.profile-hero{position:relative;overflow:hidden;background-image:linear-gradient(90deg,rgba(4,9,13,.97),rgba(4,9,13,.78) 58%,rgba(4,9,13,.32)),var(--v2-mountain)!important;background-position:0 0,right center!important;background-repeat:no-repeat!important;background-size:auto,58% 100%!important}
+.profile-hero:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,#ff1c3c,transparent 70%)}
+.profile-avatar{box-shadow:0 0 0 1px rgba(255,255,255,.1),0 0 28px rgba(255,28,60,.11)!important}
+.profile-program{background:rgba(5,12,18,.9)!important;backdrop-filter:blur(8px);border-color:#2b3944!important}
+.profile-card,.vault-card,.data-card,.danger-zone{border-radius:7px!important;background:linear-gradient(150deg,#0b131a,#060b0f)!important}
+.data-actions{gap:7px!important}
+.action-tile{min-height:96px!important;border-radius:5px!important;background:#071017!important}
+.calendar-month-card{background:linear-gradient(160deg,#0b151d,#060b10)!important;border-radius:16px!important;padding:14px!important}
+.calendar-grid{gap:5px!important}
+.calendar-cell{min-height:47px!important;border-radius:5px!important;background:#071017!important;border-color:#24333e!important}
+.calendar-cell .dot{width:8px!important;height:8px!important;box-shadow:0 0 12px rgba(255,26,59,.35)}
+.calendar-cell.rest .dot{box-shadow:0 0 12px rgba(73,235,169,.3)}
+.calendar-list{display:grid;gap:6px!important;margin-top:10px}
+.calendar-event{grid-template-columns:8px minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;padding:10px 12px!important;border-radius:6px!important;background:linear-gradient(90deg,#081119,#071017)!important}
+.calendar-event>i{width:7px!important;height:7px!important;border-radius:50%;background:#ff1e3e!important}
+.calendar-event.rest>i{background:#4de2aa!important}
+.calendar-event>div{min-width:0;display:grid;gap:2px}
+.calendar-event>div>span{font-size:9px!important;color:#758692!important;letter-spacing:.06em}
+.calendar-event strong{display:block!important;font-size:14px!important;line-height:1.05!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-event small{display:block!important;font-size:10px!important;line-height:1.25!important;color:#91a0aa!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-event>em{font-style:normal;font-size:10px!important;color:#d6e0e6;white-space:nowrap}
+.settings-list{display:grid;gap:6px!important}
+.settings-row{min-height:64px!important;border-radius:6px!important;background:linear-gradient(90deg,#09131a,#071016)!important;border-color:#273640!important}
+.settings-row>span{background:#071017!important;border-color:#32434f!important;color:#f5f8fa!important}
+.settings-brand{min-height:190px!important;border-radius:7px!important;background-position:center 56%!important;letter-spacing:.34em!important}
+.command-menu-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+.command-menu-grid .more-card{min-height:76px!important;border-radius:6px!important;background:linear-gradient(90deg,#09131a,#071016)!important}
+.command-menu-grid .more-card>span{width:44px!important;height:44px!important;border-radius:5px!important;background:#071017!important;border:1px solid #253640;display:grid!important;place-items:center;color:#ff2342!important}
+.command-menu-grid .more-card strong{font-size:16px!important}
+.command-menu-grid .more-card small{font-size:10px!important;color:#7f909c!important}
+.more-brand{min-height:190px!important;border-radius:7px!important;background-position:center 48%!important}
+@media(max-width:780px){
+ .profile-hero{grid-template-columns:60px minmax(0,1fr)!important;gap:12px!important;padding:14px!important;background-size:auto,78% 100%!important}
+ .profile-avatar{width:58px!important;height:58px!important;font-size:22px!important}
+ .profile-program{grid-column:1/-1!important;margin-top:2px!important}
+ .calendar-month-card{padding:10px!important}
+ .calendar-cell{min-height:44px!important}
+ .command-menu-grid{grid-template-columns:1fr!important}
+ .command-menu-grid .more-card{min-height:66px!important}
+ .more-brand,.settings-brand{min-height:180px!important}
+}
+@media(max-width:420px){
+ .calendar-grid{gap:4px!important}
+ .calendar-cell{min-height:42px!important}
+ .calendar-event{padding:9px 10px!important}
+ .calendar-event strong{font-size:13px!important}
+ .calendar-event small{font-size:9px!important}
+ .settings-row{min-height:62px!important}
+ .command-menu-grid .more-card{min-height:64px!important}
+}
