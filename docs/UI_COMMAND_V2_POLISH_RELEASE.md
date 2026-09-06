@@ -1,6 +1,6 @@
 # LetMeFly Command V2 — Galaxy Release Polish
 
-Release scope: presentation, responsive ergonomics, analytics truthfulness, cinematic asset cleanup, and image-fidelity correction only.
+Release scope: presentation, responsive ergonomics, analytics truthfulness, cinematic asset cleanup, image-fidelity correction, and final Train/Progress hierarchy polish only.
 
 Verified boundaries:
 - Crownforge Weeks 1–6 source prescriptions are unchanged.
@@ -9,6 +9,8 @@ Verified boundaries:
 - Program view is roadmap-first with governed detail available on demand.
 - Progress consistency uses actual session state rather than decorative pseudo-trends.
 - Galaxy Ultra readiness and navigation ergonomics are tightened.
+- The readiness swipe page removes unnecessary minimum-height pressure and reduces non-interactive vertical spacing while keeping primary controls usable.
+- The Progress dashboard emphasizes athlete signal first and visually de-emphasizes editing controls on phone-sized layouts.
 - Fenrir and training artwork are standalone assets.
 - Program mountain artwork is native, text-free SVG; no UI-reference screenshot crops are shipped.
 - Cinematic and exercise imagery uses crop-preserving `cover` behavior rather than stretched percentage sizing.
@@ -16,4 +18,4 @@ Verified boundaries:
 - Program, profile, coach, and training hero imagery retain source aspect ratios on Galaxy-sized screens.
 - Safe refresh clears obsolete app-shell caches/service workers without deleting private athlete data.
 
-Release gate: `ci/build-command-v2-polish2.sh` reconstructs the audited V5.4 Command V2 source, applies the polish and image-fidelity overlays, verifies cinematic asset hashes and fidelity rules, reruns source/Crownforge/Exercise/UI audits, typechecks, builds with Vite, and verifies production output.
+Release gate: `ci/build-command-v2-polish2.sh` reconstructs the audited V5.4 Command V2 source, applies the polish, image-fidelity, and final Galaxy overlays, verifies their checksums and required selectors, reruns source/Crownforge/Exercise/UI audits, typechecks, builds with Vite, and verifies production output.
