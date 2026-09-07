@@ -40,25 +40,45 @@ manifest = json.loads((overlay / 'BLOCK_MANIFESTS.json').read_text())
 out_dir = target / 'src/programs/black-crown/source-weeks'
 
 seen_weeks: set[int] = set()
+archives: dict[int, bytes] = {}
+transport_errors: list[str] = []
 
+# Report every transport mismatch in one run so repairs can be batched instead
+# of discovering one block at a time.
 for block in manifest['blocks']:
     encoded_path = overlay / 'transport' / block['base64File']
     if not encoded_path.is_file():
-        raise SystemExit(f'Missing Black Crown transport: {encoded_path}')
+        transport_errors.append(f"Block {block['block']}: missing {encoded_path}")
+        continue
 
-    compact = ''.join(encoded_path.read_text().split())
+    raw_text = encoded_path.read_text()
+    compact = ''.join(raw_text.split())
     compact += '=' * (-len(compact) % 4)
-    archive = base64.b64decode(compact, validate=True)
+    try:
+        archive = base64.b64decode(compact, validate=True)
+    except Exception as exc:
+        transport_errors.append(f"Block {block['block']}: base64 decode failed: {exc}")
+        continue
+
     archive_sha = hashlib.sha256(archive).hexdigest()
-    if len(archive) != block['archiveSize']:
-        raise SystemExit(
-            f"Block {block['block']} archive size mismatch: {len(archive)} != {block['archiveSize']}"
-        )
-    if archive_sha != block['archiveSha256']:
-        raise SystemExit(
-            f"Block {block['block']} archive SHA mismatch: {archive_sha} != {block['archiveSha256']}"
+    archive_size = len(archive)
+    archives[block['block']] = archive
+
+    if archive_size != block['archiveSize'] or archive_sha != block['archiveSha256']:
+        transport_errors.append(
+            f"Block {block['block']}: actual archiveSize={archive_size} "
+            f"archiveSha256={archive_sha}; expected archiveSize={block['archiveSize']} "
+            f"archiveSha256={block['archiveSha256']}"
         )
 
+if transport_errors:
+    print('Black Crown transport preflight mismatches:', file=sys.stderr)
+    for error in transport_errors:
+        print(f'  - {error}', file=sys.stderr)
+    raise SystemExit(1)
+
+for block in manifest['blocks']:
+    archive = archives[block['block']]
     with tarfile.open(fileobj=io.BytesIO(archive), mode='r:gz') as tf:
         members = [m for m in tf.getmembers() if re.search(r'(^|/)week-\d{2}\.ts$', m.name)]
         if len(members) != 6:
