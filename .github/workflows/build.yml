@@ -14,6 +14,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      # CI validates the build path only. Netlify injects the real browser-safe
+      # Supabase URL and publishable key for production builds.
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,7 +28,7 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Build and audit Command V2 + Cloudinary exercise art
+      - name: Build and audit Command V2 + private Cloudinary exercise art
         run: bash ci/build-command-v2-cloudinary.sh
 
       - name: Install and validate safe refresh utility
