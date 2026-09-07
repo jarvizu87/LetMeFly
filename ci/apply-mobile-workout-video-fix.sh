@@ -108,14 +108,18 @@ grep -Fq 'background-size:contain' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-flow-node' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-set-tab' "$TARGET_DIR/src/command-v2.css"
 
-# Keep installed PWAs current and use the official LetMeFly logo as the
-# launcher/manifest icon. This changes shell delivery/branding only.
+# Keep installed PWAs current, expose a first-party install button when Chrome
+# grants beforeinstallprompt, and use the official LetMeFly logo everywhere.
 bash "$ROOT_DIR/ci/apply-brand-pwa-fix.sh" "$TARGET_DIR"
 
-test -s "$TARGET_DIR/public/app-icon.svg"
+test -s "$TARGET_DIR/public/app-icon-v2.svg"
+test -s "$TARGET_DIR/public/ui/pwa-install.js"
 test -s "$TARGET_DIR/public/ui/pwa-update.js"
-grep -Fq '/app-icon.svg' "$TARGET_DIR/public/manifest.webmanifest"
+grep -Fq '/app-icon-v2.svg?v=2' "$TARGET_DIR/public/manifest.webmanifest"
+grep -Fq '/ui/pwa-install.js' "$TARGET_DIR/index.html"
 grep -Fq '/ui/pwa-update.js' "$TARGET_DIR/index.html"
-grep -Fq "letmefly-shell-v5-4-command-v2-3-brand-v1" "$TARGET_DIR/public/service-worker.js"
+grep -Fq "letmefly-shell-v5-4-command-v2-4-brand-v2" "$TARGET_DIR/public/service-worker.js"
+test ! -e "$TARGET_DIR/public/icon-192.png"
+test ! -e "$TARGET_DIR/public/icon-512.png"
 
-echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + PWA branding/update reliability pass: PASS"
+echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + PWA branding/install/update reliability pass: PASS"
