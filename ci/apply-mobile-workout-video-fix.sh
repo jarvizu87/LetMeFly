@@ -40,10 +40,15 @@ p.write_text(text.replace(old, new, 1))
 print(f'Front Squat demo updated in {p.relative_to(root)}')
 PY
 
+# Audit every embedded exercise video record. Any remaining legacy Vimeo direct
+# links are demoted to honest exact-name YouTube search fallbacks until a new
+# direct instructional source has been manually approved.
+bash "$ROOT_DIR/ci/apply-exercise-video-audit.sh" "$TARGET_DIR"
+
 cat "$CSS_FILE" >> "$TARGET_DIR/src/command-v2.css"
 
 grep -Rq 'https://www.youtube.com/watch?v=-fNfycATWUo' "$TARGET_DIR/src"
-! grep -Rq 'https://vimeo.com/152122947' "$TARGET_DIR/src"
+! grep -Rq 'vimeo.com/' "$TARGET_DIR/src/data/exercise-library.ts"
 grep -Fq 'grid-template-areas:' "$TARGET_DIR/src/command-v2.css"
 grep -Fq '"set set check"' "$TARGET_DIR/src/command-v2.css"
 grep -Fq '"reps load rpe"' "$TARGET_DIR/src/command-v2.css"
@@ -52,4 +57,4 @@ grep -Fq 'height:62px!important' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'font-size:17px!important' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'font-size:11px!important' "$TARGET_DIR/src/command-v2.css"
 
-echo "LetMeFly mobile workout + Front Squat video reliability pass: PASS"
+echo "LetMeFly mobile workout + exercise video reliability pass: PASS"
