@@ -49,6 +49,11 @@ test -f .build-src/letmefly_app/package.json
 # program independently reviewable while preserving the immutable source base.
 bash ci/apply-crownforge-v2-1.sh "$ROOT_DIR/.build-src/letmefly_app"
 
+# Temporarily expose the legacy home-page source shape expected by the locked
+# Command V2 patch. This adapter changes presentation lookup only; prescriptions
+# remain owned by the modular program packages.
+bash ci/command-v2-program-compat.sh pre "$ROOT_DIR/.build-src/letmefly_app"
+
 # Reconstruct Command V2 presentation from transport-safe text chunks.
 cat overlays/ui-command-v2/command-v2.patch.* > "$PATCH_FILE"
 cat overlays/ui-command-v2/command-v2.css.* > "$CSS_FILE"
@@ -100,6 +105,9 @@ cat "$BATCH_B_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_C_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_D_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_E_CSS_FILE" >> src/command-v2.css
+
+# Restore program-aware lookup immediately after the legacy UI patch is applied.
+bash "$ROOT_DIR/ci/command-v2-program-compat.sh" post "$ROOT_DIR/.build-src/letmefly_app"
 
 # Full governed-source and UI release gates.
 npm install --no-audit --no-fund
