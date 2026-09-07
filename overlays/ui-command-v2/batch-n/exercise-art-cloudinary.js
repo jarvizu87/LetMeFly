@@ -2,18 +2,48 @@
   'use strict'
 
   const CLOUD_NAME = 'extor5az'
-  const MINE_PREFIX = 'letmefly/app/exercises/mine/'
-  const OTHERS_PREFIX = 'letmefly/app/exercises/others/'
-  // c_lfill preserves aspect ratio and never upscales smaller source images.
   const TRANSFORM = 'c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best'
   const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${TRANSFORM}/`
   const MIN_RENDER_DIMENSION = 640
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  const LOCAL_OVERRIDE_KEY = 'lmf.exerciseArtOverrides.v1'
+  const SUPABASE_URL = '__LMF_SUPABASE_URL__'
+  const SUPABASE_PUBLISHABLE_KEY = '__LMF_SUPABASE_PUBLISHABLE_KEY__'
+
   const statusBySlug = new Map()
   const waitingBySlug = new Map()
+  let overrideMap = readLocalOverrides()
+  let cloudRefreshStarted = false
 
   function candidates(slug) {
     return document.querySelectorAll(`[data-exercise-art="${slug}"]`)
+  }
+
+  function normalizeOverride(value) {
+    if (!value || typeof value !== 'object') return null
+    const publicId = typeof value.publicId === 'string' ? value.publicId.trim() : ''
+    const format = typeof value.format === 'string' && value.format.trim() ? value.format.trim() : 'webp'
+    const status = typeof value.status === 'string' ? value.status : 'approved'
+    if (!publicId || status !== 'approved') return null
+    return { publicId, format }
+  }
+
+  function readLocalOverrides() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(LOCAL_OVERRIDE_KEY) || '{}')
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+      return parsed
+    } catch {
+      return {}
+    }
+  }
+
+  function writeLocalOverrides(nextMap) {
+    try {
+      localStorage.setItem(LOCAL_OVERRIDE_KEY, JSON.stringify(nextMap))
+    } catch {
+      // Local caching is optional; never gate workout rendering on storage availability.
+    }
   }
 
   function activate(slug, url, source) {
@@ -23,44 +53,60 @@
     })
   }
 
-  function probe(slug, prefix, source, onMissing) {
-    const url = `${BASE_URL}${prefix}${slug}`
+  function clearActivation(slug) {
+    candidates(slug).forEach((element) => {
+      element.style.removeProperty('--exercise-art')
+      delete element.dataset.exerciseArtSource
+    })
+  }
+
+  function deliveryUrl(asset) {
+    return `${BASE_URL}${asset.publicId}.${asset.format}`
+  }
+
+  function probeOverride(slug, asset, source) {
+    const url = deliveryUrl(asset)
     const probeImage = new Image()
     probeImage.decoding = 'async'
     probeImage.onload = () => {
+      waitingBySlug.delete(slug)
       if (probeImage.naturalWidth < MIN_RENDER_DIMENSION || probeImage.naturalHeight < MIN_RENDER_DIMENSION) {
-        waitingBySlug.delete(slug)
-        onMissing()
+        statusBySlug.set(slug, { state: 'missing' })
+        clearActivation(slug)
         return
       }
       statusBySlug.set(slug, { state: 'ready', url, source })
-      waitingBySlug.delete(slug)
       activate(slug, url, source)
     }
     probeImage.onerror = () => {
       waitingBySlug.delete(slug)
-      onMissing()
+      statusBySlug.set(slug, { state: 'missing' })
+      clearActivation(slug)
     }
     waitingBySlug.set(slug, probeImage)
     probeImage.src = url
   }
 
   function checkSlug(slug) {
-    if (!SLUG_PATTERN.test(slug) || navigator.onLine === false) return
+    if (!SLUG_PATTERN.test(slug)) return
+
+    const asset = normalizeOverride(overrideMap[slug])
+    if (!asset) {
+      statusBySlug.set(slug, { state: 'missing' })
+      clearActivation(slug)
+      return
+    }
 
     const known = statusBySlug.get(slug)
     if (known?.state === 'ready') {
       activate(slug, known.url, known.source)
       return
     }
-    if (known?.state === 'missing' || known?.state === 'pending') return
+    if (known?.state === 'pending') return
+    if (navigator.onLine === false) return
 
     statusBySlug.set(slug, { state: 'pending' })
-    probe(slug, MINE_PREFIX, 'mine', () => {
-      probe(slug, OTHERS_PREFIX, 'others', () => {
-        statusBySlug.set(slug, { state: 'missing' })
-      })
-    })
+    probeOverride(slug, asset, 'private-override')
   }
 
   function queueElement(element) {
@@ -78,6 +124,75 @@
     nodes.forEach(queueElement)
   }
 
+  function findAccessToken() {
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i) || ''
+      if (!key.startsWith('sb-') || !key.endsWith('-auth-token')) continue
+      try {
+        const parsed = JSON.parse(localStorage.getItem(key) || '{}')
+        const token = parsed?.access_token || parsed?.currentSession?.access_token
+        if (typeof token === 'string' && token.length > 20) return token
+      } catch {
+        // Keep scanning other Supabase auth keys.
+      }
+    }
+    return null
+  }
+
+  async function supabaseGet(path, accessToken) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json'
+      },
+      cache: 'no-store'
+    })
+    if (!response.ok) throw new Error(`Supabase REST ${response.status}`)
+    return response.json()
+  }
+
+  async function refreshFromCloud() {
+    if (cloudRefreshStarted || navigator.onLine === false) return
+    if (!SUPABASE_URL.startsWith('https://') || SUPABASE_PUBLISHABLE_KEY.startsWith('__LMF_')) return
+
+    const accessToken = findAccessToken()
+    if (!accessToken) return
+    cloudRefreshStarted = true
+
+    try {
+      const athletes = await supabaseGet('athletes?select=id&deleted_at=is.null&order=created_at.asc&limit=1', accessToken)
+      const athleteId = athletes?.[0]?.id
+      if (!athleteId) return
+
+      const rows = await supabaseGet(
+        `exercise_thumbnail_overrides?select=exercise_key,cloudinary_public_id,asset_format,status,is_active&athlete_id=eq.${encodeURIComponent(athleteId)}&deleted_at=is.null&status=eq.approved&is_active=eq.true`,
+        accessToken
+      )
+
+      const nextMap = {}
+      rows.forEach((row) => {
+        if (!SLUG_PATTERN.test(row.exercise_key || '')) return
+        nextMap[row.exercise_key] = {
+          publicId: row.cloudinary_public_id,
+          format: row.asset_format || 'webp',
+          status: row.status || 'approved'
+        }
+      })
+
+      overrideMap = nextMap
+      writeLocalOverrides(nextMap)
+      statusBySlug.clear()
+      waitingBySlug.clear()
+      scan(document)
+      window.dispatchEvent(new CustomEvent('lmf:exercise-art-overrides-loaded', { detail: { count: rows.length } }))
+    } catch {
+      // Cloud art is opportunistic. Cached/local workout UI remains authoritative.
+    } finally {
+      cloudRefreshStarted = false
+    }
+  }
+
   const observer = 'IntersectionObserver' in window
     ? new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -90,6 +205,8 @@
 
   function start() {
     scan(document)
+    refreshFromCloud()
+
     const mutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
@@ -98,6 +215,25 @@
       })
     })
     mutationObserver.observe(document.documentElement, { childList: true, subtree: true })
+
+    window.addEventListener('online', () => {
+      statusBySlug.clear()
+      refreshFromCloud()
+      scan(document)
+    })
+
+    window.addEventListener('storage', (event) => {
+      if (event.key !== LOCAL_OVERRIDE_KEY) return
+      overrideMap = readLocalOverrides()
+      statusBySlug.clear()
+      scan(document)
+    })
+
+    window.addEventListener('lmf:exercise-art-overrides-updated', () => {
+      overrideMap = readLocalOverrides()
+      statusBySlug.clear()
+      scan(document)
+    })
   }
 
   if (document.readyState === 'loading') {
