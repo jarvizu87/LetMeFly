@@ -1,0 +1,33 @@
+name: Crownforge Source Diagnostic
+
+on:
+  push:
+    branches: [crownforge-v2-1-audit-continuation]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect immutable source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .diag-src
+          mkdir -p .diag-src
+          unzip -q source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip -d .diag-src
+          cd .diag-src/letmefly_app
+          echo '=== PACKAGE ==='
+          cat package.json
+          echo '=== RELEVANT FILES ==='
+          find scripts src -type f | sort | grep -Ei 'crownforge|maintenance|program|exercise|type' || true
+          echo '=== FILES CONTAINING CROWNFORGE/WEEK 12 ==='
+          grep -RIl -E 'Crownforge|CROWNFORGE|Week 12|W12|maintenance' scripts src 2>/dev/null | sort || true
+          echo '=== PROGRAM/AUDIT SOURCE EXCERPTS ==='
+          while IFS= read -r f; do
+            echo "===== $f ====="
+            sed -n '1,500p' "$f"
+          done < <(grep -RIl -E 'Crownforge|CROWNFORGE|Week 12|W12|maintenance' scripts src 2>/dev/null | sort | head -40)
