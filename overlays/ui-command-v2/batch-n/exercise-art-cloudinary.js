@@ -11,6 +11,7 @@
   const LOCAL_DB_NAME = 'letmefly-private'
   const LOCAL_META_STORE = 'meta'
   const LOCAL_MAP_KEY = 'privateExerciseArtMap'
+  const LOCAL_STORAGE_MAP_KEY = 'lmf_private_exercise_art_map_v1'
 
   const statusBySlug = new Map()
   const waitingBySlug = new Map()
@@ -127,14 +128,23 @@
     nodes.forEach(queueElement)
   }
 
+  function readLocalStorageMap() {
+    try {
+      return normalizeMap(JSON.parse(localStorage.getItem(LOCAL_STORAGE_MAP_KEY) || '{}'))
+    } catch {
+      return {}
+    }
+  }
+
   function readLocalMap() {
+    const storageFallback = readLocalStorageMap()
     return new Promise((resolve) => {
       let request
       let created = false
       try {
         request = indexedDB.open(LOCAL_DB_NAME)
       } catch {
-        resolve({})
+        resolve(storageFallback)
         return
       }
 
@@ -142,29 +152,29 @@
         created = true
         try { request.transaction?.abort() } catch {}
       }
-      request.onerror = () => resolve({})
+      request.onerror = () => resolve(storageFallback)
       request.onsuccess = () => {
         const db = request.result
         try {
           if (created || !db.objectStoreNames.contains(LOCAL_META_STORE)) {
             db.close()
-            resolve({})
+            resolve(storageFallback)
             return
           }
           const tx = db.transaction([LOCAL_META_STORE], 'readonly')
           const getRequest = tx.objectStore(LOCAL_META_STORE).get(LOCAL_MAP_KEY)
           getRequest.onsuccess = () => {
-            const value = normalizeMap(getRequest.result?.value)
+            const indexedDbMap = normalizeMap(getRequest.result?.value)
             db.close()
-            resolve(value)
+            resolve({ ...storageFallback, ...indexedDbMap })
           }
           getRequest.onerror = () => {
             db.close()
-            resolve({})
+            resolve(storageFallback)
           }
         } catch {
           db.close()
-          resolve({})
+          resolve(storageFallback)
         }
       }
     })
