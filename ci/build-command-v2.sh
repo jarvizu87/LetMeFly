@@ -103,9 +103,9 @@ if text.count(old) != 1:
 p.write_text(text.replace(old, new, 1))
 PY
 
-# Batch C's historical source is still integrity-checked above, but its old
-# program-page hunk assumed only six Crownforge weeks. Reproduce its approved UI
-# intent through a modular adapter that preserves all 14 weeks + Maintenance.
+# Batch C's historical source is integrity-checked above, but its old program
+# hunk assumed six weeks. Reproduce its UI intent without losing Weeks 7–14 or
+# the separate Crown Maintenance bridge.
 bash "$ROOT_DIR/ci/modular-command-v2-batch-c.sh" "$ROOT_DIR/.build-src/letmefly_app"
 
 python - <<'PY'
@@ -121,8 +121,12 @@ PY
 
 patch --dry-run -p0 < "$BATCH_C_TYPES_FILE"
 patch -p0 < "$BATCH_C_TYPES_FILE"
-patch --dry-run -p0 < "$BATCH_D_SEMANTICS_FILE"
-patch -p0 < "$BATCH_D_SEMANTICS_FILE"
+
+# Batch D's original semantics patch is checksum-verified above. Apply the same
+# approved Exercises/Coach intent with modular-program-aware wording instead of
+# letting its Weeks-1–6 context become program truth.
+bash "$ROOT_DIR/ci/modular-command-v2-batch-d.sh" "$ROOT_DIR/.build-src/letmefly_app"
+
 patch --dry-run -p0 < "$BATCH_E_PATCH_FILE"
 patch -p0 < "$BATCH_E_PATCH_FILE"
 cp "$CSS_FILE" src/command-v2.css
