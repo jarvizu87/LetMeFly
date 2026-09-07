@@ -23,8 +23,8 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Build and audit Command V2 + Monday hardening
-        run: bash ci/build-command-v2-hardening.sh
+      - name: Build and audit Command V2 + Cloudinary exercise art
+        run: bash ci/build-command-v2-cloudinary.sh
 
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
