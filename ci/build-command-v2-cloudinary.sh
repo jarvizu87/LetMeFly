@@ -15,7 +15,8 @@ bash ci/build-command-v2-hardening.sh
 # Preserve saved readiness values when the active workout re-renders or reloads.
 bash ci/apply-readiness-persistence-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 
-# Improve real-world phone logging ergonomics and replace the dead Front Squat demo.
+# Improve real-world phone logging ergonomics, exercise-video reliability,
+# automatic approved exercise art, and the locked Workout Flow v1 UI.
 bash ci/apply-mobile-workout-video-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 test -s "$CLOUDINARY_JS"
@@ -86,6 +87,8 @@ p.write_text(text)
 PY
 
 grep -Fq "/ui/exercise-art-cloudinary.js" index.html
+grep -Fq "/ui/exercise-art-auto.js" index.html
+grep -Fq "/ui/workout-flow-v1.js" index.html
 
 # Re-run all release boundaries against the exact private-override-enabled source that will ship.
 npm run audit:source
@@ -99,20 +102,28 @@ test -f dist/index.html
 test -f dist/service-worker.js
 test -f dist/ui/train-lifter.webp
 test -f dist/ui/exercise-art-cloudinary.js
+test -f dist/ui/exercise-art-auto.js
+test -f dist/ui/workout-flow-v1.js
 test -f dist/exercise-art-import.html
 grep -Fq "/ui/exercise-art-cloudinary.js" dist/index.html
+grep -Fq "/ui/exercise-art-auto.js" dist/index.html
+grep -Fq "/ui/workout-flow-v1.js" dist/index.html
 grep -Fq "exercise_thumbnail_overrides" dist/ui/exercise-art-cloudinary.js
 grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" dist/exercise-art-import.html
+grep -Fq "jp-${slug}-v2" dist/ui/exercise-art-auto.js
+grep -Fq "lmf-set-tabs" dist/ui/workout-flow-v1.js
+grep -Fq "lmf-compact-summary" dist/ui/workout-flow-v1.js
+grep -Fq "Between Rounds" dist/ui/workout-flow-v1.js
 ! grep -Fq "localStorage.setItem" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "__LMF_SUPABASE_" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
 
-# Verify the user-visible mobile/video/art changes in the minified production bundle
-# without depending on the minifier's exact CSS serialization.
+# Verify the user-visible mobile/video/art/workout-flow changes in the minified
+# production bundle without depending on the minifier's exact whitespace.
 python - <<'PY'
 from pathlib import Path
 
@@ -126,11 +137,18 @@ checks = {
     'neutral exercise-art fallback': 'var(--exercise-art,var(--v2-mountain))' in compact,
     'five-column readiness cells': 'grid-template-columns:repeat(5,minmax(0,1fr))' in compact,
     'readiness cell height': 'min-height:58px' in compact,
-    'mobile set top-row grid': 'set set check' in asset_text,
-    'mobile set input grid': 'reps load rpe' in asset_text,
+    'legacy mobile set top-row grid retained': 'set set check' in asset_text,
+    'legacy mobile set input grid retained': 'reps load rpe' in asset_text,
     'mobile target hidden': '.set-target-cell{display:none!important}' in compact,
     'mobile set equal input height': 'height:62px!important' in compact,
     'mobile set input text size': 'font-size:17px' in compact,
+    'Workout Flow single active set': '.set-row.lmf-set-active' in compact,
+    'Workout Flow square image': 'aspect-ratio:1/1' in compact,
+    'Workout Flow set tabs': '.lmf-set-tabs' in compact,
+    'Workout Flow 10+ set horizontal scroll': 'scroll-snap-type:xproximity' in compact,
+    'Workout Flow compact previews': '.lmf-compact-summary' in compact,
+    'Workout Flow connected rail': '.lmf-flow-node' in compact,
+    'Workout Flow rest card': '.lmf-round-rest' in compact,
     'working Front Squat demo': 'youtube.com/watch?v=-fNfycATWUo' in asset_text,
     'dead Front Squat Vimeo removed': 'vimeo.com/152122947' not in asset_text,
 }
@@ -145,4 +163,4 @@ PY
 # Minification is allowed to rename function identifiers in dist.
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly private exercise-art + readiness + mobile workout/video pipeline: PASS"
+echo "LetMeFly private exercise-art + readiness + mobile workout/video + Workout Flow v1 pipeline: PASS"
