@@ -45,6 +45,10 @@ test -f .build-src/letmefly_app/package.json
   sha256sum -c MANIFEST.sha256
 )
 
+# Apply versioned program data before presentation/UI overlays. This keeps each
+# program independently reviewable while preserving the immutable source base.
+bash ci/apply-crownforge-v2-1.sh "$ROOT_DIR/.build-src/letmefly_app"
+
 # Reconstruct Command V2 presentation from transport-safe text chunks.
 cat overlays/ui-command-v2/command-v2.patch.* > "$PATCH_FILE"
 cat overlays/ui-command-v2/command-v2.css.* > "$CSS_FILE"
