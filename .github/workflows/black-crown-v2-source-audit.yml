@@ -1,0 +1,61 @@
+name: Black Crown v2 Source Audit
+
+on:
+  push:
+    branches:
+      - black-crown-v2-0-modular-import
+    paths:
+      - 'overlays/program-data/black-crown-v2-0/**'
+      - 'ci/apply-black-crown-v2-0.sh'
+      - 'ci/audit-black-crown-source.mjs'
+      - '.github/workflows/black-crown-v2-source-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reconstruct immutable source
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE='source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip'
+          echo '514c538a9442d5c12c534a914f79c7f1988f2a416077b72bc5e9fafbd4ef89d4  '"$ARCHIVE" | sha256sum -c -
+          rm -rf .build-src
+          mkdir -p .build-src
+          unzip -q "$ARCHIVE" -d .build-src
+          cd .build-src/letmefly_app
+          sha256sum -c MANIFEST.sha256
+
+      - name: Apply protected Crownforge package
+        shell: bash
+        run: bash ci/apply-crownforge-v2-1.sh "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Apply Black Crown v2 source package
+        shell: bash
+        run: bash ci/apply-black-crown-v2-0.sh "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Validate source and regression boundaries
+        shell: bash
+        working-directory: .build-src/letmefly_app
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm run audit:source
+          npm run audit:crownforge
+          npm run typecheck
+          npm run build
+
+      - name: Confirm Black Crown staging footprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find .build-src/letmefly_app/src/programs/black-crown/source-weeks -name 'week-*.ts' | wc -l)" = '54'
+          test -f .build-src/letmefly_app/src/programs/black-crown/source-weeks/index.ts
+          echo 'Black Crown v2 source staging workflow: PASS'
