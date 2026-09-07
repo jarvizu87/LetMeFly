@@ -43,11 +43,14 @@ const testStatus = new Map([
   [54, 'VERIFIED EXIT TEST'],
 ])
 const ohpRemovedWeeks = new Set(testStatus.keys())
+const weekBuffers = []
 
 for (let week = 1; week <= 54; week += 1) {
   const file = path.join(sourceDir, `week-${String(week).padStart(2, '0')}.ts`)
   if (!fs.existsSync(file)) fail(`missing week ${week}`)
-  const text = fs.readFileSync(file, 'utf8')
+  const buffer = fs.readFileSync(file)
+  const text = buffer.toString('utf8')
+  weekBuffers.push(buffer)
 
   const weekMatch = text.match(/\n\s*week:\s*(\d+),/)
   const blockMatch = text.match(/\n\s*block:\s*(\d+),/)
@@ -92,7 +95,7 @@ if (importCount < 108) fail('unified index does not import and list all 54 weeks
 
 const digest = crypto
   .createHash('sha256')
-  .update(Array.from({ length: 54 }, (_, i) => fs.readFileSync(path.join(sourceDir, `week-${String(i + 1).padStart(2, '0')}.ts`)))
+  .update(Buffer.concat(weekBuffers))
   .digest('hex')
 
 console.log(`Black Crown source audit: PASS — 54 weeks / 270 sessions / 42 Strict OHP exposures / digest ${digest}`)
