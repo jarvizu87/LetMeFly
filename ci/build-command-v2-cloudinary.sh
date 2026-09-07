@@ -6,6 +6,7 @@ cd "$ROOT_DIR"
 
 CLOUDINARY_JS="overlays/ui-command-v2/batch-n/exercise-art-cloudinary.js"
 CLOUDINARY_CSS="overlays/ui-command-v2/batch-n/exercise-art-cloudinary.css"
+READINESS_COMFORT_CSS="overlays/ui-command-v2/batch-o/readiness-mobile-comfort.css"
 
 # First reconstruct and validate the exact hardened Command V2 production source.
 bash ci/build-command-v2-hardening.sh
@@ -15,6 +16,7 @@ bash ci/apply-readiness-persistence-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 test -s "$CLOUDINARY_JS"
 test -s "$CLOUDINARY_CSS"
+test -s "$READINESS_COMFORT_CSS"
 node --check "$CLOUDINARY_JS"
 
 grep -Fq "exercise_thumbnail_overrides" "$CLOUDINARY_JS"
@@ -28,14 +30,18 @@ grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" "$CLOUDINARY_JS"
 grep -Fq "var(--exercise-art,var(--v2-lifter))" "$CLOUDINARY_CSS"
 grep -Fq "background-size:cover!important" "$CLOUDINARY_CSS"
 grep -Fq "filter:none!important" "$CLOUDINARY_CSS"
+grep -Fq "grid-template-columns: repeat(5, minmax(0, 1fr))" "$READINESS_COMFORT_CSS"
+grep -Fq "min-height: 58px" "$READINESS_COMFORT_CSS"
+grep -Fq "font-size: 20px" "$READINESS_COMFORT_CSS"
 
 : "${VITE_SUPABASE_URL:?VITE_SUPABASE_URL is required for the private exercise-art resolver}"
 : "${VITE_SUPABASE_PUBLISHABLE_KEY:?VITE_SUPABASE_PUBLISHABLE_KEY is required for the private exercise-art resolver}"
 
 cd .build-src/letmefly_app
 
-# Append the final artwork presentation override after all existing Command V2 layers.
+# Append final presentation overrides after all existing Command V2 layers.
 cat "$ROOT_DIR/$CLOUDINARY_CSS" >> src/command-v2.css
+cat "$ROOT_DIR/$READINESS_COMFORT_CSS" >> src/command-v2.css
 
 # Render the runtime resolver with browser-safe Supabase public configuration.
 mkdir -p public/ui
@@ -90,8 +96,10 @@ grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
 grep -Rq "var(--exercise-art,var(--v2-lifter))" dist/assets
+grep -Rq "grid-template-columns:repeat(5,minmax(0,1fr))" dist/assets
+grep -Rq "min-height:58px" dist/assets
 # The source-level hotfix script already verifies the hydration function and bind point.
 # Minification is allowed to rename function identifiers in dist, so do not gate on its source name.
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly private exercise-art override + no-stretch Cloudinary pipeline: PASS"
+echo "LetMeFly private exercise-art + readiness comfort pipeline: PASS"
