@@ -12,28 +12,38 @@ fi
 
 test -s "$CSS_FILE"
 
-# Replace the dead legacy Front Squat Vimeo demo with a working reputable
-# Juggernaut Training Systems instructional video. This changes exercise
-# intelligence only; governed Crownforge prescriptions remain untouched.
+# Replace the dead legacy Front Squat Vimeo demo wherever the current modular
+# exercise library owns it. This changes exercise intelligence only; governed
+# Crownforge prescriptions remain untouched.
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
 
-p = Path(os.environ['TARGET_DIR']) / 'src/main.ts'
-text = p.read_text()
+root = Path(os.environ['TARGET_DIR']) / 'src'
 old = 'https://vimeo.com/152122947'
 new = 'https://www.youtube.com/watch?v=-fNfycATWUo'
-count = text.count(old)
-if count != 1:
-    raise SystemExit(f'expected exactly one legacy Front Squat Vimeo URL, found {count}')
-text = text.replace(old, new, 1)
-p.write_text(text)
+
+matches = []
+for p in root.rglob('*.ts'):
+    text = p.read_text()
+    count = text.count(old)
+    if count:
+        matches.append((p, count, text))
+
+total = sum(count for _, count, _ in matches)
+if total != 1:
+    locations = ', '.join(f'{p.relative_to(root)}:{count}' for p, count, _ in matches) or 'none'
+    raise SystemExit(f'expected exactly one legacy Front Squat Vimeo URL across src, found {total} ({locations})')
+
+p, _, text = matches[0]
+p.write_text(text.replace(old, new, 1))
+print(f'Front Squat demo updated in {p.relative_to(root)}')
 PY
 
 cat "$CSS_FILE" >> "$TARGET_DIR/src/command-v2.css"
 
-grep -Fq 'https://www.youtube.com/watch?v=-fNfycATWUo' "$TARGET_DIR/src/main.ts"
-! grep -Fq 'https://vimeo.com/152122947' "$TARGET_DIR/src/main.ts"
+grep -Rq 'https://www.youtube.com/watch?v=-fNfycATWUo' "$TARGET_DIR/src"
+! grep -Rq 'https://vimeo.com/152122947' "$TARGET_DIR/src"
 grep -Fq 'grid-template-areas:' "$TARGET_DIR/src/command-v2.css"
 grep -Fq '"set target target target target check"' "$TARGET_DIR/src/command-v2.css"
 grep -Fq '"reps reps load load rpe rpe"' "$TARGET_DIR/src/command-v2.css"
