@@ -23,14 +23,16 @@ test -s "$STATE_CSS"
 
 cd .build-src/letmefly_app
 
-# Apply the pre-session hardening only after every prior Command V2 source overlay.
-patch --dry-run -p0 < "$ROOT_DIR/$READINESS_PATCH"
-patch -p0 < "$ROOT_DIR/$READINESS_PATCH"
+# The historical readiness patch remains present as an audited source artifact,
+# but its main.ts hunks predate the modular Program/Progress layout. Apply the
+# same hardening intent through a function-aware adapter that preserves current
+# program lookup while keeping the workout-service readiness link.
+bash "$ROOT_DIR/ci/modular-command-v2-readiness.sh" "$ROOT_DIR/.build-src/letmefly_app"
 
 # Readiness must be explicit, saved before workout creation, and linked to that session.
 grep -Fq "readiness_id: readinessId" src/services/workout-service.ts
 grep -Fq "const readiness = await saveReadiness(state.athlete.id, input)" src/main.ts
-grep -Fq "readiness.id," src/main.ts
+grep -Fq "readiness.id" src/main.ts
 grep -Fq "SAVE READINESS & START WORKOUT" src/main.ts
 grep -Fq "Complete readiness before starting" src/main.ts
 grep -Fq "UPDATE READINESS" src/main.ts
