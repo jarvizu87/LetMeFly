@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_DIR="${1:-}"
 CSS_FILE="$ROOT_DIR/overlays/ui-command-v2/batch-p/mobile-workout-video-fix.css"
 AUTO_ART_JS="$ROOT_DIR/overlays/ui-command-v2/batch-r/exercise-art-auto.js"
+FLOW_JS="$ROOT_DIR/overlays/ui-command-v2/batch-s/workout-flow-v1.js"
+FLOW_CSS="$ROOT_DIR/overlays/ui-command-v2/batch-s/workout-flow-v1.css"
 
 if [[ -z "$TARGET_DIR" || ! -f "$TARGET_DIR/src/main.ts" || ! -f "$TARGET_DIR/src/command-v2.css" ]]; then
   echo "LetMeFly source tree is missing: $TARGET_DIR" >&2
@@ -13,7 +15,10 @@ fi
 
 test -s "$CSS_FILE"
 test -s "$AUTO_ART_JS"
+test -s "$FLOW_JS"
+test -s "$FLOW_CSS"
 node --check "$AUTO_ART_JS"
+node --check "$FLOW_JS"
 
 # Replace the dead legacy Front Squat Vimeo demo wherever the current modular
 # exercise library owns it. This changes exercise intelligence only; governed
@@ -48,23 +53,32 @@ PY
 # direct instructional source has been manually approved.
 bash "$ROOT_DIR/ci/apply-exercise-video-audit.sh" "$TARGET_DIR"
 
+# Keep the current mobile reliability overrides, then append the locked Workout
+# Flow v1 presentation after them so the newer single-active-set rules win.
 cat "$CSS_FILE" >> "$TARGET_DIR/src/command-v2.css"
+cat "$FLOW_CSS" >> "$TARGET_DIR/src/command-v2.css"
 
 # Make the approved Style 2 Cloudinary thumbnails render automatically on the
 # current SSO-protected release without requiring a phone-side JSON import.
+# Workout Flow v1 runs after the art resolver and only changes presentation.
 mkdir -p "$TARGET_DIR/public/ui"
 cp "$AUTO_ART_JS" "$TARGET_DIR/public/ui/exercise-art-auto.js"
+cp "$FLOW_JS" "$TARGET_DIR/public/ui/workout-flow-v1.js"
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
 
 p = Path(os.environ['TARGET_DIR']) / 'index.html'
 text = p.read_text()
-marker = '<script defer src="/ui/exercise-art-auto.js"></script>'
-if marker not in text:
-    if '</body>' not in text:
-        raise SystemExit('index.html is missing </body>')
-    text = text.replace('</body>', f'  {marker}\n</body>', 1)
+markers = [
+    '<script defer src="/ui/exercise-art-auto.js"></script>',
+    '<script defer src="/ui/workout-flow-v1.js"></script>',
+]
+if '</body>' not in text:
+    raise SystemExit('index.html is missing </body>')
+for marker in markers:
+    if marker not in text:
+        text = text.replace('</body>', f'  {marker}\n</body>', 1)
 p.write_text(text)
 PY
 
@@ -77,10 +91,21 @@ grep -Fq '.set-target-cell{display:none!important}' "$TARGET_DIR/src/command-v2.
 grep -Fq 'height:62px!important' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'font-size:17px!important' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'font-size:11px!important' "$TARGET_DIR/src/command-v2.css"
+
 test -s "$TARGET_DIR/public/ui/exercise-art-auto.js"
 grep -Fq '/ui/exercise-art-auto.js' "$TARGET_DIR/index.html"
 grep -Fq 'jp-${slug}-v2' "$TARGET_DIR/public/ui/exercise-art-auto.js"
 grep -Fq "'glute-bridge-iso': 'jp-glute-bridge-isometric-hold-v2'" "$TARGET_DIR/public/ui/exercise-art-auto.js"
 grep -Fq "'rear-delt-fly': 'jp-rear-deltoid-fly-v2'" "$TARGET_DIR/public/ui/exercise-art-auto.js"
 
-echo "LetMeFly mobile workout + exercise video + automatic exercise art reliability pass: PASS"
+test -s "$TARGET_DIR/public/ui/workout-flow-v1.js"
+grep -Fq '/ui/workout-flow-v1.js' "$TARGET_DIR/index.html"
+grep -Fq 'lmf-set-tabs' "$TARGET_DIR/public/ui/workout-flow-v1.js"
+grep -Fq 'lmf-compact-summary' "$TARGET_DIR/public/ui/workout-flow-v1.js"
+grep -Fq 'Between Rounds' "$TARGET_DIR/public/ui/workout-flow-v1.js"
+grep -Fq 'scroll-snap-type:x proximity' "$TARGET_DIR/src/command-v2.css"
+grep -Fq 'background-size:contain' "$TARGET_DIR/src/command-v2.css"
+grep -Fq 'lmf-flow-node' "$TARGET_DIR/src/command-v2.css"
+grep -Fq 'lmf-set-tab' "$TARGET_DIR/src/command-v2.css"
+
+echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 reliability pass: PASS"
