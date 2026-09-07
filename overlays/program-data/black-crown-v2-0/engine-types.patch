@@ -1,0 +1,40 @@
+--- a/src/program-engine/types.ts
++++ b/src/program-engine/types.ts
+@@ -14,6 +14,10 @@ export interface ProgramSet {
+   /** Stable source reference for dynamic post-test/test-sheet loads. */
+   loadReference?: string
+   rounding?: 'nearest-5' | 'up-5' | 'down-5'
++  rpe?: number | string
++  rir?: number | string
++  tempo?: string
++  sourceText?: string
+ }
+ 
+ export interface ProgramExercise {
+@@ -24,6 +28,7 @@ export interface ProgramExercise {
+   sets: ProgramSet[]
+   notes?: string
+   coaching?: string
++  rest?: string
+   videoQuery?: string
+ }
+@@ -36,7 +41,7 @@ export interface WorkoutSection {
+ 
+ export interface ProgramDay {
+   day: number
+-  date: string
++  date?: string
+   title: string
+   role: string
+   readinessRule: string
+@@ -47,8 +52,8 @@ export interface ProgramDay {
+ 
+ export interface ProgramWeek {
+   week: number
+-  start: string
+-  end: string
++  start?: string
++  end?: string
+   intent: string
+   days: ProgramDay[]
+ }
