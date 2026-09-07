@@ -1,0 +1,33 @@
+name: Black Crown Source Export
+
+on:
+  push:
+    branches: [black-crown-v1-7-7-modular-import]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct governed modular source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .black-crown-src
+          mkdir -p .black-crown-src
+          unzip -q source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip -d .black-crown-src
+          test -f .black-crown-src/letmefly_app/package.json
+          bash ci/apply-crownforge-v2-1.sh "$PWD/.black-crown-src/letmefly_app"
+          test -f .black-crown-src/letmefly_app/src/programs/black-crown/index.ts
+          test -f .black-crown-src/letmefly_app/src/programs/crownforge/index.ts
+      - name: Upload governed modular source
+        uses: actions/upload-artifact@v4
+        with:
+          name: black-crown-modular-source
+          path: .black-crown-src/letmefly_app
+          if-no-files-found: error
+          retention-days: 7
