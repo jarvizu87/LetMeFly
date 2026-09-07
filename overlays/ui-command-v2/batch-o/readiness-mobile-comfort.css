@@ -1,0 +1,76 @@
+/* LetMeFly mobile readiness comfort pass
+   Keep the four readiness questions easy to scan and easy to tap on Galaxy-sized screens. */
+@media (max-width: 720px) {
+  .readiness-panel .readiness-stack {
+    gap: 18px !important;
+  }
+
+  .readiness-panel .readiness-field {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .readiness-panel .readiness-label {
+    display: flex !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin: 0 0 9px !important;
+  }
+
+  .readiness-panel .readiness-label strong {
+    font-size: 17px !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .readiness-panel .readiness-label span {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+  }
+
+  .readiness-panel .readiness-options {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    width: 100% !important;
+  }
+
+  .readiness-panel .readiness-options label {
+    display: block !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .readiness-panel .readiness-options label > span {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 58px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    border-radius: 10px !important;
+  }
+
+  .readiness-panel .readiness-options input:checked + span {
+    font-size: 21px !important;
+  }
+
+  .readiness-panel .field > label {
+    font-size: 14px !important;
+  }
+
+  .readiness-panel #readiness-notes {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+    min-height: 92px !important;
+  }
+}
