@@ -90,10 +90,35 @@ cd .build-src/letmefly_app
 patch --dry-run -p0 < "$PATCH_FILE"
 patch -p0 < "$PATCH_FILE"
 
+# Batch C should change the Training Maxes privacy badge, not the Profile badge
+# that belongs to Batch E. Protect that later-screen marker while Batch C runs.
+python - <<'PY'
+from pathlib import Path
+p = Path('src/main.ts')
+text = p.read_text()
+old = '<div class="page-kicker">Identity</div><h2>Athlete Profile</h2></div><span class="badge mandatory">Private</span>'
+new = '<div class="page-kicker">Identity</div><h2>Athlete Profile</h2></div><span class="badge mandatory">__LMF_PROFILE_PRIVATE__</span>'
+if text.count(old) != 1:
+    raise SystemExit(f'Profile privacy sentinel expected one source block, found {text.count(old)}')
+p.write_text(text.replace(old, new, 1))
+PY
+
 # Batch C's historical source is still integrity-checked above, but its old
 # program-page hunk assumed only six Crownforge weeks. Reproduce its approved UI
 # intent through a modular adapter that preserves all 14 weeks + Maintenance.
 bash "$ROOT_DIR/ci/modular-command-v2-batch-c.sh" "$ROOT_DIR/.build-src/letmefly_app"
+
+python - <<'PY'
+from pathlib import Path
+p = Path('src/main.ts')
+text = p.read_text()
+old = '<span class="badge mandatory">__LMF_PROFILE_PRIVATE__</span>'
+new = '<span class="badge mandatory">Private</span>'
+if text.count(old) != 1:
+    raise SystemExit(f'Profile privacy sentinel restore expected one marker, found {text.count(old)}')
+p.write_text(text.replace(old, new, 1))
+PY
+
 patch --dry-run -p0 < "$BATCH_C_TYPES_FILE"
 patch -p0 < "$BATCH_C_TYPES_FILE"
 patch --dry-run -p0 < "$BATCH_D_SEMANTICS_FILE"
