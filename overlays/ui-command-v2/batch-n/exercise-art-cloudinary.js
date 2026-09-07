@@ -7,6 +7,7 @@
   // c_lfill preserves aspect ratio and never upscales smaller source images.
   const TRANSFORM = 'c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best'
   const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${TRANSFORM}/`
+  const MIN_RENDER_DIMENSION = 640
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
   const statusBySlug = new Map()
   const waitingBySlug = new Map()
@@ -27,6 +28,11 @@
     const probeImage = new Image()
     probeImage.decoding = 'async'
     probeImage.onload = () => {
+      if (probeImage.naturalWidth < MIN_RENDER_DIMENSION || probeImage.naturalHeight < MIN_RENDER_DIMENSION) {
+        waitingBySlug.delete(slug)
+        onMissing()
+        return
+      }
       statusBySlug.set(slug, { state: 'ready', url, source })
       waitingBySlug.delete(slug)
       activate(slug, url, source)
