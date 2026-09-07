@@ -12,8 +12,8 @@
     h1{font-size:28px;line-height:1.05;margin:0 0 12px}p{color:#c7cbd4;line-height:1.55;font-size:16px}
     .card{margin-top:20px;padding:18px;border:1px solid #292e3a;border-radius:18px;background:#121620;box-shadow:0 16px 40px #0006}
     input[type=file],textarea{width:100%;padding:14px;border:1px dashed #474d5c;border-radius:14px;background:#0c0f16;color:#f5f7fb;font-size:16px}
-    textarea{min-height:120px;resize:vertical;border-style:solid;margin-top:14px}
-    button,a.button{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:14px;border:0;border-radius:14px;background:#6d45e8;color:white;font-weight:850;font-size:16px;text-decoration:none;cursor:pointer}
+    textarea{min-height:150px;resize:vertical;border-style:solid;margin-top:14px}
+    button,a.button{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;margin-top:14px;border:0;border-radius:14px;background:#6d45e8;color:white;font-weight:850;font-size:17px;text-decoration:none;cursor:pointer}
     button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#202633!important}.status{margin-top:14px;padding:12px 14px;border-radius:12px;background:#0b0e14;color:#c7cbd4;min-height:48px;white-space:pre-wrap}.ok{color:#9ce8b8}.error{color:#ff9c9c}
     .privacy,.hint{font-size:13px;color:#9ba2af;margin-top:12px}.privacy strong,.hint strong{color:#fff}.divider{display:flex;align-items:center;gap:10px;margin:18px 0 2px;color:#747b89;font-size:12px;font-weight:800;letter-spacing:.08em}.divider:before,.divider:after{content:"";height:1px;background:#292e3a;flex:1}
   </style>
@@ -28,9 +28,8 @@
     <p class="hint"><strong>Android:</strong> choose the file from Files/Downloads. Both .json and .txt copies are accepted.</p>
     <div class="divider">OR PASTE JSON</div>
     <textarea id="paste" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste the private exercise-art JSON here if Android will not select the downloaded file."></textarea>
-    <button id="readPaste" class="secondary" type="button">Use Pasted JSON</button>
-    <button id="import" type="button" disabled>Import Private Art Map</button>
-    <div id="status" class="status">Choose a LetMeFly private exercise-art JSON/TXT file, or paste the JSON.</div>
+    <button id="import" type="button">IMPORT ART MAP NOW</button>
+    <div id="status" class="status">Choose the file or paste the JSON, then tap IMPORT ART MAP NOW.</div>
     <a class="button secondary" href="/">Return to LetMeFly</a>
     <p class="privacy"><strong>Privacy:</strong> the selected mapping is stored in LetMeFly's local IndexedDB on this device. The importer does not upload the JSON file or pasted text.</p>
   </section>
@@ -44,7 +43,6 @@
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
   const fileInput = document.getElementById('file')
   const pasteInput = document.getElementById('paste')
-  const readPasteButton = document.getElementById('readPaste')
   const importButton = document.getElementById('import')
   const status = document.getElementById('status')
   let parsed = null
@@ -77,14 +75,15 @@
   }
 
   function parseText(text) {
-    const payload = JSON.parse(text)
-    return validate(payload)
+    return validate(JSON.parse(text))
   }
 
-  function markReady(overrides) {
-    parsed = overrides
-    importButton.disabled = false
-    setStatus(`Ready to import ${Object.keys(overrides).length} approved exercise-image mappings.`, 'ok')
+  async function sourceText() {
+    const pasted = pasteInput.value.trim()
+    if (pasted) return pasted
+    const file = fileInput.files && fileInput.files[0]
+    if (file) return file.text()
+    throw new Error('Choose the exercise-art file or paste the JSON first.')
   }
 
   function saveMap(overrides) {
@@ -97,14 +96,14 @@
         try { request.transaction && request.transaction.abort() } catch {}
       }
       request.onerror = () => reject(created
-        ? new Error('Open LetMeFly once before importing the private art map.')
+        ? new Error('Open LetMeFly in this same browser/app once, then return here and tap IMPORT ART MAP NOW again.')
         : (request.error || new Error('Could not open LetMeFly private storage.')))
       request.onsuccess = () => {
         const db = request.result
         try {
           if (!db.objectStoreNames.contains(STORE_NAME)) {
             db.close()
-            reject(new Error('LetMeFly private storage is not initialized. Open the app once, then try again.'))
+            reject(new Error('This browser does not have LetMeFly private storage yet. Open LetMeFly here once, then return and import again.'))
             return
           }
           const tx = db.transaction([STORE_NAME], 'readwrite')
@@ -126,37 +125,44 @@
 
   fileInput.addEventListener('change', async () => {
     parsed = null
-    importButton.disabled = true
     const file = fileInput.files && fileInput.files[0]
-    if (!file) return setStatus('Choose a LetMeFly private exercise-art JSON/TXT file, or paste the JSON.')
+    if (!file) return
     try {
-      markReady(parseText(await file.text()))
+      parsed = parseText(await file.text())
+      setStatus(`File ready: ${Object.keys(parsed).length} approved exercise-image mappings. Tap IMPORT ART MAP NOW.`, 'ok')
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Could not read that file.', 'error')
     }
   })
 
-  readPasteButton.addEventListener('click', () => {
+  pasteInput.addEventListener('input', () => {
     parsed = null
-    importButton.disabled = true
+    const text = pasteInput.value.trim()
+    if (!text) {
+      setStatus('Choose the file or paste the JSON, then tap IMPORT ART MAP NOW.')
+      return
+    }
     try {
-      const text = pasteInput.value.trim()
-      if (!text) throw new Error('Paste the private exercise-art JSON first.')
-      markReady(parseText(text))
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Could not read the pasted JSON.', 'error')
+      parsed = parseText(text)
+      setStatus(`Pasted map ready: ${Object.keys(parsed).length} approved exercise-image mappings. Tap IMPORT ART MAP NOW.`, 'ok')
+    } catch {
+      setStatus('JSON pasted. Tap IMPORT ART MAP NOW when the full map is present.')
     }
   })
 
   importButton.addEventListener('click', async () => {
-    if (!parsed) return
     importButton.disabled = true
+    setStatus('Importing exercise art…')
     try {
+      if (!parsed) parsed = parseText(await sourceText())
       await saveMap(parsed)
-      setStatus(`Imported ${Object.keys(parsed).length} exercise-image mappings. Return to LetMeFly and refresh once.`, 'ok')
+      const count = Object.keys(parsed).length
+      setStatus(`SUCCESS — imported ${count} exercise-image mappings. Tap Return to LetMeFly.`, 'ok')
+      importButton.textContent = 'IMPORTED ✓'
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'Exercise-art import failed.', 'error')
       importButton.disabled = false
+      importButton.textContent = 'TRY IMPORT AGAIN'
     }
   })
 })()
