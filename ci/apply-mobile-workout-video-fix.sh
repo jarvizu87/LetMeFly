@@ -92,22 +92,26 @@ grep -Fq 'background-size:contain' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-flow-node' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-set-tab' "$TARGET_DIR/src/command-v2.css"
 
-# Keep installed PWAs current, always expose an install/open-in-Chrome path,
+# Keep installed PWAs current, expose an install path even inside in-app browsers,
 # and replace legacy crown branding with the official LetMeFly logo.
 bash "$ROOT_DIR/ci/apply-brand-pwa-fix.sh" "$TARGET_DIR"
 
-test -s "$TARGET_DIR/public/app-icon-v3.svg"
+test -s "$TARGET_DIR/public/app-icon-v4.svg"
 test -s "$TARGET_DIR/public/ui/pwa-install.js"
 test -s "$TARGET_DIR/public/ui/pwa-update.js"
-grep -Fq '/app-icon-v3.svg?v=3' "$TARGET_DIR/public/manifest.webmanifest"
-grep -Fq '/manifest.webmanifest?v=brand-v3' "$TARGET_DIR/index.html"
+grep -Fq '/app-icon-v4.svg?v=4' "$TARGET_DIR/public/manifest.webmanifest"
+grep -Fq '"id": "/letmefly-pwa-v1"' "$TARGET_DIR/public/manifest.webmanifest"
+grep -Fq 'source=pwa&app=letmefly-v1' "$TARGET_DIR/public/manifest.webmanifest"
+grep -Fq '/manifest.webmanifest?v=brand-v4' "$TARGET_DIR/index.html"
 grep -Fq '/ui/pwa-install.js' "$TARGET_DIR/index.html"
 grep -Fq '/ui/pwa-update.js' "$TARGET_DIR/index.html"
 grep -Fq 'lmf-official-brand-mark' "$TARGET_DIR/src/main.ts"
 grep -Fq 'lmf-official-more-logo' "$TARGET_DIR/src/main.ts"
 grep -Fq 'Open in Chrome' "$TARGET_DIR/public/ui/pwa-install.js"
-grep -Fq 'letmefly-shell-v5-4-command-v2-5-brand-v3' "$TARGET_DIR/public/service-worker.js"
+grep -Fq "params.get('app') === 'letmefly-v1'" "$TARGET_DIR/public/ui/pwa-install.js"
+grep -Fq 'letmefly-shell-v5-4-command-v2-6-brand-v4' "$TARGET_DIR/public/service-worker.js"
 test ! -e "$TARGET_DIR/public/icon-192.png"
 test ! -e "$TARGET_DIR/public/icon-512.png"
+test ! -e "$TARGET_DIR/public/app-icon-v3.svg"
 
 echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + official branding/install/update reliability pass: PASS"
