@@ -112,7 +112,7 @@ grep -Fq "exercise_thumbnail_overrides" dist/ui/exercise-art-cloudinary.js
 grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" dist/exercise-art-import.html
-grep -Fq "jp-${slug}-v2" dist/ui/exercise-art-auto.js
+grep -Fq 'jp-${slug}-v2' dist/ui/exercise-art-auto.js
 grep -Fq "lmf-set-tabs" dist/ui/workout-flow-v1.js
 grep -Fq "lmf-compact-summary" dist/ui/workout-flow-v1.js
 grep -Fq "Between Rounds" dist/ui/workout-flow-v1.js
