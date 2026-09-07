@@ -8,11 +8,17 @@
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
   const SUPABASE_URL = '__LMF_SUPABASE_URL__'
   const SUPABASE_PUBLISHABLE_KEY = '__LMF_SUPABASE_PUBLISHABLE_KEY__'
+  const LOCAL_DB_NAME = 'letmefly-private'
+  const LOCAL_META_STORE = 'meta'
+  const LOCAL_MAP_KEY = 'privateExerciseArtMap'
 
   const statusBySlug = new Map()
   const waitingBySlug = new Map()
+  let localOverrideMap = {}
+  let cloudOverrideMap = {}
   let overrideMap = {}
   let cloudRefreshStarted = false
+  let localRefreshStarted = false
 
   function candidates(slug) {
     return document.querySelectorAll(`[data-exercise-art="${slug}"]`)
@@ -25,6 +31,21 @@
     const status = typeof value.status === 'string' ? value.status : 'approved'
     if (!publicId || status !== 'approved') return null
     return { publicId, format }
+  }
+
+  function normalizeMap(value) {
+    const clean = {}
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return clean
+    Object.entries(value).forEach(([slug, asset]) => {
+      if (!SLUG_PATTERN.test(slug)) return
+      const normalized = normalizeOverride(asset)
+      if (normalized) clean[slug] = normalized
+    })
+    return clean
+  }
+
+  function mergeOverrideMaps() {
+    overrideMap = { ...localOverrideMap, ...cloudOverrideMap }
   }
 
   function activate(slug, url, source) {
@@ -87,7 +108,8 @@
     if (navigator.onLine === false) return
 
     statusBySlug.set(slug, { state: 'pending' })
-    probeOverride(slug, asset, 'private-override')
+    const source = cloudOverrideMap[slug] ? 'private-cloud-override' : 'private-local-override'
+    probeOverride(slug, asset, source)
   }
 
   function queueElement(element) {
@@ -103,6 +125,66 @@
       ? [root, ...root.querySelectorAll('[data-exercise-art]')]
       : [...root.querySelectorAll('[data-exercise-art]')]
     nodes.forEach(queueElement)
+  }
+
+  function readLocalMap() {
+    return new Promise((resolve) => {
+      let request
+      let created = false
+      try {
+        request = indexedDB.open(LOCAL_DB_NAME)
+      } catch {
+        resolve({})
+        return
+      }
+
+      request.onupgradeneeded = () => {
+        created = true
+        try { request.transaction?.abort() } catch {}
+      }
+      request.onerror = () => resolve({})
+      request.onsuccess = () => {
+        const db = request.result
+        try {
+          if (created || !db.objectStoreNames.contains(LOCAL_META_STORE)) {
+            db.close()
+            resolve({})
+            return
+          }
+          const tx = db.transaction([LOCAL_META_STORE], 'readonly')
+          const getRequest = tx.objectStore(LOCAL_META_STORE).get(LOCAL_MAP_KEY)
+          getRequest.onsuccess = () => {
+            const value = normalizeMap(getRequest.result?.value)
+            db.close()
+            resolve(value)
+          }
+          getRequest.onerror = () => {
+            db.close()
+            resolve({})
+          }
+        } catch {
+          db.close()
+          resolve({})
+        }
+      }
+    })
+  }
+
+  async function refreshFromLocal() {
+    if (localRefreshStarted) return
+    localRefreshStarted = true
+    try {
+      localOverrideMap = await readLocalMap()
+      mergeOverrideMaps()
+      statusBySlug.clear()
+      waitingBySlug.clear()
+      scan(document)
+      window.dispatchEvent(new CustomEvent('lmf:exercise-art-local-loaded', {
+        detail: { count: Object.keys(localOverrideMap).length }
+      }))
+    } finally {
+      localRefreshStarted = false
+    }
   }
 
   function findAccessToken() {
@@ -161,7 +243,8 @@
         }
       })
 
-      overrideMap = nextMap
+      cloudOverrideMap = nextMap
+      mergeOverrideMaps()
       statusBySlug.clear()
       waitingBySlug.clear()
       scan(document)
@@ -185,6 +268,7 @@
 
   function start() {
     scan(document)
+    refreshFromLocal()
     refreshFromCloud()
 
     const mutationObserver = new MutationObserver((mutations) => {
@@ -198,12 +282,14 @@
 
     window.addEventListener('online', () => {
       statusBySlug.clear()
+      refreshFromLocal()
       refreshFromCloud()
       scan(document)
     })
 
     window.addEventListener('lmf:exercise-art-overrides-updated', () => {
       statusBySlug.clear()
+      refreshFromLocal()
       refreshFromCloud()
     })
   }
