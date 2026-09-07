@@ -6,13 +6,12 @@
   const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${TRANSFORM}/`
   const MIN_RENDER_DIMENSION = 640
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-  const LOCAL_OVERRIDE_KEY = 'lmf.exerciseArtOverrides.v1'
   const SUPABASE_URL = '__LMF_SUPABASE_URL__'
   const SUPABASE_PUBLISHABLE_KEY = '__LMF_SUPABASE_PUBLISHABLE_KEY__'
 
   const statusBySlug = new Map()
   const waitingBySlug = new Map()
-  let overrideMap = readLocalOverrides()
+  let overrideMap = {}
   let cloudRefreshStarted = false
 
   function candidates(slug) {
@@ -26,24 +25,6 @@
     const status = typeof value.status === 'string' ? value.status : 'approved'
     if (!publicId || status !== 'approved') return null
     return { publicId, format }
-  }
-
-  function readLocalOverrides() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(LOCAL_OVERRIDE_KEY) || '{}')
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
-      return parsed
-    } catch {
-      return {}
-    }
-  }
-
-  function writeLocalOverrides(nextMap) {
-    try {
-      localStorage.setItem(LOCAL_OVERRIDE_KEY, JSON.stringify(nextMap))
-    } catch {
-      // Local caching is optional; never gate workout rendering on storage availability.
-    }
   }
 
   function activate(slug, url, source) {
@@ -181,13 +162,12 @@
       })
 
       overrideMap = nextMap
-      writeLocalOverrides(nextMap)
       statusBySlug.clear()
       waitingBySlug.clear()
       scan(document)
       window.dispatchEvent(new CustomEvent('lmf:exercise-art-overrides-loaded', { detail: { count: rows.length } }))
     } catch {
-      // Cloud art is opportunistic. Cached/local workout UI remains authoritative.
+      // Private art is opportunistic. Existing local workout UI remains authoritative.
     } finally {
       cloudRefreshStarted = false
     }
@@ -222,17 +202,9 @@
       scan(document)
     })
 
-    window.addEventListener('storage', (event) => {
-      if (event.key !== LOCAL_OVERRIDE_KEY) return
-      overrideMap = readLocalOverrides()
-      statusBySlug.clear()
-      scan(document)
-    })
-
     window.addEventListener('lmf:exercise-art-overrides-updated', () => {
-      overrideMap = readLocalOverrides()
       statusBySlug.clear()
-      scan(document)
+      refreshFromCloud()
     })
   }
 
