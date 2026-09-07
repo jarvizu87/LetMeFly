@@ -1,0 +1,81 @@
+diff --git a/scripts/audit-crownforge-full.mjs b/scripts/audit-crownforge-full.mjs
+index 5a391b7..b2b32df 100644
+--- a/scripts/audit-crownforge-full.mjs
++++ b/scripts/audit-crownforge-full.mjs
+@@ -101,7 +101,7 @@ const maintenancePercentageSets = maintenance.weekData
+   .filter((set) => set.percentage != null)
+ check('Maintenance percentage sets all have governed load references', maintenancePercentageSets.length > 0 && maintenancePercentageSets.every((set) => Boolean(set.loadReference)))
+ check('Maintenance percentage sets do not freeze source projections into loadValue', maintenancePercentageSets.every((set) => set.loadValue == null))
+-check('Maintenance percentage sets define rounding', maintenancePercentageSets.every((set) => set.rounding === 'nearest-5'))
++check('Maintenance percentage sets round UP to nearest 5', maintenancePercentageSets.every((set) => set.rounding === 'up-5'))
+ 
+ const m1d5Cg = findExercise(maintenance.weekData[0], 5, 'Close-Grip Bench Press')
+ check('Maintenance W1 D5 keeps 60-65% close-grip range', typeof m1d5Cg?.sets[0]?.percentage === 'object' && m1d5Cg.sets[0].percentage.min === 60 && m1d5Cg.sets[0].percentage.max === 65, JSON.stringify(m1d5Cg?.sets[0]))
+@@ -111,8 +111,16 @@ const m3d1Fs = findExercise(maintenance.weekData[2], 1, 'Front Squat')
+ check('Maintenance W3 D1 Front Squat 87.5% single + 75% backoffs', m3d1Fs?.sets[0]?.percentage === 87.5 && m3d1Fs?.sets.slice(1).every((set) => set.percentage === 75), JSON.stringify(m3d1Fs?.sets ?? []))
+ const m3d4Dl = findExercise(maintenance.weekData[2], 4, 'Deadlift')
+ check('Maintenance W3 D4 Deadlift 87.5% single + 75% backoffs', m3d4Dl?.sets[0]?.percentage === 87.5 && m3d4Dl?.sets.slice(1).every((set) => set.percentage === 75), JSON.stringify(m3d4Dl?.sets ?? []))
++const m2d5Cg = findExercise(maintenance.weekData[1], 5, 'Close-Grip Bench Press')
++check('Maintenance W2 D5 Close-Grip Bench is 4x5 @ 70%', m2d5Cg?.sets.length === 4 && m2d5Cg.sets.every((set) => set.reps === 5 && set.percentage === 70), JSON.stringify(m2d5Cg?.sets ?? []))
++const m2d5Belt = findExercise(maintenance.weekData[1], 5, 'Belt Squat')
++check('Maintenance W2 D5 Belt Squat is 4x8', m2d5Belt?.sets.length === 4 && m2d5Belt.sets.every((set) => set.reps === 8), JSON.stringify(m2d5Belt?.sets ?? []))
++const m2d5Pull = findExercise(maintenance.weekData[1], 5, 'Neutral-Grip Pulldown')
++check('Maintenance W2 D5 Neutral-Grip Pulldown is 4x10', m2d5Pull?.sets.length === 4 && m2d5Pull.sets.every((set) => set.reps === 10), JSON.stringify(m2d5Pull?.sets ?? []))
+ const m3d5Cg = findExercise(maintenance.weekData[2], 5, 'Close-Grip Bench Press')
+-check('Maintenance W3 D5 Close-Grip Bench is 67.5%', m3d5Cg?.sets.every((set) => set.percentage === 67.5), JSON.stringify(m3d5Cg?.sets ?? []))
++check('Maintenance W3 D5 Close-Grip Bench is 4x4 @ 72.5%', m3d5Cg?.sets.length === 4 && m3d5Cg.sets.every((set) => set.reps === 4 && set.percentage === 72.5), JSON.stringify(m3d5Cg?.sets ?? []))
++const m3d5Pull = findExercise(maintenance.weekData[2], 5, 'Neutral-Grip Pulldown')
++check('Maintenance W3 D5 Neutral-Grip Pulldown is 4x10', m3d5Pull?.sets.length === 4 && m3d5Pull.sets.every((set) => set.reps === 10), JSON.stringify(m3d5Pull?.sets ?? []))
+ 
+ const calendarSamples = [
+   ['2026-09-07', 'crownforge', 1, 1],
+diff --git a/src/programs/crown-maintenance/rules.ts b/src/programs/crown-maintenance/rules.ts
+index 43440ff..99e5d2a 100644
+--- a/src/programs/crown-maintenance/rules.ts
++++ b/src/programs/crown-maintenance/rules.ts
+@@ -1,6 +1,6 @@
+ export const CROWN_MAINTENANCE_SOURCE_NOTES = [
+   'This bridge begins after Crownforge Testing Week 14 and ends before Black Crown Week 1; it is not inserted into Crownforge or Black Crown numbering.',
+-  'Main-lift and Olympic percentage work resolves from verified Crownforge 1RMs / technical references at runtime and rounds to the nearest 5 lb.',
++  'Main-lift and Olympic percentage work resolves from verified Crownforge 1RMs / technical references at runtime and rounds UP to the nearest 5 lb.',
+   'Week 1 clears testing fatigue; Weeks 2–3 retain meaningful intensity without misses, grinders, AMRAPs, full pyramids, or punishment conditioning.',
+   'Crown Maintenance readiness determines final lift-by-lift Black Crown activation: Green keeps the normal 90% entry TM, Yellow uses 87.5%, Red delays that lift.',
+ ] as const
+diff --git a/src/programs/crown-maintenance/weeks.ts b/src/programs/crown-maintenance/weeks.ts
+index f18e135..bd156a3 100644
+--- a/src/programs/crown-maintenance/weeks.ts
++++ b/src/programs/crown-maintenance/weeks.ts
+@@ -25,7 +25,7 @@ const pct = (
+   notes?: string,
+ ): ProgramSet => {
+   const text = typeof percentage === 'number' ? `${percentage}% of verified reference` : `${percentage.min}–${percentage.max}% of verified reference`
+-  return s(label, reps, text, notes, { percentage, loadReference, rounding: 'nearest-5' })
++  return s(label, reps, text, notes, { percentage, loadReference, rounding: 'up-5' })
+ }
+ 
+ const warmStrength = (tibReps: number | string = 20): ProgramExercise[] => [
+@@ -295,9 +295,9 @@ export const CROWN_MAINTENANCE_WEEK_2: ProgramWeek = {
+       sections: [
+         { id: 'warmup', title: 'Warm-Up / Primer', exercises: fullBodyWarmup() },
+         { id: 'main', title: 'Main Full Body', exercises: [
+-          ex('close-grip-bench', 'Close-Grip Bench Press', 'primary', 'mandatory', Array.from({ length: 4 }, (_, i) => pct(String(i + 1), 5, 65, 'verified-bench-press-1rm')), 'Fast reps; rest 2 min.'),
+-          ex('belt-squat', 'Belt Squat', 'secondary', 'mandatory', Array.from({ length: 4 }, (_, i) => s(String(i + 1), '8–10', 'RPE 7')), 'Stable stance.'),
+-          ex('neutral-grip-pulldown', 'Neutral-Grip Pulldown', 'secondary', 'mandatory', Array.from({ length: 4 }, (_, i) => s(String(i + 1), '8–10')), 'Smooth pulling.'),
++          ex('close-grip-bench', 'Close-Grip Bench Press', 'primary', 'mandatory', Array.from({ length: 4 }, (_, i) => pct(String(i + 1), 5, 70, 'verified-bench-press-1rm')), 'Fast reps; rest 2 min.'),
++          ex('belt-squat', 'Belt Squat', 'secondary', 'mandatory', Array.from({ length: 4 }, (_, i) => s(String(i + 1), 8, 'RPE 7')), 'Stable stance.'),
++          ex('neutral-grip-pulldown', 'Neutral-Grip Pulldown', 'secondary', 'mandatory', Array.from({ length: 4 }, (_, i) => s(String(i + 1), 10)), 'Smooth pulling.'),
+           ex('kettlebell-swing', 'Kettlebell Swing', 'kettlebell', 'mandatory', Array.from({ length: 4 }, (_, i) => s(String(i + 1), 10, 'Moderate')), 'Every set fast.'),
+           ex('farmer-carry', 'Farmer Carry', 'carry', 'conditional', Array.from({ length: 3 }, (_, i) => s(String(i + 1), '30 m', 'Moderate')), 'Posture tall; grip controlled.'),
+           ex('sled-push', 'Sled Push', 'sled', 'conditional', Array.from({ length: 4 }, (_, i) => s(String(i + 1), '20 m', 'Moderate')), 'Repeatable output.'),
+@@ -394,9 +394,9 @@ export const CROWN_MAINTENANCE_WEEK_3: ProgramWeek = {
+       sections: [
+         { id: 'warmup', title: 'Warm-Up / Primer', exercises: fullBodyWarmup() },
+         { id: 'main', title: 'Main Full Body', exercises: [
+-          ex('close-grip-bench', 'Close-Grip Bench Press', 'primary', 'mandatory', Array.from({ length: 3 }, (_, i) => pct(String(i + 1), 5, 67.5, 'verified-bench-press-1rm')), 'Fast reps; rest 2 min.'),
++          ex('close-grip-bench', 'Close-Grip Bench Press', 'primary', 'mandatory', Array.from({ length: 4 }, (_, i) => pct(String(i + 1), 4, 72.5, 'verified-bench-press-1rm')), 'Fast reps; rest 2 min.'),
+           ex('belt-squat', 'Belt Squat', 'secondary', 'mandatory', Array.from({ length: 3 }, (_, i) => s(String(i + 1), 8, 'RPE 7')), 'Stable stance.'),
+-          ex('neutral-grip-pulldown', 'Neutral-Grip Pulldown', 'secondary', 'mandatory', Array.from({ length: 4 }, (_, i) => s(String(i + 1), '8–10')), 'Smooth pulling.'),
++          ex('neutral-grip-pulldown', 'Neutral-Grip Pulldown', 'secondary', 'mandatory', Array.from({ length: 4 }, (_, i) => s(String(i + 1), 10)), 'Smooth pulling.'),
+           ex('kettlebell-swing', 'Kettlebell Swing', 'kettlebell', 'mandatory', Array.from({ length: 3 }, (_, i) => s(String(i + 1), 10, 'Moderate')), 'Every set fast.'),
+           ex('farmer-carry', 'Farmer Carry', 'carry', 'conditional', Array.from({ length: 3 }, (_, i) => s(String(i + 1), '30 m', 'Moderate')), 'Posture tall; grip controlled.'),
+           ex('sled-push', 'Sled Push', 'sled', 'conditional', Array.from({ length: 4 }, (_, i) => s(String(i + 1), '20 m', 'Moderate')), 'Repeatable output.'),
