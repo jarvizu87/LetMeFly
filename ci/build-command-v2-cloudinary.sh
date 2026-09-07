@@ -11,8 +11,11 @@ READINESS_COMFORT_CSS="overlays/ui-command-v2/batch-o/readiness-mobile-comfort.c
 # First reconstruct and validate the exact hardened Command V2 production source.
 bash ci/build-command-v2-hardening.sh
 
-# Preserve the saved readiness values when the active workout re-renders or reloads.
+# Preserve saved readiness values when the active workout re-renders or reloads.
 bash ci/apply-readiness-persistence-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
+
+# Improve real-world phone logging ergonomics and replace the dead Front Squat demo.
+bash ci/apply-mobile-workout-video-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 test -s "$CLOUDINARY_JS"
 test -s "$CLOUDINARY_CSS"
@@ -27,7 +30,7 @@ grep -Fq "__LMF_SUPABASE_PUBLISHABLE_KEY__" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/mine/" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/others/" "$CLOUDINARY_JS"
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" "$CLOUDINARY_JS"
-grep -Fq "var(--exercise-art,var(--v2-lifter))" "$CLOUDINARY_CSS"
+grep -Fq "var(--exercise-art,var(--v2-mountain))" "$CLOUDINARY_CSS"
 grep -Fq "background-size:cover!important" "$CLOUDINARY_CSS"
 grep -Fq "filter:none!important" "$CLOUDINARY_CSS"
 grep -Fq "grid-template-columns: repeat(5, minmax(0, 1fr))" "$READINESS_COMFORT_CSS"
@@ -95,11 +98,15 @@ grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
-grep -Rq "var(--exercise-art,var(--v2-lifter))" dist/assets
+grep -Rq "var(--exercise-art,var(--v2-mountain))" dist/assets
 grep -Rq "grid-template-columns:repeat(5,minmax(0,1fr))" dist/assets
 grep -Rq "min-height:58px" dist/assets
-# The source-level hotfix script already verifies the hydration function and bind point.
-# Minification is allowed to rename function identifiers in dist, so do not gate on its source name.
+grep -Rq 'grid-template-areas:"set target target target target check" "reps reps load load rpe rpe"' dist/assets
+grep -Rq 'font-size:17px!important' dist/assets
+grep -Rq 'https://www.youtube.com/watch?v=-fNfycATWUo' dist/assets
+! grep -Rq 'https://vimeo.com/152122947' dist/assets
+# The source-level hotfix scripts already verify hydration and mobile/video patch points.
+# Minification is allowed to rename function identifiers in dist.
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly private exercise-art + readiness comfort pipeline: PASS"
+echo "LetMeFly private exercise-art + readiness + mobile workout/video pipeline: PASS"
