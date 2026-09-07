@@ -5,50 +5,85 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app}"
 ICON_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-s/letmefly-app-icon.svg"
 UPDATE_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-s/pwa-update.js"
+INSTALL_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-s/pwa-install.js"
 
 cd "$APP_DIR"
 
 test -s "$ICON_SRC"
 test -s "$UPDATE_SRC"
+test -s "$INSTALL_SRC"
 test -f public/manifest.webmanifest
 test -f public/service-worker.js
 test -f index.html
 
 mkdir -p public/ui
-cp "$ICON_SRC" public/app-icon.svg
+# Use a new icon URL so Android/Chrome cannot keep resolving the previous crown
+# asset from an older manifest or favicon cache.
+cp "$ICON_SRC" public/app-icon-v2.svg
 cp "$UPDATE_SRC" public/ui/pwa-update.js
+cp "$INSTALL_SRC" public/ui/pwa-install.js
+
+# The old raster crown files were part of the rebuilt source. Remove them from
+# the shipping public tree so a fresh install has no stale crown fallback.
+rm -f public/icon-192.png public/icon-512.png
 
 python - <<'PY'
 from pathlib import Path
 import json
+import re
 
 manifest_path = Path('public/manifest.webmanifest')
 manifest = json.loads(manifest_path.read_text())
+manifest['id'] = '/'
+manifest['scope'] = '/'
+manifest['start_url'] = '/?source=pwa&brand=v2'
 manifest['icons'] = [
     {
-        'src': '/app-icon.svg',
-        'sizes': 'any',
+        'src': '/app-icon-v2.svg?v=2',
+        'sizes': '192x192',
         'type': 'image/svg+xml',
-        'purpose': 'any maskable',
-    }
+        'purpose': 'any',
+    },
+    {
+        'src': '/app-icon-v2.svg?v=2',
+        'sizes': '512x512',
+        'type': 'image/svg+xml',
+        'purpose': 'any',
+    },
+    {
+        'src': '/app-icon-v2.svg?v=2',
+        'sizes': '512x512',
+        'type': 'image/svg+xml',
+        'purpose': 'maskable',
+    },
 ]
 manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
 
 index_path = Path('index.html')
 text = index_path.read_text()
-text = text.replace('<link rel="icon" href="/icon-192.png" />', '<link rel="icon" href="/app-icon.svg" type="image/svg+xml" />')
-update_marker = '<script defer src="/ui/pwa-update.js"></script>'
-if update_marker not in text:
-    if '</body>' not in text:
-        raise SystemExit('index.html is missing </body>')
-    text = text.replace('</body>', f'  {update_marker}\n</body>', 1)
+# Bust the browser's manifest cache and remove every legacy crown favicon path.
+text = re.sub(r'<link rel="manifest" href="[^"]+"\s*/?>', '<link rel="manifest" href="/manifest.webmanifest?v=brand-v2" />', text, count=1)
+text = re.sub(r'<link rel="icon" href="[^"]+"(?: type="[^"]+")?\s*/?>', '<link rel="icon" href="/app-icon-v2.svg?v=2" type="image/svg+xml" />', text, count=1)
+if 'rel="apple-touch-icon"' not in text:
+    text = text.replace('</head>', '    <link rel="apple-touch-icon" href="/app-icon-v2.svg?v=2" />\n    <meta name="mobile-web-app-capable" content="yes" />\n  </head>', 1)
+
+for marker in [
+    '<script defer src="/ui/pwa-install.js"></script>',
+    '<script defer src="/ui/pwa-update.js"></script>',
+]:
+    if marker not in text:
+        if '</body>' not in text:
+            raise SystemExit('index.html is missing </body>')
+        text = text.replace('</body>', f'  {marker}\n</body>', 1)
 index_path.write_text(text)
 PY
 
 cat > public/service-worker.js <<'SW'
-// Legacy audit compatibility marker: letmefly-shell-v5-4-command-v2-1
-const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-3-brand-v1'
-const PRECACHE = ['/', '/manifest.webmanifest', '/app-icon.svg']
+// Legacy audit compatibility markers:
+// letmefly-shell-v5-4-command-v2-1
+// letmefly-shell-v5-4-command-v2-3-brand-v1
+const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-4-brand-v2'
+const PRECACHE = ['/', '/manifest.webmanifest?v=brand-v2', '/app-icon-v2.svg?v=2']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -135,13 +170,23 @@ self.addEventListener('fetch', (event) => {
 })
 SW
 
-grep -Fq 'app-icon.svg' public/manifest.webmanifest
-grep -Fq 'image/svg+xml' public/manifest.webmanifest
-grep -Fq '/app-icon.svg' index.html
+node --check public/ui/pwa-install.js
+node --check public/ui/pwa-update.js
+grep -Fq 'app-icon-v2.svg?v=2' public/manifest.webmanifest
+grep -Fq '192x192' public/manifest.webmanifest
+grep -Fq '512x512' public/manifest.webmanifest
+grep -Fq '/manifest.webmanifest?v=brand-v2' index.html
+grep -Fq '/app-icon-v2.svg?v=2' index.html
+grep -Fq '/ui/pwa-install.js' index.html
 grep -Fq '/ui/pwa-update.js' index.html
+test ! -e public/icon-192.png
+test ! -e public/icon-512.png
 grep -Fq "letmefly-shell-v5-4-command-v2-1" public/service-worker.js
 grep -Fq "letmefly-shell-v5-4-command-v2-3-brand-v1" public/service-worker.js
+grep -Fq "letmefly-shell-v5-4-command-v2-4-brand-v2" public/service-worker.js
 grep -Fq "['script', 'style', 'manifest']" public/service-worker.js
 grep -Fq "updateViaCache: 'none'" public/ui/pwa-update.js
+grep -Fq 'beforeinstallprompt' public/ui/pwa-install.js
+grep -Fq 'Install LetMeFly' public/ui/pwa-install.js
 
-echo "LetMeFly official app icon + installed-PWA update behavior: PASS"
+echo "LetMeFly official app icon + visible install prompt + installed-PWA update behavior: PASS"
