@@ -1,5 +1,5 @@
 [build]
-  command = "bash ci/build-command-v2-cloudinary.sh && bash ci/install-command-refresh.sh"
+  command = "bash ci/build-command-v2-cloudinary.sh && bash ci/install-command-refresh.sh && mkdir -p .build-src/letmefly_app/dist/.well-known && cp android-twa/site/assetlinks.json .build-src/letmefly_app/dist/.well-known/assetlinks.json"
   publish = ".build-src/letmefly_app/dist"
 
 [build.environment]
@@ -24,6 +24,12 @@
   for = "/refresh.js"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/.well-known/assetlinks.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Content-Type = "application/json"
 
 [[headers]]
   for = "/*"
