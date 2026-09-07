@@ -74,11 +74,11 @@ header_old = '<div class="brand-mark">♛</div>'
 header_new = '<div class="brand-mark lmf-official-brand-mark"><img src="/app-icon-v3.svg?v=3" alt="" aria-hidden="true" /></div>'
 more_old = '<section class="more-brand"><div class="crown-seal">♛</div><strong>LETMEFLY</strong><span>DISCIPLINE BUILDS FREEDOM</span></section>'
 more_new = '<section class="more-brand lmf-official-more-brand"><img class="lmf-official-more-logo" src="/app-icon-v3.svg?v=3" alt="LetMeFly" /><span>DISCIPLINE BUILDS FREEDOM</span></section>'
-if main.count(header_old) != 1:
-    raise SystemExit(f'expected one legacy header crown, found {main.count(header_old)}')
+if main.count(header_old) != 2:
+    raise SystemExit(f'expected two legacy header crowns, found {main.count(header_old)}')
 if main.count(more_old) != 1:
     raise SystemExit(f'expected one legacy More-page crown brand, found {main.count(more_old)}')
-main = main.replace(header_old, header_new, 1).replace(more_old, more_new, 1)
+main = main.replace(header_old, header_new).replace(more_old, more_new, 1)
 main_path.write_text(main)
 PY
 
@@ -206,6 +206,7 @@ grep -Fq '/ui/pwa-update.js' index.html
 grep -Fq 'lmf-official-brand-mark' src/main.ts
 grep -Fq 'lmf-official-more-logo' src/main.ts
 grep -Fq 'lmf-official-more-brand' src/command-v2.css
+! grep -Fq '<div class="brand-mark">♛</div>' src/main.ts
 test ! -e public/icon-192.png
 test ! -e public/icon-512.png
 grep -Fq 'letmefly-shell-v5-4-command-v2-1' public/service-worker.js
