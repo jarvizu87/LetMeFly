@@ -96,9 +96,14 @@ grep -Fq 'lmf-set-tab' "$TARGET_DIR/src/command-v2.css"
 # and replace legacy crown branding with the official LetMeFly logo.
 bash "$ROOT_DIR/ci/apply-brand-pwa-fix.sh" "$TARGET_DIR"
 
+# The More tab uses a verified local PNG rather than the older inline SVG asset.
+# This avoids the partially-rendered/broken logo seen on Galaxy Chrome.
+bash "$ROOT_DIR/ci/apply-more-logo-raster-fix.sh" "$TARGET_DIR"
+
 test -s "$TARGET_DIR/public/app-icon-v4.svg"
 test -s "$TARGET_DIR/public/ui/pwa-install.js"
 test -s "$TARGET_DIR/public/ui/pwa-update.js"
+test -s "$TARGET_DIR/public/ui/letmefly-official-logo-512.png"
 grep -Fq '"id": "/letmefly-pwa-v2"' "$TARGET_DIR/public/manifest.webmanifest"
 grep -Fq 'source=pwa&app=letmefly-v2' "$TARGET_DIR/public/manifest.webmanifest"
 grep -Fq 'letmefly-app-icon-192-v2.png' "$TARGET_DIR/public/manifest.webmanifest"
@@ -112,6 +117,8 @@ grep -Fq '/ui/pwa-install.js' "$TARGET_DIR/index.html"
 grep -Fq '/ui/pwa-update.js' "$TARGET_DIR/index.html"
 grep -Fq 'lmf-official-brand-mark' "$TARGET_DIR/src/main.ts"
 grep -Fq 'lmf-official-more-logo' "$TARGET_DIR/src/main.ts"
+grep -Fq '/ui/letmefly-official-logo-512.png?v=6' "$TARGET_DIR/src/main.ts"
+grep -Fq 'More-tab official logo v6' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'Open in Chrome' "$TARGET_DIR/public/ui/pwa-install.js"
 grep -Fq "params.get('app') === 'letmefly-v2'" "$TARGET_DIR/public/ui/pwa-install.js"
 grep -Fq 'letmefly-shell-v5-4-command-v2-7-brand-v5' "$TARGET_DIR/public/service-worker.js"
@@ -119,4 +126,4 @@ test ! -e "$TARGET_DIR/public/icon-192.png"
 test ! -e "$TARGET_DIR/public/icon-512.png"
 test ! -e "$TARGET_DIR/public/app-icon-v3.svg"
 
-echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + official branding/install/update reliability pass: PASS"
+echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + official branding/install/update + More-tab raster logo reliability pass: PASS"
