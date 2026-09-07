@@ -6,14 +6,20 @@
     window.matchMedia?.('(display-mode: fullscreen)').matches ||
     window.navigator.standalone === true
 
-  if (isStandalone()) return
+  const params = new URLSearchParams(window.location.search)
+  const launchedFromCurrentPwa = () =>
+    isStandalone() && params.get('source') === 'pwa' && params.get('app') === 'letmefly-v1'
+
+  if (launchedFromCurrentPwa()) return
 
   const isAndroid = /Android/i.test(navigator.userAgent || '')
   let deferredPrompt = null
   let banner = null
 
   const chromeIntent = () => {
-    const path = `${window.location.host}${window.location.pathname}${window.location.search}${window.location.hash}`
+    const url = new URL(window.location.href)
+    url.searchParams.set('install', '1')
+    const path = `${url.host}${url.pathname}${url.search}${url.hash}`
     return `intent://${path}#Intent;scheme=https;package=com.android.chrome;end`
   }
 
@@ -36,7 +42,7 @@
     }
 
     if (isAndroid) {
-      copy.textContent = 'Open LetMeFly in Chrome once so Android can install the full app.'
+      copy.textContent = 'Open LetMeFly directly in Chrome so Android can offer the full app install.'
       confirm.textContent = 'Open in Chrome'
       confirm.dataset.mode = 'chrome'
       return
@@ -48,7 +54,7 @@
   }
 
   const showBanner = () => {
-    if (isStandalone() || banner || !document.body) return
+    if (launchedFromCurrentPwa() || banner || !document.body) return
 
     banner = document.createElement('aside')
     banner.id = 'lmf-install-banner'
@@ -56,7 +62,7 @@
     banner.setAttribute('aria-label', 'Install LetMeFly')
     banner.innerHTML = `
       <div class="lmf-install-brand">
-        <img src="/app-icon-v3.svg?v=3" alt="" aria-hidden="true" />
+        <img src="/app-icon-v4.svg?v=4" alt="" aria-hidden="true" />
         <div>
           <strong>Install LetMeFly</strong>
           <span class="lmf-install-copy"></span>
@@ -126,15 +132,15 @@
   })
 
   if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', () => setTimeout(showBanner, 350), { once: true })
+    window.addEventListener('DOMContentLoaded', () => setTimeout(showBanner, 650), { once: true })
   } else {
-    setTimeout(showBanner, 350)
+    setTimeout(showBanner, 650)
   }
 
   window.__LMF_PWA_INSTALL__ = {
-    canInstall: () => !isStandalone(),
+    canInstall: () => !launchedFromCurrentPwa(),
     prompt: async () => {
-      if (isStandalone()) return false
+      if (launchedFromCurrentPwa()) return false
       if (deferredPrompt) {
         const promptEvent = deferredPrompt
         deferredPrompt = null
