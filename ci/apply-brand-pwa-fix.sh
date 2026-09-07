@@ -30,30 +30,35 @@ import json
 import re
 
 icon = '/app-icon-v4.svg?v=4'
+icon_192 = 'https://res.cloudinary.com/extor5az/image/upload/v1788815201/letmefly/app-brand/letmefly-app-icon-192-v2.png'
+icon_512 = 'https://res.cloudinary.com/extor5az/image/upload/v1788815215/letmefly/app-brand/letmefly-app-icon-512-v2.png'
+icon_512_maskable = 'https://res.cloudinary.com/extor5az/image/upload/v1788815247/letmefly/app-brand/letmefly-app-icon-512-maskable-v2.png'
 
 manifest_path = Path('public/manifest.webmanifest')
 manifest = json.loads(manifest_path.read_text())
-manifest['id'] = '/letmefly-pwa-v1'
+manifest['id'] = '/letmefly-pwa-v2'
 manifest['name'] = 'LetMeFly'
 manifest['short_name'] = 'LetMeFly'
 manifest['scope'] = '/'
-manifest['start_url'] = '/?source=pwa&app=letmefly-v1'
+manifest['start_url'] = '/?source=pwa&app=letmefly-v2'
 manifest['display'] = 'standalone'
 manifest['background_color'] = '#090b10'
 manifest['theme_color'] = '#090b10'
 manifest['icons'] = [
+    {'src': icon_192, 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
+    {'src': icon_512, 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
+    {'src': icon_512_maskable, 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'},
     {'src': icon, 'sizes': 'any', 'type': 'image/svg+xml', 'purpose': 'any'},
-    {'src': icon, 'sizes': 'any', 'type': 'image/svg+xml', 'purpose': 'maskable'},
 ]
 manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
 
 index_path = Path('index.html')
 text = index_path.read_text()
-text = re.sub(r'<link rel="manifest" href="[^"]+"\s*/?>', '<link rel="manifest" href="/manifest.webmanifest?v=brand-v4" />', text, count=1)
+text = re.sub(r'<link rel="manifest" href="[^"]+"\s*/?>', '<link rel="manifest" href="/manifest.webmanifest?v=brand-v5" />', text, count=1)
 text = re.sub(r'<link rel="icon" href="[^"]+"(?: type="[^"]+")?\s*/?>', f'<link rel="icon" href="{icon}" type="image/svg+xml" />', text, count=1)
-text = re.sub(r'<link rel="apple-touch-icon" href="[^"]+"\s*/?>', f'<link rel="apple-touch-icon" href="{icon}" />', text)
+text = re.sub(r'<link rel="apple-touch-icon" href="[^"]+"\s*/?>', f'<link rel="apple-touch-icon" href="{icon_192}" />', text)
 if 'rel="apple-touch-icon"' not in text:
-    text = text.replace('</head>', f'    <link rel="apple-touch-icon" href="{icon}" />\n  </head>', 1)
+    text = text.replace('</head>', f'    <link rel="apple-touch-icon" href="{icon_192}" />\n  </head>', 1)
 if 'name="mobile-web-app-capable"' not in text:
     text = text.replace('</head>', '    <meta name="mobile-web-app-capable" content="yes" />\n  </head>', 1)
 if 'name="theme-color"' not in text:
@@ -84,7 +89,7 @@ PY
 
 cat >> src/command-v2.css <<'CSS'
 
-/* LetMeFly official brand v4: official logo + fresh PWA identity. */
+/* LetMeFly official brand v5: official logo + raster PWA install icons. */
 .brand-mark.lmf-official-brand-mark{
   display:grid!important;
   place-items:center!important;
@@ -131,8 +136,9 @@ cat > public/service-worker.js <<'SW'
 // letmefly-shell-v5-4-command-v2-3-brand-v1
 // letmefly-shell-v5-4-command-v2-4-brand-v2
 // letmefly-shell-v5-4-command-v2-5-brand-v3
-const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-6-brand-v4'
-const PRECACHE = ['/', '/manifest.webmanifest?v=brand-v4', '/app-icon-v4.svg?v=4']
+// letmefly-shell-v5-4-command-v2-6-brand-v4
+const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-7-brand-v5'
+const PRECACHE = ['/', '/manifest.webmanifest?v=brand-v5', '/app-icon-v4.svg?v=4']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()))
@@ -198,11 +204,15 @@ SW
 
 node --check public/ui/pwa-install.js
 node --check public/ui/pwa-update.js
-grep -Fq 'app-icon-v4.svg?v=4' public/manifest.webmanifest
-grep -Fq '"id": "/letmefly-pwa-v1"' public/manifest.webmanifest
-grep -Fq 'source=pwa&app=letmefly-v1' public/manifest.webmanifest
-grep -Fq 'sizes": "any"' public/manifest.webmanifest
-grep -Fq '/manifest.webmanifest?v=brand-v4' index.html
+grep -Fq '"id": "/letmefly-pwa-v2"' public/manifest.webmanifest
+grep -Fq 'source=pwa&app=letmefly-v2' public/manifest.webmanifest
+grep -Fq 'letmefly-app-icon-192-v2.png' public/manifest.webmanifest
+grep -Fq '"sizes": "192x192"' public/manifest.webmanifest
+grep -Fq 'letmefly-app-icon-512-v2.png' public/manifest.webmanifest
+grep -Fq '"sizes": "512x512"' public/manifest.webmanifest
+grep -Fq 'letmefly-app-icon-512-maskable-v2.png' public/manifest.webmanifest
+grep -Fq '"purpose": "maskable"' public/manifest.webmanifest
+grep -Fq '/manifest.webmanifest?v=brand-v5' index.html
 grep -Fq '/app-icon-v4.svg?v=4' index.html
 grep -Fq '/ui/pwa-install.js' index.html
 grep -Fq '/ui/pwa-update.js' index.html
@@ -213,16 +223,12 @@ grep -Fq 'lmf-official-more-brand' src/command-v2.css
 test ! -e public/icon-192.png
 test ! -e public/icon-512.png
 test ! -e public/app-icon-v3.svg
-grep -Fq 'letmefly-shell-v5-4-command-v2-1' public/service-worker.js
-grep -Fq 'letmefly-shell-v5-4-command-v2-3-brand-v1' public/service-worker.js
-grep -Fq 'letmefly-shell-v5-4-command-v2-4-brand-v2' public/service-worker.js
-grep -Fq 'letmefly-shell-v5-4-command-v2-5-brand-v3' public/service-worker.js
-grep -Fq 'letmefly-shell-v5-4-command-v2-6-brand-v4' public/service-worker.js
+grep -Fq 'letmefly-shell-v5-4-command-v2-7-brand-v5' public/service-worker.js
 grep -Fq "['script', 'style', 'manifest']" public/service-worker.js
 grep -Fq "updateViaCache: 'none'" public/ui/pwa-update.js
 grep -Fq 'beforeinstallprompt' public/ui/pwa-install.js
 grep -Fq 'Open in Chrome' public/ui/pwa-install.js
 grep -Fq 'Install LetMeFly' public/ui/pwa-install.js
-grep -Fq "params.get('app') === 'letmefly-v1'" public/ui/pwa-install.js
+grep -Fq "params.get('app') === 'letmefly-v2'" public/ui/pwa-install.js
 
-echo "LetMeFly official logo + fresh PWA identity + visible install fallback: PASS"
+echo "LetMeFly official logo + Chromium raster install icons + visible install fallback: PASS"
