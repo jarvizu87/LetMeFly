@@ -20,9 +20,6 @@ test -s "$FLOW_CSS"
 node --check "$AUTO_ART_JS"
 node --check "$FLOW_JS"
 
-# Replace the dead legacy Front Squat Vimeo demo wherever the current modular
-# exercise library owns it. This changes exercise intelligence only; governed
-# Crownforge prescriptions remain untouched.
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
@@ -30,44 +27,31 @@ import os
 root = Path(os.environ['TARGET_DIR']) / 'src'
 old = 'https://vimeo.com/152122947'
 new = 'https://www.youtube.com/watch?v=-fNfycATWUo'
-
 matches = []
 for p in root.rglob('*.ts'):
     text = p.read_text()
     count = text.count(old)
     if count:
         matches.append((p, count, text))
-
 total = sum(count for _, count, _ in matches)
 if total != 1:
     locations = ', '.join(f'{p.relative_to(root)}:{count}' for p, count, _ in matches) or 'none'
     raise SystemExit(f'expected exactly one legacy Front Squat Vimeo URL across src, found {total} ({locations})')
-
 p, _, text = matches[0]
 p.write_text(text.replace(old, new, 1))
 print(f'Front Squat demo updated in {p.relative_to(root)}')
 PY
 
-# Audit every embedded exercise video record. Any remaining legacy Vimeo direct
-# links are demoted to honest exact-name YouTube search fallbacks until a new
-# direct instructional source has been manually approved.
 bash "$ROOT_DIR/ci/apply-exercise-video-audit.sh" "$TARGET_DIR"
-
-# Keep the current mobile reliability overrides, then append the locked Workout
-# Flow v1 presentation after them so the newer single-active-set rules win.
 cat "$CSS_FILE" >> "$TARGET_DIR/src/command-v2.css"
 cat "$FLOW_CSS" >> "$TARGET_DIR/src/command-v2.css"
 
-# Make the approved Style 2 Cloudinary thumbnails render automatically on the
-# current SSO-protected release without requiring a phone-side JSON import.
-# Workout Flow v1 runs after the art resolver and only changes presentation.
 mkdir -p "$TARGET_DIR/public/ui"
 cp "$AUTO_ART_JS" "$TARGET_DIR/public/ui/exercise-art-auto.js"
 cp "$FLOW_JS" "$TARGET_DIR/public/ui/workout-flow-v1.js"
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
-
 p = Path(os.environ['TARGET_DIR']) / 'index.html'
 text = p.read_text()
 markers = [
@@ -108,18 +92,22 @@ grep -Fq 'background-size:contain' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-flow-node' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-set-tab' "$TARGET_DIR/src/command-v2.css"
 
-# Keep installed PWAs current, expose a first-party install button when Chrome
-# grants beforeinstallprompt, and use the official LetMeFly logo everywhere.
+# Keep installed PWAs current, always expose an install/open-in-Chrome path,
+# and replace legacy crown branding with the official LetMeFly logo.
 bash "$ROOT_DIR/ci/apply-brand-pwa-fix.sh" "$TARGET_DIR"
 
-test -s "$TARGET_DIR/public/app-icon-v2.svg"
+test -s "$TARGET_DIR/public/app-icon-v3.svg"
 test -s "$TARGET_DIR/public/ui/pwa-install.js"
 test -s "$TARGET_DIR/public/ui/pwa-update.js"
-grep -Fq '/app-icon-v2.svg?v=2' "$TARGET_DIR/public/manifest.webmanifest"
+grep -Fq '/app-icon-v3.svg?v=3' "$TARGET_DIR/public/manifest.webmanifest"
+grep -Fq '/manifest.webmanifest?v=brand-v3' "$TARGET_DIR/index.html"
 grep -Fq '/ui/pwa-install.js' "$TARGET_DIR/index.html"
 grep -Fq '/ui/pwa-update.js' "$TARGET_DIR/index.html"
-grep -Fq "letmefly-shell-v5-4-command-v2-4-brand-v2" "$TARGET_DIR/public/service-worker.js"
+grep -Fq 'lmf-official-brand-mark' "$TARGET_DIR/src/main.ts"
+grep -Fq 'lmf-official-more-logo' "$TARGET_DIR/src/main.ts"
+grep -Fq 'Open in Chrome' "$TARGET_DIR/public/ui/pwa-install.js"
+grep -Fq 'letmefly-shell-v5-4-command-v2-5-brand-v3' "$TARGET_DIR/public/service-worker.js"
 test ! -e "$TARGET_DIR/public/icon-192.png"
 test ! -e "$TARGET_DIR/public/icon-512.png"
 
-echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + PWA branding/install/update reliability pass: PASS"
+echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + official branding/install/update reliability pass: PASS"
