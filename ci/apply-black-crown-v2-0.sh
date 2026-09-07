@@ -43,21 +43,36 @@ seen_weeks: set[int] = set()
 archives: dict[int, bytes] = {}
 transport_errors: list[str] = []
 
+# Transport may be one base64 file or Crownforge-style numbered chunks.
+# Prefer chunks when present so large payloads stay safe/resumable in GitHub writes.
+def read_transport(block: dict) -> tuple[str, str]:
+    transport_dir = overlay / 'transport'
+    base = transport_dir / block['base64File']
+    chunks = sorted(transport_dir.glob(block['base64File'] + '.*'))
+    chunks = [p for p in chunks if re.fullmatch(r'.*\.\d{2}', p.name)]
+    if chunks:
+        return ''.join(p.read_text() for p in chunks), 'chunks:' + ','.join(p.name for p in chunks)
+    if base.is_file():
+        return base.read_text(), base.name
+    raise FileNotFoundError(base)
+
 # Report every transport mismatch in one run so repairs can be batched instead
 # of discovering one block at a time.
 for block in manifest['blocks']:
-    encoded_path = overlay / 'transport' / block['base64File']
-    if not encoded_path.is_file():
-        transport_errors.append(f"Block {block['block']}: missing {encoded_path}")
+    try:
+        raw_text, source_label = read_transport(block)
+    except FileNotFoundError as exc:
+        transport_errors.append(f"Block {block['block']}: missing {exc}")
         continue
 
-    raw_text = encoded_path.read_text()
     compact = ''.join(raw_text.split())
     compact += '=' * (-len(compact) % 4)
     try:
         archive = base64.b64decode(compact, validate=True)
     except Exception as exc:
-        transport_errors.append(f"Block {block['block']}: base64 decode failed: {exc}")
+        transport_errors.append(
+            f"Block {block['block']}: base64 decode failed from {source_label}: {exc}"
+        )
         continue
 
     archive_sha = hashlib.sha256(archive).hexdigest()
@@ -66,7 +81,7 @@ for block in manifest['blocks']:
 
     if archive_size != block['archiveSize'] or archive_sha != block['archiveSha256']:
         transport_errors.append(
-            f"Block {block['block']}: actual archiveSize={archive_size} "
+            f"Block {block['block']}: {source_label} actual archiveSize={archive_size} "
             f"archiveSha256={archive_sha}; expected archiveSize={block['archiveSize']} "
             f"archiveSha256={block['archiveSha256']}"
         )
