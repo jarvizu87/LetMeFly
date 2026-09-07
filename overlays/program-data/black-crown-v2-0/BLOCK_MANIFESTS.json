@@ -1,0 +1,184 @@
+{
+  "release": "Black Crown Revised v2.0",
+  "totalBlocks": 9,
+  "totalWeeks": 54,
+  "totalSessions": 270,
+  "blocks": [
+    {
+      "block": 1,
+      "weeks": "1-6",
+      "sessions": 30,
+      "archive": "block-01-weeks.tar.gz",
+      "archiveSize": 5844,
+      "archiveSha256": "c47f8b9f64864022ac43143cf161413b8fc43a86947c10553a7de587c1bf7770",
+      "base64File": "block-01-weeks.tar.gz.b64",
+      "base64Size": 7792,
+      "base64Sha256": "b83cb1d95fb3b40f30a65e77ad7d7d3e1c30d6789feffdb4b2b73a32de07cf64",
+      "weekSourceHashes": {
+        "01": "b984e1a620e772833bdb4faeb7997e4057dc6b460dfd0986b9f45fd9d3435a5b",
+        "02": "24c6bf868e623f6ef1f10f0b5b13ba822505366993541e9602b138754b7201e0",
+        "03": "db4ea6d9a13847161a0b96efbc009daa5e4d73bc7da4af6e05afae9b69140331",
+        "04": "ac663d7cc6369f49a134343f7d4dd63a19bc08f5bd3eeedd11dd48019da6cf39",
+        "05": "821742153f62337e66b8d26a4790f9272be59aedfe1d15e7bb91228ff5c89c69",
+        "06": "af79adedd675baec839b48cdefef08f48836c3a9a1f9a550112e481b19df3c04"
+      }
+    },
+    {
+      "block": 2,
+      "weeks": "7-12",
+      "sessions": 30,
+      "archive": "block-02-weeks.tar.gz",
+      "archiveSize": 5556,
+      "archiveSha256": "c81a77434e6643c3e58fdea9243e076cc71117fce52bc74410832540fb823e77",
+      "base64File": "block-02-weeks.tar.gz.b64",
+      "base64Size": 7408,
+      "base64Sha256": "e0cd85003e9f60d9b352910ff7a8b990519ddcb78b10c2353c7cba724a1c6819",
+      "weekSourceHashes": {
+        "07": "d3cffa7ea5a38203a2247c40b1aa765c370a0ca7cf5172b27b0d600c7dfbb285",
+        "08": "a41b875a683d13875e7edc4a0053284d23c560d61e1dced19043512057f95013",
+        "09": "0696824bf7c492fd6abe036f589a0e2c63d08575e3ef8f7fb2489c5e080ec852",
+        "10": "b0c112216a32b99b844041be010591fa43eb6e58e5624842344ede002dddc095",
+        "11": "860e9bf377093c9953922151e407d4fcaa32696f22724f4f246bd7c96cb498b0",
+        "12": "7bcd202363fb8bf45a29f3abcccd7fd84f3c404de4b06e10cf7380c5240d8b9a"
+      }
+    },
+    {
+      "block": 3,
+      "weeks": "13-18",
+      "sessions": 30,
+      "archive": "block-03-weeks.tar.gz",
+      "archiveSize": 5345,
+      "archiveSha256": "95d1b3deb4589cd2bcbcae4c307371b1e01119de386c72b9213f10aeb5ee4eea",
+      "base64File": "block-03-weeks.tar.gz.b64",
+      "base64Size": 7128,
+      "base64Sha256": "e9640a00264d610376c2bbc751e428c34eb5c18c571ad06c282a18163029b498",
+      "weekSourceHashes": {
+        "13": "c4fee2626773ca5f3d7284d68976f232f931c11becebd1224683e7e36aab049e",
+        "14": "58eefcfd78848dc61bf85ba42b5eebef2a2f8b4f48c4ab90781aa9f521eb0046",
+        "15": "5728bd524fa875e4f12100e6287c405c23ec08f11d0ce15b14d3fc771d5497cc",
+        "16": "32ca10924b4f090f0ba6baf32c10991305e3a44e81d224a2c9d82dc6e1b7114c",
+        "17": "b530a99cb5ddcf5a8fda4bb30b4c1c364e27c13f695a07306cbd1bebcf1efc41",
+        "18": "365a055d156263133cb84c9046ab9632013cf822f6cce45000d9a233918b77e8"
+      }
+    },
+    {
+      "block": 4,
+      "weeks": "19-24",
+      "sessions": 30,
+      "archive": "block-04-weeks.tar.gz",
+      "archiveSize": 5181,
+      "archiveSha256": "945faf2378efa40b79dd65892db08581d96d05daaa0e58435b2ab2c1ec8c9e33",
+      "base64File": "block-04-weeks.tar.gz.b64",
+      "base64Size": 6908,
+      "base64Sha256": "3717033d7d81e99c81a4671e36ffcb4e261f4e3c4c19b5c9ecea5ccef7550bb1",
+      "weekSourceHashes": {
+        "19": "2249ad81d549e29d85443b12dd682abc61b0428a18c7f39b31980db59ce5cd67",
+        "20": "23828a6291a544482760e3da5f2888b497ebb7f4a27a4753523ba7a317e5af33",
+        "21": "9f24d427e3c96e8f128eb83df1e836f9186a48156015c020ac354e017541c078",
+        "22": "96a741cad0b7ed79dcfb54799387f115aabfe0c970c6feb614b3ab37a1237b70",
+        "23": "09ed49f65f2958a899fc83a56c9938b39682f017738b7445613d88741485f09c",
+        "24": "ac20771ed574cee6d9f263679938bb2015f62bd87c65ef0bea34c5d3f59a8a9c"
+      }
+    },
+    {
+      "block": 5,
+      "weeks": "25-30",
+      "sessions": 30,
+      "archive": "block-05-weeks.tar.gz",
+      "archiveSize": 5155,
+      "archiveSha256": "47f9c5daba218a5dde3ed8ee56c91930d4dcf7ef96210b7c526525b4e9766427",
+      "base64File": "block-05-weeks.tar.gz.b64",
+      "base64Size": 6876,
+      "base64Sha256": "9958e952ee416cf0c1e6af71a3241d31e84f68e1d21859d2031b2e73b4a8fad6",
+      "weekSourceHashes": {
+        "25": "2bd2d99e6384ec03fabbd48e6d05c28e902146d89379349b787109a138bfba34",
+        "26": "820a7e17518a0d0209afe9071ab31dcee59bd1cd5b43d5bfad7bde8dee066397",
+        "27": "500ffd91f9d469e4647fc4694c4773f513ec89a1fb2941fa7d42801d9f45e0e6",
+        "28": "c5bfdfeb49c2208abd7585b18e4c7dea17a1c7b3103d6266a628346a4b434ac7",
+        "29": "9b4c0cc04bd0c15994480941f2b42286c70355dd06a6ea371c4ce1a6d6eb7a42",
+        "30": "9350fb003575e9e5f60ac1b3392a0e856adcf58c6d6344b0f156571ed103b380"
+      }
+    },
+    {
+      "block": 6,
+      "weeks": "31-36",
+      "sessions": 30,
+      "archive": "block-06-weeks.tar.gz",
+      "archiveSize": 5056,
+      "archiveSha256": "ce856dd77056a0dc7d5dbf731cc2158bc07be576b689fe9ad4da7d71e492bab3",
+      "base64File": "block-06-weeks.tar.gz.b64",
+      "base64Size": 6744,
+      "base64Sha256": "36489266cdbe9587fab3d8f5d5d586909806fb5a836f27818779527a84edbed8",
+      "weekSourceHashes": {
+        "31": "f59918772c21740f7da1aec141946686a967bc3f5792fa0a39c07f5299facfe8",
+        "32": "817ac61ccebf7e06f4ca892afa0bcd9419b28f83dc43e72b54090cbf08738789",
+        "33": "4712c3cb093699405d12db02436c7824dd5547375bac4e0e1a0c7d903890ed3b",
+        "34": "6c94dfa2a27c62450c7d18fa11a6e644ec89257e9f8da4fb9663bd73733d298b",
+        "35": "13f6144f4360408e15a138949ac9397c96e38e2ae20fbc3b14b1622c92edb835",
+        "36": "d920383150d68f90a200201bd60c39abce7c6b29eeee2174a6a0434c8a03c307"
+      }
+    },
+    {
+      "block": 7,
+      "weeks": "37-42",
+      "sessions": 30,
+      "archive": "block-07-weeks.tar.gz",
+      "archiveSize": 5102,
+      "archiveSha256": "967c46f4c62367cf5ed80e5f5f0959640d2a1d68f32cde2004b2e4c8fcc66e5f",
+      "base64File": "block-07-weeks.tar.gz.b64",
+      "base64Size": 6804,
+      "base64Sha256": "00f11a82078c3d4e3beab359037646faf716155a2c5256ca90644d561a5bd482",
+      "weekSourceHashes": {
+        "37": "4cf6283ac6d23a68765d793ed4201b3a29d229ec2e351760fba9ad00df28cd4d",
+        "38": "bc7abc0ca6f4080b642e8e64479392b5ac9e924935e981ccda452e3297b5ab58",
+        "39": "f163fbe4e40258342c1cedfcfeb7d29f5c589857bc0c64b564537c20225d3c98",
+        "40": "aadd29ac2065c18ee917b7d58567f6d9ae099b73f059ca8992bdab3961462504",
+        "41": "b41cb0cf7c0fc59bc7d9bd95ec14e688ad2ba7f7ff40eaea05512bd0c857cad6",
+        "42": "62a59e619af2d65b07da1ddb72abae5405f4eaa3e4adfe2094196209a50a2c84"
+      }
+    },
+    {
+      "block": 8,
+      "weeks": "43-48",
+      "sessions": 30,
+      "archive": "block-08-weeks.tar.gz",
+      "archiveSize": 5245,
+      "archiveSha256": "e417c5256ab86c5465388638e31475f71316c6f022cfcb6eefda4594182277d8",
+      "base64File": "block-08-weeks.tar.gz.b64",
+      "base64Size": 6996,
+      "base64Sha256": "c3871f8c95d025d8009d2db40c3cda4167d9fea800ca1e4e0e1f04d47ee9d290",
+      "weekSourceHashes": {
+        "43": "4044873c1fe3f8b2513f5c0ae1f669ee53848a37b6424ad9cb6c1b05368149a8",
+        "44": "7f3bd9c6e5dbe0c6c14ee5bb3b043acc255162b158ddcb58c8e6c825d38e0f5d",
+        "45": "9f57bfa5570f4b794122994fc8047fafae8047c41f35bc4272df72ba43291a62",
+        "46": "48ea2008d1475344cef6fbe5e4639f64bab2ebede9137c81794bd7157bf72174",
+        "47": "d9a6f53b7d39227f37268567f8663cadf98a23538c15bea57b171a62af24dea4",
+        "48": "e258157f4b2b45e00a4b408a0de42102056ae27f06f50b701d36ccff21a63f12"
+      }
+    },
+    {
+      "block": 9,
+      "weeks": "49-54",
+      "sessions": 30,
+      "archive": "block-09-weeks.tar.gz",
+      "archiveSize": 5071,
+      "archiveSha256": "1dd99251cf983b7f97e096ed67017ba6d4fd25fa56c46826049c4eb6462a58d3",
+      "base64File": "block-09-weeks.tar.gz.b64",
+      "base64Size": 6764,
+      "base64Sha256": "95251d6f4e8e0f5010c6fc825dd286b83e3ec49ad50b064ad6c55f8d6d50eb4e",
+      "weekSourceHashes": {
+        "49": "cdcac41b5c9e87a0a5a2ce695739f2131712043194a1d8e3edb2c221fd0d1ae3",
+        "50": "ddd3ff3dfa91f1dce10710d4fc52063f1d4ae44742c66fa3ab10d6474cd726e7",
+        "51": "7647c2b4ef5fd0022df5b98e02644a773a3bb9d91e7895af8e4aebb44225e97f",
+        "52": "21140b0866eafa20d896241095229ffaeb26fead1a48eb406688b7c3416ff7c9",
+        "53": "6f6214d1221c9466d8315fba6b2d3286b549d05f77cfefd25d20760b06fc5d86",
+        "54": "fe76d40ba8abb6bba51b50d5ab227261b62619cd09b3cb1894954834022e4b08"
+      }
+    }
+  ],
+  "privacyBoundary": {
+    "containsCalendarDates": false,
+    "containsAthleteDerivedExactPoundLoads": false,
+    "containsAthleteName": false
+  }
+}
