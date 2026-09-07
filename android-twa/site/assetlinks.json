@@ -10,5 +10,17 @@
         "5A:41:62:C5:C4:13:75:21:1A:A5:76:1E:E6:BB:FA:FF:00:D9:D5:42:E6:1C:5B:9C:D3:E1:C2:CC:48:25:53:43"
       ]
     }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.letmefly.galaxytest",
+      "sha256_cert_fingerprints": [
+        "5A:41:62:C5:C4:13:75:21:1A:A5:76:1E:E6:BB:FA:FF:00:D9:D5:42:E6:1C:5B:9C:D3:E1:C2:CC:48:25:53:43"
+      ]
+    }
   }
 ]
