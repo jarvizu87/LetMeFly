@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect immutable source archive
+      - name: Extract immutable source archive
         shell: bash
         run: |
           set -euo pipefail
@@ -24,10 +24,10 @@ jobs:
           cat package.json
           echo '=== RELEVANT FILES ==='
           find scripts src -type f | sort | grep -Ei 'crownforge|maintenance|program|exercise|type' || true
-          echo '=== FILES CONTAINING CROWNFORGE/WEEK 12 ==='
-          grep -RIl -E 'Crownforge|CROWNFORGE|Week 12|W12|maintenance' scripts src 2>/dev/null | sort || true
-          echo '=== PROGRAM/AUDIT SOURCE EXCERPTS ==='
-          while IFS= read -r f; do
-            echo "===== $f ====="
-            sed -n '1,500p' "$f"
-          done < <(grep -RIl -E 'Crownforge|CROWNFORGE|Week 12|W12|maintenance' scripts src 2>/dev/null | sort | head -40)
+      - name: Upload reconstructed app source
+        uses: actions/upload-artifact@v4
+        with:
+          name: crownforge-base-source
+          path: .diag-src/letmefly_app
+          if-no-files-found: error
+          retention-days: 1
