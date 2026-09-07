@@ -14,11 +14,23 @@ EXPECTED_PROGRAM_CHUNKS="11"
 DRIVE_SYNC_PATCH="$PROGRAM_OVERLAY_DIR/drive-sync-v2-1.patch"
 EXPECTED_DRIVE_SYNC_PATCH_SHA="8fd91e70ce5ea14c7c75d37aaa28d550584bf06ed5291d5e045f55000b2bf2bf"
 EXPECTED_DRIVE_SYNC_PATCH_SIZE="8535"
+WEEKS_DRIVE_SYNC_B64="$PROGRAM_OVERLAY_DIR/drive-sync-v2-1-weeks1-14.patch.gz.b64"
+EXPECTED_WEEKS_DRIVE_SYNC_B64_SHA="6d4422dc4748de0c289556b750b1fa79ac1a96cb0e2c9da9d54c96c31738a9c9"
+EXPECTED_WEEKS_DRIVE_SYNC_B64_SIZE="7661"
+EXPECTED_WEEKS_DRIVE_SYNC_GZIP_SHA="6cff2f215fd1f6f367791caa2339a5ab879f021878e85376cf20bc1592bfb904"
+EXPECTED_WEEKS_DRIVE_SYNC_GZIP_SIZE="5745"
+EXPECTED_WEEKS_DRIVE_SYNC_PATCH_SHA="d25015597ca8bbd82f282b1382041fd8d1caa55e8e20b5c2d73ccee351115970"
+EXPECTED_WEEKS_DRIVE_SYNC_PATCH_SIZE="28038"
+LEGACY_AUDIT_SYNC_PATCH="$PROGRAM_OVERLAY_DIR/drive-sync-v2-1-legacy-audits.patch"
+EXPECTED_LEGACY_AUDIT_SYNC_PATCH_SHA="221b20dd729cb9eb5843418b8f68c7d915ee41e367342fd8ada6bb661b31947a"
+EXPECTED_LEGACY_AUDIT_SYNC_PATCH_SIZE="1013"
 
 PROGRAM_B64_FILE="$(mktemp)"
 PROGRAM_GZIP_FILE="$(mktemp)"
 PROGRAM_PATCH_FILE="$(mktemp)"
-trap 'rm -f "$PROGRAM_B64_FILE" "$PROGRAM_GZIP_FILE" "$PROGRAM_PATCH_FILE"' EXIT
+WEEKS_DRIVE_SYNC_GZIP_FILE="$(mktemp)"
+WEEKS_DRIVE_SYNC_PATCH_FILE="$(mktemp)"
+trap 'rm -f "$PROGRAM_B64_FILE" "$PROGRAM_GZIP_FILE" "$PROGRAM_PATCH_FILE" "$WEEKS_DRIVE_SYNC_GZIP_FILE" "$WEEKS_DRIVE_SYNC_PATCH_FILE"' EXIT
 
 if [[ ! -d "$TARGET_DIR" || ! -f "$TARGET_DIR/package.json" ]]; then
   echo "Crownforge target source tree is missing: $TARGET_DIR" >&2
@@ -49,6 +61,21 @@ test -f "$DRIVE_SYNC_PATCH"
 test "$(wc -c < "$DRIVE_SYNC_PATCH")" = "$EXPECTED_DRIVE_SYNC_PATCH_SIZE"
 echo "$EXPECTED_DRIVE_SYNC_PATCH_SHA  $DRIVE_SYNC_PATCH" | sha256sum -c -
 
+test -f "$WEEKS_DRIVE_SYNC_B64"
+test "$(wc -c < "$WEEKS_DRIVE_SYNC_B64")" = "$EXPECTED_WEEKS_DRIVE_SYNC_B64_SIZE"
+echo "$EXPECTED_WEEKS_DRIVE_SYNC_B64_SHA  $WEEKS_DRIVE_SYNC_B64" | sha256sum -c -
+base64 -d "$WEEKS_DRIVE_SYNC_B64" > "$WEEKS_DRIVE_SYNC_GZIP_FILE"
+test "$(wc -c < "$WEEKS_DRIVE_SYNC_GZIP_FILE")" = "$EXPECTED_WEEKS_DRIVE_SYNC_GZIP_SIZE"
+echo "$EXPECTED_WEEKS_DRIVE_SYNC_GZIP_SHA  $WEEKS_DRIVE_SYNC_GZIP_FILE" | sha256sum -c -
+gzip -t "$WEEKS_DRIVE_SYNC_GZIP_FILE"
+gzip -dc "$WEEKS_DRIVE_SYNC_GZIP_FILE" > "$WEEKS_DRIVE_SYNC_PATCH_FILE"
+test "$(wc -c < "$WEEKS_DRIVE_SYNC_PATCH_FILE")" = "$EXPECTED_WEEKS_DRIVE_SYNC_PATCH_SIZE"
+echo "$EXPECTED_WEEKS_DRIVE_SYNC_PATCH_SHA  $WEEKS_DRIVE_SYNC_PATCH_FILE" | sha256sum -c -
+
+test -f "$LEGACY_AUDIT_SYNC_PATCH"
+test "$(wc -c < "$LEGACY_AUDIT_SYNC_PATCH")" = "$EXPECTED_LEGACY_AUDIT_SYNC_PATCH_SIZE"
+echo "$EXPECTED_LEGACY_AUDIT_SYNC_PATCH_SHA  $LEGACY_AUDIT_SYNC_PATCH" | sha256sum -c -
+
 (
   cd "$TARGET_DIR"
   patch --dry-run -p1 < "$PROGRAM_PATCH_FILE"
@@ -58,6 +85,17 @@ echo "$EXPECTED_DRIVE_SYNC_PATCH_SHA  $DRIVE_SYNC_PATCH" | sha256sum -c -
   # Drive reference without modifying Crownforge week numbering or UI layers.
   patch --dry-run -p1 < "$DRIVE_SYNC_PATCH"
   patch -p1 < "$DRIVE_SYNC_PATCH"
+
+  # Sync Crownforge Weeks 1-14 against the approved Drive v2.1 source.
+  # The patch changes only confirmed prescription drift; Weeks 13-14 were
+  # audited and require no prescription edits.
+  patch --dry-run -p1 < "$WEEKS_DRIVE_SYNC_PATCH_FILE"
+  patch -p1 < "$WEEKS_DRIVE_SYNC_PATCH_FILE"
+
+  # Keep legacy regression scripts aligned with the approved source so
+  # historical assertions do not reject corrected prescriptions.
+  patch --dry-run -p1 < "$LEGACY_AUDIT_SYNC_PATCH"
+  patch -p1 < "$LEGACY_AUDIT_SYNC_PATCH"
 
   # Architecture boundaries: prescriptions belong to program packages, never the registry/facade.
   test -f src/program-engine/types.ts
@@ -74,6 +112,7 @@ echo "$EXPECTED_DRIVE_SYNC_PATCH_SHA  $DRIVE_SYNC_PATCH" | sha256sum -c -
   grep -Fq "rounding: 'up-5'" src/programs/crown-maintenance/weeks.ts
   grep -Fq "pct(String(i + 1), 5, 70, 'verified-bench-press-1rm')" src/programs/crown-maintenance/weeks.ts
   grep -Fq "pct(String(i + 1), 4, 72.5, 'verified-bench-press-1rm')" src/programs/crown-maintenance/weeks.ts
+  grep -Fq "Weeks 1–12 approved Drive v2.1 source-sync corrections: checked" scripts/audit-crownforge-full.mjs
 )
 
-echo "Crownforge v2.1 modular program-data overlay + approved Drive sync: PASS"
+echo "Crownforge v2.1 modular program-data overlay + approved full-program Drive sync: PASS"

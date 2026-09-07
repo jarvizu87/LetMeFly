@@ -1,0 +1,18 @@
+diff --git a/scripts/audit-crownforge-week2.mjs b/scripts/audit-crownforge-week2.mjs
+index d2f0c03..67cf183 100644
+--- a/scripts/audit-crownforge-week2.mjs
++++ b/scripts/audit-crownforge-week2.mjs
+@@ -72,9 +72,11 @@ requireIn('Day 4 exact pull/yoke/trunk', daySlice(4), [
+   "s('R3', 3, '185 lb', 185, 'lb')", "s('R4', 2, '195 lb', 195, 'lb')",
+   "'bodyweight OR 95 lb lat pulldown'", "'45 lb DBs'", "'55 lb'", "'20 lb/side'",
+   "'sled + 35 lb'", "'45 lb'", "'40 lb'", "'55 lb DBs'",
+-  "s('1', '10–12', '55 lb DBs')", "s('2', '10–12', '55 lb DBs')", "s('3', '10–12', '55 lb DBs')",
++  "s('1', '10–12', '55 lb DBs')",
++])
++forbidIn('Day 4 Chest-Supported Shrug is source-capped at one set', daySlice(4), [
++  "s('2', '10–12', '55 lb DBs')", "s('3', '10–12', '55 lb DBs')",
+ ])
+-forbidIn('Day 4 removed Week 1 shrug cap', daySlice(4), ['caps this Week 1 support exposure at one set'])
+ 
+ requireIn('Day 5 exact GPP', daySlice(5), [
+   "'16 kg (35 lb) KB'", "'20 kg (45 lb) KB'", "'8 kg (20 lb) KB'",
