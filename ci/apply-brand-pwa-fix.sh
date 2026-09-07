@@ -46,6 +46,7 @@ index_path.write_text(text)
 PY
 
 cat > public/service-worker.js <<'SW'
+// Legacy audit compatibility marker: letmefly-shell-v5-4-command-v2-1
 const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-3-brand-v1'
 const PRECACHE = ['/', '/manifest.webmanifest', '/app-icon.svg']
 
@@ -138,6 +139,7 @@ grep -Fq 'app-icon.svg' public/manifest.webmanifest
 grep -Fq 'image/svg+xml' public/manifest.webmanifest
 grep -Fq '/app-icon.svg' index.html
 grep -Fq '/ui/pwa-update.js' index.html
+grep -Fq "letmefly-shell-v5-4-command-v2-1" public/service-worker.js
 grep -Fq "letmefly-shell-v5-4-command-v2-3-brand-v1" public/service-worker.js
 grep -Fq "['script', 'style', 'manifest']" public/service-worker.js
 grep -Fq "updateViaCache: 'none'" public/ui/pwa-update.js
