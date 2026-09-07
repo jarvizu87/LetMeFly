@@ -45,13 +45,11 @@ test -f .build-src/letmefly_app/package.json
   sha256sum -c MANIFEST.sha256
 )
 
-# Apply versioned program data before presentation/UI overlays. This keeps each
-# program independently reviewable while preserving the immutable source base.
+# Apply versioned program data before presentation/UI overlays.
 bash ci/apply-crownforge-v2-1.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 # Temporarily expose the legacy home-page source shape expected by the locked
-# Command V2 patch. This adapter changes presentation lookup only; prescriptions
-# remain owned by the modular program packages.
+# Command V2 patch. Prescriptions remain owned by the modular program packages.
 bash ci/command-v2-program-compat.sh pre "$ROOT_DIR/.build-src/letmefly_app"
 
 # Reconstruct Command V2 presentation from transport-safe text chunks.
@@ -91,8 +89,11 @@ test "$(wc -c < "$BATCH_E_CSS_FILE")" = "4641"
 cd .build-src/letmefly_app
 patch --dry-run -p0 < "$PATCH_FILE"
 patch -p0 < "$PATCH_FILE"
-patch --dry-run -p0 < "$BATCH_C_PATCH_FILE"
-patch -p0 < "$BATCH_C_PATCH_FILE"
+
+# Batch C's historical source is still integrity-checked above, but its old
+# program-page hunk assumed only six Crownforge weeks. Reproduce its approved UI
+# intent through a modular adapter that preserves all 14 weeks + Maintenance.
+bash "$ROOT_DIR/ci/modular-command-v2-batch-c.sh" "$ROOT_DIR/.build-src/letmefly_app"
 patch --dry-run -p0 < "$BATCH_C_TYPES_FILE"
 patch -p0 < "$BATCH_C_TYPES_FILE"
 patch --dry-run -p0 < "$BATCH_D_SEMANTICS_FILE"
@@ -127,7 +128,6 @@ test -f dist/service-worker.js
 grep -Fq "letmefly-shell-v5-4-command-v2-1" dist/service-worker.js
 grep -Rq "data:image/webp;base64" dist/assets
 
-# Command V2 release markers: all ten approved screen families must survive compilation.
 for marker in \
   "Recent training signal" \
   "session-track" \
