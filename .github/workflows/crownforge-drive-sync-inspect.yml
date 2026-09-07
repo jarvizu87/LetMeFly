@@ -1,0 +1,44 @@
+name: Crownforge Drive Sync Inspect
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reconstruct modular Crownforge source
+        run: |
+          set -euo pipefail
+          ARCHIVE="source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip"
+          rm -rf .inspect-src
+          mkdir -p .inspect-src
+          unzip -q "$ARCHIVE" -d .inspect-src
+          (cd .inspect-src/letmefly_app && sha256sum -c MANIFEST.sha256)
+          bash ci/apply-crownforge-v2-1.sh "$GITHUB_WORKSPACE/.inspect-src/letmefly_app"
+
+      - name: Stage Crown Maintenance source for inspection
+        run: |
+          set -euo pipefail
+          rm -rf .inspect-out
+          mkdir -p .inspect-out
+          cp -R .inspect-src/letmefly_app/src/programs/crown-maintenance .inspect-out/
+          cp .inspect-src/letmefly_app/scripts/audit-crownforge-full.mjs .inspect-out/
+          printf '\n--- matches ---\n'
+          grep -RniE "67\.5|65%|72\.5|rounding|2026-12-26|2027-01-02|Close-Grip Bench" .inspect-out || true
+
+      - name: Publish inspection source
+        uses: actions/upload-artifact@v4
+        with:
+          name: crownforge-drive-sync-inspect
+          path: .inspect-out
+          if-no-files-found: error
+          retention-days: 1
