@@ -90,7 +90,8 @@ grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
 grep -Rq "var(--exercise-art,var(--v2-lifter))" dist/assets
-grep -Rq "hydrateReadinessFormFromLatest" dist/assets
+# The source-level hotfix script already verifies the hydration function and bind point.
+# Minification is allowed to rename function identifiers in dist, so do not gate on its source name.
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
 echo "LetMeFly private exercise-art override + no-stretch Cloudinary pipeline: PASS"
