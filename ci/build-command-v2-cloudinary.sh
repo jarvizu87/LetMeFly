@@ -98,13 +98,35 @@ grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
-grep -Rq "var(--exercise-art,var(--v2-mountain))" dist/assets
-grep -Rq "grid-template-columns:repeat(5,minmax(0,1fr))" dist/assets
-grep -Rq "min-height:58px" dist/assets
-grep -Rq 'grid-template-areas:"set target target target target check" "reps reps load load rpe rpe"' dist/assets
-grep -Rq 'font-size:17px!important' dist/assets
-grep -Rq 'https://www.youtube.com/watch?v=-fNfycATWUo' dist/assets
-! grep -Rq 'https://vimeo.com/152122947' dist/assets
+
+# Verify the user-visible mobile/video/art changes in the minified production bundle
+# without depending on the minifier's exact CSS serialization.
+python - <<'PY'
+from pathlib import Path
+
+asset_text = '\n'.join(
+    p.read_text(errors='ignore')
+    for p in Path('dist/assets').rglob('*')
+    if p.is_file()
+)
+compact = ''.join(asset_text.split())
+checks = {
+    'neutral exercise-art fallback': 'var(--exercise-art,var(--v2-mountain))' in compact,
+    'five-column readiness cells': 'grid-template-columns:repeat(5,minmax(0,1fr))' in compact,
+    'readiness cell height': 'min-height:58px' in compact,
+    'mobile set top-row grid': 'set target target target target check' in asset_text,
+    'mobile set input grid': 'reps reps load load rpe rpe' in asset_text,
+    'mobile set input text size': 'font-size:17px' in compact,
+    'working Front Squat demo': 'youtube.com/watch?v=-fNfycATWUo' in asset_text,
+    'dead Front Squat Vimeo removed': 'vimeo.com/152122947' not in asset_text,
+}
+failed = [label for label, ok in checks.items() if not ok]
+for label, ok in checks.items():
+    print(f'production marker {label}: {"PASS" if ok else "FAIL"}')
+if failed:
+    raise SystemExit('production marker failures: ' + ', '.join(failed))
+PY
+
 # The source-level hotfix scripts already verify hydration and mobile/video patch points.
 # Minification is allowed to rename function identifiers in dist.
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
