@@ -47,6 +47,7 @@ for block in manifest['blocks']:
         raise SystemExit(f'Missing Black Crown transport: {encoded_path}')
 
     compact = ''.join(encoded_path.read_text().split())
+    compact += '=' * (-len(compact) % 4)
     archive = base64.b64decode(compact, validate=True)
     archive_sha = hashlib.sha256(archive).hexdigest()
     if len(archive) != block['archiveSize']:
