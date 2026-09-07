@@ -1,0 +1,654 @@
+/* LetMeFly Workout Flow v1 — locked mobile workout presentation.
+   Presentation only. Program structure and persisted workout data remain authoritative. */
+
+/* Active exercise cards become ordered media -> title -> actions -> active set. */
+.exercise-stack .active-exercise.lmf-workout-flow-card{
+  display:flex!important;
+  flex-direction:column!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#071016!important;
+  border:1px solid #2b3944!important;
+  border-radius:16px!important;
+}
+.exercise-stack .active-exercise.lmf-workout-flow-card::before{
+  content:none!important;
+  display:none!important;
+}
+.exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-exercise-media{order:1}
+.exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-title{order:2}
+.exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-actions{order:3}
+.exercise-stack .active-exercise.lmf-workout-flow-card > .set-table{order:4}
+.exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-compact-summary{order:0}
+
+/* Full approved square art without the current shallow-banner crop. */
+.lmf-exercise-media{
+  width:100%;
+  aspect-ratio:1 / 1;
+  min-height:260px;
+  background-image:var(--exercise-art,var(--v2-mountain));
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  background-color:#03070a;
+  border-bottom:1px solid #27343e;
+  position:relative;
+}
+.lmf-exercise-media::after{
+  content:"";
+  pointer-events:none;
+  position:absolute;
+  inset:0;
+  box-shadow:inset 0 -54px 70px -58px #000;
+}
+
+.lmf-workout-flow-card .exercise-title{
+  padding:14px 15px 12px!important;
+  border-bottom:0!important;
+}
+.lmf-workout-flow-card .exercise-title h3{
+  font-size:27px!important;
+  line-height:1!important;
+  margin:4px 0 7px!important;
+}
+.lmf-workout-flow-card .exercise-actions{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+  padding:0 14px 14px!important;
+  border-top:0!important;
+  border-bottom:1px solid #25313a!important;
+}
+.lmf-workout-flow-card .exercise-actions .btn{
+  min-width:0!important;
+  min-height:48px!important;
+  justify-content:center!important;
+  padding:0 8px!important;
+  font-size:9px!important;
+}
+.lmf-workout-flow-card .exercise-actions .btn:last-child:nth-child(4){
+  grid-column:1/-1!important;
+}
+
+/* Only the selected set renders in full. All original set rows remain in the DOM
+   so the existing LetMeFly logging/persistence functions remain untouched. */
+.lmf-workout-flow-card .set-table{
+  display:block!important;
+  margin:0!important;
+  padding:14px!important;
+  border-top:0!important;
+  background:#061018!important;
+}
+.lmf-workout-flow-card .set-row{
+  display:none!important;
+}
+.lmf-workout-flow-card .set-row.lmf-set-active{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) 72px!important;
+  grid-template-areas:
+    "set set set check"
+    "reps load rpe check"
+    "plates plates plates plates"!important;
+  gap:12px 10px!important;
+  align-items:start!important;
+  padding:15px!important;
+  background:#0a131b!important;
+  border:1px solid #2c3945!important;
+  border-radius:16px!important;
+}
+.lmf-workout-flow-card .set-row.lmf-set-active:first-child{
+  border-top:1px solid #2c3945!important;
+}
+.lmf-workout-flow-card .set-target-cell{display:none!important}
+
+.lmf-workout-flow-card .set-label{
+  grid-area:set!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:flex-end!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+  min-height:62px!important;
+}
+.lmf-workout-flow-card .set-label span{
+  position:absolute;
+  align-self:flex-start;
+  color:#98a4b2!important;
+  font-size:10px!important;
+  letter-spacing:.11em!important;
+}
+.lmf-workout-flow-card .set-label strong{
+  font-size:42px!important;
+  line-height:.9!important;
+  margin-top:20px!important;
+}
+.lmf-set-total{
+  color:#7f8c9a!important;
+  font-family:var(--condensed);
+  font-style:normal;
+  font-size:28px;
+  font-weight:800;
+  line-height:1;
+  margin-bottom:2px;
+}
+
+.lmf-workout-flow-card .set-check{
+  grid-area:check!important;
+  justify-self:end!important;
+  align-self:start!important;
+  width:70px!important;
+  height:70px!important;
+  border-radius:16px!important;
+  font-size:32px!important;
+  color:#fff!important;
+  background:#101923!important;
+  border:1px solid #465567!important;
+}
+.lmf-workout-flow-card .set-check.done{
+  background:#ff1731!important;
+  border-color:#ff1731!important;
+  box-shadow:0 0 24px #ff17313b!important;
+}
+
+.lmf-workout-flow-card .reps-field{grid-area:reps!important}
+.lmf-workout-flow-card .load-field{grid-area:load!important}
+.lmf-workout-flow-card .rpe-field{grid-area:rpe!important}
+.lmf-workout-flow-card .set-field{
+  width:100%!important;
+  min-width:0!important;
+}
+.lmf-workout-flow-card .set-field label{
+  display:block!important;
+  margin:0 0 6px!important;
+  min-height:auto!important;
+  text-align:center!important;
+  color:#9ca8b5!important;
+  font-size:10px!important;
+  letter-spacing:.09em!important;
+}
+.lmf-stepper{
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr) 36px;
+  gap:5px;
+  align-items:center;
+  padding:5px;
+  border:1px solid #303d4a;
+  border-radius:13px;
+  background:#0b141d;
+}
+.lmf-stepper .set-input{
+  width:100%!important;
+  height:54px!important;
+  min-height:54px!important;
+  padding:6px 2px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  text-align:center!important;
+  font-size:25px!important;
+  font-weight:850!important;
+}
+.lmf-step-btn{
+  width:36px;
+  height:42px;
+  padding:0;
+  border:1px solid #344352;
+  border-radius:9px;
+  color:#f4f7fb;
+  background:#101b25;
+  font-size:24px;
+  line-height:1;
+  font-weight:650;
+}
+.lmf-step-btn:active{
+  transform:translateY(1px);
+  background:#172430;
+}
+.lmf-workout-flow-card .load-field > small{
+  display:none!important;
+}
+.lmf-plates-line{
+  grid-area:plates!important;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:28px;
+  color:#aeb8c4;
+  font-size:11px;
+  line-height:1.3;
+}
+.lmf-plates-line span{
+  color:#fff;
+  font-size:18px;
+}
+.lmf-plates-line strong{font-weight:650}
+.lmf-plates-line.is-empty{opacity:.7}
+
+/* Universal numbered set selector. It scrolls instead of shrinking when a pyramid
+   or other prescription has 10+ sets. */
+.lmf-set-tabs{
+  display:flex;
+  gap:8px;
+  width:100%;
+  margin-top:12px;
+  padding:1px 1px 6px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  scroll-snap-type:x proximity;
+}
+.lmf-set-tabs::-webkit-scrollbar{display:none}
+.lmf-set-tab{
+  flex:1 0 54px;
+  min-width:54px;
+  height:48px;
+  scroll-snap-align:center;
+  border:1px solid #31404c;
+  border-radius:10px;
+  color:#8995a3;
+  background:#0a131b;
+  font-family:var(--condensed);
+  font-size:17px;
+  font-weight:850;
+}
+.lmf-set-tab.active{
+  color:#fff;
+  border-color:#ff1731;
+  background:linear-gradient(145deg,#321019,#170d12);
+  box-shadow:inset 0 0 0 1px #ff173140;
+}
+.lmf-set-tab.done:not(.active){
+  color:#88d7ad;
+  border-color:#245f43;
+  background:#0a1b15;
+}
+
+/* One active exercise at a time in every workout section. Grouped blocks use the
+   connected B1/B2/... rail; ordinary sequential blocks use the same compact cards
+   without forcing a circuit interpretation. */
+.lmf-flow-panel .exercise-stack{
+  gap:12px!important;
+  position:relative;
+}
+.lmf-flow-panel .exercise-stack.lmf-group-flow{
+  padding-left:36px;
+}
+.lmf-flow-panel .exercise-stack.lmf-group-flow::before{
+  content:"";
+  position:absolute;
+  left:15px;
+  top:18px;
+  bottom:18px;
+  width:2px;
+  background:linear-gradient(180deg,#ff1731 0 18%,#394754 52%,#26323d 100%);
+  border-radius:99px;
+}
+.lmf-flow-panel .active-exercise{
+  position:relative;
+}
+.lmf-flow-node{
+  position:absolute;
+  left:-35px;
+  top:19px;
+  z-index:6;
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border:2px solid #52616e;
+  border-radius:50%;
+  color:#dfe5eb;
+  background:#091118;
+  font-family:var(--condensed);
+  font-size:11px;
+  font-weight:900;
+  box-shadow:0 0 0 4px #050a0e;
+}
+.lmf-flow-node.active{
+  color:#fff;
+  border-color:#ff1731;
+  box-shadow:0 0 0 4px #050a0e,0 0 18px #ff17315c;
+}
+.lmf-flow-node.complete{
+  color:#a8efd0;
+  border-color:#2d8f63;
+  background:#0b2118;
+}
+.lmf-flow-node.round-done:not(.complete){
+  color:#fff;
+  border-color:#8a2b3a;
+  background:#1d1015;
+}
+
+.lmf-flow-panel .active-exercise.lmf-flow-active{
+  border-color:#ff1731!important;
+  box-shadow:0 0 0 1px #ff173132,0 14px 34px #0007!important;
+}
+.lmf-flow-panel .active-exercise.lmf-flow-reviewing{
+  border-color:#725b9e!important;
+  box-shadow:0 0 0 1px #7d5ab438!important;
+}
+
+/* Compact preview = small artwork + name + prescription + state. */
+.lmf-compact-summary{
+  width:100%;
+  min-height:94px;
+  display:grid;
+  grid-template-columns:78px minmax(0,1fr) auto 18px;
+  align-items:center;
+  gap:11px;
+  padding:8px 10px;
+  text-align:left;
+  color:#fff;
+  border:0;
+  background:#081119;
+}
+.lmf-compact-thumb{
+  width:78px;
+  height:78px;
+  border:1px solid #30404b;
+  border-radius:10px;
+  background-image:var(--exercise-art,var(--v2-mountain));
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:cover;
+}
+.lmf-compact-copy{
+  min-width:0;
+  display:grid;
+  gap:6px;
+}
+.lmf-compact-copy b{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-family:var(--condensed);
+  font-size:20px;
+  line-height:1;
+}
+.lmf-compact-copy small{
+  color:#a6b1bd;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+}
+.lmf-compact-state{
+  padding:6px 8px;
+  border:1px solid #384856;
+  border-radius:999px;
+  color:#91a0ae;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+  white-space:nowrap;
+}
+.lmf-compact-state.now{
+  color:#fff;
+  border-color:#ff1731;
+  background:#3a1018;
+}
+.lmf-compact-state.complete{
+  color:#9ce8bd;
+  border-color:#296b4b;
+  background:#0a1f16;
+}
+.lmf-compact-state.round-done{
+  color:#ffb5bd;
+  border-color:#6b2934;
+  background:#221015;
+}
+.lmf-compact-state.up-next{
+  color:#a9c8ef;
+  border-color:#31516e;
+  background:#0d1721;
+}
+.lmf-compact-summary > i{
+  color:#82909d;
+  font-style:normal;
+  font-size:27px;
+}
+
+.lmf-flow-panel .active-exercise.lmf-flow-active > .lmf-compact-summary{
+  display:none!important;
+}
+.lmf-flow-panel .active-exercise.lmf-flow-compact > :not(.lmf-compact-summary):not(.lmf-flow-node){
+  display:none!important;
+}
+.lmf-flow-panel .active-exercise.lmf-flow-compact{
+  min-height:94px;
+  padding:0!important;
+  overflow:visible!important;
+  background:#081119!important;
+  border-color:#2b3944!important;
+  box-shadow:none!important;
+}
+.lmf-flow-panel .active-exercise.lmf-flow-complete.lmf-flow-compact{
+  opacity:.78;
+}
+
+/* Round / exercise progress badge in the section header. */
+.lmf-round-badge{
+  margin-left:auto;
+  min-width:84px;
+  padding:7px 9px;
+  display:grid;
+  gap:2px;
+  border:1px solid #33424e;
+  border-radius:10px;
+  text-align:center;
+  background:#081119;
+}
+.lmf-round-badge span{
+  color:#8895a2;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.lmf-round-badge strong{
+  font-family:var(--condensed);
+  color:#fff;
+  font-size:17px;
+  line-height:1;
+}
+
+/* Subtle rest / next strips selected in the Option 1 refinement. */
+.lmf-round-rest,
+.lmf-next-strip{
+  margin:12px 0 0 36px;
+  border:1px solid #2e3c47;
+  border-radius:13px;
+  background:#081119;
+}
+.lmf-round-rest{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:11px 13px;
+}
+.lmf-round-rest > span{
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  border:1px solid #435463;
+  border-radius:50%;
+  color:#bdc7d0;
+  font-size:20px;
+}
+.lmf-round-rest > div{
+  min-width:0;
+  display:grid;
+  gap:3px;
+}
+.lmf-round-rest b{
+  font-family:var(--condensed);
+  font-size:17px;
+}
+.lmf-round-rest small{
+  color:#8f9ca9;
+  font-size:9px;
+  line-height:1.3;
+}
+.lmf-round-rest > strong{
+  color:#dfe6ed;
+  font-family:var(--condensed);
+  font-size:17px;
+  white-space:nowrap;
+}
+
+.lmf-next-strip{
+  min-height:58px;
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) 18px;
+  align-items:center;
+  gap:9px;
+  padding:8px 11px;
+}
+.lmf-next-strip.complete{
+  border-color:#285f46;
+  background:#081711;
+}
+.lmf-next-thumb,
+.lmf-next-icon{
+  width:42px;
+  height:42px;
+  border-radius:8px;
+}
+.lmf-next-thumb{
+  border:1px solid #34444f;
+  background-image:var(--exercise-art,var(--v2-mountain));
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:cover;
+}
+.lmf-next-icon{
+  display:grid;
+  place-items:center;
+  color:#ff1731;
+  font-size:24px;
+  font-weight:900;
+}
+.lmf-next-strip > div{
+  min-width:0;
+  display:grid;
+  gap:3px;
+}
+.lmf-next-strip small{
+  color:#ff5366;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.1em;
+}
+.lmf-next-strip b{
+  color:#e9edf1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+}
+.lmf-next-strip > i{
+  color:#83919e;
+  font-style:normal;
+  font-size:22px;
+}
+
+@media (max-width:620px){
+  .lmf-exercise-media{
+    min-height:0;
+    aspect-ratio:1 / 1;
+  }
+  .lmf-workout-flow-card .exercise-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .lmf-workout-flow-card .exercise-actions .btn:last-child:nth-child(4){grid-column:1/-1!important}
+  .lmf-workout-flow-card .set-row.lmf-set-active{
+    grid-template-columns:repeat(3,minmax(0,1fr)) 62px!important;
+    gap:11px 7px!important;
+    padding:12px 10px!important;
+  }
+  .lmf-workout-flow-card .set-check{
+    width:62px!important;
+    height:62px!important;
+    border-radius:15px!important;
+    font-size:29px!important;
+  }
+  .lmf-stepper{
+    grid-template-columns:30px minmax(0,1fr) 30px;
+    gap:3px;
+    padding:4px;
+  }
+  .lmf-step-btn{
+    width:30px;
+    height:39px;
+    font-size:20px;
+  }
+  .lmf-stepper .set-input{
+    height:50px!important;
+    min-height:50px!important;
+    font-size:21px!important;
+  }
+  .lmf-set-tabs{gap:7px}
+  .lmf-set-tab{
+    flex-basis:50px;
+    min-width:50px;
+    height:46px;
+  }
+  .lmf-flow-panel .exercise-stack.lmf-group-flow{
+    padding-left:31px;
+  }
+  .lmf-flow-panel .exercise-stack.lmf-group-flow::before{
+    left:12px;
+  }
+  .lmf-flow-node{
+    left:-30px;
+    width:27px;
+    height:27px;
+    font-size:10px;
+  }
+  .lmf-compact-summary{
+    grid-template-columns:66px minmax(0,1fr) auto 14px;
+    min-height:82px;
+    gap:9px;
+    padding:7px 8px;
+  }
+  .lmf-compact-thumb{
+    width:66px;
+    height:66px;
+  }
+  .lmf-compact-copy b{font-size:18px}
+  .lmf-compact-state{font-size:7px;padding:5px 6px}
+  .lmf-round-rest,
+  .lmf-next-strip{
+    margin-left:31px;
+  }
+  .lmf-round-rest{
+    grid-template-columns:38px minmax(0,1fr) auto;
+    padding:10px;
+  }
+  .lmf-round-rest > strong{font-size:15px}
+}
+
+@media (max-width:430px){
+  .lmf-workout-flow-card .set-row.lmf-set-active{
+    grid-template-columns:repeat(3,minmax(0,1fr)) 56px!important;
+  }
+  .lmf-workout-flow-card .set-check{
+    width:56px!important;
+    height:56px!important;
+  }
+  .lmf-stepper{
+    grid-template-columns:27px minmax(0,1fr) 27px;
+  }
+  .lmf-step-btn{
+    width:27px;
+    height:36px;
+    font-size:19px;
+  }
+  .lmf-stepper .set-input{font-size:19px!important}
+  .lmf-compact-summary{
+    grid-template-columns:60px minmax(0,1fr) 14px;
+  }
+  .lmf-compact-thumb{width:60px;height:60px}
+  .lmf-compact-state{display:none}
+}
