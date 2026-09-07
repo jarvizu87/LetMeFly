@@ -10,6 +10,9 @@ CLOUDINARY_CSS="overlays/ui-command-v2/batch-n/exercise-art-cloudinary.css"
 # First reconstruct and validate the exact hardened Command V2 production source.
 bash ci/build-command-v2-hardening.sh
 
+# Preserve the saved readiness values when the active workout re-renders or reloads.
+bash ci/apply-readiness-persistence-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
+
 test -s "$CLOUDINARY_JS"
 test -s "$CLOUDINARY_CSS"
 node --check "$CLOUDINARY_JS"
@@ -87,6 +90,7 @@ grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
 grep -Rq "var(--exercise-art,var(--v2-lifter))" dist/assets
+grep -Rq "hydrateReadinessFormFromLatest" dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
 echo "LetMeFly private exercise-art override + no-stretch Cloudinary pipeline: PASS"
