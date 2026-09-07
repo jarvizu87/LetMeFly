@@ -1,0 +1,71 @@
+name: LetMeFly Galaxy Shell APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android-shell/**'
+      - '.github/workflows/android-shell-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+
+      - name: Restore test signing key
+        run: |
+          mkdir -p android-twa/signing
+          base64 -d android-twa/signing/letmefly-test.jks.b64 > android-twa/signing/letmefly-test.jks
+
+      - name: Fetch official LetMeFly launcher logo
+        run: |
+          mkdir -p android-shell/app/src/main/res/drawable-nodpi
+          curl -fL 'https://res.cloudinary.com/extor5az/image/upload/v1788815215/letmefly/app-brand/letmefly-app-icon-512-v2.png' \
+            -o android-shell/app/src/main/res/drawable-nodpi/letmefly_logo.png
+          test -s android-shell/app/src/main/res/drawable-nodpi/letmefly_logo.png
+
+      - name: Build signed shell APK
+        working-directory: android-shell
+        run: gradle :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Verify install package
+        run: |
+          APK='android-shell/app/build/outputs/apk/release/app-release.apk'
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | tee /tmp/badging.txt
+          grep -Fq "package: name='com.letmefly.galaxyshell' versionCode='3'" /tmp/badging.txt
+          grep -Fq "launchable-activity: name='com.letmefly.galaxyshell.MainActivity'" /tmp/badging.txt
+          cp "$APK" LetMeFly-Galaxy-Shell-v3.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LetMeFly-Galaxy-Shell-v3
+          path: LetMeFly-Galaxy-Shell-v3.apk
+          if-no-files-found: error
+          retention-days: 14
