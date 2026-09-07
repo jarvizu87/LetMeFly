@@ -11,7 +11,6 @@ ART_SOURCE_DIR="overlays/exercise-art"
 STATE_PATCH="overlays/ui-command-v2/batch-m/runtime-states.patch"
 STATE_CSS="overlays/ui-command-v2/batch-m/runtime-states.css"
 
-# Reconstruct and validate the full locked Command V2 release first.
 bash ci/build-command-v2-polish2.sh
 
 test -s "$READINESS_PATCH"
@@ -23,13 +22,20 @@ test -s "$STATE_CSS"
 
 cd .build-src/letmefly_app
 
-# The historical readiness patch remains present as an audited source artifact,
-# but its main.ts hunks predate the modular Program/Progress layout. Apply the
-# same hardening intent through a function-aware adapter that preserves current
-# program lookup while keeping the workout-service readiness link.
+# The service-layer readiness hunks still match the governed source and have
+# already been proven by CI. Apply only that verified section directly from the
+# historical patch; main.ts is handled by the modular adapter below.
+READINESS_SERVICE_PATCH="$(mktemp)"
+awk '/^--- src\/main.ts/{exit} {print}' "$ROOT_DIR/$READINESS_PATCH" > "$READINESS_SERVICE_PATCH"
+test -s "$READINESS_SERVICE_PATCH"
+patch --dry-run -p0 < "$READINESS_SERVICE_PATCH"
+patch -p0 < "$READINESS_SERVICE_PATCH"
+rm -f "$READINESS_SERVICE_PATCH"
+
+# Apply main.ts readiness behavior through a function-aware adapter so current
+# modular program lookup is preserved.
 bash "$ROOT_DIR/ci/modular-command-v2-readiness.sh" "$ROOT_DIR/.build-src/letmefly_app"
 
-# Readiness must be explicit, saved before workout creation, and linked to that session.
 grep -Fq "readiness_id: readinessId" src/services/workout-service.ts
 grep -Fq "const readiness = await saveReadiness(state.athlete.id, input)" src/main.ts
 grep -Fq "readiness.id" src/main.ts
@@ -47,7 +53,6 @@ grep -Fq "data-exercise-art=\"\${esc(slug(exercise.name))}\"" src/main.ts
 grep -Fq "data-exercise-art=\"\${esc(slug(name))}\"" src/main.ts
 grep -Fq "var(--exercise-art,var(--v2-mountain))" src/command-v2.css
 
-# Only artwork files that physically exist are copied and activated. Missing files keep fallback art.
 mkdir -p public/ui/exercises
 GENERATED_ART_CSS="$(mktemp)"
 : > "$GENERATED_ART_CSS"
@@ -94,7 +99,6 @@ grep -Fq "retry-progress" src/main.ts
 grep -Fq ".v2-bars i.empty" src/command-v2.css
 ! grep -Fq "8 + index * 3" src/main.ts
 
-# Re-run all protected-boundary audits against the hardened source that will actually ship.
 npm run audit:source
 npm run audit:crownforge
 npm run audit:exercise-library
