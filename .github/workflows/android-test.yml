@@ -48,23 +48,24 @@ jobs:
             -o android-twa/app/src/main/res/drawable-nodpi/letmefly_logo.png
           test -s android-twa/app/src/main/res/drawable-nodpi/letmefly_logo.png
 
-      - name: Build signed test APK
+      - name: Build signed Galaxy test APK
         working-directory: android-twa
         run: gradle :app:assembleRelease --no-daemon --stacktrace
 
-      - name: Verify APK certificate
+      - name: Verify APK certificate and package
         run: |
           APK='android-twa/app/build/outputs/apk/release/app-release.apk'
           test -s "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$APK" | grep -Fq '5a4162c5c41375211aa5761ee6bbfaff00d9d542e61c5b9cd3e1c2cc48255343'
-          cp "$APK" LetMeFly-test.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging "$APK" | grep -Fq "package: name='com.letmefly.galaxytest' versionCode='2'"
+          cp "$APK" LetMeFly-Galaxy-v2.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LetMeFly-test-apk
-          path: LetMeFly-test.apk
+          name: LetMeFly-Galaxy-v2-apk
+          path: LetMeFly-Galaxy-v2.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -78,4 +79,4 @@ jobs:
               --notes 'Direct-install Galaxy test build. Test signing only; not the future Google Play signing identity.' \
               --prerelease
           fi
-          gh release upload android-test LetMeFly-test.apk --clobber
+          gh release upload android-test LetMeFly-Galaxy-v2.apk --clobber
