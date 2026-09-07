@@ -4,37 +4,54 @@ Canonical source: `LetMeFly Private Exercise Thumbnails - JP/Black Crown/BLACK_C
 
 Working branch: `black-crown-v2-0-modular-import`
 
+Latest source-stage validation: GitHub Actions `Black Crown v2 Source Audit` run 17 (`34171539409`) — **PASS**.
+
 ## Batch checkpoints
 
-| Batch | Weeks | Source extraction | Encoding | Batch audit | Commit |
+Source staging is complete for all nine blocks. `SOURCE-STAGED` means the canonical public source prescriptions are safely committed and hash-audited, but have not yet all been normalized into final engine-native exercise/set objects.
+
+| Batch | Weeks | Source extraction | Source staging | Source audit | Runtime normalization |
 |---|---:|---|---|---|---|
-| 1 | 1-6 | PENDING | PENDING | PENDING | - |
-| 2 | 7-12 | PENDING | PENDING | PENDING | - |
-| 3 | 13-18 | PENDING | PENDING | PENDING | - |
-| 4 | 19-24 | PENDING | PENDING | PENDING | - |
-| 5 | 25-30 | PENDING | PENDING | PENDING | - |
-| 6 | 31-36 | PENDING | PENDING | PENDING | - |
-| 7 | 37-42 | PENDING | PENDING | PENDING | - |
-| 8 | 43-48 | PENDING | PENDING | PENDING | - |
-| 9 | 49-54 | PENDING | PENDING | PENDING | - |
+| 1 | 1-6 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 2 | 7-12 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 3 | 13-18 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 4 | 19-24 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 5 | 25-30 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 6 | 31-36 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 7 | 37-42 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 8 | 43-48 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
+| 9 | 49-54 | COMPLETE | SOURCE-STAGED | PASS | PENDING |
 
-## Final integration gates
+## Source-stage gates — PASSED
 
-- [ ] 54 weeks encoded.
-- [ ] 270 sessions present.
-- [ ] Source-parity audit passes all 54 weeks.
-- [ ] Test/check schedule matches v2.0.
-- [ ] Strict OHP exposure/removal rules match v2.0.
-- [ ] Mandatory / Conditional / Optional priorities preserved.
-- [ ] TM / percentage rounding rules preserved.
-- [ ] Day 4 recovery structure preserved.
-- [ ] Power / Olympic quality rules preserved.
-- [ ] Exercise-library resolution passes.
-- [ ] Crownforge regression passes unchanged.
-- [ ] Crown Maintenance regression passes unchanged.
-- [ ] TypeScript passes.
-- [ ] Vite production build passes.
-- [ ] Registry/facade contain no workout prescriptions.
-- [ ] Black Crown v2.0 is registered and reachable through program lookup.
+- [x] 54 canonical source weeks staged.
+- [x] 270 sessions present — exactly five sessions per week.
+- [x] Source-parity hashes pass all 54 weeks.
+- [x] Test/check schedule matches v2.0.
+- [x] Strict OHP source exposure count = 42 and protected removal weeks are clear.
+- [x] Mandatory / Conditional / Optional priorities preserved in source staging.
+- [x] No athlete calendar dates exposed in the public Black Crown source package.
+- [x] No athlete-derived exact pound loads exposed where percentage/TM loading is authoritative.
+- [x] Day 4 recovery/structural source rule preserved outside governed test/opener weeks.
+- [x] Crownforge regression passes unchanged.
+- [x] Crown Maintenance regression passes unchanged.
+- [x] TypeScript passes with the source overlay applied.
+- [x] Vite production build passes with the source overlay applied.
+- [x] Registry/facade remain prescription-free at the source-staging checkpoint.
 
-This file is intentionally updated after every completed batch so a timeout or chat change cannot lose import position.
+Source-stage aggregate digest: `843a4afc2736201b132f75e1945ee08a371c2bda583f672f5dd1f68dfdd65c48`.
+
+## Runtime integration gates — NEXT
+
+- [ ] Normalize all 54 weeks into engine-native `ProgramWeek` / `ProgramDay` / `WorkoutSection` / `ProgramExercise` / `ProgramSet` data.
+- [ ] Preserve percentages, set/rep structures, RPE/effort ceilings, rest, order, priority, and governed load references during normalization.
+- [ ] Preserve TM rounding: selected TM nearest 5 lb; percentage work rounds up to nearest 5 lb.
+- [ ] Resolve every programmed exercise display name through the Exercise Intelligence Library.
+- [ ] Validate barbell-loading compatibility for percentage/TM exercises.
+- [ ] Update Black Crown metadata to the canonical nine 6-week blocks.
+- [ ] Change Black Crown from `catalog-only` to active source only after runtime normalization passes.
+- [ ] Register Black Crown v2.0 as reachable through central program lookup without adding prescriptions to the registry/facade.
+- [ ] Apply the Black Crown overlay in the production build after Crownforge and before UI overlays.
+- [ ] Run final Black Crown + Crownforge + Crown Maintenance + exercise-library + TypeScript + production-build regression.
+
+This file is intentionally updated at durable checkpoints so a timeout or chat change cannot lose import position.
