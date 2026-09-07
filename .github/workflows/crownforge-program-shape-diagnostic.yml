@@ -1,0 +1,30 @@
+name: Crownforge Program Shape Diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Reconstruct modular source through Command V2 base
+        run: |
+          set -euo pipefail
+          ROOT="$PWD"
+          unzip -q source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip -d /tmp/lmfdiag
+          TARGET=/tmp/lmfdiag/letmefly_app
+          bash ci/apply-crownforge-v2-1.sh "$TARGET"
+          bash ci/command-v2-program-compat.sh pre "$TARGET"
+          cat overlays/ui-command-v2/command-v2.patch.* > /tmp/command-v2.patch
+          cd "$TARGET"
+          patch -p0 < /tmp/command-v2.patch
+          echo '===== PROGRAM PAGE SHAPE ====='
+          nl -ba src/main.ts | sed -n '270,365p'
+          echo '===== END PROGRAM PAGE SHAPE ====='
