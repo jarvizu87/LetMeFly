@@ -25,10 +25,6 @@ replacements = [
 """
 ),
 (
-"all programmed Crownforge Weeks 1–6 names resolved.",
-"all programmed Crownforge Weeks 1–14 + Crown Maintenance names resolved."
-),
-(
 """<button data-exercise-filter="carry">Carry</button><button data-exercise-filter="core">Core</button>""",
 """<button data-exercise-filter="carry">Carry</button><button data-exercise-filter="bodyweight">Bodyweight</button><button data-exercise-filter="core">Core</button>"""
 ),
@@ -49,7 +45,7 @@ PY
 
 grep -Fq "? 'bodyweight' : ''" "$TARGET_DIR/src/main.ts"
 grep -Fq 'data-exercise-filter="bodyweight"' "$TARGET_DIR/src/main.ts"
-grep -Fq 'Crownforge Weeks 1–14 + Crown Maintenance names resolved' "$TARGET_DIR/src/main.ts"
+grep -Fq 'Crownforge + Crown Maintenance names audited against the embedded source library' "$TARGET_DIR/src/main.ts"
 grep -Fq 'YOUR AI TRAINING PARTNER' "$TARGET_DIR/src/main.ts"
 grep -Fq 'PROGRAM-AWARE' "$TARGET_DIR/src/main.ts"
 
