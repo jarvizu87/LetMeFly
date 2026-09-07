@@ -7,11 +7,14 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.letmefly.app"
+        // Keep the permanent Play identity (com.letmefly.app) unused during
+        // direct Galaxy testing. A fresh package avoids stale/partial package
+        // conflicts from earlier sideload attempts on the device.
+        applicationId = "com.letmefly.galaxytest"
         minSdk = 23
-        targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0-test"
+        targetSdk = 35
+        versionCode = 2
+        versionName = "0.1.1-galaxy-test"
     }
 
     signingConfigs {
