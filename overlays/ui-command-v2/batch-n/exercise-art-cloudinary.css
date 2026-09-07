@@ -1,0 +1,28 @@
+/* LetMeFly Command V2 Batch N — Cloudinary exercise artwork.
+   Priority: JP custom art -> generic workout art -> bundled real lifter photo.
+   Never stretch or blur exercise imagery. */
+
+.exercise-stack .exercise-card[data-exercise-art]::before{
+  background-image:linear-gradient(180deg,rgba(2,5,8,.14),rgba(2,5,8,.20) 48%,rgba(2,5,8,.86)),var(--exercise-art,var(--v2-lifter))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  filter:none!important;
+}
+.exercise-stack .exercise-card:first-child[data-exercise-art]::before{
+  background-image:linear-gradient(180deg,rgba(2,5,8,.05),rgba(2,5,8,.12) 44%,rgba(2,5,8,.84)),var(--exercise-art,var(--v2-lifter))!important;
+}
+.library-thumb[data-exercise-art]{
+  background-image:linear-gradient(180deg,rgba(1,5,8,.04),rgba(1,5,8,.72)),var(--exercise-art,var(--v2-lifter))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  filter:none!important;
+}
+
+/* Cloudinary delivers aspect-ratio-preserving limit-fill crops. CSS cover only crops the
+   already-proportional image to the final card shape; it never distorts width vs height. */
+[data-exercise-art-source="mine"],
+[data-exercise-art-source="others"]{
+  image-rendering:auto;
+}

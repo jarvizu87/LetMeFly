@@ -1,5 +1,5 @@
 [build]
-  command = "bash ci/build-command-v2-hardening.sh && bash ci/install-command-refresh.sh"
+  command = "bash ci/build-command-v2-cloudinary.sh && bash ci/install-command-refresh.sh"
   publish = ".build-src/letmefly_app/dist"
 
 [build.environment]
