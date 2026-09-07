@@ -7,6 +7,7 @@ cd "$ROOT_DIR"
 CLOUDINARY_JS="overlays/ui-command-v2/batch-n/exercise-art-cloudinary.js"
 CLOUDINARY_CSS="overlays/ui-command-v2/batch-n/exercise-art-cloudinary.css"
 READINESS_COMFORT_CSS="overlays/ui-command-v2/batch-o/readiness-mobile-comfort.css"
+ART_IMPORT_HTML="overlays/ui-command-v2/batch-q/exercise-art-import.html"
 
 # First reconstruct and validate the exact hardened Command V2 production source.
 bash ci/build-command-v2-hardening.sh
@@ -20,16 +21,20 @@ bash ci/apply-mobile-workout-video-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 test -s "$CLOUDINARY_JS"
 test -s "$CLOUDINARY_CSS"
 test -s "$READINESS_COMFORT_CSS"
+test -s "$ART_IMPORT_HTML"
 node --check "$CLOUDINARY_JS"
 
 grep -Fq "exercise_thumbnail_overrides" "$CLOUDINARY_JS"
 grep -Fq "cloudinary_public_id" "$CLOUDINARY_JS"
+grep -Fq "privateExerciseArtMap" "$CLOUDINARY_JS"
 grep -Fq "__LMF_SUPABASE_URL__" "$CLOUDINARY_JS"
 grep -Fq "__LMF_SUPABASE_PUBLISHABLE_KEY__" "$CLOUDINARY_JS"
 ! grep -Fq "localStorage.setItem" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/mine/" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/others/" "$CLOUDINARY_JS"
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" "$CLOUDINARY_JS"
+grep -Fq "letmefly-private-exercise-art-map" "$ART_IMPORT_HTML"
+grep -Fq "privateExerciseArtMap" "$ART_IMPORT_HTML"
 grep -Fq "var(--exercise-art,var(--v2-mountain))" "$CLOUDINARY_CSS"
 grep -Fq "background-size:cover!important" "$CLOUDINARY_CSS"
 grep -Fq "filter:none!important" "$CLOUDINARY_CSS"
@@ -48,6 +53,7 @@ cat "$ROOT_DIR/$READINESS_COMFORT_CSS" >> src/command-v2.css
 
 # Render the runtime resolver with browser-safe Supabase public configuration.
 mkdir -p public/ui
+cp "$ROOT_DIR/$ART_IMPORT_HTML" public/exercise-art-import.html
 CLOUDINARY_TEMPLATE="$ROOT_DIR/$CLOUDINARY_JS" python - <<'PY'
 import json
 import os
@@ -63,6 +69,9 @@ if '__LMF_SUPABASE_' in source:
 Path('public/ui/exercise-art-cloudinary.js').write_text(source)
 PY
 node --check public/ui/exercise-art-cloudinary.js
+
+grep -Fq "privateExerciseArtMap" public/ui/exercise-art-cloudinary.js
+grep -Fq "privateExerciseArtMap" public/exercise-art-import.html
 
 python - <<'PY'
 from pathlib import Path
@@ -90,9 +99,12 @@ test -f dist/index.html
 test -f dist/service-worker.js
 test -f dist/ui/train-lifter.webp
 test -f dist/ui/exercise-art-cloudinary.js
+test -f dist/exercise-art-import.html
 grep -Fq "/ui/exercise-art-cloudinary.js" dist/index.html
 grep -Fq "exercise_thumbnail_overrides" dist/ui/exercise-art-cloudinary.js
 grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
+grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-cloudinary.js
+grep -Fq "privateExerciseArtMap" dist/exercise-art-import.html
 ! grep -Fq "localStorage.setItem" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "__LMF_SUPABASE_" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
