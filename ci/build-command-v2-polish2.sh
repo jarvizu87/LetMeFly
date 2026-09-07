@@ -38,8 +38,10 @@ test "$(wc -c < "$FINAL_POLISH_CSS")" = "4166"
 test "$(wc -c < "$INTERACTION_QA_CSS")" = "1979"
 
 cd .build-src/letmefly_app
-patch --dry-run -p0 < "$ROOT_DIR/$PATCH"
-patch -p0 < "$ROOT_DIR/$PATCH"
+# Batch F's historical patch remains checksum/size verified above. Its Program
+# hunk was authored against the old six-week shape, so reproduce the approved
+# release-polish intent through the modular adapter instead of regressing source.
+bash "$ROOT_DIR/ci/modular-command-v2-release-polish.sh" "$ROOT_DIR/.build-src/letmefly_app"
 cat "$ROOT_DIR/$CSS" >> src/command-v2.css
 cat "$ROOT_DIR/$CLEAN_CSS" >> src/command-v2.css
 cat "$ROOT_DIR/$FIDELITY_CSS" >> src/command-v2.css
@@ -92,6 +94,7 @@ test -f dist/ui/mountain-volume.svg
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 ! grep -Fq "35 + ((index * 13)" src/main.ts
 grep -Rq "program-governed-details" dist/assets
+grep -Rq "VIEW GOVERNED CROWNFORGE WEEKS 1–14" dist/assets
 grep -Rq "No session" dist/assets
 grep -Rq "readiness-field" dist/assets
 grep -Rq "scroll-margin-top" dist/assets

@@ -45,6 +45,13 @@ test -f .build-src/letmefly_app/package.json
   sha256sum -c MANIFEST.sha256
 )
 
+# Apply versioned program data before presentation/UI overlays.
+bash ci/apply-crownforge-v2-1.sh "$ROOT_DIR/.build-src/letmefly_app"
+
+# Temporarily expose the legacy home-page source shape expected by the locked
+# Command V2 patch. Prescriptions remain owned by the modular program packages.
+bash ci/command-v2-program-compat.sh pre "$ROOT_DIR/.build-src/letmefly_app"
+
 # Reconstruct Command V2 presentation from transport-safe text chunks.
 cat overlays/ui-command-v2/command-v2.patch.* > "$PATCH_FILE"
 cat overlays/ui-command-v2/command-v2.css.* > "$CSS_FILE"
@@ -82,12 +89,44 @@ test "$(wc -c < "$BATCH_E_CSS_FILE")" = "4641"
 cd .build-src/letmefly_app
 patch --dry-run -p0 < "$PATCH_FILE"
 patch -p0 < "$PATCH_FILE"
-patch --dry-run -p0 < "$BATCH_C_PATCH_FILE"
-patch -p0 < "$BATCH_C_PATCH_FILE"
+
+# Batch C should change the Training Maxes privacy badge, not the Profile badge
+# that belongs to Batch E. Protect that later-screen marker while Batch C runs.
+python - <<'PY'
+from pathlib import Path
+p = Path('src/main.ts')
+text = p.read_text()
+old = '<div class="page-kicker">Identity</div><h2>Athlete Profile</h2></div><span class="badge mandatory">Private</span>'
+new = '<div class="page-kicker">Identity</div><h2>Athlete Profile</h2></div><span class="badge mandatory">__LMF_PROFILE_PRIVATE__</span>'
+if text.count(old) != 1:
+    raise SystemExit(f'Profile privacy sentinel expected one source block, found {text.count(old)}')
+p.write_text(text.replace(old, new, 1))
+PY
+
+# Batch C's historical source is integrity-checked above, but its old program
+# hunk assumed six weeks. Reproduce its UI intent without losing Weeks 7–14 or
+# the separate Crown Maintenance bridge.
+bash "$ROOT_DIR/ci/modular-command-v2-batch-c.sh" "$ROOT_DIR/.build-src/letmefly_app"
+
+python - <<'PY'
+from pathlib import Path
+p = Path('src/main.ts')
+text = p.read_text()
+old = '<span class="badge mandatory">__LMF_PROFILE_PRIVATE__</span>'
+new = '<span class="badge mandatory">Private</span>'
+if text.count(old) != 1:
+    raise SystemExit(f'Profile privacy sentinel restore expected one marker, found {text.count(old)}')
+p.write_text(text.replace(old, new, 1))
+PY
+
 patch --dry-run -p0 < "$BATCH_C_TYPES_FILE"
 patch -p0 < "$BATCH_C_TYPES_FILE"
-patch --dry-run -p0 < "$BATCH_D_SEMANTICS_FILE"
-patch -p0 < "$BATCH_D_SEMANTICS_FILE"
+
+# Batch D's original semantics patch is checksum-verified above. Apply the same
+# approved Exercises/Coach intent with modular-program-aware wording instead of
+# letting its Weeks-1–6 context become program truth.
+bash "$ROOT_DIR/ci/modular-command-v2-batch-d.sh" "$ROOT_DIR/.build-src/letmefly_app"
+
 patch --dry-run -p0 < "$BATCH_E_PATCH_FILE"
 patch -p0 < "$BATCH_E_PATCH_FILE"
 cp "$CSS_FILE" src/command-v2.css
@@ -96,6 +135,9 @@ cat "$BATCH_B_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_C_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_D_CSS_FILE" >> src/command-v2.css
 cat "$BATCH_E_CSS_FILE" >> src/command-v2.css
+
+# Restore program-aware lookup immediately after the legacy UI patch is applied.
+bash "$ROOT_DIR/ci/command-v2-program-compat.sh" post "$ROOT_DIR/.build-src/letmefly_app"
 
 # Full governed-source and UI release gates.
 npm install --no-audit --no-fund
@@ -115,7 +157,6 @@ test -f dist/service-worker.js
 grep -Fq "letmefly-shell-v5-4-command-v2-1" dist/service-worker.js
 grep -Rq "data:image/webp;base64" dist/assets
 
-# Command V2 release markers: all ten approved screen families must survive compilation.
 for marker in \
   "Recent training signal" \
   "session-track" \
