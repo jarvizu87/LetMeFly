@@ -25,20 +25,30 @@ jobs:
           (cd .inspect-src/letmefly_app && sha256sum -c MANIFEST.sha256)
           bash ci/apply-crownforge-v2-1.sh "$GITHUB_WORKSPACE/.inspect-src/letmefly_app"
 
-      - name: Stage Crown Maintenance source for inspection
+      - name: Show exact Maintenance source sections
         run: |
           set -euo pipefail
-          rm -rf .inspect-out
-          mkdir -p .inspect-out
-          cp -R .inspect-src/letmefly_app/src/programs/crown-maintenance .inspect-out/
-          cp .inspect-src/letmefly_app/scripts/audit-crownforge-full.mjs .inspect-out/
-          printf '\n--- matches ---\n'
-          grep -RniE "67\.5|65%|72\.5|rounding|2026-12-26|2027-01-02|Close-Grip Bench" .inspect-out || true
+          printf '\n--- crown-maintenance helper ---\n'
+          sed -n '1,45p' .inspect-src/letmefly_app/src/programs/crown-maintenance/weeks.ts
+          printf '\n--- Maintenance Week 2 Day 5 ---\n'
+          sed -n '286,316p' .inspect-src/letmefly_app/src/programs/crown-maintenance/weeks.ts
+          printf '\n--- Maintenance Week 3 Day 5 ---\n'
+          sed -n '386,414p' .inspect-src/letmefly_app/src/programs/crown-maintenance/weeks.ts
+          printf '\n--- Crownforge audit section ---\n'
+          sed -n '82,120p' .inspect-src/letmefly_app/scripts/audit-crownforge-full.mjs
+
+      - name: Stage source artifact
+        run: |
+          set -euo pipefail
+          rm -rf inspect-out
+          mkdir -p inspect-out
+          cp -R .inspect-src/letmefly_app/src/programs/crown-maintenance inspect-out/
+          cp .inspect-src/letmefly_app/scripts/audit-crownforge-full.mjs inspect-out/
 
       - name: Publish inspection source
         uses: actions/upload-artifact@v4
         with:
           name: crownforge-drive-sync-inspect
-          path: .inspect-out
+          path: inspect-out
           if-no-files-found: error
           retention-days: 1
