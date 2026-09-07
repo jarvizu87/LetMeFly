@@ -7,6 +7,9 @@ if [[ -z "$TARGET_DIR" || ! -f "$TARGET_DIR/src/main.ts" || ! -f "$TARGET_DIR/sr
   exit 1
 fi
 
+# The service-layer portion is applied directly from the historical readiness
+# patch by build-command-v2-hardening.sh. This adapter owns only main.ts so it
+# cannot accidentally rewrite modular program lookup.
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
@@ -15,41 +18,18 @@ root = Path(os.environ['TARGET_DIR'])
 service = root / 'src/services/workout-service.ts'
 main = root / 'src/main.ts'
 
-# Preserve the original hardening intent in the workout service.
 s = service.read_text()
-old_sig = '''  programInstanceId: string | null,
-  week: number,
-  day: ProgramDay,
-): Promise<WorkoutBundle> {'''
-new_sig = '''  programInstanceId: string | null,
-  week: number,
-  day: ProgramDay,
-  readinessId: string,
-): Promise<WorkoutBundle> {'''
-if s.count(old_sig) != 1:
-    raise SystemExit(f'readiness service signature expected one block, found {s.count(old_sig)}')
-s = s.replace(old_sig, new_sig, 1)
-old_session = '''        program_instance_id: programInstanceId,
-        originating_device_id: null,'''
-new_session = '''        program_instance_id: programInstanceId,
-        readiness_id: readinessId,
-        originating_device_id: null,'''
-if s.count(old_session) != 1:
-    raise SystemExit(f'readiness session link expected one block, found {s.count(old_session)}')
-s = s.replace(old_session, new_session, 1)
-service.write_text(s)
+if 'readinessId: string' not in s or 'readiness_id: readinessId' not in s:
+    raise SystemExit('verified readiness service patch was not applied before modular main adapter')
 
 t = main.read_text()
 
-# Session-review action must clearly communicate the readiness requirement.
 old_review = '''<button class="btn primary hero-start" data-action="start-workout">${day.restDay ? 'LOG REST DAY' : 'START WORKOUT'}</button>'''
 new_review = '''<button class="btn primary hero-start" data-action="start-workout">${day.restDay ? 'SAVE READINESS & LOG REST DAY' : 'SAVE READINESS & START WORKOUT'}</button>'''
 if t.count(old_review) != 1:
     raise SystemExit(f'readiness review action expected one block, found {t.count(old_review)}')
 t = t.replace(old_review, new_review, 1)
 
-# Replace the readiness renderer as a complete function so line movement from
-# modular Program/Progress UI cannot make the historical patch brittle.
 start = t.find('function readinessPage(day: ProgramDay, hasWorkout: boolean): string {')
 next_start = t.find('function programExerciseCard(', start)
 if start < 0 or next_start < 0:
@@ -60,7 +40,6 @@ new_readiness = '''function readinessPage(day: ProgramDay, hasWorkout: boolean):
 }'''
 t = t[:start] + new_readiness + t[next_start:]
 
-# Replace readiness save as a complete function.
 save_start = t.find('async function saveReadinessFromForm(): Promise<void> {')
 start_workout = t.find('async function startSelectedWorkout(): Promise<void> {', save_start)
 if save_start < 0 or start_workout < 0:
@@ -97,7 +76,6 @@ async function saveReadinessFromForm(): Promise<void> {
 '''
 t = t[:save_start] + new_save + t[start_workout:]
 
-# Modify startSelectedWorkout in place rather than replacing its program lookup.
 fn_start = t.find('async function startSelectedWorkout(): Promise<void> {')
 next_async = t.find('\nasync function ', fn_start + 1)
 if fn_start < 0 or next_async < 0:
@@ -137,12 +115,10 @@ if close_pos is None:
 args = fn[open_pos + 1:close_pos].rstrip()
 if args.rstrip().endswith(','):
     new_args = args + '\n    readiness.id,'
+elif '\n' in args:
+    new_args = args + ',\n    readiness.id,'
 else:
-    # Preserve existing compact or multiline arguments and append the readiness link.
-    if '\n' in args:
-        new_args = args + ',\n    readiness.id,'
-    else:
-        new_args = args + ', readiness.id'
+    new_args = args + ', readiness.id'
 fn = fn[:open_pos + 1] + new_args + fn[close_pos:]
 
 old_toast = "  showToast('Workout saved locally • cloud sync pending if needed')"
