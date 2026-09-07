@@ -8,11 +8,13 @@
 
   const params = new URLSearchParams(window.location.search)
   const launchedFromCurrentPwa = () =>
-    isStandalone() && params.get('source') === 'pwa' && params.get('app') === 'letmefly-v1'
+    isStandalone() && params.get('source') === 'pwa' && params.get('app') === 'letmefly-v2'
 
   if (launchedFromCurrentPwa()) return
 
-  const isAndroid = /Android/i.test(navigator.userAgent || '')
+  const ua = navigator.userAgent || ''
+  const isAndroid = /Android/i.test(ua)
+  const isChrome = /Chrome\//i.test(ua) && !/(EdgA|OPR|SamsungBrowser)\//i.test(ua)
   let deferredPrompt = null
   let banner = null
 
@@ -35,16 +37,23 @@
     if (!copy || !confirm) return
 
     if (deferredPrompt) {
-      copy.textContent = 'Install the full LetMeFly app on your home screen.'
+      copy.textContent = 'LetMeFly is ready to install as a full app.'
       confirm.textContent = 'Install'
       confirm.dataset.mode = 'install'
       return
     }
 
-    if (isAndroid) {
-      copy.textContent = 'Open LetMeFly directly in Chrome so Android can offer the full app install.'
+    if (isAndroid && !isChrome) {
+      copy.textContent = 'Open LetMeFly directly in Chrome so Android can install the full app.'
       confirm.textContent = 'Open in Chrome'
       confirm.dataset.mode = 'chrome'
+      return
+    }
+
+    if (isAndroid && isChrome) {
+      copy.textContent = 'You are in Chrome. If Install is not ready yet, use Chrome’s menu and choose Install app.'
+      confirm.textContent = 'Install help'
+      confirm.dataset.mode = 'help'
       return
     }
 
@@ -112,7 +121,7 @@
         return
       }
 
-      alert('Open LetMeFly in Chrome, then use Chrome’s Install app or Add to Home screen option.')
+      alert('In Chrome, tap the three-dot menu and choose Install app. If Chrome only shows Add to Home screen, choose that option.')
     })
 
     document.body.appendChild(banner)
@@ -131,10 +140,11 @@
     removeBanner()
   })
 
+  const start = () => setTimeout(showBanner, params.get('install') === '1' ? 900 : 1400)
   if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', () => setTimeout(showBanner, 650), { once: true })
+    window.addEventListener('DOMContentLoaded', start, { once: true })
   } else {
-    setTimeout(showBanner, 650)
+    start()
   }
 
   window.__LMF_PWA_INSTALL__ = {
@@ -149,7 +159,7 @@
         removeBanner()
         return choice?.outcome === 'accepted'
       }
-      if (isAndroid) {
+      if (isAndroid && !isChrome) {
         window.location.href = chromeIntent()
       } else {
         showBanner()
