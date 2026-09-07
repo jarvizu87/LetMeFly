@@ -14,11 +14,11 @@ test -s "$CLOUDINARY_JS"
 test -s "$CLOUDINARY_CSS"
 node --check "$CLOUDINARY_JS"
 
-grep -Fq "lmf.exerciseArtOverrides.v1" "$CLOUDINARY_JS"
 grep -Fq "exercise_thumbnail_overrides" "$CLOUDINARY_JS"
 grep -Fq "cloudinary_public_id" "$CLOUDINARY_JS"
 grep -Fq "__LMF_SUPABASE_URL__" "$CLOUDINARY_JS"
 grep -Fq "__LMF_SUPABASE_PUBLISHABLE_KEY__" "$CLOUDINARY_JS"
+! grep -Fq "localStorage.setItem" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/mine/" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/others/" "$CLOUDINARY_JS"
 grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" "$CLOUDINARY_JS"
@@ -79,9 +79,9 @@ test -f dist/service-worker.js
 test -f dist/ui/train-lifter.webp
 test -f dist/ui/exercise-art-cloudinary.js
 grep -Fq "/ui/exercise-art-cloudinary.js" dist/index.html
-grep -Fq "lmf.exerciseArtOverrides.v1" dist/ui/exercise-art-cloudinary.js
 grep -Fq "exercise_thumbnail_overrides" dist/ui/exercise-art-cloudinary.js
 grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
+! grep -Fq "localStorage.setItem" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "__LMF_SUPABASE_" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
