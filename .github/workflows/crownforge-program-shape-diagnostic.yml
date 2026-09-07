@@ -14,9 +14,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Reconstruct modular source through Command V2 base
+      - name: Reconstruct through modular Batch C
         run: |
           set -euo pipefail
+          ROOT="$PWD"
           unzip -q source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip -d /tmp/lmfdiag
           TARGET=/tmp/lmfdiag/letmefly_app
           bash ci/apply-crownforge-v2-1.sh "$TARGET"
@@ -24,6 +25,18 @@ jobs:
           cat overlays/ui-command-v2/command-v2.patch.* > /tmp/command-v2.patch
           cd "$TARGET"
           patch -p0 < /tmp/command-v2.patch
-          echo '===== PRIVATE BADGE CONTEXT ====='
-          grep -n -C 1 '<span class="badge mandatory">Private</span>' src/main.ts || true
-          echo '===== END PRIVATE BADGE CONTEXT ====='
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/main.ts'); t=p.read_text()
+          old='<div class="page-kicker">Identity</div><h2>Athlete Profile</h2></div><span class="badge mandatory">Private</span>'
+          new='<div class="page-kicker">Identity</div><h2>Athlete Profile</h2></div><span class="badge mandatory">__LMF_PROFILE_PRIVATE__</span>'
+          p.write_text(t.replace(old,new,1))
+          PY
+          bash "$ROOT/ci/modular-command-v2-batch-c.sh" "$TARGET"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/main.ts'); t=p.read_text(); p.write_text(t.replace('<span class="badge mandatory">__LMF_PROFILE_PRIVATE__</span>','<span class="badge mandatory">Private</span>',1))
+          PY
+          echo '===== EXERCISES / COACH SHAPE ====='
+          grep -n -A 34 -B 4 'function exercisesPage' src/main.ts
+          echo '===== END EXERCISES / COACH SHAPE ====='
