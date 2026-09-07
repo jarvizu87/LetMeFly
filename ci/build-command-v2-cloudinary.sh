@@ -143,7 +143,7 @@ checks = {
     'mobile set equal input height': 'height:62px!important' in compact,
     'mobile set input text size': 'font-size:17px' in compact,
     'Workout Flow single active set': '.set-row.lmf-set-active' in compact,
-    'Workout Flow square image': 'aspect-ratio:1/1' in compact,
+    'Workout Flow square image': '.lmf-exercise-media' in compact and 'aspect-ratio:1' in compact and 'background-size:contain' in compact,
     'Workout Flow set tabs': '.lmf-set-tabs' in compact,
     'Workout Flow 10+ set horizontal scroll': 'scroll-snap-type:xproximity' in compact,
     'Workout Flow compact previews': '.lmf-compact-summary' in compact,
