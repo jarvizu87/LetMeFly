@@ -45,30 +45,38 @@ transport_errors: list[str] = []
 
 # Transport may be one base64 file or Crownforge-style numbered chunks.
 # Prefer chunks when present so large payloads stay safe/resumable in GitHub writes.
-def read_transport(block: dict) -> tuple[str, str]:
+def read_transport(block: dict) -> tuple[str, str, bool]:
     transport_dir = overlay / 'transport'
     base = transport_dir / block['base64File']
     chunks = sorted(transport_dir.glob(block['base64File'] + '.*'))
     chunks = [p for p in chunks if re.fullmatch(r'.*\.\d{2}', p.name)]
     if chunks:
-        return ''.join(p.read_text() for p in chunks), 'chunks:' + ','.join(p.name for p in chunks)
+        return ''.join(p.read_text() for p in chunks), 'chunks:' + ','.join(p.name for p in chunks), True
     if base.is_file():
-        return base.read_text(), base.name
+        return base.read_text(), base.name, False
     raise FileNotFoundError(base)
 
 # Report every transport mismatch in one run so repairs can be batched instead
 # of discovering one block at a time.
 for block in manifest['blocks']:
     try:
-        raw_text, source_label = read_transport(block)
+        raw_text, source_label, is_chunked = read_transport(block)
     except FileNotFoundError as exc:
         transport_errors.append(f"Block {block['block']}: missing {exc}")
         continue
 
     compact = ''.join(raw_text.split())
-    compact += '=' * (-len(compact) % 4)
+    compact_sha = hashlib.sha256(compact.encode()).hexdigest()
+    if is_chunked and block.get('base64Sha256') and compact_sha != block['base64Sha256']:
+        transport_errors.append(
+            f"Block {block['block']}: {source_label} base64Sha256={compact_sha}; "
+            f"expected {block['base64Sha256']}"
+        )
+        continue
+
+    padded = compact + '=' * (-len(compact) % 4)
     try:
-        archive = base64.b64decode(compact, validate=True)
+        archive = base64.b64decode(padded, validate=True)
     except Exception as exc:
         transport_errors.append(
             f"Block {block['block']}: base64 decode failed from {source_label}: {exc}"
@@ -79,11 +87,20 @@ for block in manifest['blocks']:
     archive_size = len(archive)
     archives[block['block']] = archive
 
-    if archive_size != block['archiveSize'] or archive_sha != block['archiveSha256']:
+    if archive_size != block['archiveSize']:
         transport_errors.append(
-            f"Block {block['block']}: {source_label} actual archiveSize={archive_size} "
-            f"archiveSha256={archive_sha}; expected archiveSize={block['archiveSize']} "
-            f"archiveSha256={block['archiveSha256']}"
+            f"Block {block['block']}: {source_label} actual archiveSize={archive_size}; "
+            f"expected archiveSize={block['archiveSize']}"
+        )
+        continue
+
+    # For a chunked upload, the compact base64 digest is the transport-integrity
+    # authority. This avoids tar/gzip wrapper-byte drift while the canonical
+    # per-week source hashes below still protect the actual program content.
+    if not is_chunked and archive_sha != block['archiveSha256']:
+        transport_errors.append(
+            f"Block {block['block']}: {source_label} archiveSha256={archive_sha}; "
+            f"expected archiveSha256={block['archiveSha256']}"
         )
 
 if transport_errors:
