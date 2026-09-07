@@ -11,6 +11,9 @@ EXPECTED_PROGRAM_B64_SIZE="81978"
 EXPECTED_PROGRAM_GZIP_SIZE="60857"
 EXPECTED_PROGRAM_PATCH_SIZE="329460"
 EXPECTED_PROGRAM_CHUNKS="11"
+DRIVE_SYNC_PATCH="$PROGRAM_OVERLAY_DIR/drive-sync-v2-1.patch"
+EXPECTED_DRIVE_SYNC_PATCH_SHA="8fd91e70ce5ea14c7c75d37aaa28d550584bf06ed5291d5e045f55000b2bf2bf"
+EXPECTED_DRIVE_SYNC_PATCH_SIZE="8535"
 
 PROGRAM_B64_FILE="$(mktemp)"
 PROGRAM_GZIP_FILE="$(mktemp)"
@@ -42,10 +45,19 @@ gzip -dc "$PROGRAM_GZIP_FILE" > "$PROGRAM_PATCH_FILE"
 test "$(wc -c < "$PROGRAM_PATCH_FILE")" = "$EXPECTED_PROGRAM_PATCH_SIZE"
 echo "$EXPECTED_PROGRAM_PATCH_SHA  $PROGRAM_PATCH_FILE" | sha256sum -c -
 
+test -f "$DRIVE_SYNC_PATCH"
+test "$(wc -c < "$DRIVE_SYNC_PATCH")" = "$EXPECTED_DRIVE_SYNC_PATCH_SIZE"
+echo "$EXPECTED_DRIVE_SYNC_PATCH_SHA  $DRIVE_SYNC_PATCH" | sha256sum -c -
+
 (
   cd "$TARGET_DIR"
   patch --dry-run -p1 < "$PROGRAM_PATCH_FILE"
   patch -p1 < "$PROGRAM_PATCH_FILE"
+
+  # Sync the modular Crown Maintenance package to the approved Crownforge v2.1
+  # Drive reference without modifying Crownforge week numbering or UI layers.
+  patch --dry-run -p1 < "$DRIVE_SYNC_PATCH"
+  patch -p1 < "$DRIVE_SYNC_PATCH"
 
   # Architecture boundaries: prescriptions belong to program packages, never the registry/facade.
   test -f src/program-engine/types.ts
@@ -59,6 +71,9 @@ echo "$EXPECTED_PROGRAM_PATCH_SHA  $PROGRAM_PATCH_FILE" | sha256sum -c -
   grep -Fq "black-crown" src/programs/registry.ts
   ! grep -Eq "sets:[[:space:]]*[0-9]|loadLbs:|reps:" src/programs/registry.ts
   ! grep -Eq "sets:[[:space:]]*[0-9]|loadLbs:|reps:" src/data/programs.ts
+  grep -Fq "rounding: 'up-5'" src/programs/crown-maintenance/weeks.ts
+  grep -Fq "pct(String(i + 1), 5, 70, 'verified-bench-press-1rm')" src/programs/crown-maintenance/weeks.ts
+  grep -Fq "pct(String(i + 1), 4, 72.5, 'verified-bench-press-1rm')" src/programs/crown-maintenance/weeks.ts
 )
 
-echo "Crownforge v2.1 modular program-data overlay: PASS"
+echo "Crownforge v2.1 modular program-data overlay + approved Drive sync: PASS"
