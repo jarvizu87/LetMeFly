@@ -18,8 +18,8 @@ test -s "$INDEX"
 
 # Some legacy source layers left a complete second HTML document appended after
 # the real Vite document. Browsers can still discover favicon/manifest links in
-# that stale tail, which allowed the retired crown icon to survive. Keep only
-# the first complete document in the production shell.
+# that stale tail, which allowed retired branding to survive. Keep only the
+# first complete document in the production shell.
 INDEX="$INDEX" python - <<'PY'
 from pathlib import Path
 import os
@@ -37,7 +37,7 @@ PY
 # PWA identity. Fail the release if any old crown path leaks back in.
 [[ "$(grep -Eic '<!doctype html>' "$INDEX")" -eq 1 ]]
 [[ "$(grep -Eic '</html>' "$INDEX")" -eq 1 ]]
-grep -Fq '/manifest.webmanifest?v=brand-v4' "$INDEX"
+grep -Fq '/manifest.webmanifest?v=brand-v5' "$INDEX"
 grep -Fq '/app-icon-v4.svg?v=4' "$INDEX"
 ! grep -Fq '/icon-192.png' "$INDEX"
 ! grep -Fq '/icon-512.png' "$INDEX"
