@@ -1,7 +1,32 @@
 /* LetMeFly Command V2 Batch P — mobile workout comfort pass.
    Goal: fast, readable set logging on Galaxy-class phones without changing program data. */
 
-@media (max-width: 620px){
+/* The brand element already contains the crown character. A later Command V2 layer
+   also injected it with ::before, which rendered two crowns on mobile. */
+.brand-mark::before{content:none!important}
+
+@media (max-width:780px){
+  /* Keep the cloud/local indicator intentional instead of rendering as a thin
+     purple artifact at the far-right edge of the phone header. */
+  .topbar .sync-pill{
+    display:grid!important;
+    place-items:center!important;
+    width:14px!important;
+    min-width:14px!important;
+    height:14px!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+  .topbar .sync-pill .dot{
+    display:block!important;
+    width:8px!important;
+    height:8px!important;
+    margin:0!important;
+    border-radius:50%!important;
+  }
+}
+
+@media (max-width:620px){
   .set-table{
     gap:10px;
     padding:0 10px 12px;
