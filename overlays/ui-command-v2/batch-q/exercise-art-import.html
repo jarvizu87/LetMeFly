@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#090b10" />
+  <title>LetMeFly — Private Exercise Art Import</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090b10;color:#f5f7fb}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#090b10,#10131b);padding:24px 16px}
+    main{max-width:620px;margin:0 auto}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#a88cff;margin-bottom:8px}
+    h1{font-size:28px;line-height:1.05;margin:0 0 12px}p{color:#c7cbd4;line-height:1.55;font-size:16px}
+    .card{margin-top:20px;padding:18px;border:1px solid #292e3a;border-radius:18px;background:#121620;box-shadow:0 16px 40px #0006}
+    input[type=file]{width:100%;padding:14px;border:1px dashed #474d5c;border-radius:14px;background:#0c0f16;color:#f5f7fb;font-size:16px}
+    button,a.button{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:14px;border:0;border-radius:14px;background:#6d45e8;color:white;font-weight:850;font-size:16px;text-decoration:none;cursor:pointer}
+    button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#202633!important}.status{margin-top:14px;padding:12px 14px;border-radius:12px;background:#0b0e14;color:#c7cbd4;min-height:48px;white-space:pre-wrap}.ok{color:#9ce8b8}.error{color:#ff9c9c}
+    .privacy{font-size:13px;color:#9ba2af;margin-top:16px}.privacy strong{color:#fff}
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Private Athlete Data</div>
+  <h1>Import Exercise Art Map</h1>
+  <p>This imports only your private exercise-thumbnail mapping into this device. It does not change Crownforge, training maxes, workout history, or readiness data.</p>
+  <section class="card">
+    <input id="file" type="file" accept="application/json,.json" />
+    <button id="import" type="button" disabled>Import Private Art Map</button>
+    <div id="status" class="status">Choose a LetMeFly private exercise-art JSON file.</div>
+    <a class="button secondary" href="/">Return to LetMeFly</a>
+    <p class="privacy"><strong>Privacy:</strong> the selected mapping is stored in LetMeFly's local IndexedDB on this device. The importer does not upload the JSON file.</p>
+  </section>
+</main>
+<script>
+(() => {
+  'use strict'
+  const DB_NAME = 'letmefly-private'
+  const STORE_NAME = 'meta'
+  const MAP_KEY = 'privateExerciseArtMap'
+  const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  const fileInput = document.getElementById('file')
+  const importButton = document.getElementById('import')
+  const status = document.getElementById('status')
+  let parsed = null
+
+  function setStatus(message, kind = '') {
+    status.textContent = message
+    status.className = `status ${kind}`.trim()
+  }
+
+  function validate(payload) {
+    if (!payload || payload.format !== 'letmefly-private-exercise-art-map' || payload.formatVersion !== 1) {
+      throw new Error('This is not a LetMeFly private exercise-art map.')
+    }
+    if (!payload.overrides || typeof payload.overrides !== 'object' || Array.isArray(payload.overrides)) {
+      throw new Error('The file is missing its overrides map.')
+    }
+    const clean = {}
+    for (const [slug, value] of Object.entries(payload.overrides)) {
+      if (!SLUG_PATTERN.test(slug)) throw new Error(`Invalid exercise key: ${slug}`)
+      if (!value || typeof value !== 'object') throw new Error(`Invalid asset record: ${slug}`)
+      const publicId = typeof value.publicId === 'string' ? value.publicId.trim() : ''
+      const format = typeof value.format === 'string' && value.format.trim() ? value.format.trim().toLowerCase() : 'webp'
+      if (!publicId || !/^[a-zA-Z0-9_./-]+$/.test(publicId)) throw new Error(`Invalid Cloudinary public ID: ${slug}`)
+      if (!/^[a-z0-9]+$/.test(format)) throw new Error(`Invalid image format: ${slug}`)
+      clean[slug] = { publicId, format, status: 'approved' }
+    }
+    const count = Object.keys(clean).length
+    if (!count || count > 500) throw new Error(`Unexpected exercise-art count: ${count}`)
+    return clean
+  }
+
+  function saveMap(overrides) {
+    return new Promise((resolve, reject) => {
+      let request
+      let created = false
+      try { request = indexedDB.open(DB_NAME) } catch (error) { reject(error); return }
+      request.onupgradeneeded = () => {
+        created = true
+        try { request.transaction && request.transaction.abort() } catch {}
+      }
+      request.onerror = () => reject(created
+        ? new Error('Open LetMeFly once before importing the private art map.')
+        : (request.error || new Error('Could not open LetMeFly private storage.')))
+      request.onsuccess = () => {
+        const db = request.result
+        try {
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.close()
+            reject(new Error('LetMeFly private storage is not initialized. Open the app once, then try again.'))
+            return
+          }
+          const tx = db.transaction([STORE_NAME], 'readwrite')
+          tx.objectStore(STORE_NAME).put({
+            key: MAP_KEY,
+            value: overrides,
+            updatedAt: new Date().toISOString()
+          })
+          tx.oncomplete = () => { db.close(); resolve() }
+          tx.onabort = () => { db.close(); reject(tx.error || new Error('Exercise-art import was aborted.')) }
+          tx.onerror = () => { db.close(); reject(tx.error || new Error('Exercise-art import failed.')) }
+        } catch (error) {
+          db.close()
+          reject(error)
+        }
+      }
+    })
+  }
+
+  fileInput.addEventListener('change', async () => {
+    parsed = null
+    importButton.disabled = true
+    const file = fileInput.files && fileInput.files[0]
+    if (!file) return setStatus('Choose a LetMeFly private exercise-art JSON file.')
+    try {
+      const payload = JSON.parse(await file.text())
+      const overrides = validate(payload)
+      parsed = overrides
+      importButton.disabled = false
+      setStatus(`Ready to import ${Object.keys(overrides).length} approved exercise images.`, 'ok')
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Could not read that file.', 'error')
+    }
+  })
+
+  importButton.addEventListener('click', async () => {
+    if (!parsed) return
+    importButton.disabled = true
+    try {
+      await saveMap(parsed)
+      setStatus(`Imported ${Object.keys(parsed).length} exercise images. Return to LetMeFly and refresh once.`, 'ok')
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Exercise-art import failed.', 'error')
+      importButton.disabled = false
+    }
+  })
+})()
+</script>
+</body>
+</html>
