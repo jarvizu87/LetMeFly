@@ -36,22 +36,43 @@
     border:1px solid #27323e!important;
     border-radius:14px;
     background:#0b1219;
-    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
     grid-template-areas:
-      "set target target target target check"
-      "reps reps load load rpe rpe";
-    align-items:end!important;
-    column-gap:8px!important;
-    row-gap:12px!important;
+      "set set check"
+      "reps load rpe";
+    align-items:start!important;
+    column-gap:10px!important;
+    row-gap:14px!important;
     padding:14px 12px!important;
   }
 
   .set-row:first-child{border-top:1px solid #27323e!important}
-  .set-label{grid-area:set;align-items:flex-start!important;justify-content:center;min-height:48px}
-  .set-target-cell{grid-area:target;align-self:center}
+
+  /* The prescribed reps/load are already prefilled in the logging cells, so the
+     separate TARGET block is redundant on a phone and wastes the most valuable
+     horizontal space. */
+  .set-target-cell{display:none!important}
+
+  .set-label{
+    grid-area:set;
+    align-items:flex-start!important;
+    justify-content:center;
+    align-self:center!important;
+    min-height:48px;
+  }
+
   .reps-field{grid-area:reps}
   .load-field{grid-area:load}
   .rpe-field{grid-area:rpe}
+
+  .reps-field,
+  .load-field,
+  .rpe-field{
+    align-self:start!important;
+    min-width:0!important;
+    width:100%!important;
+  }
+
   .set-check{
     grid-area:check;
     justify-self:end;
@@ -63,7 +84,6 @@
   }
 
   .set-label span,
-  .set-target-cell span,
   .set-field label,
   .rpe-field label{
     font-size:10px!important;
@@ -71,19 +91,24 @@
     letter-spacing:.08em;
   }
 
+  .set-field label,
+  .rpe-field label{
+    display:block!important;
+    min-height:16px!important;
+    margin-bottom:7px!important;
+  }
+
   .set-label strong{
     font-size:28px!important;
     line-height:1;
   }
 
-  .set-target-cell strong{
-    font-size:14px!important;
-    line-height:1.3!important;
-  }
-
   .set-input{
-    min-height:50px;
-    padding:12px 10px!important;
+    width:100%!important;
+    height:62px!important;
+    min-height:62px!important;
+    box-sizing:border-box!important;
+    padding:12px 8px!important;
     border-radius:10px!important;
     font-size:17px!important;
     font-weight:750;
@@ -91,6 +116,8 @@
   }
 
   .set-field small{
+    display:block!important;
+    min-height:30px!important;
     margin-top:6px!important;
     color:#aeb8c4!important;
     font-size:11px!important;
