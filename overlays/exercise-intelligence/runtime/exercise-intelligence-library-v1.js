@@ -76,8 +76,9 @@
     const roles = (exercise.movementRoles || []).join(' • ') || 'Training movement';
     const equipment = (exercise.equipment || []).join(' • ') || 'Equipment varies';
     const tags = filterTags(exercise).join(' ');
+    const artKey = exercise?.thumbnail?.canonicalKey || exercise.id;
     return `<article class="library-card lmf-intel-catalog-only" data-library-card data-lmf-intel-added="true" data-lmf-intel-id="${esc(exercise.id)}" data-search-name="${esc(searchText(exercise))}" data-filter-tags="${esc(tags)}">
-      <div class="library-thumb" data-exercise-art="${esc(exercise.canonicalName)}"><span>${String(index + 1).padStart(2, '0')}</span><b>⚔</b></div>
+      <div class="library-thumb" data-exercise-art="${esc(artKey)}"><span>${String(index + 1).padStart(2, '0')}</span><b>⚔</b></div>
       <div class="library-copy">
         <div class="exercise-eyebrow">${esc(exercise.trainingCategory || roles)} • ${esc(equipment)}</div>
         <h3>${esc(exercise.canonicalName)}</h3>
