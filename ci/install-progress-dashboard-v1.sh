@@ -43,6 +43,7 @@ grep -Fq 'strengthPoints(data)' "$JS_V3_SOURCE"
 grep -Fq 'conditioningData(data)' "$JS_V3_SOURCE"
 grep -Fq 'Keep programming unchanged' "$JS_V3_SOURCE"
 grep -Fq 'data-lmf-progress-anchor' "$JS_GUARD_SOURCE"
+grep -Fq 'window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID)' "$JS_GUARD_SOURCE"
 grep -Fq '.lmf-progress-dashboard' "$CSS_SOURCE"
 grep -Fq '.lmf-pg-lift-card' "$CSS_SOURCE"
 grep -Fq '.lmf-pg-native-tools' "$CSS_V2_SOURCE"
@@ -89,16 +90,18 @@ PY
 
 DIST_DIR="$DIST_DIR" python - <<'PY'
 from pathlib import Path
-import os
+import os, re
 
 p = Path(os.environ['DIST_DIR']) / 'index.html'
 text = p.read_text()
+# Remove any older unversioned/versioned mount guard include before inserting v3.
+text = re.sub(r'\s*<script defer src="/ui/progress-dashboard-mount-guard\.js(?:\?v=\d+)?"></script>\s*', '\n', text)
 css1 = '<link rel="stylesheet" href="/ui/progress-dashboard-v1.css">'
 css2 = '<link rel="stylesheet" href="/ui/progress-dashboard-v2.css">'
 css3 = '<link rel="stylesheet" href="/ui/progress-dashboard-v3.css">'
 js1 = '<script defer src="/ui/progress-dashboard-v1.js"></script>'
 js3 = '<script defer src="/ui/progress-dashboard-v3-polish.js"></script>'
-jsg = '<script defer src="/ui/progress-dashboard-mount-guard.js"></script>'
+jsg = '<script defer src="/ui/progress-dashboard-mount-guard.js?v=3"></script>'
 for css in (css1, css2, css3):
     if css not in text:
         if '</head>' not in text:
@@ -125,7 +128,7 @@ grep -Fq '/ui/progress-dashboard-v2.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v3.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v1.js' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v3-polish.js' "$DIST_DIR/index.html"
-grep -Fq '/ui/progress-dashboard-mount-guard.js' "$DIST_DIR/index.html"
+grep -Fq '/ui/progress-dashboard-mount-guard.js?v=3' "$DIST_DIR/index.html"
 grep -Fq 'PROGRESS DASHBOARD' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'Private vault data' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'never rewrite programming' "$DIST_DIR/ui/progress-dashboard-v1.js"
@@ -133,5 +136,6 @@ grep -Fq 'if(timer&&!force)return' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'activeTab=next;writeSetting(TAB_KEY,next);queueRender(true)' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq '__LMF_PROGRESS_POLISH__' "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
 grep -Fq 'data-lmf-progress-anchor' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
+grep -Fq 'window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID)' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 
-echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + starvation-safe route/tab guard: PASS"
+echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + starvation-safe single-runtime route/tab guard: PASS"
