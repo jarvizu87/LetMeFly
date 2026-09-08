@@ -34,6 +34,9 @@ jobs:
       - name: Build and audit Command V2 + private Cloudinary exercise art
         run: bash ci/build-command-v2-cloudinary.sh
 
+      - name: Install smart names + Bar Loader
+        run: bash ci/install-smart-names-bar-loader.sh
+
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
 
