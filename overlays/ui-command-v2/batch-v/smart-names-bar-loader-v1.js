@@ -1,7 +1,7 @@
 (() => {
   'use strict'
 
-  // LetMeFly Smart Exercise Names + Bar Loader v1
+  // LetMeFly Smart Exercise Names + Bar Loader
   // Presentation/utility only. Canonical exercise names and programmed loads are never rewritten.
 
   const STORAGE_KEY = 'letmefly-bar-loader-v1'
@@ -9,12 +9,36 @@
     lb: [55, 45, 35, 25, 10, 5, 2.5, 1.25],
     kg: [25, 20, 15, 10, 5, 2.5, 1.25, 0.5],
   }
+  const PLATE_PRESETS = {
+    lb: {
+      iron: {
+        label: 'Iron Plates',
+        pairs: { '55': 0, '45': 6, '35': 2, '25': 4, '10': 4, '5': 4, '2.5': 4, '1.25': 2 },
+      },
+      bumper: {
+        label: 'Bumper Plates',
+        pairs: { '55': 2, '45': 4, '35': 2, '25': 4, '10': 2, '5': 2, '2.5': 2, '1.25': 0 },
+      },
+    },
+    kg: {
+      iron: {
+        label: 'Iron Plates',
+        pairs: { '25': 0, '20': 6, '15': 2, '10': 4, '5': 4, '2.5': 4, '1.25': 4, '0.5': 2 },
+      },
+      bumper: {
+        label: 'Bumper Plates',
+        pairs: { '25': 2, '20': 4, '15': 2, '10': 4, '5': 2, '2.5': 2, '1.25': 2, '0.5': 0 },
+      },
+    },
+  }
   const DEFAULTS = {
     unit: 'lb',
     barLb: 45,
     barKg: 20,
     collarsLb: 0,
     collarsKg: 0,
+    platePresetLb: 'custom',
+    platePresetKg: 'custom',
     pairsLb: { '55': 2, '45': 6, '35': 2, '25': 4, '10': 4, '5': 4, '2.5': 4, '1.25': 2 },
     pairsKg: { '25': 2, '20': 6, '15': 2, '10': 4, '5': 4, '2.5': 4, '1.25': 4, '0.5': 2 },
   }
@@ -22,6 +46,7 @@
   let refreshTimer = null
   let modal = null
   let currentContext = null
+  let copyResetTimer = null
 
   function cleanName(value) {
     return String(value || '').replace(/\s+/g, ' ').trim()
@@ -91,6 +116,14 @@
     })
   }
 
+  function cloneDefaults() {
+    return {
+      ...DEFAULTS,
+      pairsLb: { ...DEFAULTS.pairsLb },
+      pairsKg: { ...DEFAULTS.pairsKg },
+    }
+  }
+
   function storageRead() {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY)
@@ -102,7 +135,7 @@
         pairsKg: { ...DEFAULTS.pairsKg, ...(parsed.pairsKg || {}) },
       }
     } catch (_) {
-      return { ...DEFAULTS, pairsLb: { ...DEFAULTS.pairsLb }, pairsKg: { ...DEFAULTS.pairsKg } }
+      return cloneDefaults()
     }
   }
 
@@ -183,6 +216,16 @@
     return unit === 'kg' ? settings.pairsKg : settings.pairsLb
   }
 
+  function getPlatePresetKey(settings, unit) {
+    const key = unit === 'kg' ? settings.platePresetKg : settings.platePresetLb
+    return PLATE_PRESETS[unit]?.[key] ? key : 'custom'
+  }
+
+  function setPlatePresetKey(settings, unit, value) {
+    if (unit === 'kg') settings.platePresetKg = value
+    else settings.platePresetLb = value
+  }
+
   function getBarWeight(settings, unit) {
     return unit === 'kg' ? Number(settings.barKg) || 20 : Number(settings.barLb) || 45
   }
@@ -249,12 +292,29 @@
     return UNIT_PLATES[unit].flatMap((denom) => Array.from({ length: Number(combo[String(denom)] || 0) }, () => denom))
   }
 
-  function visualPlateChips(combo, unit) {
-    const plates = plateList(combo, unit)
-    if (!plates.length) return '<span class="lmf-bar-empty">No plates</span>'
-    const visible = plates.slice(0, 12).map((plate) => `<span class="lmf-plate-chip">${formatWeight(plate)}</span>`).join('')
-    const extra = plates.length > 12 ? `<span class="lmf-plate-chip more">+${plates.length - 12}</span>` : ''
-    return visible + extra
+  function plateSizeClass(plate, unit) {
+    const index = UNIT_PLATES[unit].indexOf(Number(plate))
+    if (index <= 1) return 'xl'
+    if (index <= 3) return 'lg'
+    if (index <= 5) return 'md'
+    return 'sm'
+  }
+
+  function plateChip(plate, unit) {
+    return `<span class="lmf-plate-chip ${plateSizeClass(plate, unit)}" data-lmf-plate-value="${plate}" aria-label="${formatWeight(plate)} ${unit} plate">${formatWeight(plate)}</span>`
+  }
+
+  function visualPlateChips(combo, unit, side) {
+    const all = plateList(combo, unit)
+    if (!all.length) return '<span class="lmf-bar-empty">No plates</span>'
+
+    const clipped = all.slice(0, 12)
+    const ordered = side === 'left' ? clipped.slice().reverse() : clipped
+    const chips = ordered.map((plate) => plateChip(plate, unit)).join('')
+    if (all.length <= 12) return chips
+
+    const extra = `<span class="lmf-plate-chip more">+${all.length - 12}</span>`
+    return side === 'left' ? extra + chips : chips + extra
   }
 
   function renderInventory(settings, unit) {
@@ -266,6 +326,32 @@
         <input class="lmf-bar-input lmf-pairs-input" type="number" min="0" max="12" step="1" inputmode="numeric" data-lmf-plate="${plate}" value="${Number.parseInt(pairs[String(plate)] ?? 0, 10) || 0}">
       </label>
     `).join('')
+  }
+
+  function barPresetMarkup(unit, currentBar) {
+    const options = unit === 'kg'
+      ? [{ weight: 20, label: '20 kg Men’s Bar' }, { weight: 15, label: '15 kg Women’s Bar' }]
+      : [{ weight: 45, label: '45 lb Power Bar' }, { weight: 35, label: '35 lb Technique Bar' }]
+    return `
+      <span class="lmf-preset-label">QUICK BAR</span>
+      ${options.map(({ weight, label }) => `<button type="button" class="${Number(currentBar) === weight ? 'active' : ''}" data-lmf-bar-preset="${weight}">${label}</button>`).join('')}
+      <button type="button" data-lmf-bar-custom>Custom Bar</button>
+    `
+  }
+
+  function platePresetMarkup(settings, unit) {
+    const active = getPlatePresetKey(settings, unit)
+    return `
+      <span class="lmf-preset-label">PLATE SET</span>
+      <button type="button" class="${active === 'iron' ? 'active' : ''}" data-lmf-plate-preset="iron">Iron Plates</button>
+      <button type="button" class="${active === 'bumper' ? 'active' : ''}" data-lmf-plate-preset="bumper">Bumper Plates</button>
+      <button type="button" class="${active === 'custom' ? 'active' : ''}" data-lmf-plate-preset="custom">Custom</button>
+    `
+  }
+
+  function inventoryLabel(settings, unit) {
+    const key = getPlatePresetKey(settings, unit)
+    return PLATE_PRESETS[unit]?.[key]?.label || 'Custom inventory'
   }
 
   function modalMarkup(settings, context) {
@@ -294,21 +380,22 @@
             <label><span>Bar weight</span><div class="lmf-input-unit"><input class="lmf-bar-input" id="lmf-bar-weight" type="number" min="0" step="0.5" inputmode="decimal" value="${formatWeight(bar)}"><b>${unit}</b></div></label>
             <label><span>Collars total</span><div class="lmf-input-unit"><input class="lmf-bar-input" id="lmf-bar-collars" type="number" min="0" step="0.5" inputmode="decimal" value="${formatWeight(collars)}"><b>${unit}</b></div></label>
           </div>
-          <div class="lmf-bar-presets" id="lmf-bar-presets">${barPresetMarkup(unit)}</div>
+          <div class="lmf-bar-preset-stack">
+            <div class="lmf-bar-presets" id="lmf-bar-presets">${barPresetMarkup(unit, bar)}</div>
+            <div class="lmf-bar-presets lmf-plate-presets" id="lmf-plate-presets">${platePresetMarkup(settings, unit)}</div>
+          </div>
           <div class="lmf-bar-result" id="lmf-bar-result"></div>
           <details class="lmf-bar-inventory">
-            <summary><span>AVAILABLE PLATES</span><small>Set how many plate pairs are available</small></summary>
+            <summary>
+              <div><span>AVAILABLE PLATES</span><small>Customize how many plate pairs you have</small></div>
+              <strong id="lmf-inventory-label">${escapeHtml(inventoryLabel(settings, unit))}</strong>
+            </summary>
             <div id="lmf-bar-inventory-grid">${renderInventory(settings, unit)}</div>
           </details>
           <div class="lmf-bar-foot"><span>Saved on this device</span><span>Programmed workout loads are never changed</span></div>
         </section>
       </div>
     `
-  }
-
-  function barPresetMarkup(unit) {
-    const options = unit === 'kg' ? [20, 15] : [45, 35]
-    return `<span>QUICK BAR</span>${options.map((weight) => `<button type="button" data-lmf-bar-preset="${weight}">${formatWeight(weight)} ${unit}</button>`).join('')}<button type="button" data-lmf-bar-custom>Custom</button>`
   }
 
   function escapeHtml(value) {
@@ -345,6 +432,36 @@
     return settings
   }
 
+  function setInventoryFromSettings(settings, unit) {
+    if (!modal) return
+    const inventory = modal.querySelector('#lmf-bar-inventory-grid')
+    if (inventory) inventory.innerHTML = renderInventory(settings, unit)
+    const label = modal.querySelector('#lmf-inventory-label')
+    if (label) label.textContent = inventoryLabel(settings, unit)
+    const presets = modal.querySelector('#lmf-plate-presets')
+    if (presets) presets.innerHTML = platePresetMarkup(settings, unit)
+  }
+
+  function applyPlatePreset(key) {
+    if (!modal) return
+    const unit = modal.querySelector('#lmf-bar-unit')?.value === 'kg' ? 'kg' : 'lb'
+    const settings = collectSettings()
+
+    if (key === 'custom') {
+      setPlatePresetKey(settings, unit, 'custom')
+    } else {
+      const preset = PLATE_PRESETS[unit]?.[key]
+      if (!preset) return
+      if (unit === 'kg') settings.pairsKg = { ...preset.pairs }
+      else settings.pairsLb = { ...preset.pairs }
+      setPlatePresetKey(settings, unit, key)
+    }
+
+    storageWrite(settings)
+    setInventoryFromSettings(settings, unit)
+    renderResult()
+  }
+
   function renderResult() {
     if (!modal) return
     const unit = modal.querySelector('#lmf-bar-unit')?.value === 'kg' ? 'kg' : 'lb'
@@ -362,27 +479,100 @@
       result.innerHTML = '<div class="lmf-bar-result-empty">Enter a target load to calculate the bar.</div>'
       return
     }
-    if (target < bar + (Number.isFinite(collars) ? collars : 0)) {
-      result.innerHTML = `<div class="lmf-bar-result-empty warning">Target is lighter than the selected bar + collars.</div>`
+    const collarTotal = Number.isFinite(collars) ? collars : 0
+    if (target < bar + collarTotal) {
+      result.innerHTML = '<div class="lmf-bar-result-empty warning">Target is lighter than the selected bar + collars.</div>'
       return
     }
 
-    const solution = solvePlates(target, bar, Number.isFinite(collars) ? collars : 0, unit, pairs)
+    const solution = solvePlates(target, bar, collarTotal, unit, pairs)
     const plates = plateList(solution.combo, unit)
     const perSide = plates.length ? plates.map(formatWeight).join(' + ') : 'No plates'
     const status = solution.exact
-      ? `<span class="lmf-load-status exact">EXACT</span>`
-      : `<span class="lmf-load-status near">NEAREST: ${formatWeight(solution.achievedTotal)} ${unit}</span>`
-    const delta = solution.exact ? '' : `<small>${solution.deltaTotal > 0 ? '+' : ''}${formatWeight(solution.deltaTotal)} ${unit} from target</small>`
-    const chips = visualPlateChips(solution.combo, unit)
+      ? '<span class="lmf-load-status exact">EXACT</span>'
+      : '<span class="lmf-load-status near">CLOSEST POSSIBLE</span>'
+    const achieved = solution.exact
+      ? ''
+      : `<div class="lmf-achieved-load"><span>ACHIEVED</span><strong>${formatWeight(solution.achievedTotal)} ${unit}</strong><small>${solution.deltaTotal > 0 ? '+' : ''}${formatWeight(solution.deltaTotal)} ${unit} from target</small></div>`
+    const leftChips = visualPlateChips(solution.combo, unit, 'left')
+    const rightChips = visualPlateChips(solution.combo, unit, 'right')
+    const collarPerSide = collarTotal > 0 ? collarTotal / 2 : 0
+    const collarLeft = collarPerSide > 0 ? `<span class="lmf-outer-collar" title="${formatWeight(collarPerSide)} ${unit} collar per side" aria-label="Collar"></span>` : ''
+    const collarRight = collarLeft
+    const settings = collectSettings()
+    const inventory = inventoryLabel(settings, unit)
+    const copyText = solution.exact
+      ? `${formatWeight(target)} ${unit} = ${formatWeight(bar)} ${unit} bar, each side: ${perSide}`
+      : `${formatWeight(target)} ${unit} target → ${formatWeight(solution.achievedTotal)} ${unit} closest load = ${formatWeight(bar)} ${unit} bar, each side: ${perSide}`
 
+    result.dataset.lmfCopyText = copyText
     result.innerHTML = `
-      <div class="lmf-bar-result-top"><div><span>TARGET</span><strong>${formatWeight(target)} ${unit}</strong></div>${status}</div>
-      <div class="lmf-bar-per-side"><span>EACH SIDE</span><strong>${perSide}</strong>${delta}</div>
-      <div class="lmf-bar-visual" aria-label="Bar loading diagram">
-        <div class="lmf-bar-side left">${chips}</div><div class="lmf-bar-shaft"><span>${formatWeight(bar)} ${unit} BAR</span></div><div class="lmf-bar-side right">${chips}</div>
+      <div class="lmf-bar-result-top">
+        <div class="lmf-target-load"><span>TARGET</span><strong>${formatWeight(target)} <small>${unit}</small></strong></div>
+        ${status}
+      </div>
+      ${achieved}
+      <div class="lmf-bar-per-side">
+        <div><span>EACH SIDE</span><strong>${perSide}</strong></div>
+        <button type="button" class="lmf-copy-load" data-lmf-copy-load aria-label="Copy bar loading result">COPY LOAD</button>
+      </div>
+      <div class="lmf-bar-visual" aria-label="Bar loading diagram. Largest plates are closest to the bar on both sides.">
+        <div class="lmf-bar-side left">
+          ${collarLeft}
+          <div class="lmf-plate-stack left">${leftChips}</div>
+          <span class="lmf-bar-sleeve" aria-hidden="true"></span>
+        </div>
+        <div class="lmf-bar-shaft"><span>${formatWeight(bar)} ${unit} BAR</span></div>
+        <div class="lmf-bar-side right">
+          <span class="lmf-bar-sleeve" aria-hidden="true"></span>
+          <div class="lmf-plate-stack right">${rightChips}</div>
+          ${collarRight}
+        </div>
+      </div>
+      <div class="lmf-bar-result-meta">
+        <span>${formatWeight(bar)} ${unit} bar</span>
+        <span>${collarTotal > 0 ? `${formatWeight(collarTotal)} ${unit} collars total` : 'No collar weight'}</span>
+        <span>${escapeHtml(inventory)}</span>
       </div>
     `
+  }
+
+  async function copyLoadResult(button) {
+    const result = modal?.querySelector('#lmf-bar-result')
+    const value = result?.dataset.lmfCopyText || ''
+    if (!value || !button) return
+
+    let copied = false
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value)
+        copied = true
+      }
+    } catch (_) {
+      copied = false
+    }
+
+    if (!copied) {
+      const textarea = document.createElement('textarea')
+      textarea.value = value
+      textarea.setAttribute('readonly', '')
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      try { copied = document.execCommand('copy') } catch (_) { copied = false }
+      textarea.remove()
+    }
+
+    if (!copied) return
+    window.clearTimeout(copyResetTimer)
+    button.classList.add('copied')
+    button.textContent = 'COPIED ✓'
+    copyResetTimer = window.setTimeout(() => {
+      if (!button.isConnected) return
+      button.classList.remove('copied')
+      button.textContent = 'COPY LOAD'
+    }, 1400)
   }
 
   function rebuildForUnit(unit) {
@@ -392,16 +582,23 @@
     settings.unit = unit
     storageWrite(settings)
     modal.dataset.lmfUnit = unit
-    const inventory = modal.querySelector('#lmf-bar-inventory-grid')
-    if (inventory) inventory.innerHTML = renderInventory(settings, unit)
+    setInventoryFromSettings(settings, unit)
     const presets = modal.querySelector('#lmf-bar-presets')
-    if (presets) presets.innerHTML = barPresetMarkup(unit)
+    if (presets) presets.innerHTML = barPresetMarkup(unit, getBarWeight(settings, unit))
     const barInput = modal.querySelector('#lmf-bar-weight')
     const collarInput = modal.querySelector('#lmf-bar-collars')
     if (barInput) barInput.value = formatWeight(getBarWeight(settings, unit))
     if (collarInput) collarInput.value = formatWeight(getCollarWeight(settings, unit))
     modal.querySelectorAll('.lmf-input-unit b').forEach((node) => { node.textContent = unit })
     renderResult()
+  }
+
+  function refreshBarPresetButtons() {
+    if (!modal) return
+    const unit = modal.querySelector('#lmf-bar-unit')?.value === 'kg' ? 'kg' : 'lb'
+    const bar = Number.parseFloat(modal.querySelector('#lmf-bar-weight')?.value || '')
+    const presets = modal.querySelector('#lmf-bar-presets')
+    if (presets) presets.innerHTML = barPresetMarkup(unit, bar)
   }
 
   function bindModal() {
@@ -421,17 +618,37 @@
         if (input) {
           input.value = preset.dataset.lmfBarPreset
           input.dispatchEvent(new Event('input', { bubbles: true }))
+          refreshBarPresetButtons()
         }
         return
       }
-      if (target.closest('[data-lmf-bar-custom]')) modal.querySelector('#lmf-bar-weight')?.focus()
+      const platePreset = target.closest('[data-lmf-plate-preset]')
+      if (platePreset) {
+        applyPlatePreset(platePreset.dataset.lmfPlatePreset || 'custom')
+        return
+      }
+      if (target.closest('[data-lmf-bar-custom]')) {
+        modal.querySelector('#lmf-bar-weight')?.focus()
+        return
+      }
+      const copy = target.closest('[data-lmf-copy-load]')
+      if (copy) copyLoadResult(copy)
     })
 
     modal.addEventListener('input', (event) => {
       if (!(event.target instanceof Element)) return
       if (event.target.matches('#lmf-bar-unit')) return
       const settings = collectSettings()
+      const unit = modal.querySelector('#lmf-bar-unit')?.value === 'kg' ? 'kg' : 'lb'
+      if (event.target.matches('.lmf-pairs-input')) {
+        setPlatePresetKey(settings, unit, 'custom')
+        const label = modal.querySelector('#lmf-inventory-label')
+        if (label) label.textContent = inventoryLabel(settings, unit)
+        const platePresets = modal.querySelector('#lmf-plate-presets')
+        if (platePresets) platePresets.innerHTML = platePresetMarkup(settings, unit)
+      }
       storageWrite(settings)
+      if (event.target.matches('#lmf-bar-weight')) refreshBarPresetButtons()
       renderResult()
     })
 
