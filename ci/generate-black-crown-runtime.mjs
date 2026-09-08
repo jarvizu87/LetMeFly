@@ -90,6 +90,9 @@ const manualAliases = new Map(Object.entries({
   'easy bike': 'Stationary Bike',
   'rower': 'Row',
   'cable march': 'Cable March',
+  'chest-supported/kelso shrug': 'Chest-Supported Shrug',
+  'kelso shrug': 'Chest-Supported Shrug',
+  'trap-3': 'Trap-3 Raise',
 }))
 
 const compositeAliases = new Map(Object.entries({
@@ -130,6 +133,7 @@ function fallbackCandidate(chunk) {
     .trim()
   candidate = candidate.replace(/\s*\([^)]*\)\s*$/, '').trim()
   candidate = candidate.replace(/\s+(?:Technique|Strength Volume|Strength Maintenance|Warm-Up|Primer)$/i, '').trim()
+  candidate = candidate.replace(/\s+\d+(?:\s*(?:to|–|-)\s*\d+)?\s*[x×]\s*\d+(?:\s*(?:to|–|-)\s*\d+)?(?:\s*\/\s*\w+)?\s*$/i, '').trim()
   if (!candidate || narrativeReject.test(candidate)) return null
   if (!/[A-Za-z]/.test(candidate) || candidate.length > 64 || candidate.split(/\s+/).length > 9) return null
   if (/^\d/.test(candidate)) return null
@@ -236,6 +240,12 @@ function parseSetScheme(chunk, name) {
   const easySetMatch = sourceText.match(/(\d+)\s*[–-]\s*(\d+)\s+(?:easy\s+)?sets?\s+(?:of\s+)?(\d+)/i)
   if (easySetMatch) {
     return [makeSet(`${easySetMatch[1]}-${easySetMatch[2]} sets`, easySetMatch[3])]
+  }
+
+  const durationMatch = sourceText.match(/\b(\d+(?:\s*(?:to|–|-)\s*\d+)?)\s*(minutes?|mins?|seconds?|secs?)(?:\s+easy)?\b/i)
+  if (durationMatch) {
+    const duration = durationMatch[1].replace(/\s*(?:to|–)\s*/g, '-')
+    return [makeSet('Duration', duration, durationMatch[2])]
   }
 
   if (percentage !== undefined) {
