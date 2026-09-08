@@ -17,3 +17,5 @@ After applying, run:
 - `node scripts/audit-progression-shadow-v54.mjs`
 
 The progression audit performs a strict TypeScript compile using the same narrow temporary Supabase declaration used by the V5.4 source audit.
+
+Do not merge or deploy from this overlay alone. Runtime v5 is intended for the controlled invisible Shadow pilot on the dedicated progression lane.
