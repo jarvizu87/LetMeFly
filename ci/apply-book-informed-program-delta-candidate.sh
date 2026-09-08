@@ -44,6 +44,12 @@ for required in (black_crown, maintenance, cf_root):
     if not required.is_dir():
         raise SystemExit(f'missing program tree: {required}')
 
+# The Crownforge experiment now runs against Black Crown v2.1 as the protected
+# production baseline. It may not mutate Black Crown or Crown Maintenance.
+black_crown_metadata = (black_crown / 'metadata.ts').read_text()
+if "version: 'v2.1'" not in black_crown_metadata:
+    raise SystemExit('Crownforge candidate lane requires Black Crown v2.1 protected baseline')
+
 protected_before = {
     'blackCrown': tree_hash(black_crown),
     'crownMaintenance': tree_hash(maintenance),
@@ -84,7 +90,7 @@ protected_after = {
     'crownMaintenance': tree_hash(maintenance),
 }
 if protected_before != protected_after:
-    raise SystemExit('book-informed candidate changed a protected Black Crown or Crown Maintenance tree')
+    raise SystemExit('book-informed Crownforge candidate changed protected Black Crown v2.1 or Crown Maintenance')
 
 cf_after = file_hashes(cf_root)
 if set(cf_before) != set(cf_after):
@@ -108,8 +114,8 @@ marker = {
     'protectedBefore': protected_before,
     'protectedAfter': protected_after,
     'crownforgeChangedFilesVerified': actual_changed,
-    'blackCrownBookCandidate': 'REJECTED — canonical B5 W25-29 source explicitly says no additional loaded glute slot',
+    'blackCrownStatus': 'PROMOTED SEPARATELY — Black Crown v2.1 lateral-glute amendment is protected baseline, not part of this Crownforge candidate',
 }
 (root / '.book-informed-program-delta-candidate.json').write_text(json.dumps(marker, indent=2) + '\n')
-print('Book-informed Crownforge candidate applied: Day 6 KB primer is conditional in W1-W12; Black Crown and Crown Maintenance unchanged.')
+print('Book-informed Crownforge candidate applied against protected Black Crown v2.1 baseline; Crown Maintenance unchanged.')
 PY

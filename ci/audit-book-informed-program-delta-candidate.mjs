@@ -38,7 +38,7 @@ assert(fs.existsSync(markerPath), 'candidate marker missing')
 const marker = JSON.parse(fs.readFileSync(markerPath, 'utf8'))
 assert(marker.candidate === 'crownforge-day6-kb-primer-conditional-v1', 'unexpected candidate marker')
 assert(marker.baseProgram === 'Crownforge v2.1', 'candidate base program changed')
-assert(marker.blackCrownBookCandidate?.startsWith('REJECTED'), 'Black Crown book candidate must remain rejected')
+assert(marker.blackCrownStatus?.startsWith('PROMOTED SEPARATELY'), 'Black Crown v2.1 must be treated as protected production baseline')
 
 const expectedChanged = [
   'src/programs/crownforge/weeks/week-01.ts',
@@ -65,28 +65,29 @@ for (let week = 7; week <= 12; week += 1) {
   assert(text.includes('makeD6({'), `Crownforge Week ${week} no longer consumes governed makeD6 builder`)
 }
 
-// Deload weeks must still use the existing 12 kg primer/main swing configuration.
 assert(builder.includes("config.deload ? '12 kg (25 lb) KB' : (config.primerKb ?? config.kb)"), 'Crownforge deload primer load logic changed')
 assert(builder.includes("repeated(config.deload ? 2 : 4, config.deload ? 10 : '15–20', config.kb"), 'Crownforge main Day-6 swing deload/build logic changed')
 
-// The candidate must not mutate protected programs. This matches the apply script's
-// digest-of-digests tree algorithm so the independent post-apply check is comparable.
+// The Crownforge candidate must leave the now-official Black Crown v2.1 and
+// Crown Maintenance trees byte-for-byte unchanged.
 const blackCrownHash = treeHash(path.join(target, 'src/programs/black-crown'))
 const maintenanceHash = treeHash(path.join(target, 'src/programs/crown-maintenance'))
-assert(marker.protectedAfter.blackCrown === blackCrownHash, 'Black Crown tree changed after candidate application')
+assert(marker.protectedAfter.blackCrown === blackCrownHash, 'Black Crown v2.1 tree changed after Crownforge candidate application')
 assert(marker.protectedAfter.crownMaintenance === maintenanceHash, 'Crown Maintenance tree changed after candidate application')
 
-// Explicitly prove the rejected Black Crown idea was NOT applied.
+const bcMetadata = mustRead('src/programs/black-crown/metadata.ts')
+assert(bcMetadata.includes("version: 'v2.1'"), 'protected Black Crown baseline is not v2.1')
 for (let week = 25; week <= 29; week += 1) {
   const text = mustRead(`src/programs/black-crown/source-weeks/week-${String(week).padStart(2, '0')}.ts`)
-  assert(text.includes('No additional loaded glute slot; weekly roles already supplied by D1 hip thrust/lunge + D3 deadlift'), `Black Crown W${week} lost source-local no-extra-glute rule`)
-  assert(text.includes('Lat Pulldown 2–3x8–10 + Chest-Supported Row 2x8–10'), `Black Crown W${week} structural row was changed`)
-  assert(!/Machine Hip Abduction|Seated Band Hip Abduction/.test(text), `Black Crown W${week} received rejected abduction candidate`)
+  assert(text.includes('v2.1 intentional glute-specialization amendment'), `Black Crown W${week} lost v2.1 amendment note`)
+  assert(text.includes('Machine Hip Abduction 2x15–25 RPE7–8 — 45–60 sec rest'), `Black Crown W${week} lost v2.1 Machine Hip Abduction prescription`)
+  assert(!text.includes('Lat Pulldown 2–3x8–10 + Chest-Supported Row 2x8–10'), `Black Crown W${week} regressed to v2.0 secondary-row slot`)
 }
 const week30 = mustRead('src/programs/black-crown/source-weeks/week-30.ts')
 assert(week30.includes('Chest-Supported Row 2x10 RPE6 + Leg Extension 2x12 easy + Trap-3 2x12 + Dead Bug 2x8/side'), 'Black Crown W30 non-max check changed')
+assert(!/Machine Hip Abduction|Seated Band Hip Abduction/.test(week30), 'Black Crown W30 received out-of-scope glute amendment')
 
-console.log('Book-informed program delta candidate audit: PASS')
+console.log('Book-informed Crownforge candidate audit: PASS')
 console.log('  Crownforge: W1-W12 Day-6 KB primer is conditional only; main KB/Day-5 work preserved')
-console.log('  Black Crown: v2.0 source remains unchanged; B5 abduction idea remains rejected')
+console.log('  Black Crown: v2.1 lateral-glute amendment protected byte-for-byte')
 console.log('  Crown Maintenance: unchanged')
