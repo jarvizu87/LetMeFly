@@ -1,0 +1,9 @@
+/* Keep injected Home-reference presentation out of every non-Home route. */
+body:not(.lmf-home-ref3-active) .lmf-home-topbar-shell,
+body:not(.lmf-home-ref3-active) .lmf-home-greeting,
+body:not(.lmf-home-ref3-active) .lmf-home-stat-strip,
+body:not(.lmf-home-ref3-active) .lmf-approved-command-copy,
+body:not(.lmf-home-ref3-active) .lmf-readiness-summary,
+body:not(.lmf-home-ref3-active) .lmf-performance-mark{
+  display:none!important;
+}
