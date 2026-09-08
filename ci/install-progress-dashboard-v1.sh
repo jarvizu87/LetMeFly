@@ -70,11 +70,12 @@ cp "$CSS_V3_SOURCE" "$DIST_DIR/ui/progress-dashboard-v3.css"
 # those renders through the short path so a PWA/install or other route mutation
 # cannot leave the newly tapped tab showing the previously selected panel.
 #
-# Some production Progress shells render the visual PROGRESS title as a styled
-# non-heading element. The route guard deliberately creates a semantic hidden
-# data-lmf-progress-anchor in that case. Teach the base dashboard to accept that
-# explicit route anchor even though it is visually clipped; otherwise the guard
-# can correctly identify Progress while the dashboard itself never mounts.
+# The rebuilt production shell no longer guarantees that the visible PROGRESS
+# label is an h1/h2/h3 or that #progress-content exists. Make the base dashboard
+# route-aware itself: on #/progress it creates the same semantic clipped anchor
+# inside the live app surface. The guard remains a second safety layer, but the
+# dashboard no longer depends on presentation markup or on the guard winning a
+# route-render timing race.
 PROGRESS_JS="$DIST_DIR/ui/progress-dashboard-v1.js" python - <<'PY'
 from pathlib import Path
 import os
@@ -94,9 +95,9 @@ if text.count(old_tab) != 1:
 text = text.replace(old_tab, new_tab, 1)
 
 old_heading = "function progressHeading() { return [...document.querySelectorAll('h1,h2,h3')].find(el => /^progress$/i.test((el.textContent||'').trim()) && isVisible(el)) || null }"
-new_heading = "function progressHeading() { const visibleHeading=[...document.querySelectorAll('h1,h2,h3')].find(el => /^progress$/i.test((el.textContent||'').trim()) && isVisible(el)); if(visibleHeading)return visibleHeading; const anchor=document.querySelector('[data-lmf-progress-anchor=\"true\"]'); return anchor?.isConnected ? anchor : null }"
+new_heading = "function progressHeading() { const visibleHeading=[...document.querySelectorAll('h1,h2,h3')].find(el => /^progress$/i.test((el.textContent||'').trim()) && isVisible(el)); if(visibleHeading)return visibleHeading; let anchor=document.querySelector('[data-lmf-progress-anchor=\"true\"]'); if(anchor?.isConnected)return anchor; if(!/^#\\/progress(?:[/?#]|$)/i.test(location.hash||''))return null; const root=[document.querySelector('main'),document.querySelector('[role=\"main\"]'),document.querySelector('#app'),document.body].find(el=>el&&isVisible(el)); if(!root)return null; anchor=document.createElement('h2'); anchor.setAttribute('data-lmf-progress-anchor','true'); anchor.setAttribute('aria-hidden','true'); anchor.textContent='PROGRESS'; Object.assign(anchor.style,{position:'absolute',width:'1px',height:'1px',padding:'0',margin:'0',overflow:'hidden',clipPath:'inset(50%)',whiteSpace:'nowrap',pointerEvents:'none'}); root.insertAdjacentElement('afterbegin',anchor); return anchor }"
 if text.count(old_heading) != 1:
-    raise SystemExit(f'Progress explicit-anchor mount patch expected one source block, found {text.count(old_heading)}')
+    raise SystemExit(f'Progress route-aware mount patch expected one source block, found {text.count(old_heading)}')
 text = text.replace(old_heading, new_heading, 1)
 p.write_text(text)
 PY
@@ -148,9 +149,10 @@ grep -Fq 'never rewrite programming' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'if(timer&&!force)return' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'activeTab=next;writeSetting(TAB_KEY,next);queueRender(true)' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq "document.querySelector('[data-lmf-progress-anchor=\"true\"]')" "$DIST_DIR/ui/progress-dashboard-v1.js"
+grep -Fq "location.hash||''" "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'progressRouteActive' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 grep -Fq '__LMF_PROGRESS_POLISH__' "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
 grep -Fq 'data-lmf-progress-anchor' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 grep -Fq 'window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID)' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 
-echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + starvation-safe single-runtime route-aware mount/tab guard: PASS"
+echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + self-mounting route-aware runtime/tab guard: PASS"
