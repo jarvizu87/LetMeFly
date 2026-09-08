@@ -6,6 +6,7 @@
   // Day-1-style controls that are intentionally disabled in preview mode.
   const PREVIEW = /^(Preview position\.|Preview only\.)/i
   const LABEL = /^(?:R|S|SET)\s*(\d+)\s*$/i
+  const EFFORT = /\b(RPE|RIR)\s*[:@]?\s*([0-9]+(?:\.[0-9]+)?)/ig
   let queued = false
 
   const txt = (n) => (n?.innerText || n?.textContent || '').replace(/\u00a0/g, ' ').trim()
@@ -30,16 +31,25 @@
     const loadText = clean(value)
     if (!loadText) return { load: '—', rpe: '—' }
 
-    const rpeHit = loadText.match(/\bRPE\s*[:@]?\s*([0-9]+(?:\.[0-9]+)?)/i)
-    const rirHit = loadText.match(/\bRIR\s*[:@]?\s*([0-9]+(?:\.[0-9]+)?)/i)
-    if (rpeHit || rirHit) {
-      return {
-        load: 'BY RPE',
-        rpe: rpeHit ? rpeHit[1] : `RIR ${rirHit[1]}`,
-      }
-    }
+    const efforts = []
+    const explicitLoad = clean(loadText
+      .replace(EFFORT, (_, kind, target) => {
+        efforts.push({ kind: String(kind).toUpperCase(), target })
+        return ''
+      })
+      .replace(/\s*•\s*•\s*/g, ' • ')
+      .replace(/^\s*•\s*|\s*•\s*$/g, ''))
 
-    return { load: loadText, rpe: '—' }
+    const effort = efforts[0]
+    const effortText = effort ? (effort.kind === 'RIR' ? `RIR ${effort.target}` : effort.target) : '—'
+
+    // A governed row may contain BOTH a resolved load and an RPE/RIR target
+    // (for example "95 lb • RPE 7"). Preview must preserve the actual load.
+    // Only use BY RPE when effort is truly the sole loading prescription.
+    return {
+      load: explicitLoad || (effort ? 'BY RPE' : loadText),
+      rpe: effortText,
+    }
   }
 
   function parse(node, index) {
@@ -76,7 +86,7 @@
   function metric(label, value) {
     const el = document.createElement('div')
     el.className = 'lmf-preview-metric'
-    el.innerHTML = `<span>${label}</span><div class="lmf-preview-stepper"><button type="button" disabled tabindex="-1" aria-hidden="true">−</button><strong></strong><button type="button" disabled tabindex="-1" aria-hidden="true">+</button></div>`
+    el.innerHTML = `<span>${label}</span><div class="lmf-preview-stepper"><button type="button" disabled aria-disabled="true" tabindex="-1" aria-hidden="true">−</button><strong></strong><button type="button" disabled aria-disabled="true" tabindex="-1" aria-hidden="true">+</button></div>`
     el.querySelector('strong').textContent = value || '—'
     return el
   }
@@ -86,6 +96,7 @@
     selected = Math.max(0, Math.min(rows.length - 1, Number(selected) || 0))
     const row = rows[selected]
     shell.dataset.selected = String(selected)
+    shell.dataset.lmfPreviewReadonly = 'true'
     shell.replaceChildren()
 
     const panel = document.createElement('div')
