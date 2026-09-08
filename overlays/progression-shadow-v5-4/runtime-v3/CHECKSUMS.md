@@ -1,0 +1,13 @@
+1263c223ad10a790223cd9660e4de8df4c3f3453425f9bee3614db91c1da1c7c  APPLY.md
+1227681f3eec4e2eb69c72000495e1ad79cf23b264ecd145bbfa7e58241b1523  PILOT_CHECKLIST.md
+757609460d798e576de4fb176e7cfb9d398ed6e3989715cf3733dafdfa44c915  README.md
+bc197e06682d8eac673d4f436b7ae5e6746a0d76ad98342357c61e2e52900f9b  patch/runtime-v2-to-v3.patch.gz.b64.00
+566c72aea2a36453cebffd22ab6ee790ca36fc2f1736ef560e466be4ff276a1e  patch/runtime-v2-to-v3.patch.gz.b64.01
+
+Runtime v2->v3 patch SHA-256: `265d8c29c5995cc0224a2b79f5e25f1f9d0ee2439ed09efab023def6ff3199d1`
+Gzip SHA-256: `3441efc51cf085a8f1da6f7082e5ae1e5f3f0a660a4365cf0928783694c114a1`
+Base64 payload SHA-256: `9f5b85d3e5cced7c1f009d7995bc6fd0b8cb7ea1a8eab0601bf04fb539e9f656`
+Patch bytes: 13709
+Gzip bytes: 4475
+Base64 characters: 5968
+Changed files: 6
