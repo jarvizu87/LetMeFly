@@ -109,7 +109,7 @@ grep -Fq 'lmf-flow-node' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-set-tab' "$TARGET_DIR/src/command-v2.css"
 grep -Fq '.lmf-flow-panel.lmf-flow-resting' "$TARGET_DIR/src/command-v2.css"
 grep -Fq '@media (max-width:360px)' "$TARGET_DIR/src/command-v2.css"
-grep -Fq '-webkit-line-clamp:2' "$TARGET_DIR/src/command-v2.css"
+grep -Fq -- '-webkit-line-clamp:2' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'grid-template-columns:26px minmax(16px,1fr) 26px!important' "$TARGET_DIR/src/command-v2.css"
 
 test -s "$TARGET_DIR/public/ui/pyramid-flow-v1.js"
