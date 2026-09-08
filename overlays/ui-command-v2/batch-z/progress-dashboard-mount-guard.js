@@ -2,11 +2,14 @@
   'use strict'
 
   // Route-mount guard for the optional Progress dashboard overlay.
-  // Presentation only: it never reads or writes athlete/program data.
+  // Presentation only: it never changes program prescriptions or athlete records.
   // Installer compatibility marker: window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID)
   const DASHBOARD_ID = 'lmf-progress-dashboard-v1'
   const ANCHOR_ATTR = 'data-lmf-progress-anchor'
   const RETRY_ATTR = 'data-lmf-progress-script-retry'
+  const BOOTSTRAP_ATTR = 'data-lmf-progress-bootstrap'
+  const TAB_KEY = 'letmefly_progress_dashboard_tab_v1'
+  const TABS = ['overview', 'strength', 'body', 'conditioning', 'prs']
   let queued = false
   let retrying = false
   let progressIntentUntil = 0
@@ -47,81 +50,124 @@
 
   function routeRoot() {
     if (!progressRouteActive()) return null
-    const candidates = [
-      document.querySelector('main'),
-      document.querySelector('[role="main"]'),
-      document.querySelector('#app'),
-      document.body,
-    ].filter(Boolean)
-    return candidates.find(visible) || null
+    return [document.querySelector('main'), document.querySelector('[role="main"]'), document.querySelector('#app'), document.body].filter(Boolean).find(visible) || null
   }
 
   function progressSurface() {
     const title = progressTitle()
-    if (title) return { title, root: title.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || title.parentElement }
-
     const native = document.querySelector('#progress-content')
+    if (title) return { title, native, root: title.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || title.parentElement }
+
     if (native) {
       const nativeVisible = visible(native) || [...native.querySelectorAll(':scope > *')].some(visible)
-      if (nativeVisible) return { title: null, root: native.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || native.parentElement || native }
+      if (nativeVisible) return { title: null, native, root: native.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || native.parentElement || native }
     }
 
     const marker = [...document.querySelectorAll('.progress-score-grid,.strength-progress-card,.tm-board,.history-list')].find(visible)
-    if (marker) return { title: null, root: marker.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || marker.parentElement }
+    if (marker) return { title: null, native, root: marker.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || marker.parentElement }
 
-    // A Progress nav tap is remembered briefly while the SPA replaces the route.
-    // That makes the mount deterministic even when neither the hash nor active
-    // nav class is updated before the new screen is painted.
     const root = routeRoot()
-    return root ? { title: null, root } : null
+    return root ? { title: null, native, root } : null
   }
 
   function ensureAnchor(surface) {
     if (!surface?.root) return null
     const existing = [...surface.root.querySelectorAll(`[${ANCHOR_ATTR}]`)].find(element => element.isConnected)
     if (existing) return existing
-
     const anchor = document.createElement('h2')
     anchor.setAttribute(ANCHOR_ATTR, 'true')
     anchor.textContent = 'PROGRESS'
     anchor.setAttribute('aria-hidden', 'true')
     Object.assign(anchor.style, {
-      position: 'absolute',
-      width: '1px',
-      height: '1px',
-      padding: '0',
-      margin: '0',
-      overflow: 'hidden',
-      clipPath: 'inset(50%)',
-      whiteSpace: 'nowrap',
-      pointerEvents: 'none',
+      position: 'absolute', width: '1px', height: '1px', padding: '0', margin: '0', overflow: 'hidden',
+      clipPath: 'inset(50%)', whiteSpace: 'nowrap', pointerEvents: 'none'
     })
     if (surface.title) surface.title.insertAdjacentElement('afterend', anchor)
     else surface.root.insertAdjacentElement('afterbegin', anchor)
     return anchor
   }
 
-  function refreshBaseDashboard() {
-    const refresh = window.__LMF_PROGRESS_DASHBOARD__?.refresh || window.__LMF_PROGRESS_BOOT__?.refresh
-    if (typeof refresh !== 'function') return false
-    refresh()
-    return true
+  function storedTab() {
+    try {
+      const value = localStorage.getItem(TAB_KEY)
+      return TABS.includes(value) ? value : 'overview'
+    } catch (_) { return 'overview' }
+  }
+
+  function syncTab(next) {
+    if (!TABS.includes(next)) return
+    try { localStorage.setItem(TAB_KEY, next) } catch (_) {}
+    const root = document.getElementById(DASHBOARD_ID)
+    root?.querySelectorAll('[data-pg-tab]').forEach(button => button.setAttribute('aria-selected', button.dataset.pgTab === next ? 'true' : 'false'))
+    const sync = () => {
+      const api = window.__LMF_PROGRESS_DASHBOARD__
+      if (api?.setTab) api.setTab(next)
+    }
+    sync()
+    window.setTimeout(sync, 80)
+    window.setTimeout(sync, 180)
+    window.setTimeout(sync, 320)
+  }
+
+  function bootstrapTabs(active) {
+    const labels = { overview:'OVERVIEW', strength:'STRENGTH', body:'BODY', conditioning:'CONDITIONING', prs:'PRs' }
+    return TABS.map(id => `<button type="button" role="tab" data-pg-tab="${id}" aria-selected="${active === id ? 'true' : 'false'}">${labels[id]}</button>`).join('')
+  }
+
+  function ensureBootstrapShell(surface) {
+    let dashboard = document.getElementById(DASHBOARD_ID)
+    if (dashboard) return dashboard
+    dashboard = document.createElement('section')
+    dashboard.id = DASHBOARD_ID
+    dashboard.className = 'lmf-progress-dashboard'
+    dashboard.dataset.loaded = 'bootstrap'
+    dashboard.setAttribute(BOOTSTRAP_ATTR, 'true')
+    const active = storedTab()
+    dashboard.innerHTML = `<header class="lmf-pg-header"><div><span>ATHLETE PERFORMANCE</span><h2>PROGRESS DASHBOARD</h2><p>Loading your private training history…</p></div></header><nav class="lmf-pg-tabs" role="tablist" aria-label="Progress sections">${bootstrapTabs(active)}</nav><div class="lmf-pg-tabbody" role="tabpanel"><div class="lmf-pg-loading">Reading your private training history…</div></div>`
+    dashboard.querySelectorAll('[data-pg-tab]').forEach(button => button.addEventListener('click', () => syncTab(button.dataset.pgTab)))
+
+    // Prefer a stable sibling of the native Progress body. This survives the SPA's
+    // internal card refreshes while the authoritative private-vault renderer loads.
+    if (surface.native?.parentElement) surface.native.insertAdjacentElement('beforebegin', dashboard)
+    else if (surface.title) surface.title.insertAdjacentElement('afterend', dashboard)
+    else surface.root.insertAdjacentElement('afterbegin', dashboard)
+    return dashboard
+  }
+
+  function baseDashboardReady() {
+    return Boolean(window.__LMF_PROGRESS_DASHBOARD__?.refresh)
+  }
+
+  function requestBaseRender() {
+    const boot = window.__LMF_PROGRESS_BOOT__
+    if (typeof boot?.scan === 'function') {
+      boot.scan()
+      return true
+    }
+    if (typeof boot?.refresh === 'function') {
+      boot.refresh()
+      return true
+    }
+    if (baseDashboardReady()) {
+      window.__LMF_PROGRESS_DASHBOARD__.refresh()
+      return true
+    }
+    return false
   }
 
   function retryBaseDashboard() {
-    if (retrying || document.getElementById(DASHBOARD_ID) || !progressSurface()) return
-    if (refreshBaseDashboard()) return
+    if (retrying || baseDashboardReady() || !progressSurface()) return
+    if (requestBaseRender()) return
     if (document.querySelector(`script[${RETRY_ATTR}]`)) return
     retrying = true
     const script = document.createElement('script')
-    script.defer = true
-    script.src = '/ui/progress-dashboard-v1.js?mount-retry=9'
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=10'
     script.setAttribute(RETRY_ATTR, 'true')
     script.addEventListener('load', () => {
       window.setTimeout(() => {
-        refreshBaseDashboard()
+        requestBaseRender()
         retrying = false
-      }, 220)
+      }, 120)
     }, { once: true })
     script.addEventListener('error', () => { retrying = false }, { once: true })
     document.body.appendChild(script)
@@ -129,21 +175,29 @@
 
   function ensureMount() {
     queued = false
-    if (document.getElementById(DASHBOARD_ID)) return
     const surface = progressSurface()
     if (!surface) return
     ensureAnchor(surface)
-    refreshBaseDashboard()
-    const pulse = document.createElement('span')
-    pulse.hidden = true
-    pulse.setAttribute('data-lmf-progress-mount-pulse', 'true')
-    surface.root.appendChild(pulse)
-    pulse.remove()
+    const dashboard = ensureBootstrapShell(surface)
+    requestBaseRender()
+
+    // If the full renderer has taken over, remove the bootstrap marker only.
+    // The renderer owns the same section and replaces its contents atomically.
+    if (baseDashboardReady() && dashboard.dataset.loaded === '1') {
+      dashboard.removeAttribute(BOOTSTRAP_ATTR)
+      return
+    }
 
     window.setTimeout(() => {
-      if (document.getElementById(DASHBOARD_ID) || !progressSurface()) return
-      if (!refreshBaseDashboard()) retryBaseDashboard()
-    }, 700)
+      const current = document.getElementById(DASHBOARD_ID)
+      if (!current || !progressSurface()) return
+      if (current.dataset.loaded === '1' && baseDashboardReady()) {
+        current.removeAttribute(BOOTSTRAP_ATTR)
+        return
+      }
+      requestBaseRender()
+      retryBaseDashboard()
+    }, 500)
   }
 
   function queue() {
@@ -155,10 +209,10 @@
   function pulseRouteMount() {
     queue()
     window.setTimeout(queue, 80)
-    window.setTimeout(queue, 260)
-    window.setTimeout(queue, 700)
-    window.setTimeout(queue, 1400)
-    window.setTimeout(queue, 2400)
+    window.setTimeout(queue, 220)
+    window.setTimeout(queue, 520)
+    window.setTimeout(queue, 1100)
+    window.setTimeout(queue, 2000)
   }
 
   function progressNavTrigger(target) {
@@ -174,7 +228,12 @@
 
   function start() {
     queue()
-    new MutationObserver(queue).observe(document.body, { childList: true, subtree: true })
+    new MutationObserver(records => {
+      // Ignore mutations that are solely inside the mounted dashboard to avoid
+      // a feedback loop while the private-vault renderer updates its own cards.
+      const outside = records.some(record => !(record.target instanceof Element) || !record.target.closest(`#${DASHBOARD_ID}`))
+      if (outside) queue()
+    }).observe(document.body, { childList: true, subtree: true })
     window.addEventListener('popstate', pulseRouteMount)
     window.addEventListener('hashchange', pulseRouteMount)
     document.addEventListener('click', event => {
@@ -182,9 +241,9 @@
       progressIntentUntil = Date.now() + 5000
       pulseRouteMount()
     }, true)
-    window.setTimeout(queue, 300)
-    window.setTimeout(queue, 850)
-    window.setTimeout(queue, 1600)
+    window.setTimeout(queue, 250)
+    window.setTimeout(queue, 700)
+    window.setTimeout(queue, 1400)
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true })
