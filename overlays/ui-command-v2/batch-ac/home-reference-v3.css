@@ -1,0 +1,238 @@
+/* LetMeFly Home Reference v3
+   Approved mockup is the layout contract. Presentation only: no program/data writes. */
+
+body.lmf-home-ref3-active{
+  --hm-bg:#05080b;
+  --hm-panel:#0a1116;
+  --hm-panel2:#0d151b;
+  --hm-line:#26323a;
+  --hm-muted:#89949c;
+  --hm-text:#f3f5f6;
+  --hm-red:#ff2339;
+  --hm-red2:#d9162b;
+}
+
+/* HOME HEADER — compact brand lockup + profile affordances like the approved target. */
+body.lmf-home-ref3-active .topbar{
+  min-height:76px!important;
+  padding:10px 16px!important;
+  background:linear-gradient(180deg,#06090d,#070b0f)!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+}
+body.lmf-home-ref3-active .topbar>*:not(.lmf-home-topbar-shell){display:none!important}
+.lmf-home-topbar-shell{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.lmf-home-brand-lockup{display:flex;align-items:center;gap:9px;min-width:0}
+.lmf-home-brand-lockup>img{width:48px;height:48px;object-fit:contain;display:block;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
+.lmf-home-brand-lockup>div{display:grid;gap:1px;min-width:0}
+.lmf-home-brand-lockup strong{font-family:var(--condensed,system-ui),system-ui,sans-serif;font-style:italic;font-weight:900;font-size:25px;line-height:.95;letter-spacing:-.02em;color:#f5f6f7;white-space:nowrap}
+.lmf-home-brand-lockup strong span{color:var(--hm-red)}
+.lmf-home-brand-lockup small{font-size:5.5px;letter-spacing:.27em;font-weight:800;color:#87929a;white-space:nowrap}
+.lmf-home-header-actions{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.lmf-home-bell{width:32px;height:32px;display:grid;place-items:center;color:#aab3b9}
+.lmf-home-bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.lmf-home-avatar{width:39px;height:39px;border-radius:50%;display:grid;place-items:center;border:1px solid #2a343b;background:#11171c;color:#dce1e4;font:700 12px/1 system-ui,sans-serif}
+
+/* The Home route uses the narrow, intentional composition from the chosen phone mockup. */
+body.lmf-home-ref3-active .lmf-home-reference-v3{
+  width:min(100%,620px)!important;
+  margin:0 auto!important;
+  padding:0 12px 86px!important;
+}
+.lmf-home-greeting{padding:12px 7px 11px;margin:0}
+.lmf-home-greeting h1{margin:0;color:var(--hm-text);font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:28px;line-height:1;font-weight:850;letter-spacing:.01em}
+.lmf-home-greeting p{margin:5px 0 0;color:#aeb6bb;font-size:10px;line-height:1.3;letter-spacing:.01em}
+
+/* MAIN COMMAND CARD */
+body.lmf-home-ref3-active .command-hero.lmf-reference-command-card{
+  min-height:376px!important;
+  margin:0!important;
+  border:1px solid #334049!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:#070b0f!important;
+  box-shadow:0 18px 40px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+body.lmf-home-ref3-active .command-hero.lmf-reference-command-card::before{
+  opacity:.9!important;
+  filter:grayscale(.08) saturate(.78) contrast(1.08)!important;
+  background:
+    linear-gradient(180deg,rgba(4,7,10,.1),rgba(4,7,10,.12) 28%,rgba(4,7,10,.75) 61%,#070b0f 88%),
+    linear-gradient(90deg,rgba(2,5,8,.35),rgba(2,5,8,.02) 64%),
+    var(--v2-mountain) 50% 2%/cover no-repeat!important;
+}
+body.lmf-home-ref3-active .command-hero.lmf-reference-command-card::after{
+  height:40%!important;
+  background:linear-gradient(180deg,transparent,rgba(255,35,57,.035))!important;
+}
+body.lmf-home-ref3-active .command-hero .hero-content{
+  position:relative!important;
+  z-index:2!important;
+  max-width:none!important;
+  padding:21px 16px 101px!important;
+  background:linear-gradient(180deg,rgba(4,7,10,.08),rgba(4,7,10,.12) 34%,rgba(4,7,10,.88) 69%,#070b0f 88%)!important;
+}
+.lmf-ref3-source-hidden{display:none!important}
+.lmf-approved-command-copy{display:block;max-width:100%}
+.lmf-command-kicker{font:800 8px/1 system-ui,sans-serif;letter-spacing:.08em;color:var(--hm-red);margin-bottom:7px}
+.lmf-approved-command-copy h2{margin:0;color:#fff;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:30px;line-height:.94;font-weight:900;letter-spacing:.015em;text-shadow:0 2px 16px rgba(0,0,0,.8)}
+.lmf-command-tagline{margin-top:4px;color:#a3abb1;font-size:7px;font-weight:700;letter-spacing:.19em}
+.lmf-command-position{margin-top:15px;color:#f4f5f6;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:16px;font-weight:750;letter-spacing:.02em}
+.lmf-approved-command-copy h3{margin:3px 0 0;color:#fff;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:23px;line-height:1.04;font-weight:850;letter-spacing:.01em;text-shadow:0 2px 14px rgba(0,0,0,.85)}
+.lmf-command-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:17px;padding:10px 0 9px;border-top:1px solid rgba(121,137,147,.17);border-bottom:1px solid rgba(121,137,147,.17)}
+.lmf-command-meta>span{display:flex;align-items:center;gap:6px;min-width:0;padding:0 8px;border-right:1px solid rgba(121,137,147,.13)}
+.lmf-command-meta>span:first-child{padding-left:0}
+.lmf-command-meta>span:last-child{border-right:0;padding-right:0}
+.lmf-command-meta b{font:700 15px/1 system-ui;color:#c2c9ce;flex:0 0 auto}
+.lmf-command-meta small{min-width:0;color:#b1b9be;font-size:6.5px;line-height:1.2;letter-spacing:.035em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.lmf-home-ref3-active .command-hero .hero-actions{position:absolute!important;left:16px!important;right:16px!important;bottom:53px!important;margin:0!important;z-index:4!important}
+body.lmf-home-ref3-active .command-hero .hero-start{
+  width:100%!important;
+  min-height:50px!important;
+  border-radius:7px!important;
+  background:linear-gradient(180deg,#ff263e,#e9162e)!important;
+  border:1px solid #ff4054!important;
+  box-shadow:0 12px 30px rgba(255,20,46,.22)!important;
+  color:#fff!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  letter-spacing:.15em!important;
+}
+body.lmf-home-ref3-active .command-hero .hero-progress{
+  left:16px!important;right:16px!important;bottom:12px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+body.lmf-home-ref3-active .command-hero .hero-progress>div:first-child{margin-bottom:5px!important}
+body.lmf-home-ref3-active .command-hero .hero-progress span{font-size:6px!important;letter-spacing:.1em!important;color:#9aa4aa!important}
+body.lmf-home-ref3-active .command-hero .hero-progress strong{font-size:7px!important;color:#d5dade!important}
+body.lmf-home-ref3-active .command-hero .progress-bar{height:7px!important;background:#1a242b!important;border-radius:2px!important;overflow:hidden!important}
+body.lmf-home-ref3-active .command-hero .progress-bar span{background:linear-gradient(90deg,#ff2339,#f14152)!important;border-radius:2px!important}
+
+/* The approved design does not use the three legacy section tiles below the hero. */
+body.lmf-home-ref3-active .focus-strip{display:none!important}
+
+/* 2 x 2 command card grid */
+body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin-top:10px!important;
+}
+body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.card,
+body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.status-card,
+body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.milestone-card,
+body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.coach-focus-card{
+  min-height:145px!important;
+  max-height:none!important;
+  padding:12px!important;
+  border:1px solid #29363e!important;
+  border-radius:9px!important;
+  background:linear-gradient(145deg,#0c1419,#080e12)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)!important;
+  overflow:hidden!important;
+  cursor:pointer;
+}
+body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>*::after{content:'›'!important;top:10px!important;right:11px!important;font-size:18px!important;color:#a2abb1!important}
+body.lmf-home-ref3-active .dashboard-grid .card-head{margin:0 0 6px!important;padding-right:18px!important}
+body.lmf-home-ref3-active .dashboard-grid .card-head .page-kicker{font-size:6.5px!important;letter-spacing:.08em!important;color:#d3d8dc!important}
+body.lmf-home-ref3-active .dashboard-grid .card-head h2,
+body.lmf-home-ref3-active .dashboard-grid>.status-card h2,
+body.lmf-home-ref3-active .dashboard-grid>.milestone-card h2,
+body.lmf-home-ref3-active .dashboard-grid>.coach-focus-card h2{font-size:13px!important;line-height:1.05!important;margin:2px 0 0!important;color:#f2f4f5!important}
+
+/* Readiness becomes one clear score, while its original logged components remain in the DOM. */
+body.lmf-home-ref3-active .readiness-card .readiness-rings{display:none!important}
+.lmf-readiness-summary{display:flex;align-items:center;gap:11px;margin-top:9px}
+.lmf-readiness-score{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;flex:0 0 62px;border:5px solid #75e2c5;background:#081116;box-shadow:inset 0 0 0 2px #1b3333,0 0 18px rgba(84,231,190,.08)}
+.lmf-readiness-score strong{font:800 18px/1 system-ui;color:#fff}
+.lmf-readiness-summary>div:last-child{display:grid;gap:5px;min-width:0}
+.lmf-readiness-summary b{font-size:12px;line-height:1.05;color:#f4f6f7}
+.lmf-readiness-summary small{font-size:7px!important;line-height:1.35!important;color:#8d989f!important}
+body.lmf-home-ref3-active .readiness-card>p,
+body.lmf-home-ref3-active .readiness-card>.muted{display:none!important}
+
+/* Performance signal mirrors the bar icon in the reference without inventing a percentage. */
+.lmf-performance-mark{height:37px;display:flex;align-items:flex-end;gap:4px;margin:7px 0 4px}
+.lmf-performance-mark i{display:block;width:7px;border-radius:1px 1px 0 0;background:linear-gradient(#ff3549,#e31329)}
+.lmf-performance-mark i:nth-child(1){height:16px}.lmf-performance-mark i:nth-child(2){height:24px}.lmf-performance-mark i:nth-child(3){height:33px}
+body.lmf-home-ref3-active .performance-list{margin-top:3px!important}
+body.lmf-home-ref3-active .performance-list>div{padding:4px 0!important;border-color:#1d292f!important}
+body.lmf-home-ref3-active .performance-list span{font-size:6px!important;color:#828d94!important}
+body.lmf-home-ref3-active .performance-list strong{font-size:7px!important;color:#e4e8ea!important;max-width:68%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.lmf-home-ref3-active .performance-list>div:nth-child(n+3){display:none!important}
+
+body.lmf-home-ref3-active .milestone-card{background:linear-gradient(145deg,#0c1419,#080e12)!important;border-color:#29363e!important}
+body.lmf-home-ref3-active .milestone-icon{width:34px!important;height:34px!important;margin-bottom:6px!important;border-color:#694338!important;background:#191216!important;color:#f1cc92!important}
+body.lmf-home-ref3-active .milestone-card p,
+body.lmf-home-ref3-active .coach-focus-card p{font-size:7px!important;line-height:1.35!important;color:#9aa4aa!important;margin:5px 0!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;overflow:hidden!important}
+body.lmf-home-ref3-active .milestone-card .progress-bar{height:5px!important;margin-top:10px!important}
+body.lmf-home-ref3-active .coach-focus-card .callout{display:none!important}
+body.lmf-home-ref3-active .coach-focus-card .btn{display:none!important}
+
+/* Bottom snapshot row from the approved Home screen. Values are read from the private vault. */
+.lmf-home-stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px;border:1px solid #28343c;border-radius:9px;background:linear-gradient(180deg,#0b1217,#080e12);overflow:hidden}
+.lmf-home-stat-strip>div{min-width:0;min-height:82px;padding:10px 4px 8px;display:grid;place-items:center;align-content:center;text-align:center;border-right:1px solid #1c272d}
+.lmf-home-stat-strip>div:last-child{border-right:0}
+.lmf-home-stat-strip span{font-size:15px;line-height:1;color:#b9c2c7;margin-bottom:5px}
+.lmf-home-stat-strip strong{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f4f6f7;font:800 17px/1 system-ui,sans-serif}
+.lmf-home-stat-strip small{margin-top:5px;color:#7f8a91;font-size:6px;line-height:1.2}
+
+/* Refine navigation to the icon-first proportions in the target. */
+body.lmf-home-ref3-active .navbar{min-height:66px!important;padding:0 8px max(4px,env(safe-area-inset-bottom))!important;background:rgba(5,8,11,.98)!important;border-top:1px solid #202a30!important;box-shadow:0 -12px 30px rgba(0,0,0,.25)!important}
+body.lmf-home-ref3-active .navbar .nav-item{min-height:62px!important;gap:4px!important;padding:8px 2px 5px!important;color:#7e898f!important;font-size:6.5px!important;font-weight:700!important;letter-spacing:.02em!important;border-top:2px solid transparent!important}
+body.lmf-home-ref3-active .navbar .nav-item span{font-size:19px!important;line-height:1!important}
+body.lmf-home-ref3-active .navbar .nav-item.active{color:var(--hm-red)!important;background:linear-gradient(180deg,rgba(255,35,57,.08),transparent 70%)!important;border-top-color:var(--hm-red)!important}
+
+@media(max-width:520px){
+  body.lmf-home-ref3-active .lmf-home-reference-v3{padding-left:11px!important;padding-right:11px!important}
+  .lmf-home-greeting{padding:11px 5px 10px}
+  .lmf-home-greeting h1{font-size:26px}
+  body.lmf-home-ref3-active .command-hero.lmf-reference-command-card{min-height:365px!important}
+  body.lmf-home-ref3-active .command-hero .hero-content{padding:18px 14px 99px!important}
+  .lmf-approved-command-copy h2{font-size:28px}
+  .lmf-approved-command-copy h3{font-size:21px}
+  .lmf-command-position{font-size:14px;margin-top:14px}
+  .lmf-command-meta{margin-top:14px;padding:9px 0 8px}
+  .lmf-command-meta>span{padding:0 5px;gap:4px}
+  .lmf-command-meta small{font-size:5.8px}
+  body.lmf-home-ref3-active .command-hero .hero-actions{left:14px!important;right:14px!important}
+  body.lmf-home-ref3-active .command-hero .hero-progress{left:14px!important;right:14px!important}
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.card,
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.status-card,
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.milestone-card,
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.coach-focus-card{min-height:138px!important;padding:10px!important}
+  .lmf-readiness-score{width:56px;height:56px;flex-basis:56px;border-width:4px}
+  .lmf-readiness-score strong{font-size:17px}
+  .lmf-readiness-summary{gap:8px}
+  .lmf-readiness-summary b{font-size:10px}
+  .lmf-home-stat-strip>div{min-height:76px;padding:8px 3px 7px}
+  .lmf-home-stat-strip strong{font-size:15px}
+}
+
+@media(max-width:380px){
+  .lmf-home-brand-lockup>img{width:43px;height:43px}
+  .lmf-home-brand-lockup strong{font-size:22px}
+  .lmf-home-greeting h1{font-size:24px}
+  body.lmf-home-ref3-active .command-hero.lmf-reference-command-card{min-height:356px!important}
+  .lmf-approved-command-copy h2{font-size:26px}
+  .lmf-approved-command-copy h3{font-size:19px}
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid{gap:6px!important}
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.card,
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.status-card,
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.milestone-card,
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.coach-focus-card{min-height:134px!important;padding:9px!important}
+  .lmf-readiness-score{width:51px;height:51px;flex-basis:51px}
+  .lmf-home-stat-strip strong{font-size:13px}
+  .lmf-home-stat-strip small{font-size:5.3px}
+}
+
+@media(min-width:781px){
+  body.lmf-home-ref3-active .lmf-home-reference-v3{width:min(100%,900px)!important}
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .lmf-home-greeting h1{font-size:32px}
+}
