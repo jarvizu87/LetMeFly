@@ -1,5 +1,39 @@
-/* LetMeFly recording-led mobile regression fixes v3.
+/* LetMeFly recording-led mobile regression fixes v4.
    Presentation only: do not alter program prescriptions or private athlete data. */
+
+/* ACTIVE WORKOUT IMAGE HARDENING
+   Canonical exercise artwork is square. The live workout card must never collapse
+   that artwork back into the legacy shallow banner. Keep the full image visible. */
+.exercise-stack .active-exercise.lmf-workout-flow-card::before{
+  content:none!important;
+  display:none!important;
+}
+.exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-exercise-media,
+.exercise-stack .active-exercise.lmf-flow-active > .lmf-exercise-media{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:1 / 1!important;
+  flex:0 0 auto!important;
+  position:relative!important;
+  overflow:hidden!important;
+  background-image:var(--exercise-art,var(--v2-mountain))!important;
+  background-size:contain!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  background-color:#03070a!important;
+  border-bottom:1px solid #27343e!important;
+}
+.exercise-stack .active-exercise .lmf-exercise-media > img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
 
 /* Future governed-day previews intentionally use the same large exercise-card
    visual language as Day 1 / the live workout. They remain read-only previews. */
@@ -23,14 +57,16 @@
   height:auto!important;
   aspect-ratio:1/1!important;
   min-height:0!important;
+  max-height:none!important;
   margin:0!important;
   border:0!important;
   border-bottom:1px solid #2b3944!important;
   border-radius:0!important;
   background-image:var(--exercise-art,linear-gradient(145deg,#121a22,#06090d 70%))!important;
-  background-size:cover!important;
+  background-size:contain!important;
   background-position:center!important;
   background-repeat:no-repeat!important;
+  background-color:#03070a!important;
   box-shadow:none!important;
   filter:none!important;
   opacity:1!important;
