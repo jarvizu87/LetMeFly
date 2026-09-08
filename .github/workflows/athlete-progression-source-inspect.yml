@@ -1,0 +1,66 @@
+name: Athlete Progression Source Inspect
+
+on:
+  push:
+    branches:
+      - athlete-progression-v1
+    paths:
+      - '.github/workflows/athlete-progression-source-inspect.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: athlete-progression-v1
+
+      - name: Reconstruct current governed Command V2 source
+        env:
+          VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+        run: bash ci/build-command-v2-hardening.sh
+
+      - name: Snapshot athlete-state source surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC='.build-src/letmefly_app'
+          OUT='.diagnostics/athlete-progression'
+          rm -rf "$OUT"
+          mkdir -p "$OUT/src"
+          cp "$SRC/src/main.ts" "$OUT/src/main.ts"
+          cp "$SRC/src/program-engine/types.ts" "$OUT/src/program-engine-types.ts"
+          cp "$SRC/src/data/programs.ts" "$OUT/src/programs.ts"
+          cp "$SRC/package.json" "$OUT/package.json"
+          if [[ -d "$SRC/src/services" ]]; then
+            mkdir -p "$OUT/src/services"
+            find "$SRC/src/services" -maxdepth 1 -type f -name '*.ts' -exec cp {} "$OUT/src/services/" \;
+          fi
+          if [[ -d "$SRC/src/db" ]]; then
+            mkdir -p "$OUT/src/db"
+            find "$SRC/src/db" -maxdepth 1 -type f -name '*.ts' -exec cp {} "$OUT/src/db/" \;
+          fi
+          if [[ -d "$SRC/src/domain" ]]; then
+            mkdir -p "$OUT/src/domain"
+            find "$SRC/src/domain" -maxdepth 2 -type f -name '*.ts' -exec cp {} "$OUT/src/domain/" \;
+          fi
+          find "$OUT" -type f -maxdepth 4 -print | sort
+
+      - name: Commit diagnostic snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .diagnostics/athlete-progression
+          if git diff --cached --quiet; then
+            echo 'No diagnostic changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Snapshot athlete progression source surfaces'
+          git push origin HEAD:athlete-progression-v1
