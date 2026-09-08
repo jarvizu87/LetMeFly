@@ -49,7 +49,15 @@ jobs:
             mkdir -p "$OUT/src/domain"
             find "$SRC/src/domain" -maxdepth 2 -type f -name '*.ts' -exec cp {} "$OUT/src/domain/" \;
           fi
-          find "$OUT" -type f -maxdepth 4 -print | sort
+          if [[ -d "$SRC/src/programs/black-crown" ]]; then
+            mkdir -p "$OUT/src/programs"
+            cp -R "$SRC/src/programs/black-crown" "$OUT/src/programs/black-crown"
+          fi
+          if [[ -d "$SRC/src/programs/crown-maintenance" ]]; then
+            mkdir -p "$OUT/src/programs"
+            cp -R "$SRC/src/programs/crown-maintenance" "$OUT/src/programs/crown-maintenance"
+          fi
+          find "$OUT" -type f -maxdepth 6 -print | sort
 
       - name: Commit diagnostic snapshot
         shell: bash
@@ -62,5 +70,5 @@ jobs:
             echo 'No diagnostic changes to commit.'
             exit 0
           fi
-          git commit -m 'Snapshot athlete progression source surfaces'
+          git commit -m 'Expand athlete progression source snapshot'
           git push origin HEAD:athlete-progression-v1
