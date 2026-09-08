@@ -37,6 +37,9 @@ jobs:
       - name: Install smart names + Bar Loader
         run: bash ci/install-smart-names-bar-loader.sh
 
+      - name: Install read-only Exercise Intelligence runtime
+        run: bash ci/install-exercise-intelligence-v1.sh
+
       - name: Install smart voice-note dictation v2
         run: bash ci/install-voice-notes-v2.sh
 
