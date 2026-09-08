@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}\")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 CSS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3.css"
+GUARD_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3-route-guard.css"
 JS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3.js"
 ICON_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/letmefly-official-icon-v3.svg"
 MASK_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/letmefly-official-icon-maskable-v3.svg"
@@ -11,7 +12,7 @@ INDEX="$DIST_DIR/index.html"
 MANIFEST="$DIST_DIR/manifest.webmanifest"
 SW="$DIST_DIR/service-worker.js"
 
-for f in "$INDEX" "$MANIFEST" "$SW" "$CSS_SRC" "$JS_SRC" "$ICON_SRC" "$MASK_SRC"; do
+for f in "$INDEX" "$MANIFEST" "$SW" "$CSS_SRC" "$GUARD_SRC" "$JS_SRC" "$ICON_SRC" "$MASK_SRC"; do
   test -s "$f" || { echo "Missing required Home reference asset: $f" >&2; exit 1; }
 done
 
@@ -23,9 +24,11 @@ grep -Fq 'letmefly-private' "$JS_SRC"
 grep -Fq 'Approved mockup is the layout contract' "$CSS_SRC"
 grep -Fq '.lmf-approved-command-copy' "$CSS_SRC"
 grep -Fq '.lmf-home-stat-strip' "$CSS_SRC"
+grep -Fq 'body:not(.lmf-home-ref3-active)' "$GUARD_SRC"
 
 mkdir -p "$DIST_DIR/ui"
 cp "$CSS_SRC" "$DIST_DIR/ui/home-reference-v3.css"
+cp "$GUARD_SRC" "$DIST_DIR/ui/home-reference-v3-route-guard.css"
 cp "$JS_SRC" "$DIST_DIR/ui/home-reference-v3.js"
 
 # Use the original Let Me Fly bird logo everywhere the existing shell expects its app mark.
@@ -59,14 +62,16 @@ manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
 
 text = index.read_text()
 css = '<link rel="stylesheet" href="/ui/home-reference-v3.css?v=3">'
+guard = '<link rel="stylesheet" href="/ui/home-reference-v3-route-guard.css?v=3">'
 js = '<script defer src="/ui/home-reference-v3.js?v=3"></script>'
 text = re.sub(r'<link rel="manifest" href="[^"]+"\s*/?>', '<link rel="manifest" href="/manifest.webmanifest?v=brand-v6" />', text, count=1)
 text = re.sub(r'<link rel="icon" href="[^"]+"(?: type="[^"]+")?\s*/?>', '<link rel="icon" href="/app-icon-official-v6.svg?v=6" type="image/svg+xml" />', text, count=1)
 text = re.sub(r'<link rel="apple-touch-icon" href="[^"]+"\s*/?>', '<link rel="apple-touch-icon" href="/app-icon-official-v6.svg?v=6" />', text)
 if 'rel="apple-touch-icon"' not in text:
     text = text.replace('</head>', '  <link rel="apple-touch-icon" href="/app-icon-official-v6.svg?v=6" />\n</head>', 1)
-if css not in text:
-    text = text.replace('</head>', f'  {css}\n</head>', 1)
+for marker in (css, guard):
+    if marker not in text:
+        text = text.replace('</head>', f'  {marker}\n</head>', 1)
 if js not in text:
     text = text.replace('</body>', f'  {js}\n</body>', 1)
 if text.lower().count('<!doctype html>') != 1:
@@ -86,9 +91,11 @@ PY
 
 node --check "$DIST_DIR/ui/home-reference-v3.js"
 test -s "$DIST_DIR/ui/home-reference-v3.css"
+test -s "$DIST_DIR/ui/home-reference-v3-route-guard.css"
 test -s "$DIST_DIR/app-icon-official-v6.svg"
 test -s "$DIST_DIR/app-icon-official-maskable-v6.svg"
 grep -Fq '/ui/home-reference-v3.css?v=3' "$INDEX"
+grep -Fq '/ui/home-reference-v3-route-guard.css?v=3' "$INDEX"
 grep -Fq '/ui/home-reference-v3.js?v=3' "$INDEX"
 grep -Fq '/manifest.webmanifest?v=brand-v6' "$INDEX"
 grep -Fq '/app-icon-official-v6.svg?v=6' "$INDEX"
