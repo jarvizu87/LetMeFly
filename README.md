@@ -1,82 +1,86 @@
 # LetMeFly — Rebuilt Source of Truth
 
-Version: `5.0.0-rebuild.1`
+LetMeFly is a mobile-first strength, conditioning, and coaching PWA built around a **Public App Shell + Private Athlete Data** architecture.
 
-This project reconstructs the missing LetMeFly PWA source from the locked LetMeFly architecture, the completed local/cloud modules, and the current governed training-program releases.
+The repository currently uses an audited reconstruction pipeline: an immutable V5.4 source archive is expanded during CI, governed program-data packages are applied, then the Command V2 / mobile / exercise-art overlays are layered and audited before the production build.
+
+## Architecture boundaries
+
+- Public application source contains program logic, exercise intelligence, UI, progression rules, workout services, and coaching infrastructure.
+- Private athlete information belongs in local/private storage and optional authenticated cloud storage, never in the public repository.
+- IndexedDB is the active local workout database.
+- Supabase Auth + PostgreSQL provide the optional cloud synchronization layer.
+- Local-only training remains supported; cloud initialization never gates workout access.
+- Completed workouts snapshot their prescriptions so later program revisions do not rewrite training history.
+- Program packages own prescriptions. Registry/facade files must not contain hard-coded workout prescriptions.
+
+## Current governed program coverage
+
+### Crownforge
+
+Governing release: **Crownforge Revised Integrated v2.1**.
+
+The current modular program-data overlay owns:
+
+- `src/programs/crownforge/` — Crownforge Weeks **1–14** and Crownforge governance rules.
+- `src/programs/crown-maintenance/` — the separate mandatory **3-week Crown Maintenance bridge**.
+
+The build audits protect source-specific invariants including the Week 10 bench exposure, Week 12 deload, Weeks 13–14 governed testing, maintenance loading references, and program/exercise-library resolution.
+
+Crownforge source changes must be intentional and traceable to the governing program source. Workout execution must never silently rewrite the program.
+
+### Black Crown
+
+Governing release: **Black Crown Revised v2.0**, 54 weeks.
+
+`src/programs/black-crown/` is an independent modular package, but its detailed 54-week prescriptions are still **catalog-only** in the current build until the governing Black Crown source is intentionally imported and audited.
+
+Do not invent missing Black Crown sessions or infer them from Crownforge. The canonical human-readable Black Crown source is maintained separately from the public app code.
+
+## Exercise intelligence and artwork
+
+The app keeps exercise intelligence separate from program prescriptions. Programmed exercise names must resolve through the Exercise Intelligence Library, and substitutions must preserve the programmed movement purpose and training role.
+
+The public build supports exercise-art hooks and private/approved artwork resolution without hard-coding JP's private athlete profile into the repository.
 
 ## What this rebuild preserves
 
 - Public App Shell + Private Athlete Data
-- IndexedDB as the active workout database
-- account optional / local-only training supported
-- Supabase Auth + PostgreSQL cloud synchronization
-- revision-checked, idempotent sync path
-- safe first account bootstrap
+- IndexedDB workout storage
+- optional local-only training
+- Supabase Auth + PostgreSQL synchronization
+- revision-checked, idempotent sync behavior
+- safe first-account bootstrap
 - backup/export and restore/import
 - legacy localStorage discovery/migration without deleting the original
-- mobile-first Workout Mode with horizontally swiped sections
-- readiness page first and session review last
-- set-level logging with RPE and barbell plate helper
-- program history snapshots so future program changes do not rewrite completed sessions
+- mobile-first Workout Mode
+- readiness intake and set-level logging
+- RPE/RIR recording and barbell plate helper
+- program-history snapshots
 - Private Vault cloud status
-- PWA service worker that does not cache private Supabase responses
+- PWA service-worker privacy boundaries
 
-## Important source coverage
+## Development and production pipeline
 
-This is a faithful reconstruction of the **application architecture**, but it is not pretending that every byte of the lost program-data source was recovered.
+The production source is reconstructed by the versioned CI scripts rather than by editing `.build-src` directly.
 
-### Crownforge
+Key flow:
 
-The governing release is Crownforge Revised Integrated v2.1, source engine v1.7.20.
+1. Validate and unpack `source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip`.
+2. Apply governed modular program-data overlays.
+3. Apply Command V2 / mobile / exercise-art overlays.
+4. Run source, Crownforge, exercise-library, UI, and TypeScript audits.
+5. Build the Vite production bundle.
+6. Netlify publishes `.build-src/letmefly_app/dist`.
 
-The rebuilt source embeds the complete opening-week app flow for September 7–13, 2026 so the app can support the immediate Crownforge launch. Program governance, Day 1 loading, the opening-week calendar, readiness rules, and the core training structure were recovered from the governed releases.
-
-Some opening-week support/accessory values were reconstructed from the retained v1.7.20 engine and related governed source material where direct v2.1 Week-1 text was not retrievable in the current file interface. See `docs/SOURCE_COVERAGE.md` before treating every support load as source-verified.
-
-Weeks 2–14 and the Crown Maintenance bridge are intentionally **not fabricated**. They should be imported from the governing program source into the public structured program database.
-
-### Black Crown
-
-Black Crown Revised v2.0 is registered in the public program catalog, but the 54-week program is intentionally `catalog-only` in this rebuild until the governing structured source is imported. The app does not invent missing Black Crown sessions.
-
-## No personal athlete data is in this repository
-
-The rebuilt public source does not contain a private athlete profile, training maxes, bodyweight, goals, workout history, readiness history, or cloud tokens.
-
-A new athlete is created locally in IndexedDB. Existing legacy LetMeFly browser data can be discovered and migrated at runtime.
-
-## Development
+Do **not** reorganize or bypass `source/`, `ci/`, or `overlays/` casually; the current production reconstruction pipeline depends on those paths and checksum boundaries.
 
 Requirements:
 
 - Node.js 22.12+
 - npm
 
-```bash
-npm install
-npm run typecheck
-npm run audit:source
-npm run dev
-```
-
-Production build:
-
-```bash
-npm run build
-```
-
-## Public cloud configuration
-
-Only these browser-visible variables are required:
-
-```text
-VITE_SUPABASE_URL
-VITE_SUPABASE_PUBLISHABLE_KEY
-```
-
-Never add a service-role/secret key, database password, SMTP password, or administrative credential to the client environment.
-
-The existing Netlify `let-me-fly-public` project already has the correct live public Supabase URL and publishable key configured.
+Public browser configuration is limited to the publishable Supabase values required by the client. Never commit service-role keys, database passwords, SMTP passwords, administrative credentials, or private athlete records.
 
 ## Startup order
 
@@ -88,24 +92,23 @@ The existing Netlify `let-me-fly-public` project already has the correct live pu
 6. Start the optional cloud/auth layer.
 7. Opportunistically synchronize.
 
-Cloud initialization never gates local workout access.
-
 ## Workout write rule
 
-Pressing Complete Set writes the set and sync outbox operation in one IndexedDB transaction. It does not wait for Supabase.
+Completing a set writes the set and its synchronization outbox operation in the same local transaction and does not wait for Supabase.
 
-Starting a workout now also creates the entire session/exercise/set skeleton atomically, preventing a browser crash from leaving a half-created workout.
+Starting a workout creates the session/exercise/set skeleton atomically so a browser interruption cannot leave a half-created session that appears complete.
 
 ## PWA privacy boundary
 
-The service worker may cache the public shell and public assets. It explicitly bypasses Supabase/auth/private API traffic and LetMeFly backup downloads.
+The service worker may cache the public shell and public assets. It must bypass Supabase/auth/private API traffic and private backup downloads.
 
-## Deployment
+## Source-of-truth rule
 
-`netlify.toml` builds `dist` with `npm run build` and applies baseline security headers/CSP.
+When sources disagree, use this order:
 
-Do not deploy the real athlete until the remaining browser integration items in `AUDIT_REBUILD.md` pass.
+1. Current governed program package and its audit rules.
+2. Current approved human-readable program source.
+3. Current repository build/CI documentation.
+4. Historical rebuild notes and archived files.
 
-## Current result
-
-The missing source-code dependency that previously blocked Stage 15 has now been reconstructed into a maintainable source tree. The remaining work is validation/integration, not architecture reconstruction.
+Historical documents are useful evidence, but they must not override a later audited program-data import or correction.

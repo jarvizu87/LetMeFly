@@ -1,38 +1,49 @@
 # Current LetMeFly Source Archive
 
-Current audited rebuild: **V5_4**
+## Production reconstruction base
 
-- Google Drive file ID: `1z-Uf5V0TyezuN_cGGgMbp4cMBng1h5cM`
-- Drive filename: `LETMEFLY_REBUILT_SOURCE_V5_4.zip`
-- SHA-256: `48aa4bde71f768d77aa8ba916d53c29c756d31896d6386a2c3cf23831d2492a7`
-- Archive size: `135242` bytes
-- Local package version inside archive: `5.4.0-rebuild.1`
+The current GitHub build reconstructs the application from the repository-owned immutable base archive:
 
-This archive supersedes V5 through V5_3.
+- Path: `source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip`
+- Expected archive size: `154947` bytes
+- Expected SHA-256: `514c538a9442d5c12c534a914f79c7f1988f2a416077b72bc5e9fafbd4ef89d4`
 
-## Current audit state
+`ci/build-command-v2.sh` verifies that size and checksum, expands the archive into `.build-src/letmefly_app`, and verifies the package manifest before applying governed program-data and UI overlays.
 
-- Rebuild/source security audit: PASS
-- Crownforge Week 1 source audit: PASS
-- Crownforge Week 2 source audit: PASS
-- Crownforge Weeks 3–6 individual source audits: PASS
-- Crownforge Weeks 1–6 regression: PASS — 42 consecutive days from 2026-09-07 through 2026-10-18
-- Crownforge structured source coverage: Weeks 1–6
-- Exercise master-source QA reference: 202 active-plan exercises / 68 source-approved substitution pairs
-- Embedded exercise source slice: 82 canonical records
-- Crownforge Weeks 1–6 exercise instances audited: 326
-- Unique programmed exercise display names resolved: 81 / 81
-- Embedded verified Crownforge substitution rows: 7
-- Front Rack Carry canonicalizes to Kettlebell Front Rack Carry: PASS
-- Direct video vs search-fallback status integrity: PASS
-- Workout preview + active cards expose Watch Exercise / Substitute Exercise: PASS
-- Program page now renders all embedded weeks generically: PASS
-- Train day selector follows selected embedded week: PASS
-- Strict TypeScript source audit with temporary narrow Supabase declaration: PASS
-- Crownforge Weeks 7–14 / Crown Maintenance: intentionally not extrapolated
-- Real package-backed Vite production build: still requires a normal networked environment
-- Netlify production deploy: not yet completed
+This repository archive is a **build base**, not the final assembled production source by itself.
 
-The remaining master exercise rows and substitution rows are not claimed as embedded until their structured import is audited.
+## Governed overlay state
 
-Do not deploy older V5.x archives as though they were current. Use V5_4 or a later checksum-recorded archive.
+The current reconstruction pipeline applies the Crownforge v2.1 modular program-data overlay before the UI overlays.
+
+Current program-data status:
+
+- Crownforge Weeks 1–14: structured modular package.
+- Crown Maintenance Weeks 1–3: separate structured modular package.
+- Black Crown: independent package, detailed 54-week prescriptions still catalog-only pending intentional source import.
+- Program registry/facade: lookup/compatibility only; prescriptions belong to packages.
+
+The current build then applies the Command V2, mobile, readiness, exercise-art, Cloudinary/private-art resolution, and related hardened presentation/runtime layers before running release audits and the Vite build.
+
+## Historical Drive backup
+
+A previous audited rebuild archive is retained as a recovery artifact:
+
+- Drive file ID: `1z-Uf5V0TyezuN_cGGgMbp4cMBng1h5cM`
+- Filename: `LETMEFLY_REBUILT_SOURCE_V5_4.zip`
+- Historical SHA-256: `48aa4bde71f768d77aa8ba916d53c29c756d31896d6386a2c3cf23831d2492a7`
+- Historical size: `135242` bytes
+
+It has been moved out of My Drive root into the LetMeFly project archive under **Archive / Source Code Backups**.
+
+That Drive ZIP is a historical recovery backup. It does **not** supersede the newer repository reconstruction base plus audited overlays.
+
+## Source-of-truth rule
+
+For current application behavior, use:
+
+1. The current GitHub reconstruction pipeline and audited program-data overlays.
+2. The approved governing human-readable program sources for intentional source corrections/imports.
+3. Historical Drive source ZIPs only for recovery/comparison.
+
+Do not deploy or restore an older V5.x archive as though it were the complete current application without reapplying the current governed overlays and audits.

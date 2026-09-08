@@ -1,0 +1,134 @@
+/* LetMeFly Pyramid Flow v1 — locked Option 1 pyramid presentation.
+   Presentation only. Existing workout logging remains authoritative. */
+
+.lmf-pyramid-card .lmf-pyramid-badge{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 8px;
+  color:#fff;
+}
+.lmf-pyramid-card .lmf-pyramid-badge strong{
+  padding:6px 9px;
+  border:1px solid #ff1731;
+  border-radius:8px;
+  background:#321019;
+  color:#ff6072;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.11em;
+}
+.lmf-pyramid-card .lmf-pyramid-badge span{
+  color:#9ca8b5;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+
+.lmf-pyramid-plan{
+  margin-top:12px;
+  border:1px solid #2d3b47;
+  border-radius:13px;
+  overflow:hidden;
+  background:#071016;
+}
+.lmf-pyramid-plan-head{
+  min-height:48px;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:8px;
+  padding:9px 11px;
+  border-bottom:1px solid #25323d;
+}
+.lmf-pyramid-icon{color:#ff1731;font-size:17px}
+.lmf-pyramid-plan-head strong{
+  color:#ff5367;
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.12em;
+}
+.lmf-pyramid-plan-head em{
+  color:#9aa6b2;
+  font-size:9px;
+  font-style:normal;
+  font-weight:800;
+  letter-spacing:.06em;
+}
+.lmf-pyramid-plan-list{display:grid}
+.lmf-pyramid-plan.is-long .lmf-pyramid-plan-list{
+  max-height:330px;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+}
+.lmf-pyramid-plan-row{
+  width:100%;
+  min-height:48px;
+  display:grid;
+  grid-template-columns:34px repeat(3,minmax(0,1fr)) 54px;
+  align-items:center;
+  gap:5px;
+  padding:6px 8px;
+  border:0;
+  border-bottom:1px solid #18242d;
+  color:#dce3ea;
+  background:#081119;
+  text-align:center;
+}
+.lmf-pyramid-plan-row:last-child{border-bottom:0}
+.lmf-pyramid-plan-row.current{
+  color:#fff;
+  background:linear-gradient(90deg,#351019,#121119);
+  box-shadow:inset 3px 0 #ff1731;
+}
+.lmf-pyramid-plan-row.done{background:#091713}
+.lmf-pyramid-plan-number{
+  font-family:var(--condensed);
+  font-size:18px;
+  font-weight:900;
+}
+.lmf-pyramid-plan-row span{display:grid;gap:2px;min-width:0}
+.lmf-pyramid-plan-row i{
+  color:#6f7e8c;
+  font-size:7px;
+  font-style:normal;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.lmf-pyramid-plan-row span strong{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:inherit;
+  font-size:11px;
+  font-weight:850;
+}
+.lmf-pyramid-plan-state{
+  justify-self:end;
+  color:#7f8d9b;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.06em;
+}
+.lmf-pyramid-plan-row.current .lmf-pyramid-plan-state{color:#ff8290}
+.lmf-pyramid-plan-row.done .lmf-pyramid-plan-state{color:#72d69f;font-size:16px}
+
+/* Pyramid prescriptions can exceed ten sets. Reuse the locked horizontal set tabs,
+   keep touch targets usable, and scroll rather than shrinking them. */
+.lmf-pyramid-card .lmf-set-tabs{
+  scroll-padding-inline:12px;
+  overscroll-behavior-x:contain;
+}
+.lmf-pyramid-card .lmf-set-tab{
+  flex:0 0 54px!important;
+  min-width:54px!important;
+}
+
+@media (max-width:430px){
+  .lmf-pyramid-plan-row{
+    grid-template-columns:30px repeat(3,minmax(0,1fr)) 46px;
+    padding-inline:6px;
+  }
+  .lmf-pyramid-plan-head em{font-size:8px}
+}

@@ -7,6 +7,8 @@ CSS_FILE="$ROOT_DIR/overlays/ui-command-v2/batch-p/mobile-workout-video-fix.css"
 AUTO_ART_JS="$ROOT_DIR/overlays/ui-command-v2/batch-r/exercise-art-auto.js"
 FLOW_JS="$ROOT_DIR/overlays/ui-command-v2/batch-s/workout-flow-v1.js"
 FLOW_CSS="$ROOT_DIR/overlays/ui-command-v2/batch-s/workout-flow-v1.css"
+PYRAMID_JS="$ROOT_DIR/overlays/ui-command-v2/batch-t/pyramid-flow-v1.js"
+PYRAMID_CSS="$ROOT_DIR/overlays/ui-command-v2/batch-t/pyramid-flow-v1.css"
 
 if [[ -z "$TARGET_DIR" || ! -f "$TARGET_DIR/src/main.ts" || ! -f "$TARGET_DIR/src/command-v2.css" ]]; then
   echo "LetMeFly source tree is missing: $TARGET_DIR" >&2
@@ -17,8 +19,11 @@ test -s "$CSS_FILE"
 test -s "$AUTO_ART_JS"
 test -s "$FLOW_JS"
 test -s "$FLOW_CSS"
+test -s "$PYRAMID_JS"
+test -s "$PYRAMID_CSS"
 node --check "$AUTO_ART_JS"
 node --check "$FLOW_JS"
+node --check "$PYRAMID_JS"
 
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
@@ -45,10 +50,12 @@ PY
 bash "$ROOT_DIR/ci/apply-exercise-video-audit.sh" "$TARGET_DIR"
 cat "$CSS_FILE" >> "$TARGET_DIR/src/command-v2.css"
 cat "$FLOW_CSS" >> "$TARGET_DIR/src/command-v2.css"
+cat "$PYRAMID_CSS" >> "$TARGET_DIR/src/command-v2.css"
 
 mkdir -p "$TARGET_DIR/public/ui"
 cp "$AUTO_ART_JS" "$TARGET_DIR/public/ui/exercise-art-auto.js"
 cp "$FLOW_JS" "$TARGET_DIR/public/ui/workout-flow-v1.js"
+cp "$PYRAMID_JS" "$TARGET_DIR/public/ui/pyramid-flow-v1.js"
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
@@ -57,6 +64,7 @@ text = p.read_text()
 markers = [
     '<script defer src="/ui/exercise-art-auto.js"></script>',
     '<script defer src="/ui/workout-flow-v1.js"></script>',
+    '<script defer src="/ui/pyramid-flow-v1.js"></script>',
 ]
 if '</body>' not in text:
     raise SystemExit('index.html is missing </body>')
@@ -92,6 +100,13 @@ grep -Fq 'background-size:contain' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-flow-node' "$TARGET_DIR/src/command-v2.css"
 grep -Fq 'lmf-set-tab' "$TARGET_DIR/src/command-v2.css"
 
+test -s "$TARGET_DIR/public/ui/pyramid-flow-v1.js"
+grep -Fq '/ui/pyramid-flow-v1.js' "$TARGET_DIR/index.html"
+grep -Fq 'PYRAMID PLAN' "$TARGET_DIR/public/ui/pyramid-flow-v1.js"
+grep -Fq 'lmf-pyramid-plan-row' "$TARGET_DIR/public/ui/pyramid-flow-v1.js"
+grep -Fq '.lmf-pyramid-plan.is-long' "$TARGET_DIR/src/command-v2.css"
+grep -Fq 'flex:0 0 54px!important' "$TARGET_DIR/src/command-v2.css"
+
 # Keep installed PWAs current, expose an install path even inside in-app browsers,
 # and replace legacy crown branding with the official LetMeFly logo.
 bash "$ROOT_DIR/ci/apply-brand-pwa-fix.sh" "$TARGET_DIR"
@@ -126,4 +141,4 @@ test ! -e "$TARGET_DIR/public/icon-192.png"
 test ! -e "$TARGET_DIR/public/icon-512.png"
 test ! -e "$TARGET_DIR/public/app-icon-v3.svg"
 
-echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + official branding/install/update + More-tab raster logo reliability pass: PASS"
+echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + Pyramid Flow v1 + official branding/install/update + More-tab raster logo reliability pass: PASS"
