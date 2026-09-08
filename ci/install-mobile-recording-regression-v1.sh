@@ -66,7 +66,7 @@ grep -Fq 'background-size:contain!important' "$DIST/ui/mobile-recording-regressi
 grep -Fq 'aspect-ratio:1/1!important' "$DIST/ui/mobile-recording-regression-v1.css"
 grep -Fq 'lmfPreviewDay1Style' "$DIST/ui/mobile-recording-regression-v1.js"
 grep -Fq 'lmf-preview-readonly-logger' "$DIST/ui/preview-readonly-set-cards-v1.js"
-grep -Fq 'data-lmf-preview-set-index' "$DIST/ui/preview-readonly-set-cards-v1.js"
+grep -Fq 'lmfPreviewSetIndex' "$DIST/ui/preview-readonly-set-cards-v1.js"
 grep -Fq 'lmf-preview-rich-source' "$DIST/ui/preview-readonly-set-cards-v1.css"
 grep -Fq 'RPE / RIR' "$DIST/ui/preview-readonly-set-cards-v1.js"
 grep -Fq "Preview only — readiness is locked" "$DIST/ui/mobile-recording-regression-v1.js"
