@@ -54,9 +54,10 @@ command_v2_result = '''}function homePage(): string {
 program_aware_result = '''}function homePage(): string {
   const today = getCalendarDay(new Date())
   const homeProgram = today?.program ?? state.selectedProgram
+  const homeProgramName = homeProgram === 'crown-maintenance' ? 'Crown Maintenance' : homeProgram === 'black-crown' ? 'Black Crown' : 'Crownforge'
   const day = getProgramDay(homeProgram, today?.week ?? state.selectedWeek, today?.day ?? state.selectedDay)
-  const title = day?.title ?? (homeProgram === 'crown-maintenance' ? 'CROWN MAINTENANCE' : 'CROWNFORGE')
-  const sub = day ? `${homeProgram === 'crown-maintenance' ? 'Crown Maintenance' : 'Crownforge'} • Week ${today?.week ?? state.selectedWeek} • Day ${today?.day ?? state.selectedDay}` : 'Your current training block'
+  const title = day?.title ?? (homeProgram === 'crown-maintenance' ? 'CROWN MAINTENANCE' : homeProgram === 'black-crown' ? 'BLACK CROWN' : 'CROWNFORGE')
+  const sub = day ? `${homeProgramName} • Week ${today?.week ?? state.selectedWeek} • Day ${today?.day ?? state.selectedDay}` : 'Your current training block'
   const completed = state.workout ? completionStats(state.workout) : { done: 0, total: 0, percent: 0 }
   const focus = (day?.sections ?? []).slice(0, 4).map((section, index) => `<div class="focus-chip"><span>${['01','02','03','04'][index] ?? '•'}</span>${esc(section.title)}</div>`).join('')
 '''
@@ -75,7 +76,7 @@ if [[ "$MODE" == "pre" ]]; then
   echo "Command V2 modular-program pre-compatibility: PASS"
 else
   grep -Fq "const homeProgram = today?.program ?? state.selectedProgram" "$TARGET_DIR/src/main.ts"
+  grep -Fq "homeProgram === 'black-crown' ? 'Black Crown'" "$TARGET_DIR/src/main.ts"
   grep -Fq "const day = getProgramDay(homeProgram" "$TARGET_DIR/src/main.ts"
-  grep -Fq "homeProgram === 'crown-maintenance' ? 'Crown Maintenance' : 'Crownforge'" "$TARGET_DIR/src/main.ts"
   echo "Command V2 modular-program post-compatibility: PASS"
 fi
