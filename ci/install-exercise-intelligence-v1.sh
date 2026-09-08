@@ -11,10 +11,15 @@ DATA_OUT="$DIST_DIR/data/exercise-intelligence-v1.json"
 RUNTIME_OUT="$DIST_DIR/ui/exercise-intelligence-runtime-v1.js"
 UI_OUT="$DIST_DIR/ui/exercise-intelligence-ui-v1.js"
 UI_CSS_OUT="$DIST_DIR/ui/exercise-intelligence-ui-v1.css"
+SW_FILE="$DIST_DIR/service-worker.js"
 EXPECTED_JSON_SHA="b7bef69e9942568c59cc779ac33a2feaceba2e03535df68a0d663a766aedd350"
 
 if [[ ! -f "$DIST_DIR/index.html" ]]; then
   echo "LetMeFly production dist is missing: $DIST_DIR" >&2
+  exit 1
+fi
+if [[ ! -f "$SW_FILE" ]]; then
+  echo "LetMeFly service worker is missing: $SW_FILE" >&2
   exit 1
 fi
 
@@ -90,6 +95,36 @@ if text.index(runtime) > text.index(ui):
 p.write_text(text.rstrip() + '\n')
 PY
 
+# Exercise Intelligence is public-shell knowledge, so make its runtime resources
+# available offline through the existing shell service worker. Private/auth traffic
+# remains governed by the service worker's existing isPrivateOrAuth exclusions.
+SW_FILE="$SW_FILE" python - <<'PY'
+from pathlib import Path
+import os
+import re
+
+p = Path(os.environ['SW_FILE'])
+text = p.read_text()
+match = re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]", text)
+if not match:
+    raise SystemExit('service-worker.js PRECACHE declaration not found')
+
+existing = re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
+required = [
+    '/data/exercise-intelligence-v1.json',
+    '/ui/exercise-intelligence-runtime-v1.js',
+    '/ui/exercise-intelligence-ui-v1.js',
+    '/ui/exercise-intelligence-ui-v1.css',
+]
+assets = []
+for value in [*existing, *required]:
+    if value not in assets:
+        assets.append(value)
+replacement = 'const PRECACHE = [' + ', '.join(repr(value) for value in assets) + ']'
+text = text[:match.start()] + replacement + text[match.end():]
+p.write_text(text.rstrip() + '\n')
+PY
+
 grep -Fq '/ui/exercise-intelligence-runtime-v1.js' "$DIST_DIR/index.html"
 grep -Fq '/ui/exercise-intelligence-ui-v1.js' "$DIST_DIR/index.html"
 grep -Fq '/ui/exercise-intelligence-ui-v1.css' "$DIST_DIR/index.html"
@@ -101,10 +136,16 @@ grep -Fq 'PROGRAM SAFETY' "$UI_OUT"
 grep -Fq 'Exercise Intelligence explains the movement' "$UI_OUT"
 grep -Fq '.lmf-intel-modal' "$UI_CSS_OUT"
 grep -Fq '@media(max-width:420px)' "$UI_CSS_OUT"
+grep -Fq "'/data/exercise-intelligence-v1.json'" "$SW_FILE"
+grep -Fq "'/ui/exercise-intelligence-runtime-v1.js'" "$SW_FILE"
+grep -Fq "'/ui/exercise-intelligence-ui-v1.js'" "$SW_FILE"
+grep -Fq "'/ui/exercise-intelligence-ui-v1.css'" "$SW_FILE"
+grep -Fq "hostname.endsWith('.supabase.co')" "$SW_FILE"
+grep -Fq '/auth\\/v1\\/' "$SW_FILE"
 ! grep -Fq 'data-substitute' "$UI_OUT"
 ! grep -Fq 'localStorage' "$UI_OUT"
 ! grep -Fq 'drive.google.com' "$DATA_OUT"
 ! grep -Fq 'driveFileId' "$DATA_OUT"
 ! grep -Fq 'driveUrl' "$DATA_OUT"
 
-echo "LetMeFly Exercise Intelligence v1 read-only runtime + INFO UI install: PASS"
+echo "LetMeFly Exercise Intelligence v1 read-only runtime + INFO UI + offline shell install: PASS"
