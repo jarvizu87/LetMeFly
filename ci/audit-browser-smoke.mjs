@@ -160,28 +160,28 @@ async function auditFuturePreview(page) {
   else pass('Future-day write lock')
 
   const card = page.locator('.preview-card[data-exercise-art]').first()
-  const toggle = page.locator('.lmf-preview-plan-toggle').first()
-  if (!(await card.isVisible().catch(() => false)) || !(await toggle.isVisible().catch(() => false))) {
-    fail('Future-day Day 1-style exercise card', 'image-first preview card / VIEW FULL PLAN control missing')
+  if (!(await card.isVisible().catch(() => false))) {
+    fail('Future-day Day 1 exercise card', 'preview exercise card missing')
   } else {
-    const collapsed = await card.getAttribute('data-lmf-preview-collapsed')
-    const art = await card.evaluate((el) => {
-      const style = getComputedStyle(el, '::before')
-      return { width: Number.parseFloat(style.width) || 0, height: Number.parseFloat(style.height) || 0 }
+    const visual = await card.evaluate((el) => {
+      const pseudo = getComputedStyle(el, '::before')
+      return {
+        marker: el.getAttribute('data-lmf-preview-day1-style'),
+        width: Number.parseFloat(pseudo.width) || 0,
+        height: Number.parseFloat(pseudo.height) || 0,
+        image: pseudo.backgroundImage || '',
+      }
     })
-    if (collapsed !== 'true') fail('Future-day Day 1-style exercise card', `default collapsed state=${collapsed}`)
-    else if (art.width < 260 || art.height < 260) fail('Future-day Day 1-style exercise card', `artwork is still thumbnail-sized at ${Math.round(art.width)}×${Math.round(art.height)}px`)
-    else if (art.height / art.width < .9 || art.height / art.width > 1.1) fail('Future-day Day 1-style exercise card', `artwork is not square/image-first at ${Math.round(art.width)}×${Math.round(art.height)}px`)
-    else pass('Future-day Day 1-style exercise card', `${Math.round(art.width)}×${Math.round(art.height)}px artwork; plan collapsed`)
-
-    await toggle.click({ timeout: 5000 })
-    await page.waitForTimeout(220)
-    const expanded = await toggle.getAttribute('aria-expanded')
     const details = card.locator(':scope > .prescription-block')
-    if (expanded === 'true' && await details.isVisible().catch(() => false)) pass('Future-day full-plan expansion')
-    else fail('Future-day full-plan expansion', `aria-expanded=${expanded}`)
-    await toggle.click({ timeout: 5000 })
-    await page.waitForTimeout(120)
+    const detailsVisible = await details.isVisible().catch(() => false)
+    const toggleVisible = await firstVisible(card.locator(':scope > .lmf-preview-plan-toggle'))
+    const squareEnough = visual.width >= 250 && visual.height >= 250 && Math.abs(visual.width - visual.height) <= 8
+    if (visual.marker !== 'true') fail('Future-day Day 1 exercise card', `style marker=${visual.marker}`)
+    else if (!squareEnough) fail('Future-day Day 1 exercise card', `hero media ${Math.round(visual.width)}×${Math.round(visual.height)}px`)
+    else if (!visual.image || visual.image === 'none') fail('Future-day Day 1 exercise card', 'hero exercise image not applied')
+    else if (!detailsVisible) fail('Future-day Day 1 exercise card', 'governed prescription is not visible by default')
+    else if (toggleVisible) fail('Future-day Day 1 exercise card', 'legacy VIEW FULL PLAN control is still visible')
+    else pass('Future-day Day 1 exercise card', `${Math.round(visual.width)}×${Math.round(visual.height)}px hero; details open`)
   }
 
   await capture(page, 'Train Future Day Preview')
