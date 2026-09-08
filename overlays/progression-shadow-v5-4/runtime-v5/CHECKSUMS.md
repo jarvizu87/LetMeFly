@@ -13,3 +13,8 @@ Git blob identity verification against uploaded chunk bytes:
 - chunk 00 blob: `5b9460e6a85088dbabf17c9537354068ee7db171`
 - chunk 01 blob: `3bfe367c8a83235497fe2a5eef0e9800842bfa43`
 - chunk 02 blob: `b36aa1531b3ca5e2b40638404a89388fa22943b0`
+
+GitHub-reported uploaded sizes:
+- chunk 00: 3500 bytes
+- chunk 01: 3500 bytes
+- chunk 02: 2388 bytes
