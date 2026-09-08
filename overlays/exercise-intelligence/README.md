@@ -79,6 +79,12 @@ already exist, adds its own offline-cached JavaScript/CSS resources, and fails i
 its source starts using localStorage, substitution hooks, or direct program-data
 writes.
 
+`ci/install-exercise-intelligence-substitutions-v1.sh` installs the governed
+substitution guidance viewer. It may read the v7 substitution rules and intercept
+the existing `SUBSTITUTE` button when a governed rule exists, but it has no apply
+control and no storage or program-write path. Its dedicated audit locks the current
+rule classification totals and the exact two `DO NOT DEFAULT` relationships.
+
 ## Runtime status
 
 The overlay is **active as a read-only descriptive layer**. The Exercises page
@@ -110,12 +116,36 @@ The set-focus response is execution coaching only and displays a **PROGRAM
 PRESCRIPTION LOCKED** boundary. It cannot change the selected exercise, sets,
 reps, load, rest, progression, readiness rules, or program position.
 
-Exercise Intelligence public-shell resources are precached for installed/offline
-use. This does not cache private athlete APIs or move private athlete data into the
-public shell.
+### Governed substitution viewer v1
 
-The existing `SUBSTITUTE` workflow is intentionally **not overridden by this UI
-batch**. Broader substitution behavior will be connected only after the governed
-rule set is audited for the exact runtime context. Any actual program change still
-requires an existing governed program rule or an intentional coaching/program-edit
-decision.
+When a `SUBSTITUTE` button resolves to one or more v7 rules, LetMeFly opens a
+**ROLE-PRESERVING SUBSTITUTION GUIDE • VIEW ONLY** rather than silently changing
+the active workout. The viewer separates:
+
+- current-app governed options that are eligible to be considered;
+- protected `DO NOT DEFAULT` relationships; and
+- future library candidates that are not canonical current-app exercises.
+
+Each rule shows fit grade, role-preservation status, important differences,
+loading adjustment, use condition, and the coach explanation. Available current-
+app alternatives can expose their Watch Exercise link.
+
+The viewer intentionally contains **no Apply/Swap action**. It does not write to
+localStorage, sessionStorage, IndexedDB, workout state, program packages, or
+private athlete records. If no governed v7 rule exists for a movement, the
+existing LetMeFly substitution behavior remains the fallback.
+
+The current protected default relationships are:
+
+- Romanian Deadlift → Hamstring Curl — changes a loaded hinge/lengthened posterior-
+  chain role into knee-flexion isolation.
+- Strict Overhead Press → Push Press — changes strict vertical strength into a
+  leg-driven power movement.
+
+Any actual substitution still requires an existing governed program rule or an
+intentional coaching/program-edit decision. The viewer explains options; it does
+not make the decision or rewrite the prescription.
+
+Exercise Intelligence public-shell resources, including the set-focus Coach and
+substitution-viewer files, are precached for installed/offline use. This does not
+cache private athlete APIs or move private athlete data into the public shell.
