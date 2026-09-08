@@ -29,8 +29,8 @@
     <p class="hint">Enter the private exercise root that contains one folder per canonical exercise, with the approved image at <strong>&lt;exercise-key&gt;/v2</strong>.</p>
     <input id="prefix" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="private/folder/exercises" />
     <button id="save-prefix" type="button">SAVE PRIVATE ART SOURCE</button>
-    <div id="prefix-status" class="status">Nothing is uploaded from this page. The folder setting stays in this browser/app.</div>
-    <p class="privacy"><strong>Privacy:</strong> the folder setting is stored only in this device's local storage. The public app shell does not contain your athlete-specific mapping.</p>
+    <div id="prefix-status" class="status">Nothing is uploaded from this page. The folder setting stays in LetMeFly's private browser database.</div>
+    <p class="privacy"><strong>Privacy:</strong> the folder setting is stored only in this device's LetMeFly IndexedDB. The public app shell does not contain your athlete-specific mapping.</p>
   </section>
 
   <section class="card">
@@ -52,7 +52,7 @@
   const DB_NAME = 'letmefly-private'
   const STORE_NAME = 'meta'
   const MAP_KEY = 'privateExerciseArtMap'
-  const PREFIX_STORAGE_KEY = 'lmf_private_exercise_art_prefix_v1'
+  const PREFIX_KEY = 'privateExerciseArtPrefix'
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
   const PREFIX_PATTERN = /^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*$/
 
@@ -76,25 +76,102 @@
     return clean
   }
 
-  function loadPrefix() {
-    const queryPrefix = new URLSearchParams(location.search).get('prefix') || ''
-    const saved = localStorage.getItem(PREFIX_STORAGE_KEY) || ''
-    const initial = queryPrefix || saved
-    if (!initial) return
-    prefixInput.value = initial
-    if (saved && !queryPrefix) setStatus(prefixStatus, 'Private exercise-art source is already configured on this device.', 'ok')
-    else if (queryPrefix) setStatus(prefixStatus, 'Private folder is ready. Tap SAVE PRIVATE ART SOURCE to keep it on this device.', 'ok')
+  function openPrivateDb() {
+    return new Promise((resolve, reject) => {
+      let request
+      let created = false
+      try {
+        request = indexedDB.open(DB_NAME)
+      } catch (error) {
+        reject(error)
+        return
+      }
+      request.onupgradeneeded = () => {
+        created = true
+        try { request.transaction?.abort() } catch {}
+      }
+      request.onerror = () => reject(created
+        ? new Error('Open LetMeFly in this same browser/app once, then return here and try again.')
+        : (request.error || new Error('Could not open LetMeFly private storage.')))
+      request.onsuccess = () => {
+        const db = request.result
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.close()
+          reject(new Error('This browser does not have LetMeFly private storage yet. Open LetMeFly here once, then return and try again.'))
+          return
+        }
+        resolve(db)
+      }
+    })
   }
 
-  prefixButton.addEventListener('click', () => {
+  async function readPrivateValue(key) {
+    const db = await openPrivateDb()
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction([STORE_NAME], 'readonly')
+        const request = tx.objectStore(STORE_NAME).get(key)
+        let value
+        request.onsuccess = () => { value = request.result?.value }
+        tx.oncomplete = () => { db.close(); resolve(value) }
+        tx.onabort = () => { db.close(); reject(tx.error || new Error('Private storage read was aborted.')) }
+        tx.onerror = () => {}
+      } catch (error) {
+        db.close()
+        reject(error)
+      }
+    })
+  }
+
+  async function writePrivateValue(key, value) {
+    const db = await openPrivateDb()
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction([STORE_NAME], 'readwrite')
+        tx.objectStore(STORE_NAME).put({ key, value, updatedAt: new Date().toISOString() })
+        tx.oncomplete = () => { db.close(); resolve() }
+        tx.onabort = () => { db.close(); reject(tx.error || new Error('Private storage write was aborted.')) }
+        tx.onerror = () => {}
+      } catch (error) {
+        db.close()
+        reject(error)
+      }
+    })
+  }
+
+  async function loadPrefix() {
+    const queryPrefix = new URLSearchParams(location.search).get('prefix') || ''
+    let saved = ''
+    try {
+      const stored = await readPrivateValue(PREFIX_KEY)
+      if (stored) saved = normalizePrefix(stored)
+    } catch {
+      // The app database may not exist yet; the save action gives the actionable error.
+    }
+
+    const initial = queryPrefix || saved
+    if (!initial) return
+    try {
+      prefixInput.value = normalizePrefix(initial)
+    } catch {
+      setStatus(prefixStatus, 'The supplied private Cloudinary folder is invalid.', 'error')
+      return
+    }
+    if (saved && !queryPrefix) setStatus(prefixStatus, 'Private exercise-art source is already configured on this device.', 'ok')
+    else if (queryPrefix) setStatus(prefixStatus, 'Private folder is ready. Tap SAVE PRIVATE ART SOURCE to keep it in LetMeFly private storage.', 'ok')
+  }
+
+  prefixButton.addEventListener('click', async () => {
+    prefixButton.disabled = true
     try {
       const prefix = normalizePrefix(prefixInput.value)
-      localStorage.setItem(PREFIX_STORAGE_KEY, prefix)
-      window.dispatchEvent(new CustomEvent('lmf:exercise-art-overrides-updated'))
+      await writePrivateValue(PREFIX_KEY, prefix)
       setStatus(prefixStatus, 'SUCCESS — private exercise-art source saved on this device. Return to LetMeFly and the approved images will resolve automatically.', 'ok')
       prefixButton.textContent = 'SAVED ✓'
     } catch (error) {
       setStatus(prefixStatus, error instanceof Error ? error.message : 'Could not save the private folder.', 'error')
+      prefixButton.disabled = false
+      prefixButton.textContent = 'TRY SAVE AGAIN'
     }
   })
 
@@ -133,36 +210,7 @@
   }
 
   function saveMap(overrides) {
-    return new Promise((resolve, reject) => {
-      let request
-      let created = false
-      try { request = indexedDB.open(DB_NAME) } catch (error) { reject(error); return }
-      request.onupgradeneeded = () => {
-        created = true
-        try { request.transaction && request.transaction.abort() } catch {}
-      }
-      request.onerror = () => reject(created
-        ? new Error('Open LetMeFly in this same browser/app once, then return here and import again.')
-        : (request.error || new Error('Could not open LetMeFly private storage.')))
-      request.onsuccess = () => {
-        const db = request.result
-        try {
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.close()
-            reject(new Error('This browser does not have LetMeFly private storage yet. Open LetMeFly here once, then return and import again.'))
-            return
-          }
-          const tx = db.transaction([STORE_NAME], 'readwrite')
-          tx.objectStore(STORE_NAME).put({ key: MAP_KEY, value: overrides, updatedAt: new Date().toISOString() })
-          tx.oncomplete = () => { db.close(); resolve() }
-          tx.onabort = () => { db.close(); reject(tx.error || new Error('Exercise-art import was aborted.')) }
-          tx.onerror = () => { db.close(); reject(tx.error || new Error('Exercise-art import failed.')) }
-        } catch (error) {
-          db.close()
-          reject(error)
-        }
-      }
-    })
+    return writePrivateValue(MAP_KEY, overrides)
   }
 
   fileInput.addEventListener('change', async () => {
