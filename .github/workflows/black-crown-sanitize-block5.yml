@@ -1,0 +1,121 @@
+name: Sanitize Black Crown Block 5 Transport
+
+on:
+  push:
+    branches:
+      - black-crown-v2-0-modular-import
+    paths:
+      - .github/workflows/black-crown-sanitize-block5.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sanitize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rebuild Block 5 without athlete-derived rendered pound values
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from __future__ import annotations
+          import base64, gzip, hashlib, io, json, re, tarfile
+          from pathlib import Path
+
+          root = Path('.')
+          overlay = root / 'overlays/program-data/black-crown-v2-0'
+          transport = overlay / 'transport'
+          stem = 'block-05-weeks.tar.gz.b64'
+          parts = sorted(transport.glob(stem + '.*'))
+          parts = [p for p in parts if re.fullmatch(r'.*\.\d{2}', p.name)]
+          if not parts:
+              raise SystemExit('Block 5 chunks are missing')
+
+          encoded = ''.join(p.read_text() for p in parts)
+          compact = ''.join(encoded.split())
+          archive = base64.b64decode(compact + '=' * (-len(compact) % 4), validate=True)
+
+          files: dict[str, bytes] = {}
+          with tarfile.open(fileobj=io.BytesIO(archive), mode='r:gz') as tf:
+              for member in tf.getmembers():
+                  if not member.isfile():
+                      continue
+                  fh = tf.extractfile(member)
+                  if fh is None:
+                      raise SystemExit(f'Unable to read {member.name}')
+                  payload = fh.read()
+                  if re.search(r'week-(?:25|26|27|28|29|30)\.ts$', member.name):
+                      text = payload.decode('utf-8')
+                      text = re.sub(
+                          r'((?:@|•)\s*\d+(?:\.\d+)?%)\s*\(\s*\d{2,3}(?:\.\d+)?\s*\)',
+                          r'\1',
+                          text,
+                      )
+                      payload = text.encode('utf-8')
+                  files[member.name] = payload
+
+          leak = re.compile(r'(?:@|•)\s*\d+(?:\.\d+)?%\s*\(\s*\d{2,3}(?:\.\d+)?\s*\)')
+          for name, payload in files.items():
+              if leak.search(payload.decode('utf-8')):
+                  raise SystemExit(f'Privacy leak remains in {name}')
+
+          tar_buffer = io.BytesIO()
+          with tarfile.open(fileobj=tar_buffer, mode='w') as tf:
+              for name in sorted(files):
+                  payload = files[name]
+                  info = tarfile.TarInfo(name=name)
+                  info.size = len(payload)
+                  info.mode = 0o644
+                  info.mtime = 0
+                  info.uid = 0
+                  info.gid = 0
+                  info.uname = ''
+                  info.gname = ''
+                  tf.addfile(info, io.BytesIO(payload))
+
+          gz_buffer = io.BytesIO()
+          with gzip.GzipFile(fileobj=gz_buffer, mode='wb', compresslevel=9, mtime=0) as gz:
+              gz.write(tar_buffer.getvalue())
+          new_archive = gz_buffer.getvalue()
+          new_encoded = base64.b64encode(new_archive).decode('ascii')
+
+          # Remove every current Block 5 transport representation before writing
+          # the sanitized chunk set so no stale current-tree copy remains.
+          for p in transport.glob(stem + '*'):
+              p.unlink()
+
+          chunk_size = 1800
+          for i in range(0, len(new_encoded), chunk_size):
+              idx = i // chunk_size
+              (transport / f'{stem}.{idx:02d}').write_text(new_encoded[i:i + chunk_size])
+
+          manifest_path = overlay / 'BLOCK_MANIFESTS.json'
+          manifest = json.loads(manifest_path.read_text())
+          block = next(item for item in manifest['blocks'] if item['block'] == 5)
+          block['archiveSize'] = len(new_archive)
+          block['archiveSha256'] = hashlib.sha256(new_archive).hexdigest()
+          block['base64Size'] = len(new_encoded)
+          block['base64Sha256'] = hashlib.sha256(new_encoded.encode()).hexdigest()
+          manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
+
+          print('Sanitized Block 5 transport')
+          print('archiveSize', len(new_archive))
+          print('archiveSha256', block['archiveSha256'])
+          print('base64Size', len(new_encoded))
+          print('base64Sha256', block['base64Sha256'])
+          PY
+
+      - name: Commit sanitized transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A overlays/program-data/black-crown-v2-0/transport overlays/program-data/black-crown-v2-0/BLOCK_MANIFESTS.json
+          git commit -m 'Sanitize Black Crown Block 5 public transport'
+          git push origin HEAD:black-crown-v2-0-modular-import
