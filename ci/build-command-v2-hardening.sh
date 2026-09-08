@@ -22,9 +22,6 @@ test -s "$STATE_CSS"
 
 cd .build-src/letmefly_app
 
-# The service-layer readiness hunks still match the governed source and have
-# already been proven by CI. Apply only that verified section directly from the
-# historical patch; main.ts is handled by the modular adapter below.
 READINESS_SERVICE_PATCH="$(mktemp)"
 awk '/^--- src\/main.ts/{exit} {print}' "$ROOT_DIR/$READINESS_PATCH" > "$READINESS_SERVICE_PATCH"
 test -s "$READINESS_SERVICE_PATCH"
@@ -32,8 +29,6 @@ patch --dry-run -p0 < "$READINESS_SERVICE_PATCH"
 patch -p0 < "$READINESS_SERVICE_PATCH"
 rm -f "$READINESS_SERVICE_PATCH"
 
-# Apply main.ts readiness behavior through a function-aware adapter so current
-# modular program lookup is preserved.
 bash "$ROOT_DIR/ci/modular-command-v2-readiness.sh" "$ROOT_DIR/.build-src/letmefly_app"
 
 grep -Fq "readiness_id: readinessId" src/services/workout-service.ts
@@ -44,7 +39,6 @@ grep -Fq "Complete readiness before starting" src/main.ts
 grep -Fq "UPDATE READINESS" src/main.ts
 ! grep -Fq "v === 3 ? 'checked' : ''" src/main.ts
 
-# Add stable artwork hooks to Train preview/logged cards and the Exercise Library.
 patch --dry-run -p0 < "$ROOT_DIR/$ART_HOOKS_PATCH"
 patch -p0 < "$ROOT_DIR/$ART_HOOKS_PATCH"
 cat "$ROOT_DIR/$ART_CSS" >> src/command-v2.css
@@ -85,7 +79,6 @@ cat "$GENERATED_ART_CSS" >> src/command-v2.css
 rm -f "$GENERATED_ART_CSS"
 echo "Exercise artwork assets activated: $ART_COUNT"
 
-# Runtime states must remain truthful and recoverable when data/network features are unavailable.
 patch --dry-run -p0 < "$ROOT_DIR/$STATE_PATCH"
 patch -p0 < "$ROOT_DIR/$STATE_PATCH"
 cat "$ROOT_DIR/$STATE_CSS" >> src/command-v2.css
@@ -98,6 +91,12 @@ grep -Fq "navigator.onLine" src/main.ts
 grep -Fq "retry-progress" src/main.ts
 grep -Fq ".v2-bars i.empty" src/command-v2.css
 ! grep -Fq "8 + index * 3" src/main.ts
+
+# Command V2 historically typed active selection as dated calendar programs only.
+# Black Crown is deliberately undated public source, so widen routing only after
+# all legacy UI overlays have landed. This changes navigation/runtime access,
+# never any Crownforge or Black Crown prescription.
+bash "$ROOT_DIR/ci/apply-black-crown-command-v2-core.sh" "$ROOT_DIR/.build-src/letmefly_app"
 
 npm run audit:source
 npm run audit:crownforge
