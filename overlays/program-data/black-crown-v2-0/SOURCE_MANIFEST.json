@@ -1,0 +1,30 @@
+{
+  "sourceFile": "BLACK_CROWN_REVISED_54_WEEK_PROGRAM_v2_0_APPROVED_WAVE_CIRCUIT_STYLE_SPACED.docx",
+  "sourceFileId": "1AUuZFRwh61AkyVpWGXtNO6OJkxuqmKwC",
+  "sourceSha256": "4da9363f012b87364d930a8b26e983ce38b8c9c88f98ad8d76feec31435856e9",
+  "release": "Black Crown Revised v2.0",
+  "publicSanitization": {
+    "calendarDates": "omitted",
+    "athleteDerivedExactPoundLoads": "omitted when percentage/TM prescription is authoritative",
+    "percentagesSetsRepsRPEPrioritiesOrder": "preserved"
+  },
+  "block1": {
+    "weeks": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "sessions": 30,
+    "weekSourceHashes": {
+      "01": "b984e1a620e772833bdb4faeb7997e4057dc6b460dfd0986b9f45fd9d3435a5b",
+      "02": "24c6bf868e623f6ef1f10f0b5b13ba822505366993541e9602b138754b7201e0",
+      "03": "db4ea6d9a13847161a0b96efbc009daa5e4d73bc7da4af6e05afae9b69140331",
+      "04": "ac663d7cc6369f49a134343f7d4dd63a19bc08f5bd3eeedd11dd48019da6cf39",
+      "05": "821742153f62337e66b8d26a4790f9272be59aedfe1d15e7bb91228ff5c89c69",
+      "06": "af79adedd675baec839b48cdefef08f48836c3a9a1f9a550112e481b19df3c04"
+    }
+  }
+}

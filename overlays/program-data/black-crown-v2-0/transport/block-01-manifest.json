@@ -1,0 +1,33 @@
+{
+  "block": 1,
+  "weeks": "1-6",
+  "sessions": 30,
+  "archive": "block-01-weeks.tar.gz",
+  "archiveSize": 5642,
+  "archiveSha256": "c3deba764718bcc45f6a5f57ea0870cebdb6e0ee5c50a0081b8d2fe1baf99b93",
+  "base64File": "block-01-weeks.tar.gz.b64",
+  "base64Size": 7524,
+  "base64Sha256": "eb23ed622407582c3c64775ae7b1682cf7f7f6461bf10a9b9fd43c8d6fd32946",
+  "contents": [
+    "weeks/index.ts",
+    "weeks/week-01.ts",
+    "weeks/week-02.ts",
+    "weeks/week-03.ts",
+    "weeks/week-04.ts",
+    "weeks/week-05.ts",
+    "weeks/week-06.ts"
+  ],
+  "weekSourceHashes": {
+    "01": "b984e1a620e772833bdb4faeb7997e4057dc6b460dfd0986b9f45fd9d3435a5b",
+    "02": "24c6bf868e623f6ef1f10f0b5b13ba822505366993541e9602b138754b7201e0",
+    "03": "db4ea6d9a13847161a0b96efbc009daa5e4d73bc7da4af6e05afae9b69140331",
+    "04": "ac663d7cc6369f49a134343f7d4dd63a19bc08f5bd3eeedd11dd48019da6cf39",
+    "05": "821742153f62337e66b8d26a4790f9272be59aedfe1d15e7bb91228ff5c89c69",
+    "06": "af79adedd675baec839b48cdefef08f48836c3a9a1f9a550112e481b19df3c04"
+  },
+  "privacyBoundary": {
+    "containsCalendarDates": false,
+    "containsAthleteDerivedExactPoundLoads": false,
+    "containsAthleteName": false
+  }
+}

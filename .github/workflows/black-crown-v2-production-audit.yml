@@ -1,0 +1,70 @@
+name: Black Crown v2 Production Audit
+
+on:
+  push:
+    branches:
+      - black-crown-v2-0-modular-import
+    paths:
+      - 'ci/build-command-v2.sh'
+      - 'ci/build-command-v2-hardening.sh'
+      - 'ci/build-command-v2-cloudinary.sh'
+      - 'ci/command-v2-program-compat.sh'
+      - 'ci/apply-black-crown-v2-0.sh'
+      - 'ci/apply-black-crown-workout-support.sh'
+      - 'ci/apply-black-crown-command-v2-core.sh'
+      - 'ci/apply-black-crown-command-v2.sh'
+      - 'ci/generate-black-crown-runtime.mjs'
+      - 'ci/audit-black-crown-runtime.mjs'
+      - 'overlays/program-data/black-crown-v2-0/**'
+      - '.github/workflows/black-crown-v2-production-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Build and audit Command V2 with Black Crown v2
+        run: bash ci/build-command-v2-cloudinary.sh
+
+      - name: Show generated UI context on build failure
+        if: failure()
+        shell: bash
+        run: |
+          if [[ -f .build-src/letmefly_app/src/main.ts ]]; then
+            echo '--- main.ts routing/home context ---'
+            nl -ba .build-src/letmefly_app/src/main.ts | sed -n '145,205p'
+            echo '--- main.ts calendar/context ---'
+            nl -ba .build-src/letmefly_app/src/main.ts | sed -n '455,485p'
+          fi
+
+      - name: Re-audit active Black Crown after UI overlays
+        run: node ci/audit-black-crown-runtime.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Protect Crownforge and package architecture
+        working-directory: .build-src/letmefly_app
+        run: |
+          npm run audit:crownforge
+          npm run audit:exercise-library
+          npm run audit:source
+          npm run typecheck
+          npm run build
+
+      - name: Confirm production package
+        run: |
+          set -euo pipefail
+          test -f .build-src/letmefly_app/dist/index.html
+          grep -Rq 'Black Crown Revised' .build-src/letmefly_app/dist/assets
+          echo 'Black Crown v2 production integration: PASS'
