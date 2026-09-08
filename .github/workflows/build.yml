@@ -73,6 +73,9 @@ jobs:
       - name: Install Home Command Hero
         run: bash ci/install-home-command-hero-v1.sh
 
+      - name: Install approved Home reference + official app icon
+        run: bash ci/install-home-reference-v3.sh
+
       - name: Audit all programs, governed days, screens, tabs, features, and full mock training cycle
         run: node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
 
