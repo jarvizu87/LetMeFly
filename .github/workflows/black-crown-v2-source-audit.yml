@@ -8,6 +8,7 @@ on:
       - 'overlays/program-data/black-crown-v2-0/**'
       - 'ci/apply-black-crown-v2-0.sh'
       - 'ci/audit-black-crown-source.mjs'
+      - 'ci/audit-black-crown-privacy.mjs'
       - '.github/workflows/black-crown-v2-source-audit.yml'
   workflow_dispatch:
 
@@ -40,6 +41,10 @@ jobs:
       - name: Apply Black Crown v2 source package
         shell: bash
         run: bash ci/apply-black-crown-v2-0.sh "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Validate public-source privacy
+        shell: bash
+        run: node ci/audit-black-crown-privacy.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
 
       - name: Validate source and regression boundaries
         shell: bash
