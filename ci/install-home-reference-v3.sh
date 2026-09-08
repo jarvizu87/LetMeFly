@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}\")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 CSS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3.css"
 GUARD_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3-route-guard.css"
@@ -31,9 +31,7 @@ cp "$CSS_SRC" "$DIST_DIR/ui/home-reference-v3.css"
 cp "$GUARD_SRC" "$DIST_DIR/ui/home-reference-v3-route-guard.css"
 cp "$JS_SRC" "$DIST_DIR/ui/home-reference-v3.js"
 
-# Use the original Let Me Fly bird logo everywhere the existing shell expects its app mark.
-# app-icon-v4.svg is intentionally overwritten so older compiled header references also get
-# the corrected official artwork without changing application logic.
+# Correct the existing shell mark and PWA install art using the original Let Me Fly logo.
 cp "$ICON_SRC" "$DIST_DIR/app-icon-v4.svg"
 cp "$ICON_SRC" "$DIST_DIR/app-icon-official-v6.svg"
 cp "$MASK_SRC" "$DIST_DIR/app-icon-official-maskable-v6.svg"
@@ -47,8 +45,6 @@ index = root / 'index.html'
 manifest_path = root / 'manifest.webmanifest'
 sw_path = root / 'service-worker.js'
 
-# Manifest: keep the existing app identity/data boundary, but point installation metadata
-# at brand-new icon URLs so Chromium has a real metadata change to ingest.
 manifest = json.loads(manifest_path.read_text())
 manifest['name'] = 'LetMeFly'
 manifest['short_name'] = 'LetMeFly'
