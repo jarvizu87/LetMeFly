@@ -34,6 +34,34 @@ async function firstVisible(locator) {
   return null
 }
 
+async function optionalInstallDismiss(page) {
+  const candidates = [
+    page.locator('.modal-backdrop button,.modal-backdrop a,.modal-backdrop [role="button"]').filter({ hasText: /^\s*Not now\s*$/i }),
+    page.locator('button,a,[role="button"]').filter({ hasText: /^\s*Not now\s*$/i }),
+  ]
+  for (const locator of candidates) {
+    const button = await firstVisible(locator)
+    if (!button) continue
+    const modalText = await button.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]').innerText().catch(() => '')
+    if (modalText && !/Install LetMeFly|Install help|install LetMeFly/i.test(modalText)) continue
+    const dismissed = await button.click({ timeout: 2500 }).then(() => true).catch(() => false)
+    if (dismissed) {
+      await page.waitForTimeout(180)
+      pass('Optional install prompt', 'dismissed for browser audit')
+      return true
+    }
+  }
+  return false
+}
+
+async function settleFirstRunPrompts(page, attempts = 8) {
+  for (let i = 0; i < attempts; i += 1) {
+    const dismissed = await optionalInstallDismiss(page)
+    if (dismissed) continue
+    await page.waitForTimeout(180)
+  }
+}
+
 async function clickable(page, label) {
   const pattern = new RegExp(`\\b${esc(label)}\\b`, 'i')
   return await firstVisible(page.locator('nav button,nav a,nav [role="button"]').filter({ hasText: pattern }))
@@ -42,41 +70,67 @@ async function clickable(page, label) {
 }
 
 async function clickLabel(page, label, required = true) {
+  await optionalInstallDismiss(page)
   const item = await clickable(page, label)
   if (!item) {
     if (required) fail(`Browser control ${label}`, 'not found/visible')
     return false
   }
-  const clicked = await item.click({ timeout: 5000 }).then(() => true).catch((error) => {
+  const clicked = await item.click({ timeout: 5000 }).then(() => true).catch(async (error) => {
+    // The optional PWA prompt can arrive a moment after route content. Dismiss it
+    // once and retry the actual app control rather than treating the overlay as
+    // a route failure.
+    if (await optionalInstallDismiss(page)) {
+      return await item.click({ timeout: 5000 }).then(() => true).catch(() => false)
+    }
     if (required) fail(`Browser control ${label}`, error.message)
     return false
   })
-  if (!clicked) return false
+  if (!clicked) {
+    if (required && !failures.some((x) => x.label === `Browser control ${label}`)) fail(`Browser control ${label}`, 'click failed after optional-prompt retry')
+    return false
+  }
   await page.waitForTimeout(260)
+  await optionalInstallDismiss(page)
   return true
 }
 
 async function bootstrapEphemeralAthlete(page) {
-  const body = await page.locator('body').innerText()
-  if (!/BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(body)) {
-    pass('Browser athlete bootstrap', 'existing/fresh app state does not require setup')
+  // First-run UI is intentionally asynchronous: the shell can render before the
+  // local-vault modal. Give that modal a short deterministic window to appear,
+  // while also clearing the independent optional PWA install prompt.
+  let create = null
+  for (let i = 0; i < 16; i += 1) {
+    await optionalInstallDismiss(page)
+    create = await clickable(page, 'CREATE LOCAL ATHLETE')
+    if (create) break
+    await page.waitForTimeout(180)
+  }
+
+  if (!create) {
+    const body = await page.locator('body').innerText()
+    if (/BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(body)) {
+      fail('Browser athlete bootstrap', 'first-run athlete modal is present but Create Local Athlete is not usable')
+    } else {
+      pass('Browser athlete bootstrap', 'existing/fresh app state does not require setup')
+    }
     return
   }
 
-  const create = await clickable(page, 'CREATE LOCAL ATHLETE')
-  if (!create) {
-    fail('Browser athlete bootstrap', 'Create Local Athlete control not found')
-    return
-  }
-  const displayInput = await firstVisible(page.locator('input[type="text"],input:not([type])'))
+  const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
+  const displayInput = await firstVisible(modal.locator('input[type="text"],input:not([type])'))
+    || await firstVisible(page.locator('input[type="text"],input:not([type])'))
   if (!displayInput) {
     fail('Browser athlete bootstrap', 'display-name input not found')
     return
   }
+
   await displayInput.fill('QA Athlete')
+  await optionalInstallDismiss(page)
   await create.click({ timeout: 5000 })
   await page.waitForFunction(() => !/CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
-  await page.waitForTimeout(700)
+  await page.waitForTimeout(450)
+  await settleFirstRunPrompts(page, 5)
 
   const after = await page.locator('body').innerText()
   if (/CREATE LOCAL ATHLETE/i.test(after)) fail('Browser athlete bootstrap', 'first-run modal remained open')
@@ -139,6 +193,7 @@ async function findDay2(page) {
 async function auditFuturePreview(page) {
   if (!(await clickLabel(page, 'TRAIN'))) return
   await page.waitForTimeout(500)
+  await optionalInstallDismiss(page)
   const d2 = await findDay2(page)
   if (!d2) {
     fail('Future-day browser preview', 'D2 selector not visible after Train settled')
@@ -146,6 +201,7 @@ async function auditFuturePreview(page) {
   }
   await d2.click({ timeout: 5000 })
   await page.waitForTimeout(650)
+  await optionalInstallDismiss(page)
   const previewText = await page.locator('body').innerText()
   if (/Preview position|Preview only/i.test(previewText) && /MAKE CURRENT POSITION/i.test(previewText)) pass('Future-day preview labeling')
   else fail('Future-day preview labeling', 'preview warning/current-position control missing')
@@ -182,6 +238,34 @@ async function auditFuturePreview(page) {
     else if (!detailsVisible) fail('Future-day Day 1 exercise card', 'governed prescription is not visible by default')
     else if (toggleVisible) fail('Future-day Day 1 exercise card', 'legacy VIEW FULL PLAN control is still visible')
     else pass('Future-day Day 1 exercise card', `${Math.round(visual.width)}×${Math.round(visual.height)}px hero; details open`)
+
+    const logger = card.locator('.lmf-preview-readonly-logger').first()
+    if (!(await logger.isVisible().catch(() => false))) {
+      fail('Future-day set logger parity', 'read-only Day 1-style set logger did not mount')
+    } else {
+      const metrics = await logger.locator('.lmf-preview-metric').evaluateAll((nodes) => nodes.map((node) => ({
+        label: (node.querySelector(':scope > span')?.textContent || '').trim(),
+        value: (node.querySelector('.lmf-preview-stepper strong')?.textContent || '').trim(),
+      })))
+      const labels = metrics.map((x) => x.label.toUpperCase())
+      const loadMetric = metrics.find((x) => x.label.toUpperCase() === 'LOAD')
+      if (!labels.includes('REPS') || !labels.includes('LOAD') || !labels.includes('RPE / RIR')) {
+        fail('Future-day set logger parity', `metric labels=${labels.join(', ')}`)
+      } else if (!loadMetric?.value) {
+        fail('Future-day prescribed load', 'LOAD field is empty')
+      } else {
+        pass('Future-day set logger parity', 'REPS / LOAD / RPE-RIR fields mounted')
+        pass('Future-day prescribed load', `preview shows ${loadMetric.value}`)
+      }
+
+      const steppers = logger.locator('.lmf-preview-stepper button')
+      let allDisabled = (await steppers.count()) > 0
+      for (let i = 0; i < await steppers.count(); i += 1) {
+        if (await steppers.nth(i).isEnabled().catch(() => true)) allDisabled = false
+      }
+      if (!allDisabled) fail('Future-day set logging lock', 'preview stepper control is enabled')
+      else pass('Future-day set logging lock', 'all set steppers are disabled')
+    }
   }
 
   await capture(page, 'Train Future Day Preview')
@@ -202,12 +286,15 @@ page.on('response', (response) => {
 try {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForSelector('body', { timeout: 10000 })
-  await page.waitForTimeout(900)
+  await page.waitForFunction(() => /LETMEFLY/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
+  await page.waitForTimeout(350)
+  await optionalInstallDismiss(page)
   const bodyText = await page.locator('body').innerText()
-  if (!/LETMEFLY/i.test(bodyText)) fail('Browser app boot', 'LetMeFly shell text not found')
+  if (!/LETMEFLY/i.test(bodyText)) fail('Browser app boot', 'LetMeFly shell text not found after startup window')
   else pass('Browser app boot')
 
   await bootstrapEphemeralAthlete(page)
+  await settleFirstRunPrompts(page, 6)
   await capture(page, 'Home')
   await assertNoOverflow(page, 'Home')
 
@@ -232,6 +319,7 @@ try {
 
   await page.setViewportSize({ width: 360, height: 800 })
   await page.waitForTimeout(180)
+  await optionalInstallDismiss(page)
   await assertNoOverflow(page, '360px mobile shell')
   await capture(page, 'Train 360px')
 } finally {
