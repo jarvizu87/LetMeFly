@@ -88,11 +88,12 @@ The current recovered working master is:
 
 The current downstream control/index layer is:
 
-- **Crown Training Intelligence System v1.9R2 — RECONSTRUCTED CONTROL INDEX**.
+- **Crown Training Intelligence System v1.9R3 — RECONSTRUCTED CONTROL INDEX**.
 - It preserves the observed 11-layer engine architecture, downstream module roles, the visible `DR-001` through `DR-020` Prescription Response Matrix, Crown Coach decision-routing logic, governance boundaries, and recovered QA signals.
+- R3 is synchronized to Stage4I R4 and the current Drive-side lineage index.
 - It is a downstream control/schema/intelligence layer only. It must not renumber, replace, or silently override Stage4I factual IDs and registries.
 
-The canonical Drive-side lineage index records which Training Intelligence artifacts are recovered originals, reconstructions, current, historical, or superseded. Superseded reconstructions remain archived as provenance checkpoints rather than being deleted.
+The current Drive-side lineage/provenance map is **LetMeFly Training Intelligence Lineage Index v5**. It records which Training Intelligence artifacts are recovered originals, reconstructions, current, historical, File-Library-only, or superseded. Superseded reconstructions remain archived as provenance checkpoints rather than being deleted.
 
 If an original missing binary is recovered later, compare it against the current reconstruction by IDs, source facts, governance rules, and regression results before promoting it. Do not silently overwrite the recovered lineage.
 
