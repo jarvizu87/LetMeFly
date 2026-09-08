@@ -1,0 +1,13 @@
+a5b2b1c1e20dd00a17af6d6d2ae7f9f3bb325d08053de6c506eae89ddcf9d34a  APPLY.md
+a534dfff1ad74511cbb4a884be74003c12e32812e8d34a1193c9fe98a94ef03f  PILOT_GATE.md
+fffebaebba67832d1fd2fd97745ab3accf35d32081fc66d998bc37d02bcf4d0a  README.md
+99c47b5317f9f9db5e567bb4efc68d96e5973ec18b1196a905c9b08a640c3b0d  patch/runtime-v3-to-v4.patch.gz.b64.00
+98b3828306576e99ba2f3e51a6181fbb3972dc6e01ead92636f949c5a4618c15  patch/runtime-v3-to-v4.patch.gz.b64.01
+
+Runtime v3->v4 patch SHA-256: `6baaf7c4791865d76f4506588c3fed91406cc5bb5d6aa7cd334e6da547d173ff`
+Gzip SHA-256: `c175fbb2caa1524fe2df60f47978848e11bc3135b626be15a3a6f1c95201aaa4`
+Base64 payload SHA-256: `852de03eebe9a282d85fcb0c73a119364e2090578074e41fd7e797b6751505f2`
+Patch bytes: 10929
+Gzip bytes: 3394
+Base64 characters: 4528
+Changed files: 5
