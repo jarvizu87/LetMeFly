@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Audit set-focus Coach source boundary
+      - name: Audit descriptive Coach source boundary
         run: |
           set -euo pipefail
           JS='overlays/exercise-intelligence/runtime/exercise-intelligence-coach-v1.js'
@@ -44,15 +44,18 @@ jobs:
           grep -Fq 'sessionStorage' "$JS"
           grep -Fq 'data-action="go-coach"' "$JS"
           grep -Fq 'focusQuestion' "$JS"
-          grep -Fq 'SET COACHING CONTEXT' "$JS"
+          grep -Fq 'whyQuestion' "$JS"
+          grep -Fq 'muscleQuestion' "$JS"
+          grep -Fq 'EXERCISE COACHING CONTEXT' "$JS"
           grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$JS"
+          grep -Fq 'The exact reason it appears in today’s slot' "$JS"
           grep -Fq '.lmf-coach-intel-context' "$CSS"
           ! grep -Fq 'localStorage' "$JS"
           ! grep -Fq 'indexedDB' "$JS"
           ! grep -Fq 'data-substitute' "$JS"
           ! grep -Fq 'getSubstitutions' "$JS"
           ! grep -Fq 'fetch(' "$JS"
-          echo 'Exercise Intelligence Coach read-only boundary audit: PASS'
+          echo 'Exercise Intelligence Coach descriptive read-only boundary audit: PASS'
 
       - name: Smoke-test Coach installer and offline shell resources
         run: |
