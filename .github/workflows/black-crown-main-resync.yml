@@ -1,0 +1,32 @@
+name: Black Crown Main Resync
+
+on:
+  push:
+    branches:
+      - black-crown-v2-0-modular-import
+    paths:
+      - '.github/workflows/black-crown-main-resync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  resync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: black-crown-v2-0-modular-import
+          fetch-depth: 0
+
+      - name: Merge latest main and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git merge --no-edit origin/main
+          git rm .github/workflows/black-crown-main-resync.yml
+          git commit -m 'Remove one-shot Black Crown main resync'
+          git push origin HEAD:black-crown-v2-0-modular-import
