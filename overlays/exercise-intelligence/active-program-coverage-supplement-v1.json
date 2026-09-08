@@ -1,0 +1,719 @@
+{
+  "schemaVersion": "1.0-active-program-coverage-supplement",
+  "integrationStatus": "READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION",
+  "baseSchemaVersion": "1.1-black-crown-v2-1",
+  "baseCounts": {
+    "exercises": 94,
+    "substitutionRules": 27
+  },
+  "finalSchemaVersion": "1.2-active-program-coverage",
+  "finalCounts": {
+    "exercises": 108,
+    "substitutionRules": 27
+  },
+  "programPrescriptionOwner": "program-packages-only",
+  "activeProgramCoverageSupplements": [
+    "active-program-coverage-v1"
+  ],
+  "compoundProgramDisplayNames": [
+    "Bike / Incline Walk",
+    "Bike / Row / Walk",
+    "Bike / Walk",
+    "Bike or Walk",
+    "Walk or Bike",
+    "Dead Bug or Hollow Hold",
+    "Front Squat + Bench Ramp Sets",
+    "KB Lateral Clean or Outside Swing to Rack",
+    "Pull-Up or Lat Pulldown",
+    "Reverse Crunch or Dead Bug",
+    "Wide or Neutral Pulldown",
+    "Curl",
+    "Pushdown"
+  ],
+  "exercises": [
+    {
+      "id": "90-90-hip-mobility",
+      "canonicalName": "90/90 Hip Mobility",
+      "aliases": [
+        "90/90 Hip Mobility Drill"
+      ],
+      "sourcePrograms": [
+        "Crownforge Testing"
+      ],
+      "movementRoles": [
+        "Hip / Lower-Body Mobility Reset"
+      ],
+      "trainingCategory": "Mobility / Hip",
+      "equipment": [],
+      "purpose": "Low-fatigue hip rotation and position work used to restore or prepare squat and hinge positions without creating meaningful training fatigue.",
+      "primaryMuscles": [
+        "Hip Rotators",
+        "Adductors"
+      ],
+      "secondaryMuscles": [
+        "Gluteals",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Set both hips comfortably before chasing range.",
+        "Move through the hips rather than twisting through the low back.",
+        "Keep the torso controlled and breathe through the position.",
+        "Use a pain-free range and let repeated clean reps improve motion."
+      ],
+      "commonMistakes": [
+        "Forcing end range.",
+        "Rolling through the low back to create motion.",
+        "Rushing between sides.",
+        "Turning recovery mobility into a hard stretch."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=90%2F90+Hip+Mobility+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "LetMeFly v7 RT-027 Hip / Lower-Body Mobility Reset + v12 Exercise Demo Library distinct 90/90 Hip Mobility identity"
+    },
+    {
+      "id": "box-jump",
+      "canonicalName": "Box Jump",
+      "aliases": [],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Landing / Plyometric Quality",
+        "Jump / Throw"
+      ],
+      "trainingCategory": "Power / Landing Skill",
+      "equipment": [
+        "Box"
+      ],
+      "purpose": "Develop crisp low-volume vertical lower-body power while rehearsing controlled takeoff and landing quality with low fatigue.",
+      "primaryMuscles": [
+        "Quadriceps",
+        "Gluteus Maximus",
+        "Calves"
+      ],
+      "secondaryMuscles": [
+        "Hamstrings",
+        "Adductors",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Start each rep from a stable athletic position.",
+        "Jump with maximal intent but keep the dose low.",
+        "Land quietly with hips, knees and ankles sharing the load.",
+        "Stand tall on the box before stepping down and resetting."
+      ],
+      "commonMistakes": [
+        "Turning the set into conditioning.",
+        "Landing stiff or loudly.",
+        "Letting the knees collapse inward.",
+        "Choosing a box height that forces excessive knee tuck or poor landing position."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Box+Jump+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Stage4F EX-009 / v1.9 Exercise Intelligence Box Jump + Black Crown primer role + v7 RT-029"
+    },
+    {
+      "id": "box-squat",
+      "canonicalName": "Box Squat",
+      "aliases": [],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Squat Pattern"
+      ],
+      "trainingCategory": "Strength / Squat",
+      "equipment": [
+        "Barbell",
+        "Box"
+      ],
+      "purpose": "A squat-pattern strength tool that develops knee/quad capacity, bracing and position quality while using the box as a controlled depth and positional reference.",
+      "primaryMuscles": [
+        "Quadriceps",
+        "Gluteus Maximus",
+        "Adductors"
+      ],
+      "secondaryMuscles": [
+        "Spinal Erectors",
+        "Abdominals/Obliques",
+        "Upper Back"
+      ],
+      "coachingCues": [
+        "Brace before the descent and keep a full-foot tripod.",
+        "Control the descent to the box instead of dropping onto it.",
+        "Keep tension through the trunk and legs on contact.",
+        "Drive hips and chest up together without rocking for momentum."
+      ],
+      "commonMistakes": [
+        "Crashing onto the box.",
+        "Relaxing completely at the bottom.",
+        "Rocking backward before standing.",
+        "Letting the knees collapse or hips shoot up first."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Barbell+Box+Squat+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Black Crown squat-pattern governance + Stage4H source map / v1.9 Auto Selection Output"
+    },
+    {
+      "id": "broad-jump",
+      "canonicalName": "Broad Jump",
+      "aliases": [
+        "Standing Broad Jump"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Landing / Plyometric Quality",
+        "Jump / Throw"
+      ],
+      "trainingCategory": "Power / Horizontal Projection",
+      "equipment": [
+        "Bodyweight"
+      ],
+      "purpose": "Develop low-volume horizontal projection and explosiveness while preserving controlled landing quality.",
+      "primaryMuscles": [
+        "Gluteus Maximus",
+        "Quadriceps",
+        "Calves"
+      ],
+      "secondaryMuscles": [
+        "Hamstrings",
+        "Adductors",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Load the hips and swing the arms with intent.",
+        "Project forward rather than only upward.",
+        "Land softly with the whole foot and absorb through hips and knees.",
+        "Stick the landing before resetting the next rep."
+      ],
+      "commonMistakes": [
+        "Turning repeated jumps into conditioning.",
+        "Landing with stiff knees.",
+        "Falling or stepping through every landing.",
+        "Chasing distance after landing quality drops."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Broad+Jump+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Stage4F EX-009 Box Jump / Broad Jump role + v1.9 Exercise Intelligence"
+    },
+    {
+      "id": "explosive-push-up",
+      "canonicalName": "Explosive Push-Up",
+      "aliases": [
+        "Plyometric Push-Up"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Horizontal Push",
+        "Upper-Body Power"
+      ],
+      "trainingCategory": "Power / Horizontal Push",
+      "equipment": [
+        "Bodyweight"
+      ],
+      "purpose": "Train explosive horizontal pressing as a low-volume upper-body power primer without turning the slot into fatigue-focused push-up volume.",
+      "primaryMuscles": [
+        "Pectoralis Major",
+        "Triceps",
+        "Anterior Deltoid"
+      ],
+      "secondaryMuscles": [
+        "Serratus Anterior",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Set a rigid plank before each rep.",
+        "Lower under control and reverse with maximal intent.",
+        "Project the hands from the floor while keeping the trunk connected.",
+        "Reset fully between reps when needed to preserve speed."
+      ],
+      "commonMistakes": [
+        "Sagging through the hips.",
+        "Chasing high reps after speed drops.",
+        "Landing with locked elbows.",
+        "Using a range or hand position that irritates wrists or shoulders."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Explosive+Push-Up+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Stage4F EX-011 + Stage4H source map + Black Crown primer role"
+    },
+    {
+      "id": "finger-extension",
+      "canonicalName": "Finger Extension",
+      "aliases": [
+        "Finger Extension Band",
+        "Finger Extension Band Openers"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Hand / Wrist Health"
+      ],
+      "trainingCategory": "Structural / Grip / Wrist",
+      "equipment": [
+        "Band"
+      ],
+      "purpose": "Low-load finger-extensor and hand-health work that balances gripping stress without becoming another fatiguing grip exercise.",
+      "primaryMuscles": [
+        "Finger Extensors"
+      ],
+      "secondaryMuscles": [
+        "Wrist Extensors",
+        "Forearm Stabilizers"
+      ],
+      "coachingCues": [
+        "Use a light band and spread the fingers under control.",
+        "Keep the wrist neutral and the forearm relaxed.",
+        "Open fully without forcing the joints.",
+        "Stop well before hand fatigue affects higher-priority pulling or carries."
+      ],
+      "commonMistakes": [
+        "Using excessive band tension.",
+        "Snapping the fingers open and closed.",
+        "Turning the drill into a high-fatigue finisher.",
+        "Adding volume when the hands are already taxed."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Finger+Extension+Band+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "LetMeFly v7 RT-037 Hand / Wrist Health + Black Crown grip governance + v12 Finger Extension Band identity"
+    },
+    {
+      "id": "hip-airplane",
+      "canonicalName": "Hip Airplane",
+      "aliases": [],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Hip / Lower-Body Mobility Reset",
+        "Single-Leg Hip Control"
+      ],
+      "trainingCategory": "Mobility / Hip Control",
+      "equipment": [
+        "Bodyweight"
+      ],
+      "purpose": "Train controlled hip rotation and single-leg pelvic stability with low fatigue as preparation for squat, hinge and athletic work.",
+      "primaryMuscles": [
+        "Gluteus Medius/Minimus",
+        "Gluteus Maximus",
+        "Hip Rotators"
+      ],
+      "secondaryMuscles": [
+        "Hamstrings",
+        "Adductors",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Own a stable single-leg hinge position first.",
+        "Rotate from the hip while keeping the stance foot rooted.",
+        "Move slowly and keep the pelvis controlled.",
+        "Use support when needed to preserve clean hip motion."
+      ],
+      "commonMistakes": [
+        "Spinning through the low back.",
+        "Losing the stance-foot tripod.",
+        "Using momentum to create range.",
+        "Choosing unsupported reps when balance prevents hip control."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Hip+Airplane+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Black Crown warm-up programming + v12 plan-approved Hip Airplane -> Supported Hip Airplane relationship"
+    },
+    {
+      "id": "kb-dead-stop-swing",
+      "canonicalName": "KB Dead-Stop Swing",
+      "aliases": [
+        "Kettlebell Dead-Stop Swing",
+        "Dead-Stop Kettlebell Swing"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Kettlebell Pattern",
+        "Ballistic Hinge / Power"
+      ],
+      "trainingCategory": "Kettlebell / Athletic Power",
+      "equipment": [
+        "Kettlebell"
+      ],
+      "purpose": "Develop crisp ballistic hip extension while resetting the bell between reps or short clusters to reduce cyclic density and reinforce a clean hinge start.",
+      "primaryMuscles": [
+        "Gluteus Maximus",
+        "Hamstrings"
+      ],
+      "secondaryMuscles": [
+        "Lats",
+        "Trunk",
+        "Forearms/Grip"
+      ],
+      "coachingCues": [
+        "Set the bell and brace before each dead-start.",
+        "Hike from a stable hinge and keep the lats connected.",
+        "Snap the hips and let the bell float.",
+        "Return the bell under control and fully reset before the next start."
+      ],
+      "commonMistakes": [
+        "Squatting the start.",
+        "Yanking the bell with the arms.",
+        "Rushing the reset.",
+        "Hyperextending the low back at lockout."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=KB+Dead-Stop+Swing+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Black Crown primer/power programming + v12 Exercise Demo Library KB Dead-Stop Swing identity"
+    },
+    {
+      "id": "medicine-ball-chest-pass",
+      "canonicalName": "Medicine Ball Chest Pass",
+      "aliases": [
+        "Med Ball Chest Pass",
+        "Med-Ball Chest Pass"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Jump / Throw",
+        "Upper-Body Power"
+      ],
+      "trainingCategory": "Power / Throw",
+      "equipment": [
+        "Medicine Ball"
+      ],
+      "purpose": "Develop explosive horizontal pressing with very low eccentric cost as a crisp upper-body power primer.",
+      "primaryMuscles": [
+        "Pectoralis Major",
+        "Triceps",
+        "Anterior Deltoid"
+      ],
+      "secondaryMuscles": [
+        "Serratus Anterior",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Start braced with the ball at the chest.",
+        "Drive the pass as fast as possible without a slow grinding push.",
+        "Keep the trunk connected and finish through the hands.",
+        "Reset completely between throws so every rep is explosive."
+      ],
+      "commonMistakes": [
+        "Using a ball too heavy to move fast.",
+        "Turning the set into conditioning.",
+        "Overarching the low back.",
+        "Catching or rebounding in a way that adds unnecessary shoulder stress."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Medicine+Ball+Chest+Pass+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Stage4F EX-010 / v1.9 Medicine-Ball Chest Pass + Black Crown primer role"
+    },
+    {
+      "id": "rack-pull",
+      "canonicalName": "Rack Pull",
+      "aliases": [],
+      "sourcePrograms": [
+        "Crownforge",
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Hinge / Pull Pattern"
+      ],
+      "trainingCategory": "Strength / Hinge",
+      "equipment": [
+        "Barbell",
+        "Power Rack"
+      ],
+      "purpose": "A partial-range heavy hinge/pull tool used to develop posterior-chain strength, pulling skill, bracing and back/hip durability at a governed rack height.",
+      "primaryMuscles": [
+        "Gluteus Maximus",
+        "Hamstrings",
+        "Spinal Erectors"
+      ],
+      "secondaryMuscles": [
+        "Lats",
+        "Trapezius",
+        "Forearms/Grip",
+        "Trunk"
+      ],
+      "coachingCues": [
+        "Set the rack height exactly as programmed.",
+        "Brace hard and take the slack out before the pull.",
+        "Keep the bar close and drive through the floor while extending the hips.",
+        "Finish tall without leaning back or hitching."
+      ],
+      "commonMistakes": [
+        "Changing rack height to chase load.",
+        "Jerking the bar from the pins.",
+        "Letting the bar drift forward.",
+        "Hyperextending or hitching at lockout."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Rack+Pull+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Crownforge live pull/hinge programming + Black Crown hinge/pull anchor-pattern governance"
+    },
+    {
+      "id": "reverse-lunge",
+      "canonicalName": "Reverse Lunge",
+      "aliases": [],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Single-Leg"
+      ],
+      "trainingCategory": "Strength Support / Single-Leg",
+      "equipment": [
+        "Bodyweight",
+        "Dumbbell",
+        "Kettlebell",
+        "Barbell"
+      ],
+      "purpose": "Single-leg lower-body support that builds quad/glute strength, pelvic control and useful unilateral volume without replacing the primary squat pattern.",
+      "primaryMuscles": [
+        "Quadriceps",
+        "Gluteus Maximus"
+      ],
+      "secondaryMuscles": [
+        "Adductors",
+        "Hamstrings",
+        "Gluteus Medius",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Step back far enough to keep the front foot stable.",
+        "Stay stacked over the working leg.",
+        "Lower under control with the front knee tracking over the foot.",
+        "Drive through the front leg to return without pushing excessively off the rear foot."
+      ],
+      "commonMistakes": [
+        "Stepping too narrow and losing balance.",
+        "Front knee collapsing inward.",
+        "Pushing mainly from the rear leg.",
+        "Using load that turns clean single-leg work into a wobbling grind."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Reverse+Lunge+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "v1.9 Stage4H source map / Auto Selection Output + Black Crown structural-support programming"
+    },
+    {
+      "id": "snatch-grip-rdl",
+      "canonicalName": "Snatch-Grip RDL",
+      "aliases": [
+        "Snatch-Grip Romanian Deadlift"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Hinge / Pull Pattern"
+      ],
+      "trainingCategory": "Strength / Hinge",
+      "equipment": [
+        "Barbell"
+      ],
+      "purpose": "A wide-grip Romanian-deadlift variation used for posterior-chain strength and hinge tolerance while increasing upper-back and lat positional demand.",
+      "primaryMuscles": [
+        "Hamstrings",
+        "Gluteus Maximus"
+      ],
+      "secondaryMuscles": [
+        "Spinal Erectors",
+        "Lats",
+        "Upper Back",
+        "Forearms/Grip",
+        "Trunk"
+      ],
+      "coachingCues": [
+        "Set the snatch-width grip before bracing.",
+        "Keep a soft knee and push the hips back.",
+        "Keep the bar close and the upper back connected.",
+        "Stop when hamstring tension or position limits the range; stand with the glutes."
+      ],
+      "commonMistakes": [
+        "Choosing a grip so wide that shoulder position breaks down.",
+        "Squatting the rep.",
+        "Letting the bar drift away.",
+        "Chasing depth by rounding the back."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Snatch-Grip+Romanian+Deadlift+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Black Crown hinge/pull anchor-pattern governance + active Black Crown Snatch-Grip RDL secondary slot"
+    },
+    {
+      "id": "sorenson-hold",
+      "canonicalName": "Sorenson Hold",
+      "aliases": [
+        "Sorensen Hold"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Back-Extension Role"
+      ],
+      "trainingCategory": "Structural / Posterior Support",
+      "equipment": [
+        "Back Extension Bench"
+      ],
+      "purpose": "Isometric posterior-chain and spinal-endurance work used for low-back durability and trunk stiffness without adding another loaded hinge.",
+      "primaryMuscles": [
+        "Spinal Erectors",
+        "Gluteus Maximus"
+      ],
+      "secondaryMuscles": [
+        "Hamstrings",
+        "Multifidus",
+        "Trunk Stabilizers"
+      ],
+      "coachingCues": [
+        "Set the pelvis securely on the support.",
+        "Hold a long neutral line from head through hips.",
+        "Brace and breathe without losing trunk position.",
+        "End the hold when posture changes rather than extending the clock."
+      ],
+      "commonMistakes": [
+        "Hyperextending the low back.",
+        "Holding the breath.",
+        "Letting the hips sag.",
+        "Chasing time after posture has already failed."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Sorenson+Hold+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Black Crown back-extension role governance + active conditional low-back-durability slot"
+    },
+    {
+      "id": "trap-3-raise",
+      "canonicalName": "Trap-3 Raise",
+      "aliases": [
+        "Trap 3 Raise",
+        "Lower Trap Raise"
+      ],
+      "sourcePrograms": [
+        "Black Crown"
+      ],
+      "movementRoles": [
+        "Yoke / Scapular Support"
+      ],
+      "trainingCategory": "Structural / Upper Back",
+      "equipment": [
+        "Dumbbell",
+        "Incline Bench"
+      ],
+      "purpose": "Low-load lower-trapezius and scapular-control work that supports yoke/upper-back development without adding heavy shrug or grip stress.",
+      "primaryMuscles": [
+        "Lower Trapezius"
+      ],
+      "secondaryMuscles": [
+        "Middle Trapezius",
+        "Rhomboids",
+        "Rear Deltoid",
+        "Rotator Cuff"
+      ],
+      "coachingCues": [
+        "Set the torso and keep the neck relaxed.",
+        "Reach the arm in the intended Y/scapular plane rather than straight out to the side.",
+        "Move the shoulder blade smoothly without shrugging toward the ear.",
+        "Use light load and pause in the controlled top position."
+      ],
+      "commonMistakes": [
+        "Turning the movement into an upper-trap shrug.",
+        "Using momentum or excessive dumbbell load.",
+        "Cranking the neck into extension.",
+        "Losing scapular control to chase range."
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Trap-3+Raise+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "evidenceClassification": "SOURCE-DERIVED + NORMALIZED COACHING",
+      "evidenceBasis": "Black Crown yoke/trap emphasis governance + active Trap-3 Raise yoke/carry slot"
+    }
+  ],
+  "substitutionRules": []
+}
