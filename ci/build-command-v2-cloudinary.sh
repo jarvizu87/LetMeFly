@@ -16,7 +16,7 @@ bash ci/build-command-v2-hardening.sh
 bash ci/apply-readiness-persistence-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 # Improve real-world phone logging ergonomics, exercise-video reliability,
-# automatic approved exercise art, and the locked Workout Flow v1 UI.
+# automatic approved exercise art, locked Workout Flow v1, and Pyramid Flow v1.
 bash ci/apply-mobile-workout-video-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 test -s "$CLOUDINARY_JS"
@@ -89,6 +89,7 @@ PY
 grep -Fq "/ui/exercise-art-cloudinary.js" index.html
 grep -Fq "/ui/exercise-art-auto.js" index.html
 grep -Fq "/ui/workout-flow-v1.js" index.html
+grep -Fq "/ui/pyramid-flow-v1.js" index.html
 
 # Re-run all release boundaries against the exact private-override-enabled source that will ship.
 npm run audit:source
@@ -104,10 +105,12 @@ test -f dist/ui/train-lifter.webp
 test -f dist/ui/exercise-art-cloudinary.js
 test -f dist/ui/exercise-art-auto.js
 test -f dist/ui/workout-flow-v1.js
+test -f dist/ui/pyramid-flow-v1.js
 test -f dist/exercise-art-import.html
 grep -Fq "/ui/exercise-art-cloudinary.js" dist/index.html
 grep -Fq "/ui/exercise-art-auto.js" dist/index.html
 grep -Fq "/ui/workout-flow-v1.js" dist/index.html
+grep -Fq "/ui/pyramid-flow-v1.js" dist/index.html
 grep -Fq "exercise_thumbnail_overrides" dist/ui/exercise-art-cloudinary.js
 grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-cloudinary.js
@@ -116,6 +119,8 @@ grep -Fq 'jp-${slug}-v2' dist/ui/exercise-art-auto.js
 grep -Fq "lmf-set-tabs" dist/ui/workout-flow-v1.js
 grep -Fq "lmf-compact-summary" dist/ui/workout-flow-v1.js
 grep -Fq "Between Rounds" dist/ui/workout-flow-v1.js
+grep -Fq "PYRAMID PLAN" dist/ui/pyramid-flow-v1.js
+grep -Fq "lmf-pyramid-plan-row" dist/ui/pyramid-flow-v1.js
 ! grep -Fq "localStorage.setItem" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "__LMF_SUPABASE_" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
@@ -149,6 +154,9 @@ checks = {
     'Workout Flow compact previews': '.lmf-compact-summary' in compact,
     'Workout Flow connected rail': '.lmf-flow-node' in compact,
     'Workout Flow rest card': '.lmf-round-rest' in compact,
+    'Pyramid plan': '.lmf-pyramid-plan' in compact,
+    'Pyramid long-plan scroll': '.lmf-pyramid-plan.is-long' in compact and 'max-height:330px' in compact,
+    'Pyramid set tabs stay touchable': '.lmf-pyramid-card.lmf-set-tab' in compact or 'flex:0 054px!important' in compact,
     'working Front Squat demo': 'youtube.com/watch?v=-fNfycATWUo' in asset_text,
     'dead Front Squat Vimeo removed': 'vimeo.com/152122947' not in asset_text,
 }
@@ -163,4 +171,4 @@ PY
 # Minification is allowed to rename function identifiers in dist.
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly private exercise-art + readiness + mobile workout/video + Workout Flow v1 pipeline: PASS"
+echo "LetMeFly private exercise-art + readiness + mobile workout/video + Workout Flow v1 + Pyramid Flow v1 pipeline: PASS"
