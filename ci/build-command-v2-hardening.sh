@@ -99,6 +99,12 @@ grep -Fq ".v2-bars i.empty" src/command-v2.css
 bash "$ROOT_DIR/ci/apply-black-crown-command-v2-core.sh" "$ROOT_DIR/.build-src/letmefly_app"
 bash "$ROOT_DIR/ci/apply-black-crown-command-v2-ui.sh" "$ROOT_DIR/.build-src/letmefly_app"
 
+# Private athlete state owns the active program position, governed handoffs, and
+# TM resolution. This adapter is intentionally applied after all public program
+# packages/UI adapters and must not mutate any program prescription package.
+bash "$ROOT_DIR/ci/apply-athlete-program-progression-v1.sh" "$ROOT_DIR/.build-src/letmefly_app"
+node "$ROOT_DIR/ci/audit-athlete-program-progression.mjs" "$ROOT_DIR/.build-src/letmefly_app"
+
 npm run audit:source
 npm run audit:crownforge
 npm run audit:exercise-library
@@ -119,10 +125,12 @@ grep -Rq "Exercise demo offline" dist/assets
 grep -Rq "No TM data yet" dist/assets
 grep -Rq "54 governed weeks" dist/assets
 grep -Rq "BLACK CROWN WEEKS" dist/assets
+grep -Rq "BLACK CROWN ENTRY GATE" dist/assets
+grep -Rq "Preview only" dist/assets
 
 for art_file in "${ART_FILES[@]}"; do
   art_name="$(basename "$art_file")"
   test -f "dist/ui/exercises/$art_name"
 done
 
-echo "LetMeFly Command V2 hardening + Black Crown v2 governed UI + truthful runtime states: PASS"
+echo "LetMeFly Command V2 hardening + Black Crown v2 governed UI + private athlete progression + truthful runtime states: PASS"
