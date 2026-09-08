@@ -95,11 +95,15 @@ grep -Fq 'PROGRAM SAFETY' "$INFO_JS"
 ! grep -Fq 'sessionStorage' "$INFO_JS"
 ! grep -Fq 'indexedDB' "$INFO_JS"
 
-# Set-focus Coach may keep only transient exercise context; it may not become a
-# program/substitution/network mutation layer.
+# Exercise-aware Coach may keep only transient exercise context; it may not become
+# a program/substitution/network mutation layer.
 grep -Fq 'sessionStorage' "$COACH_JS"
 grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$COACH_JS"
-grep -Fq 'SET COACHING CONTEXT' "$COACH_JS"
+grep -Fq 'EXERCISE COACHING CONTEXT' "$COACH_JS"
+grep -Fq 'focusQuestion' "$COACH_JS"
+grep -Fq 'whyQuestion' "$COACH_JS"
+grep -Fq 'muscleQuestion' "$COACH_JS"
+grep -Fq 'The exact reason it appears in today’s slot' "$COACH_JS"
 ! grep -Fq 'localStorage' "$COACH_JS"
 ! grep -Fq 'indexedDB' "$COACH_JS"
 ! grep -Fq 'getSubstitutions' "$COACH_JS"
@@ -119,4 +123,4 @@ grep -Fq 'NOT A DEFAULT SUBSTITUTE' "$SUB_JS"
 # Program packages must remain the declared authority in the public runtime.
 grep -Fq 'program-packages-only' "$RUNTIME"
 
-echo "LetMeFly final Exercise Intelligence INFO + Coach + substitution production audit: PASS"
+echo "LetMeFly final Exercise Intelligence INFO + descriptive Coach + substitution production audit: PASS"
