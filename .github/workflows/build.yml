@@ -40,6 +40,9 @@ jobs:
       - name: Install smart voice-note dictation v2
         run: bash ci/install-voice-notes-v2.sh
 
+      - name: Install Strength Maxes
+        run: bash ci/install-strength-maxes-v1.sh
+
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
 
