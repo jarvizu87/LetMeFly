@@ -15,9 +15,12 @@ p = Path(os.environ['TARGET_DIR']) / 'src/main.ts'
 text = p.read_text()
 
 old_import = "import { CROWNFORGE, CROWN_MAINTENANCE, BLACK_CROWN, getCalendarDay, getCrownforgeDay, getCrownforgeWeek, getCrownMaintenanceDay, getCrownMaintenanceWeek, type CalendarProgramKey, type ProgramDay, type ProgramExercise, type ProgramWeek } from './data/programs'"
-new_import = "import { CROWNFORGE, CROWN_MAINTENANCE, BLACK_CROWN, getCalendarDay, getCrownforgeDay, getCrownforgeWeek, getCrownMaintenanceDay, getCrownMaintenanceWeek, getBlackCrownDay, getBlackCrownWeek, type PublicProgramKey, type ProgramDay, type ProgramExercise, type ProgramWeek } from './data/programs'"
+old_core_import = "import { CROWNFORGE, CROWN_MAINTENANCE, BLACK_CROWN, getCalendarDay, getCrownforgeDay, getCrownforgeWeek, getCrownMaintenanceDay, getCrownMaintenanceWeek, getBlackCrownDay, getBlackCrownWeek, type PublicProgramKey, type ProgramDay, type ProgramExercise, type ProgramWeek } from './data/programs'"
+new_import = "import { CROWNFORGE, CROWN_MAINTENANCE, BLACK_CROWN, BLACK_CROWN_BLOCKS, getCalendarDay, getCrownforgeDay, getCrownforgeWeek, getCrownMaintenanceDay, getCrownMaintenanceWeek, getBlackCrownDay, getBlackCrownWeek, type PublicProgramKey, type ProgramDay, type ProgramExercise, type ProgramWeek } from './data/programs'"
 if old_import in text:
     text = text.replace(old_import, new_import, 1)
+elif old_core_import in text:
+    text = text.replace(old_core_import, new_import, 1)
 elif new_import not in text:
     raise SystemExit('main program import marker not found')
 
@@ -61,6 +64,17 @@ if old_name in text:
 elif new_name not in text:
     raise SystemExit('selectedProgramName marker not found')
 
+helper = """
+function selectedSubstitutionProgram(): 'Crownforge' | 'Black Crown' | 'Crown Maintenance' {
+  return state.selectedProgram === 'black-crown' ? 'Black Crown' : state.selectedProgram === 'crown-maintenance' ? 'Crown Maintenance' : 'Crownforge'
+}
+"""
+if 'function selectedSubstitutionProgram()' not in text:
+    anchor = new_name
+    if anchor not in text:
+        raise SystemExit('selectedProgramName helper anchor not found')
+    text = text.replace(anchor, anchor + helper, 1)
+
 text = text.replace("<span>${state.selectedProgram === 'crown-maintenance' ? 'CM' : 'CF'} • W${state.selectedWeek} • D${state.selectedDay}</span>", "<span>${state.selectedProgram === 'black-crown' ? 'BC' : state.selectedProgram === 'crown-maintenance' ? 'CM' : 'CF'} • W${state.selectedWeek} • D${state.selectedDay}</span>", 1)
 text = text.replace("  const homeProgram = today?.program ?? state.selectedProgram\n", "  const homeProgram: PublicProgramKey = today?.program ?? state.selectedProgram\n", 1)
 
@@ -69,9 +83,11 @@ PY
 
 MAIN="$TARGET_DIR/src/main.ts"
 grep -Fq 'selectedProgram: PublicProgramKey' "$MAIN"
+grep -Fq 'BLACK_CROWN_BLOCKS' "$MAIN"
 grep -Fq "program === 'black-crown' ? getBlackCrownDay" "$MAIN"
 grep -Fq "program === 'black-crown' ? getBlackCrownWeek" "$MAIN"
 grep -Fq "state.selectedProgram === 'black-crown' ? BLACK_CROWN.name" "$MAIN"
 grep -Fq "state.selectedProgram === 'black-crown' ? 'BC'" "$MAIN"
+grep -Fq 'function selectedSubstitutionProgram()' "$MAIN"
 
 echo "Command V2 Black Crown core routing: PASS"
