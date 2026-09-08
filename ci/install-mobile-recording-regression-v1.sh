@@ -26,28 +26,29 @@ import os
 
 p = Path(os.environ['INDEX'])
 text = p.read_text()
-css = '<link rel="stylesheet" href="/ui/mobile-recording-regression-v1.css?v=2">'
-js = '<script defer src="/ui/mobile-recording-regression-v1.js?v=2"></script>'
+# Remove prior cache-busted variants before injecting the current UI layer.
+import re
+text = re.sub(r'\s*<link rel="stylesheet" href="/ui/mobile-recording-regression-v1\.css\?v=\d+">\s*', '\n', text)
+text = re.sub(r'\s*<script defer src="/ui/mobile-recording-regression-v1\.js\?v=\d+"></script>\s*', '\n', text)
+css = '<link rel="stylesheet" href="/ui/mobile-recording-regression-v1.css?v=3">'
+js = '<script defer src="/ui/mobile-recording-regression-v1.js?v=3"></script>'
 
-if css not in text:
-    if '</head>' not in text:
-        raise SystemExit('production index is missing </head>')
-    text = text.replace('</head>', f'  {css}\n</head>', 1)
-if js not in text:
-    if '</body>' not in text:
-        raise SystemExit('production index is missing </body>')
-    text = text.replace('</body>', f'  {js}\n</body>', 1)
+if '</head>' not in text:
+    raise SystemExit('production index is missing </head>')
+text = text.replace('</head>', f'  {css}\n</head>', 1)
+if '</body>' not in text:
+    raise SystemExit('production index is missing </body>')
+text = text.replace('</body>', f'  {js}\n</body>', 1)
 p.write_text(text)
 PY
 
-# Recording-led regression boundaries: future-day cards share the compact live
-# workout visual language, keep exact details expandable, and cannot write state.
-grep -Fq '/ui/mobile-recording-regression-v1.css?v=2' "$INDEX"
-grep -Fq '/ui/mobile-recording-regression-v1.js?v=2' "$INDEX"
-grep -Fq 'width:78px!important' "$DIST/ui/mobile-recording-regression-v1.css"
-grep -Fq 'background-image:var(--exercise-art' "$DIST/ui/mobile-recording-regression-v1.css"
-grep -Fq 'lmf-preview-plan-toggle' "$DIST/ui/mobile-recording-regression-v1.css"
-grep -Fq 'lmfPreviewCollapsed' "$DIST/ui/mobile-recording-regression-v1.js"
+# Recording-led regression boundaries: future-day cards now use Day 1's large
+# exercise-card presentation, show governed details by default, and cannot write state.
+grep -Fq '/ui/mobile-recording-regression-v1.css?v=3' "$INDEX"
+grep -Fq '/ui/mobile-recording-regression-v1.js?v=3' "$INDEX"
+grep -Fq 'aspect-ratio:1/1!important' "$DIST/ui/mobile-recording-regression-v1.css"
+grep -Fq 'data-lmf-preview-collapsed' "$DIST/ui/mobile-recording-regression-v1.css"
+grep -Fq 'lmfPreviewDay1Style' "$DIST/ui/mobile-recording-regression-v1.js"
 grep -Fq "Preview only — readiness is locked" "$DIST/ui/mobile-recording-regression-v1.js"
 grep -Fq "['start-workout', 'save-readiness']" "$DIST/ui/mobile-recording-regression-v1.js"
 grep -Fq 'MAKE CURRENT POSITION' "$DIST"/assets/*.js
@@ -56,4 +57,4 @@ grep -Fq 'MAKE CURRENT POSITION' "$DIST"/assets/*.js
 # or cloud/private records.
 ! grep -Eq 'indexedDB\.|localStorage\.setItem|supabase|programInstances|current_day_key|current_week' "$DIST/ui/mobile-recording-regression-v1.js"
 
-echo "LetMeFly mobile recording regression fixes v2: PASS"
+echo "LetMeFly mobile recording regression fixes v3: PASS"
