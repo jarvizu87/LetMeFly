@@ -40,6 +40,9 @@ jobs:
       - name: Install read-only Exercise Intelligence runtime
         run: bash ci/install-exercise-intelligence-v1.sh
 
+      - name: Install Exercise Intelligence set-focus Coach
+        run: bash ci/install-exercise-intelligence-coach-v1.sh
+
       - name: Install smart voice-note dictation v2
         run: bash ci/install-voice-notes-v2.sh
 
