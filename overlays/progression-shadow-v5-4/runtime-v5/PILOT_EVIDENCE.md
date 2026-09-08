@@ -38,3 +38,7 @@ A second connection is only a preflight. The real pilot still requires an actual
 ## Visible pilot remains blocked until
 
 The runtime-v4 gate still applies: at least 3 reviewed real workouts, including one Green and one Yellow with clean decision coverage, exact XP match, 0-XP replay, COMPLETE Main Quest, reload persistence, clean diagnostics, zero queue issues, backup/restore PASS, offline persistence PASS, and canonical workout logging regression PASS.
+
+## Current boundary
+
+Runtime v5 removes manual evidence-assembly work, but it does not fabricate real pilot evidence. The next gate still requires actual completed LetMeFly workouts. Progression remains invisible until those reviews pass.
