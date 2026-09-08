@@ -1,0 +1,26 @@
+{
+  "name": "letmefly-rebuilt",
+  "version": "5.4.0-rebuild.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "audit:source": "node scripts/audit-rebuild.mjs && node scripts/audit-program-architecture.mjs",
+    "audit:crownforge": "node scripts/audit-crownforge-week1.mjs && node scripts/audit-crownforge-week2.mjs && node scripts/audit-crownforge-weeks3-6.mjs && node scripts/audit-crownforge-weeks1-6-regression.mjs && node scripts/audit-crownforge-full.mjs",
+    "audit:exercise-library": "node scripts/audit-exercise-library.mjs",
+    "audit:ui": "node scripts/audit-command-ui.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.115.0"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "vite": "8.2.2"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
