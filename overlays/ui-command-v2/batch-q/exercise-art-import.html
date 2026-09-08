@@ -4,15 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#090b10" />
-  <title>LetMeFly — Private Exercise Art Import</title>
+  <title>LetMeFly — Private Exercise Art</title>
   <style>
     :root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090b10;color:#f5f7fb}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#090b10,#10131b);padding:24px 16px}
     main{max-width:620px;margin:0 auto}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#a88cff;margin-bottom:8px}
-    h1{font-size:28px;line-height:1.05;margin:0 0 12px}p{color:#c7cbd4;line-height:1.55;font-size:16px}
+    h1{font-size:28px;line-height:1.05;margin:0 0 12px}h2{font-size:19px;margin:0 0 8px}p{color:#c7cbd4;line-height:1.55;font-size:16px}
     .card{margin-top:20px;padding:18px;border:1px solid #292e3a;border-radius:18px;background:#121620;box-shadow:0 16px 40px #0006}
-    input[type=file],textarea{width:100%;padding:14px;border:1px dashed #474d5c;border-radius:14px;background:#0c0f16;color:#f5f7fb;font-size:16px}
-    textarea{min-height:150px;resize:vertical;border-style:solid;margin-top:14px}
+    input[type=file],input[type=text],textarea{width:100%;padding:14px;border:1px solid #474d5c;border-radius:14px;background:#0c0f16;color:#f5f7fb;font-size:16px}
+    input[type=file]{border-style:dashed}textarea{min-height:140px;resize:vertical;margin-top:14px}
     button,a.button{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;margin-top:14px;border:0;border-radius:14px;background:#6d45e8;color:white;font-weight:850;font-size:17px;text-decoration:none;cursor:pointer}
     button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#202633!important}.status{margin-top:14px;padding:12px 14px;border-radius:12px;background:#0b0e14;color:#c7cbd4;min-height:48px;white-space:pre-wrap}.ok{color:#9ce8b8}.error{color:#ff9c9c}
     .privacy,.hint{font-size:13px;color:#9ba2af;margin-top:12px}.privacy strong,.hint strong{color:#fff}.divider{display:flex;align-items:center;gap:10px;margin:18px 0 2px;color:#747b89;font-size:12px;font-weight:800;letter-spacing:.08em}.divider:before,.divider:after{content:"";height:1px;background:#292e3a;flex:1}
@@ -21,18 +21,30 @@
 <body>
 <main>
   <div class="eyebrow">Private Athlete Data</div>
-  <h1>Import Exercise Art Map</h1>
-  <p>This imports only your private exercise-thumbnail mapping into this device. It does not change Crownforge, training maxes, workout history, or readiness data.</p>
+  <h1>Private Exercise Art</h1>
+  <p>Configure your private Cloudinary exercise-art source on this device. This changes presentation only; it does not alter Crownforge, Black Crown, loads, sets, reps, progression, workout history, or readiness.</p>
+
   <section class="card">
-    <input id="file" type="file" accept="*/*,.json,.txt,application/json,text/plain" />
-    <p class="hint"><strong>Android:</strong> choose the file from Files/Downloads. Both .json and .txt copies are accepted.</p>
-    <div class="divider">OR PASTE JSON</div>
-    <textarea id="paste" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste the private exercise-art JSON here if Android will not select the downloaded file."></textarea>
-    <button id="import" type="button">IMPORT ART MAP NOW</button>
-    <div id="status" class="status">Choose the file or paste the JSON, then tap IMPORT ART MAP NOW.</div>
-    <a class="button secondary" href="/">Return to LetMeFly</a>
-    <p class="privacy"><strong>Privacy:</strong> the selected mapping is stored in LetMeFly's local IndexedDB on this device. The importer does not upload the JSON file or pasted text.</p>
+    <h2>Private Cloudinary folder</h2>
+    <p class="hint">Enter the private exercise root that contains one folder per canonical exercise, with the approved image at <strong>&lt;exercise-key&gt;/v2</strong>.</p>
+    <input id="prefix" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="private/folder/exercises" />
+    <button id="save-prefix" type="button">SAVE PRIVATE ART SOURCE</button>
+    <div id="prefix-status" class="status">Nothing is uploaded from this page. The folder setting stays in this browser/app.</div>
+    <p class="privacy"><strong>Privacy:</strong> the folder setting is stored only in this device's local storage. The public app shell does not contain your athlete-specific mapping.</p>
   </section>
+
+  <section class="card">
+    <h2>Advanced: explicit art map</h2>
+    <p class="hint">Optional. Use this only when an exercise needs an explicit asset override instead of the folder convention.</p>
+    <input id="file" type="file" accept="*/*,.json,.txt,application/json,text/plain" />
+    <div class="divider">OR PASTE JSON</div>
+    <textarea id="paste" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste a LetMeFly private exercise-art JSON map here."></textarea>
+    <button id="import" type="button">IMPORT EXPLICIT ART MAP</button>
+    <div id="status" class="status">Choose a file or paste JSON only if you need explicit per-exercise overrides.</div>
+    <p class="privacy"><strong>Privacy:</strong> explicit mappings are stored in LetMeFly's local IndexedDB on this device and are not uploaded by this importer.</p>
+  </section>
+
+  <a class="button secondary" href="/">Return to LetMeFly</a>
 </main>
 <script>
 (() => {
@@ -40,17 +52,51 @@
   const DB_NAME = 'letmefly-private'
   const STORE_NAME = 'meta'
   const MAP_KEY = 'privateExerciseArtMap'
+  const PREFIX_STORAGE_KEY = 'lmf_private_exercise_art_prefix_v1'
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  const PREFIX_PATTERN = /^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*$/
+
+  const prefixInput = document.getElementById('prefix')
+  const prefixButton = document.getElementById('save-prefix')
+  const prefixStatus = document.getElementById('prefix-status')
   const fileInput = document.getElementById('file')
   const pasteInput = document.getElementById('paste')
   const importButton = document.getElementById('import')
   const status = document.getElementById('status')
   let parsed = null
 
-  function setStatus(message, kind = '') {
-    status.textContent = message
-    status.className = `status ${kind}`.trim()
+  function setStatus(element, message, kind = '') {
+    element.textContent = message
+    element.className = `status ${kind}`.trim()
   }
+
+  function normalizePrefix(value) {
+    const clean = String(value || '').trim().replace(/^\/+|\/+$/g, '')
+    if (!PREFIX_PATTERN.test(clean)) throw new Error('Enter a valid Cloudinary folder path using letters, numbers, dots, underscores, dashes, and slashes only.')
+    return clean
+  }
+
+  function loadPrefix() {
+    const queryPrefix = new URLSearchParams(location.search).get('prefix') || ''
+    const saved = localStorage.getItem(PREFIX_STORAGE_KEY) || ''
+    const initial = queryPrefix || saved
+    if (!initial) return
+    prefixInput.value = initial
+    if (saved && !queryPrefix) setStatus(prefixStatus, 'Private exercise-art source is already configured on this device.', 'ok')
+    else if (queryPrefix) setStatus(prefixStatus, 'Private folder is ready. Tap SAVE PRIVATE ART SOURCE to keep it on this device.', 'ok')
+  }
+
+  prefixButton.addEventListener('click', () => {
+    try {
+      const prefix = normalizePrefix(prefixInput.value)
+      localStorage.setItem(PREFIX_STORAGE_KEY, prefix)
+      window.dispatchEvent(new CustomEvent('lmf:exercise-art-overrides-updated'))
+      setStatus(prefixStatus, 'SUCCESS — private exercise-art source saved on this device. Return to LetMeFly and the approved images will resolve automatically.', 'ok')
+      prefixButton.textContent = 'SAVED ✓'
+    } catch (error) {
+      setStatus(prefixStatus, error instanceof Error ? error.message : 'Could not save the private folder.', 'error')
+    }
+  })
 
   function validate(payload) {
     if (!payload || payload.format !== 'letmefly-private-exercise-art-map' || payload.formatVersion !== 1) {
@@ -96,7 +142,7 @@
         try { request.transaction && request.transaction.abort() } catch {}
       }
       request.onerror = () => reject(created
-        ? new Error('Open LetMeFly in this same browser/app once, then return here and tap IMPORT ART MAP NOW again.')
+        ? new Error('Open LetMeFly in this same browser/app once, then return here and import again.')
         : (request.error || new Error('Could not open LetMeFly private storage.')))
       request.onsuccess = () => {
         const db = request.result
@@ -107,11 +153,7 @@
             return
           }
           const tx = db.transaction([STORE_NAME], 'readwrite')
-          tx.objectStore(STORE_NAME).put({
-            key: MAP_KEY,
-            value: overrides,
-            updatedAt: new Date().toISOString()
-          })
+          tx.objectStore(STORE_NAME).put({ key: MAP_KEY, value: overrides, updatedAt: new Date().toISOString() })
           tx.oncomplete = () => { db.close(); resolve() }
           tx.onabort = () => { db.close(); reject(tx.error || new Error('Exercise-art import was aborted.')) }
           tx.onerror = () => { db.close(); reject(tx.error || new Error('Exercise-art import failed.')) }
@@ -129,9 +171,9 @@
     if (!file) return
     try {
       parsed = parseText(await file.text())
-      setStatus(`File ready: ${Object.keys(parsed).length} approved exercise-image mappings. Tap IMPORT ART MAP NOW.`, 'ok')
+      setStatus(status, `File ready: ${Object.keys(parsed).length} approved explicit mappings. Tap IMPORT EXPLICIT ART MAP.`, 'ok')
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Could not read that file.', 'error')
+      setStatus(status, error instanceof Error ? error.message : 'Could not read that file.', 'error')
     }
   })
 
@@ -139,32 +181,34 @@
     parsed = null
     const text = pasteInput.value.trim()
     if (!text) {
-      setStatus('Choose the file or paste the JSON, then tap IMPORT ART MAP NOW.')
+      setStatus(status, 'Choose a file or paste JSON only if you need explicit per-exercise overrides.')
       return
     }
     try {
       parsed = parseText(text)
-      setStatus(`Pasted map ready: ${Object.keys(parsed).length} approved exercise-image mappings. Tap IMPORT ART MAP NOW.`, 'ok')
+      setStatus(status, `Pasted map ready: ${Object.keys(parsed).length} approved explicit mappings. Tap IMPORT EXPLICIT ART MAP.`, 'ok')
     } catch {
-      setStatus('JSON pasted. Tap IMPORT ART MAP NOW when the full map is present.')
+      setStatus(status, 'JSON pasted. Complete the map, then tap IMPORT EXPLICIT ART MAP.')
     }
   })
 
   importButton.addEventListener('click', async () => {
     importButton.disabled = true
-    setStatus('Importing exercise art…')
+    setStatus(status, 'Importing explicit exercise art…')
     try {
       if (!parsed) parsed = parseText(await sourceText())
       await saveMap(parsed)
       const count = Object.keys(parsed).length
-      setStatus(`SUCCESS — imported ${count} exercise-image mappings. Tap Return to LetMeFly.`, 'ok')
+      setStatus(status, `SUCCESS — imported ${count} explicit exercise-image mappings.`, 'ok')
       importButton.textContent = 'IMPORTED ✓'
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Exercise-art import failed.', 'error')
+      setStatus(status, error instanceof Error ? error.message : 'Exercise-art import failed.', 'error')
       importButton.disabled = false
       importButton.textContent = 'TRY IMPORT AGAIN'
     }
   })
+
+  loadPrefix()
 })()
 </script>
 </body>
