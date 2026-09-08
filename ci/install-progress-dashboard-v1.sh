@@ -63,17 +63,28 @@ cp "$CSS_V3_SOURCE" "$DIST_DIR/ui/progress-dashboard-v3.css"
 # restarted the same 160 ms render timer on every mutation, which could starve
 # the first Progress mount indefinitely on a busy/fresh mobile route. Preserve
 # the same render behavior but let an already-scheduled non-forced render fire.
+#
+# Tab changes are explicit athlete interactions, not background scans. Force
+# those renders through the short path so a PWA/install or other route mutation
+# cannot leave the newly tapped tab showing the previously selected panel.
 PROGRESS_JS="$DIST_DIR/ui/progress-dashboard-v1.js" python - <<'PY'
 from pathlib import Path
 import os
 
 p = Path(os.environ['PROGRESS_JS'])
 text = p.read_text()
-old = "function queueRender(force=false){if(force)vaultCache.at=0;clearTimeout(timer);timer=setTimeout(()=>void render(force),force?30:160)}"
-new = "function queueRender(force=false){if(force)vaultCache.at=0;if(timer&&!force)return;clearTimeout(timer);timer=setTimeout(()=>{timer=0;void render(force)},force?30:160)}"
-if text.count(old) != 1:
-    raise SystemExit(f'Progress queueRender starvation patch expected one source block, found {text.count(old)}')
-p.write_text(text.replace(old, new, 1))
+old_queue = "function queueRender(force=false){if(force)vaultCache.at=0;clearTimeout(timer);timer=setTimeout(()=>void render(force),force?30:160)}"
+new_queue = "function queueRender(force=false){if(force)vaultCache.at=0;if(timer&&!force)return;clearTimeout(timer);timer=setTimeout(()=>{timer=0;void render(force)},force?30:160)}"
+if text.count(old_queue) != 1:
+    raise SystemExit(f'Progress queueRender starvation patch expected one source block, found {text.count(old_queue)}')
+text = text.replace(old_queue, new_queue, 1)
+
+old_tab = "el.querySelectorAll('[data-pg-tab]').forEach(button=>button.addEventListener('click',()=>{const next=button.dataset.pgTab;if(!TABS.includes(next)||next===activeTab)return;activeTab=next;writeSetting(TAB_KEY,next);queueRender(false)}))"
+new_tab = "el.querySelectorAll('[data-pg-tab]').forEach(button=>button.addEventListener('click',()=>{const next=button.dataset.pgTab;if(!TABS.includes(next)||next===activeTab)return;activeTab=next;writeSetting(TAB_KEY,next);queueRender(true)}))"
+if text.count(old_tab) != 1:
+    raise SystemExit(f'Progress explicit-tab render patch expected one source block, found {text.count(old_tab)}')
+text = text.replace(old_tab, new_tab, 1)
+p.write_text(text)
 PY
 
 DIST_DIR="$DIST_DIR" python - <<'PY'
@@ -119,7 +130,8 @@ grep -Fq 'PROGRESS DASHBOARD' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'Private vault data' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'never rewrite programming' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'if(timer&&!force)return' "$DIST_DIR/ui/progress-dashboard-v1.js"
+grep -Fq 'activeTab=next;writeSetting(TAB_KEY,next);queueRender(true)' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq '__LMF_PROGRESS_POLISH__' "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
 grep -Fq 'data-lmf-progress-anchor' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 
-echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + starvation-safe route mount guard: PASS"
+echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + starvation-safe route/tab guard: PASS"
