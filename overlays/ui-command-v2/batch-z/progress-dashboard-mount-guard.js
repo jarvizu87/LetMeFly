@@ -3,6 +3,7 @@
 
   // Route-mount guard for the optional Progress dashboard overlay.
   // Presentation only: it never reads or writes athlete/program data.
+  // Installer compatibility marker: window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID)
   const DASHBOARD_ID = 'lmf-progress-dashboard-v1'
   const ANCHOR_ATTR = 'data-lmf-progress-anchor'
   const RETRY_ATTR = 'data-lmf-progress-script-retry'
