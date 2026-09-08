@@ -61,10 +61,24 @@ program-prescription ownership boundary. Netlify runs this verification before
 the production build. A dedicated GitHub Actions workflow also verifies and
 materializes the payload whenever this overlay changes.
 
+`ci/install-exercise-intelligence-v1.sh` materializes a privacy-safe runtime copy
+to `/data/exercise-intelligence-v1.json`, installs the read-only lookup API, and
+installs the INFO modal UI. It rejects private Drive provenance, duplicate IDs,
+unexpected record counts, and changed payload hashes.
+
 ## Runtime status
 
-The overlay is **integration-ready but not yet allowed to rewrite runtime program
-data**. Runtime integration must remain descriptive: exercise detail, Coach Mode
-context, demo metadata, and role-preserving substitution options. Any actual
-program change still requires an existing governed program rule or an intentional
-coaching/program-edit decision.
+The overlay is **active as a read-only descriptive layer**. The Exercises page
+`INFO` button can use the intelligence API to show purpose, movement roles,
+equipment, primary/secondary muscles, coaching cues, common mistakes, and the
+current Watch Exercise link.
+
+The INFO enhancement fails open: if the intelligence payload is unavailable or a
+name cannot be resolved, the existing LetMeFly INFO behavior remains available.
+It does not read or mutate workout prescription state.
+
+The existing `SUBSTITUTE` workflow is intentionally **not overridden by this UI
+batch**. Broader substitution behavior will be connected only after the governed
+rule set is audited for the exact runtime context. Any actual program change still
+requires an existing governed program rule or an intentional coaching/program-edit
+decision.
