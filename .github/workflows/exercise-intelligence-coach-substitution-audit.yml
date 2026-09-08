@@ -1,0 +1,111 @@
+name: Exercise Intelligence Coach Substitution Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-substitutions-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-substitutions-v1.css'
+      - 'ci/install-exercise-intelligence-coach-substitutions-v1.sh'
+      - '.github/workflows/exercise-intelligence-coach-substitution-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-substitutions-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-substitutions-v1.css'
+      - 'ci/install-exercise-intelligence-coach-substitutions-v1.sh'
+      - '.github/workflows/exercise-intelligence-coach-substitution-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Audit Coach substitution read-only boundary
+        run: |
+          set -euo pipefail
+          JS='overlays/exercise-intelligence/runtime/exercise-intelligence-coach-substitutions-v1.js'
+          CSS='overlays/exercise-intelligence/runtime/exercise-intelligence-coach-substitutions-v1.css'
+          node --check "$JS"
+          bash -n ci/install-exercise-intelligence-coach-substitutions-v1.sh
+          test -s "$CSS"
+          grep -Fq 'getSubstitutions' "$JS"
+          grep -Fq 'includeBlocked: true' "$JS"
+          grep -Fq 'GOVERNED SUBSTITUTIONS • VIEW ONLY' "$JS"
+          grep -Fq 'AVAILABLE TO CONSIDER' "$JS"
+          grep -Fq 'PROTECTED RELATIONSHIPS' "$JS"
+          grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$JS"
+          grep -Fq 'sessionStorage' "$JS"
+          ! grep -Fq 'localStorage' "$JS"
+          ! grep -Fq 'indexedDB' "$JS"
+          ! grep -Fq 'data-action="apply' "$JS"
+          ! grep -Fq 'fetch(' "$JS"
+          echo 'Exercise Intelligence Coach substitution read-only boundary audit: PASS'
+
+      - name: Verify protected substitution relationships
+        run: |
+          node overlays/exercise-intelligence/materialize.mjs --output=/tmp/exercise-intelligence-v1.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/exercise-intelligence-v1.json', 'utf8'));
+          const blocked = payload.substitutionRules
+            .filter((rule) => rule.promotionStatus === 'DO NOT DEFAULT')
+            .map((rule) => `${rule.primaryExerciseId}->${rule.alternativeExerciseId}`)
+            .sort();
+          const expected = ['overhead-press->push-press', 'romanian-deadlift->hamstring-curl'].sort();
+          if (JSON.stringify(blocked) !== JSON.stringify(expected)) {
+            throw new Error(`protected substitution set changed: ${blocked.join(', ')}`);
+          }
+          console.log('Exercise Intelligence Coach protected substitution audit: PASS');
+          NODE
+
+      - name: Smoke-test Coach substitution installer and offline resources
+        run: |
+          set -euo pipefail
+          TEST_DIST="$(mktemp -d)"
+          trap 'rm -rf "$TEST_DIST"' EXIT
+          mkdir -p "$TEST_DIST/data" "$TEST_DIST/ui"
+          cat > "$TEST_DIST/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head><meta charset="utf-8"><title>LMF Coach substitution smoke test</title></head>
+            <body>
+              <div id="app"></div>
+              <script defer src="/ui/exercise-intelligence-runtime-v1.js"></script>
+              <script defer src="/ui/exercise-intelligence-coach-v1.js"></script>
+            </body>
+          </html>
+          HTML
+          cat > "$TEST_DIST/service-worker.js" <<'JS'
+          const CACHE_NAME = 'lmf-coach-substitution-smoke-test'
+          const PRECACHE = ['/', '/manifest.webmanifest', '/data/exercise-intelligence-v1.json', '/ui/exercise-intelligence-runtime-v1.js', '/ui/exercise-intelligence-coach-v1.js']
+          function isPrivateOrAuth(request) {
+            const url = new URL(request.url)
+            if (url.hostname.endsWith('.supabase.co')) return true
+            if (/\/auth\/v1\//.test(url.pathname)) return true
+            return false
+          }
+          JS
+          printf '%s\n' '{"integrationStatus":"READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION"}' > "$TEST_DIST/data/exercise-intelligence-v1.json"
+          printf '%s\n' 'window.LetMeFlyExerciseIntelligence = Object.freeze({});' > "$TEST_DIST/ui/exercise-intelligence-runtime-v1.js"
+          printf '%s\n' '/* coach dependency */' > "$TEST_DIST/ui/exercise-intelligence-coach-v1.js"
+          bash ci/install-exercise-intelligence-coach-substitutions-v1.sh "$TEST_DIST"
+          test -f "$TEST_DIST/ui/exercise-intelligence-coach-substitutions-v1.js"
+          test -f "$TEST_DIST/ui/exercise-intelligence-coach-substitutions-v1.css"
+          grep -Fq '/ui/exercise-intelligence-coach-substitutions-v1.js' "$TEST_DIST/index.html"
+          grep -Fq '/ui/exercise-intelligence-coach-substitutions-v1.css' "$TEST_DIST/index.html"
+          grep -Fq "'/ui/exercise-intelligence-coach-substitutions-v1.js'" "$TEST_DIST/service-worker.js"
+          grep -Fq "'/ui/exercise-intelligence-coach-substitutions-v1.css'" "$TEST_DIST/service-worker.js"
+          echo 'Exercise Intelligence Coach substitution installer + offline smoke test: PASS'
