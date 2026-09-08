@@ -44,8 +44,6 @@ seen_weeks: set[int] = set()
 archives: dict[int, bytes] = {}
 transport_errors: list[str] = []
 
-# Transport may be one base64 file or Crownforge-style numbered chunks.
-# Prefer chunks when present so large payloads stay safe/resumable in GitHub writes.
 def read_transport(block: dict) -> tuple[str, str, bool]:
     transport_dir = overlay / 'transport'
     base = transport_dir / block['base64File']
@@ -57,8 +55,6 @@ def read_transport(block: dict) -> tuple[str, str, bool]:
         return base.read_text(), base.name, False
     raise FileNotFoundError(base)
 
-# Report every transport mismatch in one run so repairs can be batched instead
-# of discovering one block at a time.
 for block in manifest['blocks']:
     try:
         raw_text, source_label, is_chunked = read_transport(block)
@@ -70,8 +66,7 @@ for block in manifest['blocks']:
     compact_sha = hashlib.sha256(compact.encode()).hexdigest()
     if is_chunked and block.get('base64Sha256') and compact_sha != block['base64Sha256']:
         transport_errors.append(
-            f"Block {block['block']}: {source_label} base64Sha256={compact_sha}; "
-            f"expected {block['base64Sha256']}"
+            f"Block {block['block']}: {source_label} base64Sha256={compact_sha}; expected {block['base64Sha256']}"
         )
         continue
 
@@ -79,9 +74,7 @@ for block in manifest['blocks']:
     try:
         archive = base64.b64decode(padded, validate=True)
     except Exception as exc:
-        transport_errors.append(
-            f"Block {block['block']}: base64 decode failed from {source_label}: {exc}"
-        )
+        transport_errors.append(f"Block {block['block']}: base64 decode failed from {source_label}: {exc}")
         continue
 
     archive_sha = hashlib.sha256(archive).hexdigest()
@@ -90,17 +83,13 @@ for block in manifest['blocks']:
 
     if archive_size != block['archiveSize']:
         transport_errors.append(
-            f"Block {block['block']}: {source_label} actual archiveSize={archive_size}; "
-            f"expected archiveSize={block['archiveSize']}"
+            f"Block {block['block']}: {source_label} actual archiveSize={archive_size}; expected archiveSize={block['archiveSize']}"
         )
         continue
 
-    # For a chunked upload, the compact base64 digest is the transport-integrity
-    # authority. Canonical per-week source hashes below protect program content.
     if not is_chunked and archive_sha != block['archiveSha256']:
         transport_errors.append(
-            f"Block {block['block']}: {source_label} archiveSha256={archive_sha}; "
-            f"expected archiveSha256={block['archiveSha256']}"
+            f"Block {block['block']}: {source_label} archiveSha256={archive_sha}; expected archiveSha256={block['archiveSha256']}"
         )
 
 if transport_errors:
@@ -136,9 +125,7 @@ if seen_weeks != expected:
 
 index_lines = []
 for week in range(1, 55):
-    index_lines.append(
-        f"import {{ BLACK_CROWN_WEEK_{week:02d}_SOURCE }} from './week-{week:02d}'"
-    )
+    index_lines.append(f"import {{ BLACK_CROWN_WEEK_{week:02d}_SOURCE }} from './week-{week:02d}'")
 index_lines.append('')
 index_lines.append('export const BLACK_CROWN_SOURCE_WEEKS = [')
 for week in range(1, 55):
@@ -148,20 +135,14 @@ index_lines.append('')
 (out_dir / 'index.ts').write_text('\n'.join(index_lines))
 PY
 
-# Gate the source transport before any runtime normalization.
 node "$ROOT_DIR/ci/audit-black-crown-source.mjs" "$TARGET_DIR" "$MANIFEST"
 node "$ROOT_DIR/ci/audit-black-crown-privacy.mjs" "$TARGET_DIR"
 
-# Black Crown needs richer public-engine metadata (RPE/RIR/tempo/rest/source text)
-# and undated ProgramWeek/ProgramDay records. The patch is backward-compatible;
-# Crownforge remains date-bearing and unchanged.
 patch --dry-run -d "$TARGET_DIR" -p1 < "$OVERLAY_DIR/engine-types.patch"
 patch -d "$TARGET_DIR" -p1 < "$OVERLAY_DIR/engine-types.patch"
 
-# Deterministically normalize the audited source weeks into engine-native runtime
-# ProgramWeek data, activate the Black Crown package, extend only missing exercise
-# library names, and wire generic/Black Crown registry lookup.
 node "$ROOT_DIR/ci/generate-black-crown-runtime.mjs" "$TARGET_DIR"
+bash "$ROOT_DIR/ci/apply-black-crown-workout-support.sh" "$TARGET_DIR"
 node "$ROOT_DIR/ci/audit-black-crown-runtime.mjs" "$TARGET_DIR"
 
 CROWNFORGE_AFTER="$(hash_tree "$TARGET_DIR/src/programs/crownforge")"
