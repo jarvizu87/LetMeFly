@@ -1,5 +1,5 @@
 [build]
-  command = "bash ci/build-command-v2-cloudinary.sh && bash ci/install-smart-names-bar-loader.sh && bash ci/install-command-refresh.sh && mkdir -p .build-src/letmefly_app/dist/.well-known && cp android-twa/site/assetlinks.json .build-src/letmefly_app/dist/.well-known/assetlinks.json"
+  command = "bash ci/build-command-v2-cloudinary.sh && bash ci/install-smart-names-bar-loader.sh && bash ci/install-voice-notes-v1.sh && bash ci/install-command-refresh.sh && mkdir -p .build-src/letmefly_app/dist/.well-known && cp android-twa/site/assetlinks.json .build-src/letmefly_app/dist/.well-known/assetlinks.json"
   publish = ".build-src/letmefly_app/dist"
 
 [build.environment]
@@ -36,7 +36,7 @@
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Permissions-Policy = "camera=(), microphone=(self), geolocation=()"
     Cross-Origin-Opener-Policy = "same-origin"
     Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; font-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://dvdooeipptaqelvlaept.supabase.co wss://dvdooeipptaqelvlaept.supabase.co; worker-src 'self' blob:; manifest-src 'self'"
 
