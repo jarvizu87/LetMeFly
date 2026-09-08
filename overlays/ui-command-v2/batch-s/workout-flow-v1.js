@@ -2,12 +2,13 @@
   'use strict'
 
   // LetMeFly Workout Flow v1
-  // Presentation only: this never changes Crownforge prescriptions or workout data.
+  // Presentation only: this never changes program prescriptions or persisted workout data.
   // Existing LetMeFly set buttons remain the only persistence boundary.
 
   const GROUP_PATTERN = /\b(circuit|superset|tri[- ]?set|giant set|rounds?)\b/i
   const selectedSetByExercise = new Map()
   const manualExerciseByPanel = new Map()
+  const restGateByPanel = new Map()
   let refreshTimer = null
 
   function text(element) {
@@ -29,7 +30,7 @@
   }
 
   function setNumber(row, fallback = 1) {
-    const raw = text(row.querySelector('.set-label strong'))
+    const raw = text(row?.querySelector('.set-label strong'))
     const match = raw.match(/\d+/)
     return match ? Number(match[0]) : fallback
   }
@@ -96,6 +97,8 @@
     const input = field.querySelector('.set-input')
     if (!input) return
 
+    if (!input.getAttribute('placeholder')) input.setAttribute('placeholder', '—')
+
     const wrap = document.createElement('div')
     wrap.className = 'lmf-stepper'
 
@@ -133,7 +136,7 @@
     const line = document.createElement('div')
     line.className = 'lmf-plates-line'
     if (!value) line.classList.add('is-empty')
-    line.innerHTML = `<span aria-hidden="true">▰</span><strong>${value || 'Load as prescribed'}</strong>`
+    line.innerHTML = `<span aria-hidden="true">▰</span><strong>${value || 'Load / bodyweight as prescribed'}</strong>`
     row.appendChild(line)
   }
 
@@ -147,6 +150,15 @@
     return row
   }
 
+  function scrollActiveTabIntoView(card) {
+    const tabs = card.querySelector('.lmf-set-tabs')
+    const activeTab = tabs?.querySelector('.lmf-set-tab.active')
+    if (!tabs || !activeTab || tabs.scrollWidth <= tabs.clientWidth) return
+    window.requestAnimationFrame(() => {
+      activeTab.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
+    })
+  }
+
   function selectSet(card, row, remember = false) {
     const rows = rowsFor(card)
     if (!row || !rows.length) return
@@ -157,7 +169,7 @@
 
     const total = rows.length
     const position = rows.indexOf(row) + 1
-    rows.forEach((candidate, index) => {
+    rows.forEach((candidate) => {
       const label = candidate.querySelector('.set-label')
       if (!label) return
       let totalNode = label.querySelector('.lmf-set-total')
@@ -181,6 +193,7 @@
     const table = card.querySelector('.set-table')
     table?.style.setProperty('--lmf-active-set', String(position))
     table?.style.setProperty('--lmf-set-count', String(total))
+    scrollActiveTabIntoView(card)
   }
 
   function ensureSetTabs(card) {
@@ -244,6 +257,13 @@
     return 'circuit'
   }
 
+  function normalizedGroupKind(panel, cards) {
+    // Black Crown includes labels such as "CIRCUIT / LOW-INTENSITY WORK" that can
+    // legitimately contain only one exercise. A one-card section is not a round flow.
+    if (cards.length < 2) return 'sequential'
+    return groupKind(panel)
+  }
+
   function currentRound(cards) {
     const incomplete = []
     cards.forEach((card) => {
@@ -255,7 +275,8 @@
   }
 
   function maxRound(cards) {
-    return Math.max(1, ...cards.map((card) => rowsFor(card).length))
+    const rounds = cards.flatMap((card) => rowsFor(card).map((row, index) => setNumber(row, index + 1)))
+    return Math.max(1, ...rounds)
   }
 
   function actualActiveCard(cards, kind, round) {
@@ -283,6 +304,7 @@
     summary.addEventListener('click', () => {
       const panel = card.closest('.workout-panel')
       if (!panel) return
+      restGateByPanel.delete(panelKey(panel))
       manualExerciseByPanel.set(panelKey(panel), exerciseKey(card))
       updatePanelFlow(panel)
     })
@@ -333,13 +355,22 @@
     }
   }
 
+  function nextSequentialTarget(active) {
+    const rows = rowsFor(active)
+    const current = firstIncomplete(active)
+    if (!current) return null
+    const index = rows.indexOf(current)
+    const nextRow = rows.slice(index + 1).find((row) => !isDone(row))
+    return nextRow ? { card: active, row: nextRow, prefix: 'NEXT SET' } : null
+  }
+
   function nextTarget(cards, kind, round, active) {
     if (!active) return null
     const activeIndex = cards.indexOf(active)
 
     if (kind === 'sequential') {
-      const sameCardRow = firstIncomplete(active)
-      if (sameCardRow) return { card: active, row: sameCardRow, prefix: 'NEXT SET' }
+      const sameCard = nextSequentialTarget(active)
+      if (sameCard) return sameCard
       const nextCard = cards.slice(activeIndex + 1).find((card) => !allDone(card))
       return nextCard ? { card: nextCard, row: firstIncomplete(nextCard), prefix: 'NEXT' } : null
     }
@@ -371,7 +402,7 @@
     return 'FULL REST'
   }
 
-  function ensurePanelDecor(panel, cards, kind, round, max, actualActive) {
+  function ensurePanelDecor(panel, cards, kind, round, max, actualActive, restGate) {
     const head = panel.querySelector('.workout-panel-head')
     const stack = panel.querySelector('.exercise-stack')
     if (!head || !stack) return
@@ -382,9 +413,12 @@
       badge.className = 'lmf-round-badge'
       head.appendChild(badge)
     }
+
     if (kind === 'sequential') {
       const done = cards.filter(allDone).length
       badge.innerHTML = `<span>EXERCISES</span><strong>${Math.min(done + 1, cards.length)} / ${cards.length}</strong>`
+    } else if (restGate) {
+      badge.innerHTML = `<span>ROUND ${restGate.completedRound}</span><strong>REST</strong>`
     } else {
       const safeRound = round ?? max
       badge.innerHTML = `<span>ROUND</span><strong>${safeRound} / ${max}</strong>`
@@ -397,7 +431,18 @@
         rest.className = 'lmf-round-rest'
         panel.appendChild(rest)
       }
-      rest.innerHTML = `<span aria-hidden="true">◷</span><div><b>Between Rounds</b><small>Use the programmed recovery before repeating the flow.</small></div><strong>${restText(panel)}</strong>`
+      rest.classList.toggle('is-active', !!restGate)
+      rest.classList.toggle('is-preview', !restGate)
+      if (restGate) {
+        rest.innerHTML = `
+          <span aria-hidden="true">◷</span>
+          <div><b>Round ${restGate.completedRound} Complete</b><small>Take the programmed recovery before Round ${restGate.nextRound}.</small></div>
+          <strong>${restText(panel)}</strong>
+          <button type="button" data-lmf-rest-continue>Start Round ${restGate.nextRound}</button>
+        `
+      } else {
+        rest.innerHTML = `<span aria-hidden="true">◷</span><div><b>Between Rounds</b><small>Use the programmed recovery before repeating the flow.</small></div><strong>${restText(panel)}</strong>`
+      }
     } else if (rest) {
       rest.remove()
     }
@@ -407,6 +452,12 @@
       next = document.createElement('div')
       next.className = 'lmf-next-strip'
       panel.appendChild(next)
+    }
+
+    if (restGate) {
+      next.classList.remove('complete')
+      next.innerHTML = `<span class="lmf-next-icon">◷</span><div><small>REST NOW</small><b>Round ${restGate.nextRound} starts when you are ready.</b></div><i>›</i>`
+      return
     }
 
     const target = nextTarget(cards, kind, round, actualActive)
@@ -433,15 +484,26 @@
 
     cards.forEach(enhanceCard)
 
-    const kind = groupKind(panel)
+    const kind = normalizedGroupKind(panel, cards)
+    if (kind === 'sequential') restGateByPanel.delete(panelKey(panel))
     const round = kind === 'sequential' ? null : currentRound(cards)
     const max = maxRound(cards)
-    const actualActive = actualActiveCard(cards, kind, round)
+
+    const gate = restGateByPanel.get(panelKey(panel))
+    const restGate = gate && kind !== 'sequential' && round != null && gate.nextRound === round ? gate : null
+    if (gate && !restGate) restGateByPanel.delete(panelKey(panel))
+
+    const actualActive = restGate ? null : actualActiveCard(cards, kind, round)
     const manualKey = manualExerciseByPanel.get(panelKey(panel))
     const manualCard = manualKey ? cards.find((card) => exerciseKey(card) === manualKey) : null
-    const visualActive = manualCard || actualActive || cards.at(-1)
+    const visualActive = manualCard || actualActive || (restGate ? null : cards.at(-1))
 
     panel.classList.add('lmf-flow-panel', `lmf-flow-${kind}`)
+    panel.classList.toggle('lmf-flow-resting', !!restGate)
+    ;['sequential', 'superset', 'tri-set', 'giant-set', 'circuit'].forEach((name) => {
+      if (name !== kind) panel.classList.remove(`lmf-flow-${name}`)
+    })
+
     stack.classList.add('lmf-group-flow')
 
     const kickerText = text(panel.querySelector('.workout-panel-head .page-kicker'))
@@ -472,7 +534,7 @@
       if (desired && !selectedSetByExercise.has(exerciseKey(visualActive))) selectSet(visualActive, desired, false)
     }
 
-    ensurePanelDecor(panel, cards, kind, round, max, actualActive)
+    ensurePanelDecor(panel, cards, kind, round, max, actualActive, restGate)
   }
 
   function enhanceAll(root = document) {
@@ -497,18 +559,62 @@
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element ? event.target : null
       if (!target) return
+
+      const restContinue = target.closest('[data-lmf-rest-continue]')
+      if (restContinue) {
+        event.preventDefault()
+        const panel = restContinue.closest('.workout-panel')
+        if (!panel) return
+        restGateByPanel.delete(panelKey(panel))
+        manualExerciseByPanel.delete(panelKey(panel))
+        updatePanelFlow(panel)
+        return
+      }
+
       const check = target.closest('.set-check[data-action="toggle-set"]')
       if (!check) return
+      const row = check.closest('.set-row')
       const card = check.closest('.active-exercise')
       const panel = check.closest('.workout-panel')
-      if (card) {
-        const key = exerciseKey(card)
-        if (!check.classList.contains('done')) selectedSetByExercise.delete(key)
-        else selectedSetByExercise.set(key, check.closest('.set-row')?.dataset.setId || '')
-      }
-      if (panel) manualExerciseByPanel.delete(panelKey(panel))
-      scheduleRefresh(120)
-      window.setTimeout(() => enhanceAll(document), 450)
+      if (!card || !row) return
+
+      const key = exerciseKey(card)
+      const rowId = row.dataset.setId || ''
+      const cardsBefore = panel ? [...panel.querySelectorAll('.exercise-stack > .active-exercise')] : []
+      const kindBefore = panel ? normalizedGroupKind(panel, cardsBefore) : 'sequential'
+      const roundBefore = kindBefore === 'sequential' ? null : currentRound(cardsBefore)
+
+      // Inspect the final state after LetMeFly's authoritative toggle handler runs.
+      window.setTimeout(() => {
+        const nowDone = isDone(row)
+
+        if (nowDone) selectedSetByExercise.delete(key)
+        else selectedSetByExercise.set(key, rowId)
+
+        if (panel) {
+          const pKey = panelKey(panel)
+          manualExerciseByPanel.delete(pKey)
+
+          const cardsAfter = [...panel.querySelectorAll('.exercise-stack > .active-exercise')]
+          const kindAfter = normalizedGroupKind(panel, cardsAfter)
+          const roundAfter = kindAfter === 'sequential' ? null : currentRound(cardsAfter)
+
+          if (!nowDone) {
+            // Reopened work takes priority over a pending between-round gate.
+            restGateByPanel.delete(pKey)
+          } else if (
+            kindAfter !== 'sequential' &&
+            roundBefore != null &&
+            roundAfter != null &&
+            roundAfter > roundBefore
+          ) {
+            restGateByPanel.set(pKey, { completedRound: roundBefore, nextRound: roundAfter })
+          }
+        }
+
+        enhanceAll(document)
+        window.setTimeout(() => enhanceAll(document), 300)
+      }, 0)
     }, true)
 
     window.addEventListener('lmf:exercise-art-local-loaded', () => scheduleRefresh(0))
