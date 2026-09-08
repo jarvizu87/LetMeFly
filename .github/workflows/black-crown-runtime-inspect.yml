@@ -44,7 +44,7 @@ jobs:
           SRC="$GITHUB_WORKSPACE/.build-src/letmefly_app"
           OUT="$GITHUB_WORKSPACE/overlays/program-data/black-crown-v2-0/diagnostics/runtime-shape"
           rm -rf "$OUT"
-          mkdir -p "$OUT/src/program-engine" "$OUT/src/programs/black-crown" "$OUT/src/programs" "$OUT/src/data" "$OUT/src/services" "$OUT/scripts"
+          mkdir -p "$OUT/src/program-engine" "$OUT/src/programs/black-crown" "$OUT/src/programs" "$OUT/src/data" "$OUT/src/services" "$OUT/src/db" "$OUT/scripts"
           cp "$SRC/src/program-engine/types.ts" "$OUT/src/program-engine/types.ts"
           cp "$SRC/src/program-engine/builders.ts" "$OUT/src/program-engine/builders.ts"
           cp "$SRC/src/programs/black-crown/index.ts" "$OUT/src/programs/black-crown/index.ts"
@@ -53,6 +53,9 @@ jobs:
           cp "$SRC/src/programs/registry.ts" "$OUT/src/programs/registry.ts"
           cp "$SRC/src/data/programs.ts" "$OUT/src/data/programs.ts"
           cp "$SRC/src/services/workout-service.ts" "$OUT/src/services/workout-service.ts"
+          cp "$SRC/src/services/athlete-service.ts" "$OUT/src/services/athlete-service.ts"
+          cp "$SRC/src/services/barbell.ts" "$OUT/src/services/barbell.ts"
+          cp "$SRC/src/db/local-db.ts" "$OUT/src/db/local-db.ts"
           cp "$SRC/src/data/exercise-library.ts" "$OUT/src/data/exercise-library.ts"
           cp "$SRC/scripts/audit-rebuild.mjs" "$OUT/scripts/audit-rebuild.mjs"
           cp "$SRC/scripts/audit-program-architecture.mjs" "$OUT/scripts/audit-program-architecture.mjs"
@@ -71,5 +74,5 @@ jobs:
             echo 'No runtime-shape changes to commit.'
             exit 0
           fi
-          git commit -m 'Export exercise-library audit for Black Crown'
+          git commit -m 'Refresh Black Crown runtime architecture diagnostics'
           git push origin HEAD:black-crown-v2-0-modular-import
