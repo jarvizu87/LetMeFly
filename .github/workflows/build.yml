@@ -15,58 +15,41 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      # CI validates the build path only. Netlify injects the real browser-safe
-      # Supabase URL and publishable key for production builds.
       VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
-
       - name: Audit real-program workout flow edge cases
         run: node ci/audit-workout-flow-edge-cases.mjs
-
-      - name: Build and audit Command V2 + Black Crown v2.1 + private Cloudinary exercise art
+      - name: Build and audit Command V2 + Crownforge v2.2 + Black Crown v2.1 + private Cloudinary exercise art
         run: bash ci/build-command-v2-v2-1.sh
-
       - name: Install smart names + Bar Loader
         run: bash ci/install-smart-names-bar-loader.sh
-
       - name: Install read-only Exercise Intelligence runtime
         run: bash ci/install-exercise-intelligence-v1.sh
-
       - name: Install Black Crown v2.1 Exercise Intelligence supplement
         run: bash ci/install-exercise-intelligence-v2-supplement.sh
-
       - name: Install Exercise Intelligence descriptive Coach
         run: bash ci/install-exercise-intelligence-coach-v1.sh
-
       - name: Install governed Coach substitution guidance
         run: bash ci/install-exercise-intelligence-coach-substitutions-v1.sh
-
       - name: Install governed Exercise Intelligence substitution viewer
         run: bash ci/install-exercise-intelligence-substitutions-v1.sh
-
       - name: Install smart voice-note dictation v2
         run: bash ci/install-voice-notes-v2.sh
-
       - name: Install Strength Maxes
         run: bash ci/install-strength-maxes-v1.sh
-
       - name: Install Progress dashboard
         run: bash ci/install-progress-dashboard-v1.sh
-
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
-
       - name: Audit final Exercise Intelligence production dist
         run: bash ci/audit-exercise-intelligence-production-v1.sh
-
       - name: Publish production build artifact
         uses: actions/upload-artifact@v4
         with:
