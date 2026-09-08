@@ -76,6 +76,9 @@ jobs:
       - name: Install approved Home reference + official app icon
         run: bash ci/install-home-reference-v3.sh
 
+      - name: Install private athlete Profile v2
+        run: bash ci/install-profile-v2.sh
+
       - name: Audit all programs, governed days, screens, tabs, features, and full mock training cycle
         run: node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
 
