@@ -1,0 +1,59 @@
+name: Crownforge v2.2 Production Audit
+
+on:
+  push:
+    branches:
+      - main
+      - crownforge-v2-2-final-audit-v2
+    paths:
+      - 'ci/apply-crownforge-v2-2.sh'
+      - 'ci/audit-crownforge-v2-2.mjs'
+      - 'ci/build-command-v2-v2-1.sh'
+      - 'overlays/program-data/crownforge-v2-2/**'
+      - 'docs/BOOK_INFORMED_PROGRAM_DELTA_CANDIDATES.md'
+      - '.github/workflows/crownforge-v2-2-production-audit.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ci/apply-crownforge-v2-2.sh'
+      - 'ci/audit-crownforge-v2-2.mjs'
+      - 'ci/build-command-v2-v2-1.sh'
+      - 'overlays/program-data/crownforge-v2-2/**'
+      - 'docs/BOOK_INFORMED_PROGRAM_DELTA_CANDIDATES.md'
+      - '.github/workflows/crownforge-v2-2-production-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Build current production with Crownforge v2.2
+        run: bash ci/build-command-v2-v2-1.sh
+      - name: Audit exact Crownforge v2.2 scope
+        run: node ci/audit-crownforge-v2-2.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+      - name: Re-audit protected Black Crown v2.1
+        run: |
+          node ci/audit-black-crown-runtime.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+          node ci/audit-black-crown-v2-1.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+      - name: Confirm final book-audit decision
+        run: |
+          set -euo pipefail
+          grep -Fq '"version": "v2.2"' .build-src/letmefly_app/.crownforge-v2-2-book-informed.json
+          grep -Fq 'day6-kb-swing-primer-conditional-v1' .build-src/letmefly_app/.crownforge-v2-2-book-informed.json
+          grep -Fq "version: 'v2.2'" .build-src/letmefly_app/src/programs/crownforge/metadata.ts
+          grep -Fq "version: 'v2.1'" .build-src/letmefly_app/src/programs/black-crown/metadata.ts
+          echo 'Crownforge v2.2 production governance: PASS'

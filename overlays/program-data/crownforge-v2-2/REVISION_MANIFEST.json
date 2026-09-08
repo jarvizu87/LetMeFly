@@ -1,0 +1,46 @@
+{
+  "program": "Crownforge",
+  "version": "v2.2",
+  "baseVersion": "v2.1",
+  "revisionId": "day6-kb-swing-primer-conditional-v1",
+  "status": "APPROVED_BOOK_INFORMED_REFINEMENT",
+  "affectedWeeks": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+  "affectedDay": 6,
+  "exerciseId": "kb-swing-primer-d6",
+  "exercise": "KB Swing",
+  "oldPriority": "mandatory",
+  "newPriority": "conditional",
+  "doseWhenUsed": "2x10 at the existing week-specific primer load",
+  "omitWhen": "Day 5 GPP was fully completed and Day 6 hinge timing/pattern is already crisp",
+  "useWhen": "hinge timing or stiffness needs a technical ramp",
+  "never": "Never use the primer as make-up GPP",
+  "protected": [
+    "Day 5 KB/sled/GPP prescriptions",
+    "Day 6 main KB Swing dose",
+    "Weeks 13-14 testing/handoff",
+    "Crown Maintenance",
+    "Black Crown Revised v2.1",
+    "all other Crownforge exercise, set, rep, load, RPE/RIR, tempo, rest, circuit and progression prescriptions"
+  ],
+  "evidenceDecision": {
+    "keep": [
+      "Crownforge weekly architecture",
+      "Olympic-derivative volume and quality rules",
+      "sled/GPP structure",
+      "main kettlebell progression",
+      "strength prescriptions",
+      "deload/test/handoff structure"
+    ],
+    "modify": [
+      "Day 6 light KB Swing primer priority only"
+    ],
+    "reject": [
+      "adding more Olympic volume",
+      "adding more kettlebell volume",
+      "adding more sled volume",
+      "full Triphasic eccentric/isometric/concentric blocks",
+      "APRE replacing source-owned percentage/TM prescriptions",
+      "book-driven exercise rotation for novelty"
+    ]
+  }
+}
