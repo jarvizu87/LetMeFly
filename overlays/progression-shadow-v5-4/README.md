@@ -15,13 +15,26 @@ This handoff is intentionally isolated from the active UI/deployment lane.
 
 Preserve the completed Progression Shadow integration in its own branch without changing the active UI/runtime branches or deployment.
 
-The handoff patch is stored as numbered text parts under `patch/`. Reassemble them in lexical order before applying.
+The complete integration is stored as a gzip-compressed patch, base64-encoded and split into numbered text parts under `patch/` so the branch remains text-only.
+
+## Reassemble and verify
 
 ```bash
-cat overlays/progression-shadow-v5-4/patch/letmefly-v5_4-progression-shadow.patch.* > /tmp/letmefly-v5_4-progression-shadow.patch
+cat overlays/progression-shadow-v5-4/patch/patch.gz.b64.* > /tmp/letmefly-v5_4-progression-shadow.patch.gz.b64
+base64 -d /tmp/letmefly-v5_4-progression-shadow.patch.gz.b64 > /tmp/letmefly-v5_4-progression-shadow.patch.gz
+gzip -dc /tmp/letmefly-v5_4-progression-shadow.patch.gz > /tmp/letmefly-v5_4-progression-shadow.patch
+
+sha256sum /tmp/letmefly-v5_4-progression-shadow.patch.gz
+# d55787b23491451cbd486958f5f8da32e3e625d6e3a0ce372e19af0b7885bcdb
+
+sha256sum /tmp/letmefly-v5_4-progression-shadow.patch
+# fc8a76db5faf16d5bf2326fb8b6f766d77d03926b1584d7e3f433aca51be4a54
+
 git apply --check /tmp/letmefly-v5_4-progression-shadow.patch
 git apply /tmp/letmefly-v5_4-progression-shadow.patch
 ```
+
+See `patch/CHECKSUMS.md` for the encoded archive and individual part checksums.
 
 ## What the integration does
 
