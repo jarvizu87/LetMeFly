@@ -54,6 +54,10 @@
   }
 
   function progressSurface() {
+    // Never mount Progress UI merely because another screen contains progress-like
+    // cards. The route/nav intent is authoritative and prevents Home contamination.
+    if (!progressRouteActive()) return null
+
     const title = progressTitle()
     const native = document.querySelector('#progress-content')
     if (title) return { title, native, root: title.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || title.parentElement }
@@ -126,8 +130,6 @@
     dashboard.innerHTML = `<header class="lmf-pg-header"><div><span>ATHLETE PERFORMANCE</span><h2>PROGRESS DASHBOARD</h2><p>Loading your private training history…</p></div></header><nav class="lmf-pg-tabs" role="tablist" aria-label="Progress sections">${bootstrapTabs(active)}</nav><div class="lmf-pg-tabbody" role="tabpanel"><div class="lmf-pg-loading">Reading your private training history…</div></div>`
     dashboard.querySelectorAll('[data-pg-tab]').forEach(button => button.addEventListener('click', () => syncTab(button.dataset.pgTab)))
 
-    // Prefer a stable sibling of the native Progress body. This survives the SPA's
-    // internal card refreshes while the authoritative private-vault renderer loads.
     if (surface.native?.parentElement) surface.native.insertAdjacentElement('beforebegin', dashboard)
     else if (surface.title) surface.title.insertAdjacentElement('afterend', dashboard)
     else surface.root.insertAdjacentElement('afterbegin', dashboard)
@@ -181,8 +183,6 @@
     const dashboard = ensureBootstrapShell(surface)
     requestBaseRender()
 
-    // If the full renderer has taken over, remove the bootstrap marker only.
-    // The renderer owns the same section and replaces its contents atomically.
     if (baseDashboardReady() && dashboard.dataset.loaded === '1') {
       dashboard.removeAttribute(BOOTSTRAP_ATTR)
       return
@@ -229,8 +229,6 @@
   function start() {
     queue()
     new MutationObserver(records => {
-      // Ignore mutations that are solely inside the mounted dashboard to avoid
-      // a feedback loop while the private-vault renderer updates its own cards.
       const outside = records.some(record => !(record.target instanceof Element) || !record.target.closest(`#${DASHBOARD_ID}`))
       if (outside) queue()
     }).observe(document.body, { childList: true, subtree: true })
