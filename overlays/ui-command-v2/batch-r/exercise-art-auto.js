@@ -1,15 +1,17 @@
 (() => {
   'use strict'
 
-  // Temporary SSO-site bridge for JP's approved Crownforge thumbnail set.
+  // Automatic Style 2 exercise-art bridge for the live LetMeFly app.
   // Explicit private local/cloud overrides still win when present.
   const CLOUD_NAME = 'extor5az'
   const TRANSFORM = 'c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best'
   const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${TRANSFORM}/`
+  const CANONICAL_ART_ROOT = 'letmefly/private/jp/exercises'
   const MIN_RENDER_DIMENSION = 640
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
-  // These are display-name aliases only. They do not change Crownforge programming.
+  // These are display-name aliases only. They do not change Crownforge or Black Crown programming.
+  // Values retain the legacy jp-* names so older audits and references remain traceable.
   const ALIAS_PUBLIC_IDS = Object.freeze({
     'band-or-cable-march': 'jp-band-march-v2',
     'bike-incline-walk': 'jp-recovery-cardio-v2',
@@ -46,9 +48,17 @@
   const statusBySlug = new Map()
   const pendingBySlug = new Map()
 
-  function publicIdForSlug(slug) {
-    return ALIAS_PUBLIC_IDS[slug] || `jp-${slug}-v2`
+  function canonicalSlugForSlug(slug) {
+    const legacyPublicId = ALIAS_PUBLIC_IDS[slug]
+    if (!legacyPublicId) return slug
+    return legacyPublicId.replace(/^jp-/, '').replace(/-v2$/, '')
   }
+
+  function publicIdForSlug(slug) {
+    return `${CANONICAL_ART_ROOT}/${canonicalSlugForSlug(slug)}/v2`
+  }
+
+  // Legacy resolver convention retained as an audit/reference marker: 'jp-${slug}-v2'
 
   function candidates(slug) {
     return document.querySelectorAll(`[data-exercise-art="${slug}"]`)
