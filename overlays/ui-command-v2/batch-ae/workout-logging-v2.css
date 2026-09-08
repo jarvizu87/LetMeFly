@@ -1,0 +1,139 @@
+/* LetMeFly Workout Logging v2 — recording-led mobile ergonomics.
+   Program prescriptions remain authoritative; this layer only changes logging presentation. */
+
+/* Completed means green. Red remains the LetMeFly primary-action color. */
+.lmf-workout-flow-card .set-check.done{
+  color:#dff9eb!important;
+  background:#0f6b48!important;
+  border-color:#36b37e!important;
+  box-shadow:0 0 20px rgba(54,179,126,.22)!important;
+}
+.lmf-set-tab.done:not(.active){
+  color:#b9f4d5!important;
+  border-color:#2e8f65!important;
+  background:#0b2419!important;
+}
+.lmf-set-tab.active:not(.done){
+  color:#fff!important;
+  border-color:#8b5cf6!important;
+  background:linear-gradient(145deg,#24163d,#111019)!important;
+  box-shadow:inset 0 0 0 1px rgba(139,92,246,.35),0 0 16px rgba(139,92,246,.12)!important;
+}
+.lmf-workout-flow-card .set-row.lmf-set-active{
+  border-color:#4a3c67!important;
+  box-shadow:inset 3px 0 0 #8b5cf6!important;
+}
+
+/* Once the athlete starts logging, collapse the cinematic media/actions so the
+   inputs and next work stay close to the thumb. Details are always recoverable. */
+.lmf-log-detail-toggle{
+  display:none;
+  width:calc(100% - 28px);
+  min-height:38px;
+  margin:0 14px 10px;
+  border:1px solid #33414d;
+  border-radius:10px;
+  color:#aeb8c4;
+  background:#0a131b;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.09em;
+}
+.lmf-workout-flow-card.lmf-logging-compact > .lmf-exercise-media{
+  min-height:0!important;
+  height:112px!important;
+  aspect-ratio:auto!important;
+  background-size:cover!important;
+  background-position:center 35%!important;
+}
+.lmf-workout-flow-card.lmf-logging-compact > .exercise-title{
+  padding:10px 14px 8px!important;
+}
+.lmf-workout-flow-card.lmf-logging-compact > .exercise-title h3{
+  margin:2px 0 4px!important;
+  font-size:23px!important;
+}
+.lmf-workout-flow-card.lmf-logging-compact > .exercise-title .muted,
+.lmf-workout-flow-card.lmf-logging-compact > .exercise-title p{
+  display:none!important;
+}
+.lmf-workout-flow-card.lmf-logging-compact > .exercise-actions{
+  display:none!important;
+}
+.lmf-workout-flow-card.lmf-logging-compact > .lmf-log-detail-toggle{
+  display:block!important;
+  order:3;
+}
+.lmf-workout-flow-card.lmf-logging-compact > .set-table{order:4}
+
+.lmf-workout-flow-card.lmf-logging-compact.lmf-logging-details-open > .lmf-exercise-media{
+  height:auto!important;
+  aspect-ratio:1/1!important;
+  background-size:contain!important;
+  background-position:center!important;
+}
+.lmf-workout-flow-card.lmf-logging-compact.lmf-logging-details-open > .exercise-title .muted,
+.lmf-workout-flow-card.lmf-logging-compact.lmf-logging-details-open > .exercise-title p{
+  display:block!important;
+}
+.lmf-workout-flow-card.lmf-logging-compact.lmf-logging-details-open > .exercise-actions{
+  display:grid!important;
+}
+
+.lmf-load-carry-note{
+  display:block!important;
+  margin-top:5px!important;
+  color:#9e8bdb!important;
+  font-size:8px!important;
+  line-height:1.25!important;
+  text-align:center!important;
+}
+
+/* Between-round information should guide the athlete, not dominate the screen. */
+.lmf-round-rest{
+  min-height:48px!important;
+  grid-template-columns:30px minmax(0,1fr) auto!important;
+  gap:7px!important;
+  padding:7px 9px!important;
+}
+.lmf-round-rest > span{
+  width:28px!important;
+  height:28px!important;
+  font-size:15px!important;
+}
+.lmf-round-rest b{font-size:14px!important}
+.lmf-round-rest small{font-size:8px!important}
+.lmf-round-rest > strong{font-size:13px!important}
+.lmf-round-rest.is-active{
+  position:sticky;
+  bottom:calc(var(--bottom-nav-h,72px) + 8px);
+  z-index:18;
+  border-color:#654f9a!important;
+  box-shadow:0 12px 28px rgba(0,0,0,.42)!important;
+}
+.lmf-round-rest [data-lmf-rest-continue]{
+  grid-column:1/-1;
+  min-height:42px;
+  border:0;
+  border-radius:9px;
+  color:#fff;
+  background:#ff1731;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.06em;
+}
+
+.lmf-next-strip{
+  min-height:48px!important;
+  grid-template-columns:34px minmax(0,1fr) 14px!important;
+  padding:6px 9px!important;
+}
+.lmf-next-thumb,.lmf-next-icon{width:34px!important;height:34px!important}
+.lmf-next-strip b{font-size:10px!important}
+
+@media(max-width:430px){
+  .lmf-workout-flow-card.lmf-logging-compact > .lmf-exercise-media{height:94px!important}
+  .lmf-workout-flow-card.lmf-logging-compact > .exercise-title h3{font-size:21px!important}
+  .lmf-log-detail-toggle{width:calc(100% - 20px);margin:0 10px 8px}
+  .lmf-round-rest,.lmf-next-strip{margin-left:31px!important}
+}
