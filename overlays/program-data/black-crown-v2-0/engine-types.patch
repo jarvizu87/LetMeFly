@@ -39,3 +39,8 @@
    intent: string
    days: ProgramDay[]
  }
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -246,1 +246,1 @@
+-      <div class="day-strip">${(currentWeek?.days ?? []).map((d) => `<button class="day-chip ${d.day === state.selectedDay ? 'active' : ''}" data-day="${d.day}"><strong>D${d.day}</strong><small>${esc(d.date.slice(5))}</small></button>`).join('')}</div>
++      <div class="day-strip">${(currentWeek?.days ?? []).map((d) => `<button class="day-chip ${d.day === state.selectedDay ? 'active' : ''}" data-day="${d.day}"><strong>D${d.day}</strong><small>${d.date ? esc(d.date.slice(5)) : 'Program'}</small></button>`).join('')}</div>
