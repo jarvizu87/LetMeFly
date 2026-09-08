@@ -56,6 +56,7 @@ jobs:
           cp "$SRC/src/data/exercise-library.ts" "$OUT/src/data/exercise-library.ts"
           cp "$SRC/scripts/audit-rebuild.mjs" "$OUT/scripts/audit-rebuild.mjs"
           cp "$SRC/scripts/audit-program-architecture.mjs" "$OUT/scripts/audit-program-architecture.mjs"
+          cp "$SRC/scripts/audit-exercise-library.mjs" "$OUT/scripts/audit-exercise-library.mjs"
           cp "$SRC/package.json" "$OUT/package.json"
           cp "$SRC/src/main.ts" "$OUT/src/main.ts"
 
@@ -70,5 +71,5 @@ jobs:
             echo 'No runtime-shape changes to commit.'
             exit 0
           fi
-          git commit -m 'Expand Black Crown runtime architecture snapshot'
+          git commit -m 'Export exercise-library audit for Black Crown'
           git push origin HEAD:black-crown-v2-0-modular-import
