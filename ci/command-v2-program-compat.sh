@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODE="${1:-}"
 TARGET_DIR="${2:-}"
 
@@ -91,5 +92,13 @@ else
   grep -Fq "homeProgram === 'black-crown' ? 'Black Crown'" "$TARGET_DIR/src/main.ts"
   grep -Fq "const day = getProgramDay(homeProgram" "$TARGET_DIR/src/main.ts"
   grep -Fq "day.date ? esc(day.date) : 'Program'" "$TARGET_DIR/src/main.ts"
+
+  # The post-compat result introduces Black Crown-aware labels. Widen the UI's
+  # selected-program type and routing immediately, before the first TypeScript
+  # release gate. Black Crown remains undated public source; calendar mapping
+  # stays limited to dated Crownforge/Maintenance records.
+  bash "$SCRIPT_DIR/apply-black-crown-command-v2-core.sh" "$TARGET_DIR"
+  grep -Fq "selectedProgram: PublicProgramKey" "$TARGET_DIR/src/main.ts"
+  grep -Fq "program === 'black-crown' ? getBlackCrownDay" "$TARGET_DIR/src/main.ts"
   echo "Command V2 modular-program post-compatibility: PASS"
 fi
