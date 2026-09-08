@@ -54,9 +54,35 @@ if (JSON.stringify(blocked) !== JSON.stringify(expectedBlocked)) {
   throw new Error(`Exercise Intelligence protected substitutions changed: ${blocked.join(', ')}`);
 }
 
+const roleCoverage = payload.exercises.filter((exercise) => Array.isArray(exercise.movementRoles) && exercise.movementRoles.length).length;
+const coachingCoverage = payload.exercises.filter((exercise) =>
+  Boolean(exercise.purpose) && Array.isArray(exercise.coachingCues) && exercise.coachingCues.length &&
+  Array.isArray(exercise.commonMistakes) && exercise.commonMistakes.length
+).length;
+const readyForReview = payload.exercises.filter((exercise) => exercise.reviewStatus === 'READY FOR REVIEW').length;
+
+if (payload.counts?.roleCoverage !== roleCoverage) {
+  throw new Error(`Exercise Intelligence roleCoverage is stale: ${payload.counts?.roleCoverage} != ${roleCoverage}`);
+}
+if (payload.counts?.coachingCoverage !== coachingCoverage) {
+  throw new Error(`Exercise Intelligence coachingCoverage is stale: ${payload.counts?.coachingCoverage} != ${coachingCoverage}`);
+}
+if (payload.counts?.readyForReview !== readyForReview) {
+  throw new Error(`Exercise Intelligence readyForReview is stale: ${payload.counts?.readyForReview} != ${readyForReview}`);
+}
+
 if (schema === '1.1-black-crown-v2-1') {
-  if (payload.counts?.exercises !== 94 || payload.counts?.substitutionRules !== 27) {
-    throw new Error(`Black Crown v2.1 Exercise Intelligence count mismatch: ${JSON.stringify(payload.counts)}`);
+  const expectedCounts = {
+    exercises: 94,
+    substitutionRules: 27,
+    roleCoverage: 94,
+    coachingCoverage: 94,
+    readyForReview: 94,
+  };
+  for (const [key, expected] of Object.entries(expectedCounts)) {
+    if (payload.counts?.[key] !== expected) {
+      throw new Error(`Black Crown v2.1 Exercise Intelligence ${key} mismatch: ${payload.counts?.[key]} != ${expected}`);
+    }
   }
   if (ids.size !== 94) {
     throw new Error('Black Crown v2.1 Exercise Intelligence exercise IDs are not unique');
@@ -67,6 +93,24 @@ if (schema === '1.1-black-crown-v2-1') {
   }
   for (const required of ['machine-hip-abduction', 'seated-band-hip-abduction', 'mini-band-lateral-walk']) {
     if (!ids.has(required)) throw new Error(`Missing governed Black Crown v2.1 exercise: ${required}`);
+  }
+  for (const id of ['machine-hip-abduction', 'seated-band-hip-abduction']) {
+    const exercise = payload.exercises.find((item) => item.id === id);
+    if (!exercise?.trainingCategory || 'trainingCategories' in exercise) {
+      throw new Error(`Black Crown v2.1 Exercise Intelligence schema mismatch: ${id}`);
+    }
+    if (exercise.reviewStatus !== 'READY FOR REVIEW') {
+      throw new Error(`Black Crown v2.1 exercise is not review-ready: ${id}`);
+    }
+    if (exercise?.demo?.currentStatus !== 'direct-verified') {
+      throw new Error(`Black Crown v2.1 demo is not direct-verified: ${id}`);
+    }
+    if (!String(exercise?.demo?.currentUrl || '').startsWith('https://www.youtube.com/watch?v=')) {
+      throw new Error(`Black Crown v2.1 demo is not a direct watch URL: ${id}`);
+    }
+    if (exercise?.demo?.candidateRequiresValidation !== false) {
+      throw new Error(`Black Crown v2.1 demo still requires validation: ${id}`);
+    }
   }
   const machineRules = payload.substitutionRules
     .filter((rule) => rule.primaryExerciseId === 'machine-hip-abduction')
@@ -79,14 +123,23 @@ if (schema === '1.1-black-crown-v2-1') {
   if (!runtime.includes('94/27')) {
     throw new Error('Exercise Intelligence runtime is not synchronized to Black Crown v2.1 94/27 catalog');
   }
-  console.log('Exercise Intelligence governed Black Crown v2.1 supplement: PASS (94/27)');
+  console.log('Exercise Intelligence governed Black Crown v2.1 supplement: PASS (94/27 with 94 full coverage)');
 } else {
   const digest = crypto.createHash('sha256').update(raw).digest('hex');
   if (digest !== process.env.BASE_JSON_SHA) {
     throw new Error(`Exercise Intelligence base payload digest changed: ${digest}`);
   }
-  if (payload.counts?.exercises !== 92 || payload.counts?.substitutionRules !== 25) {
-    throw new Error('Exercise Intelligence production count mismatch');
+  const expectedCounts = {
+    exercises: 92,
+    substitutionRules: 25,
+    roleCoverage: 92,
+    coachingCoverage: 92,
+    readyForReview: 92,
+  };
+  for (const [key, expected] of Object.entries(expectedCounts)) {
+    if (payload.counts?.[key] !== expected) {
+      throw new Error(`Exercise Intelligence base ${key} mismatch: ${payload.counts?.[key]} != ${expected}`);
+    }
   }
   if (ids.size !== 92) {
     throw new Error('Exercise Intelligence production exercise IDs are not unique');
@@ -94,7 +147,7 @@ if (schema === '1.1-black-crown-v2-1') {
   if ((payload.bookInformedSupplements || []).length) {
     throw new Error('Base Exercise Intelligence payload unexpectedly declares supplements');
   }
-  console.log('Exercise Intelligence immutable base payload: PASS (92/25)');
+  console.log('Exercise Intelligence immutable base payload: PASS (92/25 with 92 full coverage)');
 }
 
 for (const exercise of payload.exercises) {
