@@ -1,0 +1,112 @@
+/* LetMeFly recording-led mobile regression fixes v1.
+   Presentation only: do not alter program prescriptions or private athlete data. */
+
+/* Program preview cards should behave like compact thumbnails, not shallow cinematic banners.
+   The source masters are square, so a square preview preserves the complete exercise pose. */
+.workout-panel .exercise-stack .preview-card[data-exercise-art]{
+  display:grid!important;
+  grid-template-columns:104px minmax(0,1fr)!important;
+  grid-template-areas:
+    "art title"
+    "rx rx"
+    "actions actions"!important;
+  gap:10px 12px!important;
+  padding:12px!important;
+  align-items:start!important;
+  overflow:hidden!important;
+}
+.workout-panel .exercise-stack .preview-card[data-exercise-art]::before,
+.workout-panel .exercise-stack .preview-card:first-child[data-exercise-art]::before{
+  content:""!important;
+  grid-area:art!important;
+  position:relative!important;
+  inset:auto!important;
+  display:block!important;
+  width:104px!important;
+  height:104px!important;
+  min-height:104px!important;
+  margin:0!important;
+  border:1px solid #2a3944!important;
+  border-radius:14px!important;
+  background-image:var(--exercise-art,linear-gradient(145deg,#121a22,#06090d 70%))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)!important;
+  filter:none!important;
+  opacity:1!important;
+  z-index:auto!important;
+}
+.workout-panel .exercise-stack .preview-card[data-exercise-art] > .exercise-title{
+  grid-area:title!important;
+  min-width:0!important;
+  align-self:center!important;
+}
+.workout-panel .exercise-stack .preview-card[data-exercise-art] > .prescription-block{
+  grid-area:rx!important;
+  min-width:0!important;
+}
+.workout-panel .exercise-stack .preview-card[data-exercise-art] > .exercise-actions{
+  grid-area:actions!important;
+  min-width:0!important;
+}
+.workout-panel .exercise-stack .preview-card:first-child[data-exercise-art] > *{
+  position:relative!important;
+  z-index:1!important;
+}
+
+/* A future-day preview must never look like a live readiness/workout entry screen. */
+html.lmf-preview-mode .readiness-panel .readiness-stack,
+html.lmf-preview-mode .readiness-panel .field,
+html.lmf-preview-mode .readiness-panel .voice-note-control,
+html.lmf-preview-mode .readiness-panel .voice-note-shell,
+html.lmf-preview-mode .readiness-panel [data-action="start-workout"],
+html.lmf-preview-mode .readiness-panel [data-action="save-readiness"],
+html.lmf-preview-mode .review-panel [data-action="start-workout"]{
+  display:none!important;
+}
+html.lmf-preview-mode .readiness-panel{
+  min-height:360px!important;
+}
+html.lmf-preview-mode .readiness-panel .readiness-graphic{
+  min-height:120px!important;
+}
+.lmf-preview-lock-note{
+  display:grid;
+  gap:8px;
+  margin:18px 0 4px;
+  padding:16px;
+  border:1px solid rgba(137,92,246,.42);
+  border-radius:14px;
+  background:linear-gradient(135deg,rgba(137,92,246,.12),rgba(255,39,67,.05));
+}
+.lmf-preview-lock-note strong{
+  color:#f4f7fa;
+  font-size:15px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.lmf-preview-lock-note span{
+  color:#aeb8c2;
+  font-size:13px;
+  line-height:1.45;
+}
+.lmf-preview-position-warning{
+  padding:10px 12px!important;
+  margin-bottom:10px!important;
+}
+
+@media(max-width:420px){
+  .workout-panel .exercise-stack .preview-card[data-exercise-art]{
+    grid-template-columns:92px minmax(0,1fr)!important;
+    gap:9px 10px!important;
+    padding:10px!important;
+  }
+  .workout-panel .exercise-stack .preview-card[data-exercise-art]::before,
+  .workout-panel .exercise-stack .preview-card:first-child[data-exercise-art]::before{
+    width:92px!important;
+    height:92px!important;
+    min-height:92px!important;
+    border-radius:12px!important;
+  }
+}
