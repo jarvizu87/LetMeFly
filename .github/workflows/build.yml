@@ -28,6 +28,9 @@ jobs:
         with:
           node-version: '22.12.0'
 
+      - name: Audit real-program workout flow edge cases
+        run: node ci/audit-workout-flow-edge-cases.mjs
+
       - name: Build and audit Command V2 + private Cloudinary exercise art
         run: bash ci/build-command-v2-cloudinary.sh
 
