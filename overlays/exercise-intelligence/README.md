@@ -64,7 +64,14 @@ materializes the payload whenever this overlay changes.
 `ci/install-exercise-intelligence-v1.sh` materializes a privacy-safe runtime copy
 to `/data/exercise-intelligence-v1.json`, installs the read-only lookup API, and
 installs the INFO modal UI. It rejects private Drive provenance, duplicate IDs,
-unexpected record counts, and changed payload hashes.
+unexpected record counts, changed payload hashes, or a missing service-worker
+shell.
+
+The installer also extends the existing public-shell precache with the Exercise
+Intelligence JSON, runtime loader, INFO UI JavaScript, and INFO UI stylesheet.
+Private Supabase/auth/API requests remain excluded by the existing service-worker
+privacy rules. The dedicated CI smoke test verifies both the runtime installation
+and the offline precache patch.
 
 ## Runtime status
 
@@ -76,6 +83,10 @@ current Watch Exercise link.
 The INFO enhancement fails open: if the intelligence payload is unavailable or a
 name cannot be resolved, the existing LetMeFly INFO behavior remains available.
 It does not read or mutate workout prescription state.
+
+Exercise Intelligence public-shell resources are precached for installed/offline
+use. This does not cache private athlete APIs or move private athlete data into the
+public shell.
 
 The existing `SUBSTITUTE` workflow is intentionally **not overridden by this UI
 batch**. Broader substitution behavior will be connected only after the governed
