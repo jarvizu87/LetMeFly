@@ -1,0 +1,62 @@
+name: Athlete Progression v1 Audit
+
+on:
+  push:
+    branches:
+      - main
+      - athlete-progression-v1-mainline
+    paths:
+      - 'ci/apply-athlete-program-progression-v1.sh'
+      - 'ci/audit-athlete-program-progression.mjs'
+      - 'ci/build-command-v2-hardening.sh'
+      - '.github/workflows/athlete-progression-v1-audit.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ci/apply-athlete-program-progression-v1.sh'
+      - 'ci/audit-athlete-program-progression.mjs'
+      - 'ci/build-command-v2-hardening.sh'
+      - '.github/workflows/athlete-progression-v1-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  progression-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Build current production source with athlete progression
+        run: bash ci/build-command-v2-cloudinary.sh
+
+      - name: Re-audit athlete progression after all production overlays
+        run: node ci/audit-athlete-program-progression.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Protect governed program packages
+        working-directory: .build-src/letmefly_app
+        run: |
+          npm run audit:source
+          npm run audit:crownforge
+          npm run audit:exercise-library
+          npm run typecheck
+          npm run build
+
+      - name: Confirm production runtime markers
+        run: |
+          set -euo pipefail
+          test -f .build-src/letmefly_app/dist/index.html
+          grep -Rq 'BLACK CROWN ENTRY GATE' .build-src/letmefly_app/dist/assets
+          grep -Rq 'MAKE CURRENT POSITION' .build-src/letmefly_app/dist/assets
+          grep -Rq 'Preview only' .build-src/letmefly_app/dist/assets
+          echo 'Athlete progression v1 production audit: PASS'
