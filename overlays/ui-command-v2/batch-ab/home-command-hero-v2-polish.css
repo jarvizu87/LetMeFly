@@ -1,0 +1,136 @@
+/* LetMeFly Home Command Hero v2 polish
+   Presentation-only cleanup after real 412px browser audit. */
+
+/* Let the session-focus rail fill whatever number of governed sections exist. */
+@media(max-width:780px){
+  .focus-strip{
+    grid-template-columns:repeat(auto-fit,minmax(82px,1fr))!important;
+  }
+}
+
+/* Remove the old Batch-B synthetic Performance title so it cannot double with
+   the current card copy after Command Hero v1 restores normal heading sizing. */
+.dashboard-grid>.status-card:not(.readiness-card) .card-head h2::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Compact Command cards: preserve the live data, but make the signal readable
+   at a glance instead of allowing legacy dashboard typography to dominate. */
+.dashboard-grid>.card,
+.dashboard-grid>.status-card,
+.dashboard-grid>.milestone-card,
+.dashboard-grid>.coach-focus-card{
+  container-type:inline-size;
+}
+.dashboard-grid .card-head{
+  min-width:0!important;
+}
+.dashboard-grid .card-head h2,
+.dashboard-grid>.status-card h2,
+.dashboard-grid>.milestone-card h2,
+.dashboard-grid>.coach-focus-card h2,
+.dashboard-grid h3{
+  max-width:100%!important;
+  overflow:hidden!important;
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:2!important;
+  text-wrap:balance;
+}
+.dashboard-grid p,
+.dashboard-grid .muted,
+.dashboard-grid small{
+  font-size:7px!important;
+  line-height:1.3!important;
+}
+.dashboard-grid p{
+  margin:4px 0!important;
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:3!important;
+  overflow:hidden!important;
+}
+.dashboard-grid .btn{
+  min-height:36px!important;
+  padding:6px 8px!important;
+  font-size:6.5px!important;
+}
+
+/* Readiness should lead with the actual readiness signal rather than a large
+   empty-state sentence. The sentence remains available as supporting copy. */
+.readiness-card .card-head h2{
+  font-size:0!important;
+  line-height:0!important;
+}
+.readiness-card .card-head h2::after{
+  content:'Readiness';
+  display:block;
+  font-size:14px!important;
+  line-height:1.05!important;
+  color:#f4f7f9;
+}
+
+/* Recent performance label stays stable whether history exists yet or not. */
+.dashboard-grid>.status-card:not(.readiness-card) .card-head h2{
+  font-size:0!important;
+  line-height:0!important;
+}
+.dashboard-grid>.status-card:not(.readiness-card) .card-head h2::before{
+  content:'Recent Performance';
+  display:block;
+  font-size:14px!important;
+  line-height:1.05!important;
+  color:#f4f7f9;
+}
+
+/* Preserve useful card details but keep them below the fold line on small phones. */
+@media(max-width:520px){
+  .dashboard-grid>.card,
+  .dashboard-grid>.status-card,
+  .dashboard-grid>.milestone-card,
+  .dashboard-grid>.coach-focus-card{
+    min-height:136px!important;
+    max-height:166px!important;
+    padding:9px!important;
+  }
+  .dashboard-grid .card-head{margin-bottom:4px!important}
+  .dashboard-grid .card-head .page-kicker{font-size:5.7px!important}
+  .dashboard-grid>.milestone-card h2,
+  .dashboard-grid>.coach-focus-card h2,
+  .dashboard-grid h3{
+    font-size:12px!important;
+    line-height:1.08!important;
+  }
+  .readiness-rings{
+    gap:4px!important;
+    margin:5px 0 3px!important;
+    flex-wrap:nowrap!important;
+  }
+  .readiness-ring{
+    width:46px!important;
+    height:46px!important;
+    flex:0 0 46px!important;
+  }
+  .readiness-ring strong{font-size:13px!important}
+  .readiness-ring span{font-size:5px!important}
+  .performance-list>div:nth-child(n+3){display:none!important}
+  .performance-list>div{padding:3px 0!important}
+  .milestone-card .progress-bar{height:5px!important}
+  .coach-focus-card .callout{
+    margin-top:4px!important;
+    font-size:6.2px!important;
+    line-height:1.25!important;
+    -webkit-line-clamp:3!important;
+    overflow:hidden!important;
+  }
+}
+
+@media(max-width:380px){
+  .focus-strip{grid-template-columns:repeat(auto-fit,minmax(76px,1fr))!important}
+  .dashboard-grid>.card,
+  .dashboard-grid>.status-card,
+  .dashboard-grid>.milestone-card,
+  .dashboard-grid>.coach-focus-card{min-height:132px!important}
+  .readiness-ring{width:42px!important;height:42px!important;flex-basis:42px!important}
+}
