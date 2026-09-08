@@ -43,6 +43,9 @@ jobs:
       - name: Install Exercise Intelligence set-focus Coach
         run: bash ci/install-exercise-intelligence-coach-v1.sh
 
+      - name: Install governed Exercise Intelligence substitution viewer
+        run: bash ci/install-exercise-intelligence-substitutions-v1.sh
+
       - name: Install smart voice-note dictation v2
         run: bash ci/install-voice-notes-v2.sh
 
