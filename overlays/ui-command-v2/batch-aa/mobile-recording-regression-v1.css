@@ -1,12 +1,13 @@
 /* LetMeFly recording-led mobile regression fixes v2.
    Presentation only: do not alter program prescriptions or private athlete data. */
 
-/* Program-preview cards now use the same compact visual language as inactive
-   live-workout cards. Full prescription details remain available on demand. */
+/* Future-day exercise previews use the same image-first card silhouette as the
+   current Day 1 workout. The preview remains read-only and can still collapse
+   prescription details, but the artwork is no longer reduced to a tiny thumbnail. */
 .workout-panel .exercise-stack .preview-card[data-exercise-art]{
   display:block!important;
-  min-height:98px!important;
-  padding:10px!important;
+  min-height:0!important;
+  padding:0 10px 10px!important;
   overflow:hidden!important;
   background:#081119!important;
   border:1px solid #2b3944!important;
@@ -18,14 +19,16 @@
   content:""!important;
   position:relative!important;
   inset:auto!important;
-  float:left!important;
+  float:none!important;
   display:block!important;
-  width:78px!important;
-  height:78px!important;
-  min-height:78px!important;
-  margin:0 11px 8px 0!important;
-  border:1px solid #30404b!important;
-  border-radius:10px!important;
+  width:calc(100% + 20px)!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:1 / 1!important;
+  margin:0 -10px 10px!important;
+  border:0!important;
+  border-bottom:1px solid #30404b!important;
+  border-radius:15px 15px 0 0!important;
   background-image:var(--exercise-art,linear-gradient(145deg,#121a22,#06090d 70%))!important;
   background-size:cover!important;
   background-position:center!important;
@@ -37,13 +40,13 @@
 }
 .workout-panel .exercise-stack .preview-card[data-exercise-art] > .exercise-title{
   min-width:0!important;
-  min-height:78px!important;
-  padding:7px 4px 4px 0!important;
+  min-height:0!important;
+  padding:8px 4px 4px!important;
   border:0!important;
 }
 .workout-panel .exercise-stack .preview-card[data-exercise-art] > .exercise-title h3{
   margin:4px 0 6px!important;
-  font-size:20px!important;
+  font-size:22px!important;
   line-height:1.04!important;
 }
 .workout-panel .exercise-stack .preview-card[data-exercise-art] > .prescription-block,
@@ -62,8 +65,9 @@
   z-index:1!important;
 }
 
-/* Future positions default to a compact scan view. The athlete can expand any
-   exercise to inspect the exact governed sets without changing program state. */
+/* Future positions keep prescription details collapsed by default. The athlete
+   can expand any exercise to inspect the exact governed sets without changing
+   program state. */
 html.lmf-preview-mode .preview-card[data-lmf-preview-collapsed="true"] > .prescription-block,
 html.lmf-preview-mode .preview-card[data-lmf-preview-collapsed="true"] > .exercise-actions{
   display:none!important;
@@ -163,18 +167,12 @@ html.lmf-preview-mode .readiness-panel .readiness-graphic{
 
 @media(max-width:420px){
   .workout-panel .exercise-stack .preview-card[data-exercise-art]{
-    min-height:90px!important;
-    padding:9px!important;
+    padding:0 9px 9px!important;
   }
   .workout-panel .exercise-stack .preview-card[data-exercise-art]::before,
   .workout-panel .exercise-stack .preview-card:first-child[data-exercise-art]::before{
-    width:72px!important;
-    height:72px!important;
-    min-height:72px!important;
-    margin-right:10px!important;
-  }
-  .workout-panel .exercise-stack .preview-card[data-exercise-art] > .exercise-title{
-    min-height:72px!important;
+    width:calc(100% + 18px)!important;
+    margin:0 -9px 9px!important;
   }
   .lmf-incomplete-review-note{
     align-items:flex-start;
