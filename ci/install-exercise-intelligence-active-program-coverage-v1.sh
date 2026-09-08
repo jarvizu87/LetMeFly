@@ -104,7 +104,7 @@ for exercise in supp['exercises']:
         raise SystemExit(f"Active-program exercise must use a safe search fallback until direct media is validated: {exercise['id']}")
     for value in [exercise['canonicalName'], *(exercise.get('aliases') or [])]:
         key = norm(value)
-        if key in identity_map:
+        if key in identity_map and identity_map[key] != exercise['id']:
             raise SystemExit(f"Active-program identity collides with existing exercise: {value} -> {identity_map[key]}")
         identity_map[key] = exercise['id']
     data['exercises'].append(exercise)
@@ -136,7 +136,6 @@ for key, expected in expected_counts.items():
 if len({item['id'] for item in data['exercises']}) != final['exercises']:
     raise SystemExit('Duplicate Exercise Intelligence exercise IDs after active-program supplement')
 
-# Black Crown v2.1 supplement must survive unchanged.
 if data.get('bookInformedSupplements') != ['black-crown-v2-1-lateral-glute']:
     raise SystemExit(f"Black Crown v2.1 supplement marker changed: {data.get('bookInformedSupplements')}")
 machine_rules = [
