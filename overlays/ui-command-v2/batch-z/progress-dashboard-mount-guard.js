@@ -82,20 +82,27 @@
     return anchor
   }
 
+  function refreshBaseDashboard() {
+    const refresh = window.__LMF_PROGRESS_DASHBOARD__?.refresh || window.__LMF_PROGRESS_BOOT__?.refresh
+    if (typeof refresh !== 'function') return false
+    refresh()
+    return true
+  }
+
   function retryBaseDashboard() {
-    // If the base runtime already exists, never load its IIFE a second time.
-    // A duplicate runtime creates a second activeTab closure/observer and the
-    // two instances can race, visibly snapping a tapped tab back to Overview.
-    if (retrying || window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID) || !progressSurface()) return
+    // If the base runtime already has a live dashboard root, never load its IIFE
+    // a second time. Prefer the deterministic boot/dashboard refresh hooks first.
+    if (retrying || document.getElementById(DASHBOARD_ID) || !progressSurface()) return
+    if (refreshBaseDashboard()) return
     if (document.querySelector(`script[${RETRY_ATTR}]`)) return
     retrying = true
     const script = document.createElement('script')
     script.defer = true
-    script.src = '/ui/progress-dashboard-v1.js?mount-retry=4'
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=6'
     script.setAttribute(RETRY_ATTR, 'true')
     script.addEventListener('load', () => {
       window.setTimeout(() => {
-        window.__LMF_PROGRESS_DASHBOARD__?.refresh?.()
+        refreshBaseDashboard()
         retrying = false
       }, 220)
     }, { once: true })
@@ -110,9 +117,10 @@
     if (!surface) return
     ensureAnchor(surface)
 
-    // Give the already-loaded primary runtime a direct refresh opportunity.
-    // Only replay the script when no primary runtime exists at all.
-    window.__LMF_PROGRESS_DASHBOARD__?.refresh?.()
+    // A same-route tap can cause the SPA to rebuild Progress without changing
+    // location.hash. The original dashboard window hook survives that rebuild,
+    // so call it directly rather than waiting for hashchange or heading discovery.
+    refreshBaseDashboard()
     const pulse = document.createElement('span')
     pulse.hidden = true
     pulse.setAttribute('data-lmf-progress-mount-pulse', 'true')
@@ -121,8 +129,7 @@
 
     window.setTimeout(() => {
       if (document.getElementById(DASHBOARD_ID) || !progressSurface()) return
-      if (window.__LMF_PROGRESS_DASHBOARD__?.refresh) window.__LMF_PROGRESS_DASHBOARD__.refresh()
-      else retryBaseDashboard()
+      if (!refreshBaseDashboard()) retryBaseDashboard()
     }, 700)
   }
 
@@ -132,11 +139,33 @@
     requestAnimationFrame(ensureMount)
   }
 
+  function pulseRouteMount() {
+    queue()
+    window.setTimeout(queue, 80)
+    window.setTimeout(queue, 260)
+    window.setTimeout(queue, 700)
+    window.setTimeout(queue, 1400)
+  }
+
+  function progressNavTrigger(target) {
+    if (!(target instanceof Element)) return null
+    const link = target.closest('a[href],button,[role="button"]')
+    if (!link) return null
+    const href = link.getAttribute('href') || ''
+    const text = (link.textContent || '').trim()
+    if (/^#\/progress(?:[/?#]|$)/i.test(href)) return link
+    if (link.closest('nav') && /^progress$/i.test(text)) return link
+    return null
+  }
+
   function start() {
     queue()
     new MutationObserver(queue).observe(document.body, { childList: true, subtree: true })
-    window.addEventListener('popstate', queue)
-    window.addEventListener('hashchange', queue)
+    window.addEventListener('popstate', pulseRouteMount)
+    window.addEventListener('hashchange', pulseRouteMount)
+    document.addEventListener('click', event => {
+      if (progressNavTrigger(event.target)) pulseRouteMount()
+    }, true)
     window.setTimeout(queue, 300)
     window.setTimeout(queue, 850)
     window.setTimeout(queue, 1600)
