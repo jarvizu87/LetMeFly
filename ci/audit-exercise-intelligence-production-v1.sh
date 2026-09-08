@@ -9,13 +9,15 @@ INFO_JS="$DIST_DIR/ui/exercise-intelligence-ui-v1.js"
 INFO_CSS="$DIST_DIR/ui/exercise-intelligence-ui-v1.css"
 COACH_JS="$DIST_DIR/ui/exercise-intelligence-coach-v1.js"
 COACH_CSS="$DIST_DIR/ui/exercise-intelligence-coach-v1.css"
+COACH_SUB_JS="$DIST_DIR/ui/exercise-intelligence-coach-substitutions-v1.js"
+COACH_SUB_CSS="$DIST_DIR/ui/exercise-intelligence-coach-substitutions-v1.css"
 SUB_JS="$DIST_DIR/ui/exercise-intelligence-substitutions-v1.js"
 SUB_CSS="$DIST_DIR/ui/exercise-intelligence-substitutions-v1.css"
 INDEX="$DIST_DIR/index.html"
 SW="$DIST_DIR/service-worker.js"
 EXPECTED_JSON_SHA="b7bef69e9942568c59cc779ac33a2feaceba2e03535df68a0d663a766aedd350"
 
-for required in "$DATA" "$RUNTIME" "$INFO_JS" "$INFO_CSS" "$COACH_JS" "$COACH_CSS" "$SUB_JS" "$SUB_CSS" "$INDEX" "$SW"; do
+for required in "$DATA" "$RUNTIME" "$INFO_JS" "$INFO_CSS" "$COACH_JS" "$COACH_CSS" "$COACH_SUB_JS" "$COACH_SUB_CSS" "$SUB_JS" "$SUB_CSS" "$INDEX" "$SW"; do
   test -s "$required"
 done
 
@@ -23,6 +25,7 @@ echo "$EXPECTED_JSON_SHA  $DATA" | sha256sum -c -
 node --check "$RUNTIME"
 node --check "$INFO_JS"
 node --check "$COACH_JS"
+node --check "$COACH_SUB_JS"
 node --check "$SUB_JS"
 
 DATA="$DATA" node - <<'NODE'
@@ -64,6 +67,8 @@ for marker in \
   '/ui/exercise-intelligence-ui-v1.css' \
   '/ui/exercise-intelligence-coach-v1.js' \
   '/ui/exercise-intelligence-coach-v1.css' \
+  '/ui/exercise-intelligence-coach-substitutions-v1.js' \
+  '/ui/exercise-intelligence-coach-substitutions-v1.css' \
   '/ui/exercise-intelligence-substitutions-v1.js' \
   '/ui/exercise-intelligence-substitutions-v1.css'
 do
@@ -78,6 +83,8 @@ for marker in \
   "'/ui/exercise-intelligence-ui-v1.css'" \
   "'/ui/exercise-intelligence-coach-v1.js'" \
   "'/ui/exercise-intelligence-coach-v1.css'" \
+  "'/ui/exercise-intelligence-coach-substitutions-v1.js'" \
+  "'/ui/exercise-intelligence-coach-substitutions-v1.css'" \
   "'/ui/exercise-intelligence-substitutions-v1.js'" \
   "'/ui/exercise-intelligence-substitutions-v1.css'"
 do
@@ -110,6 +117,18 @@ grep -Fq 'The exact reason it appears in today’s slot' "$COACH_JS"
 ! grep -Fq 'data-substitute' "$COACH_JS"
 ! grep -Fq 'fetch(' "$COACH_JS"
 
+# Coach substitution guidance may read governed substitution rules and the same
+# transient exercise context, but may never apply or persist a workout change.
+grep -Fq 'getSubstitutions' "$COACH_SUB_JS"
+grep -Fq 'includeBlocked: true' "$COACH_SUB_JS"
+grep -Fq 'GOVERNED SUBSTITUTIONS • VIEW ONLY' "$COACH_SUB_JS"
+grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$COACH_SUB_JS"
+grep -Fq 'sessionStorage' "$COACH_SUB_JS"
+! grep -Fq 'localStorage' "$COACH_SUB_JS"
+! grep -Fq 'indexedDB' "$COACH_SUB_JS"
+! grep -Fq 'data-action="apply' "$COACH_SUB_JS"
+! grep -Fq 'fetch(' "$COACH_SUB_JS"
+
 # Substitution UI is an explanation viewer, never an auto-apply engine.
 grep -Fq 'ROLE-PRESERVING SUBSTITUTION GUIDE • VIEW ONLY' "$SUB_JS"
 grep -Fq 'includeBlocked: true' "$SUB_JS"
@@ -123,4 +142,4 @@ grep -Fq 'NOT A DEFAULT SUBSTITUTE' "$SUB_JS"
 # Program packages must remain the declared authority in the public runtime.
 grep -Fq 'program-packages-only' "$RUNTIME"
 
-echo "LetMeFly final Exercise Intelligence INFO + descriptive Coach + substitution production audit: PASS"
+echo "LetMeFly final Exercise Intelligence INFO + descriptive Coach + Coach substitution + substitution viewer production audit: PASS"
