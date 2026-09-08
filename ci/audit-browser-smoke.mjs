@@ -162,13 +162,17 @@ async function auditFuturePreview(page) {
   const card = page.locator('.preview-card[data-exercise-art]').first()
   const toggle = page.locator('.lmf-preview-plan-toggle').first()
   if (!(await card.isVisible().catch(() => false)) || !(await toggle.isVisible().catch(() => false))) {
-    fail('Future-day compact exercise card', 'compact preview card / VIEW FULL PLAN control missing')
+    fail('Future-day Day 1-style exercise card', 'image-first preview card / VIEW FULL PLAN control missing')
   } else {
     const collapsed = await card.getAttribute('data-lmf-preview-collapsed')
-    const box = await card.boundingBox()
-    if (collapsed !== 'true') fail('Future-day compact exercise card', `default collapsed state=${collapsed}`)
-    else if (box && box.height > 190) fail('Future-day compact exercise card', `collapsed card height ${Math.round(box.height)}px is too tall`)
-    else pass('Future-day compact exercise card', box ? `${Math.round(box.height)}px tall` : 'collapsed')
+    const art = await card.evaluate((el) => {
+      const style = getComputedStyle(el, '::before')
+      return { width: Number.parseFloat(style.width) || 0, height: Number.parseFloat(style.height) || 0 }
+    })
+    if (collapsed !== 'true') fail('Future-day Day 1-style exercise card', `default collapsed state=${collapsed}`)
+    else if (art.width < 260 || art.height < 260) fail('Future-day Day 1-style exercise card', `artwork is still thumbnail-sized at ${Math.round(art.width)}×${Math.round(art.height)}px`)
+    else if (art.height / art.width < .9 || art.height / art.width > 1.1) fail('Future-day Day 1-style exercise card', `artwork is not square/image-first at ${Math.round(art.width)}×${Math.round(art.height)}px`)
+    else pass('Future-day Day 1-style exercise card', `${Math.round(art.width)}×${Math.round(art.height)}px artwork; plan collapsed`)
 
     await toggle.click({ timeout: 5000 })
     await page.waitForTimeout(220)
