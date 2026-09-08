@@ -243,7 +243,7 @@ function topbar(): string {
         <span class="badge ${day.restDay ? 'optional' : 'mandatory'}">${day.restDay ? 'Recovery' : 'Workout'}</span>
       </div>
       <div class="session-track" id="session-track"><button class="active" data-session-index="0">READINESS</button>${day.sections.map((s, i) => `<button data-session-index="${i + 1}">${String.fromCharCode(65+i)}</button>`).join('')}<button data-session-index="${totalPages - 1}">REVIEW</button></div>
-      <div class="day-strip">${(currentWeek?.days ?? []).map((d) => `<button class="day-chip ${d.day === state.selectedDay ? 'active' : ''}" data-day="${d.day}"><strong>D${d.day}</strong><small>${esc(d.date.slice(5))}</small></button>`).join('')}</div>
+      <div class="day-strip">${(currentWeek?.days ?? []).map((d) => `<button class="day-chip ${d.day === state.selectedDay ? 'active' : ''}" data-day="${d.day}"><strong>D${d.day}</strong><small>${d.date ? esc(d.date.slice(5)) : 'Program'}</small></button>`).join('')}</div>
       <div class="train-rule"><strong>Readiness rule</strong><span>${esc(day.readinessRule)}</span></div>
       <div class="swipe-meta"><span>Swipe or tap a section</span><strong id="session-position">1 / ${totalPages}</strong></div>
       <div class="session-nav" aria-label="Workout section navigation"><button class="session-nav-btn" data-session-step="-1" disabled aria-label="Previous section">‹</button><span id="session-label">READINESS</span><button class="session-nav-btn" data-session-step="1" aria-label="Next section">›</button></div>

@@ -26,8 +26,8 @@ check(!/week:\s*1,\s*\n\s*start:/.test(registry), 'Registry contains workout pre
 
 check(crownforge.includes('CROWNFORGE_WEEK_14'), 'Crownforge package does not assemble all 14 weeks')
 check(maintenance.includes('CROWN_MAINTENANCE_WEEKS'), 'Crown Maintenance package does not assemble its bridge weeks')
-check(blackCrown.includes('weekData: []'), 'Black Crown package must remain catalog-only until full governed source import')
-check(blackCrownMetadata.includes("status: 'catalog-only'"), 'Black Crown metadata must remain catalog-only')
+check(blackCrown.includes('weekData: BLACK_CROWN_WEEKS'), 'Black Crown package must expose governed runtime week data')
+check(blackCrownMetadata.includes("status: 'active-source'"), 'Black Crown metadata must be active-source')
 
 check(!engineTypes.includes("../programs"), 'Program engine types must not depend on a concrete program package')
 check(!engineTypes.includes("../data"), 'Program engine types must not depend on legacy data facade')
@@ -48,7 +48,7 @@ if (failures.length) {
 console.log(JSON.stringify({
   result: 'PASS',
   architecture: 'shared program engine + independent program packages + central registry',
-  activePackages: ['crownforge', 'crown-maintenance'],
-  catalogPackages: ['black-crown'],
+  activePackages: ['crownforge', 'crown-maintenance', 'black-crown'],
+  catalogPackages: [],
   compatibilityFacadeContainsPrescriptions: false,
 }, null, 2))

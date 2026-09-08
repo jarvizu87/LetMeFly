@@ -22,6 +22,10 @@ export interface ProgramSet {
   /** Stable source reference for dynamic post-test/test-sheet loads. */
   loadReference?: string
   rounding?: 'nearest-5' | 'up-5' | 'down-5'
+  rpe?: string
+  rir?: string
+  tempo?: string
+  sourceText?: string
 }
 
 export interface ProgramExercise {
@@ -30,6 +34,7 @@ export interface ProgramExercise {
   category: ExerciseCategory
   priority: 'mandatory' | 'conditional' | 'optional'
   sets: ProgramSet[]
+  rest?: string
   notes?: string
   coaching?: string
   videoQuery?: string
@@ -44,7 +49,7 @@ export interface WorkoutSection {
 
 export interface ProgramDay {
   day: number
-  date: string
+  date?: string
   title: string
   role: string
   readinessRule: string
@@ -55,8 +60,8 @@ export interface ProgramDay {
 
 export interface ProgramWeek {
   week: number
-  start: string
-  end: string
+  start?: string
+  end?: string
   intent: string
   days: ProgramDay[]
 }

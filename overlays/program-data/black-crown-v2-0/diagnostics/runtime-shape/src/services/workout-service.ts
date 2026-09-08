@@ -8,7 +8,7 @@ import {
   type LocalDomainRecord,
 } from '../db/local-db'
 import { putEntityWithOutbox, prepareLocalMutation, makeOutboxEntry } from '../db/local-mutations'
-import type { ProgramDay, ProgramExercise, ProgramSet } from '../program-engine/types'
+import type { ProgramDay, ProgramExercise, ProgramSet, PublicProgramKey } from '../program-engine/types'
 
 export interface WorkoutBundle {
   session: LocalDomainRecord
@@ -35,7 +35,7 @@ export async function findWorkoutForDay(
 export async function startWorkout(
   athleteId: string,
   programInstanceId: string | null,
-  programKey: 'crownforge' | 'crown-maintenance',
+  programKey: PublicProgramKey,
   week: number,
   day: ProgramDay,
 ): Promise<WorkoutBundle> {
@@ -63,12 +63,12 @@ export async function startWorkout(
         program_instance_id: programInstanceId,
         originating_device_id: null,
         program_key: programKey,
-        program_version: 'v2.1',
-        phase_key: programKey === 'crown-maintenance' ? 'maintenance' : week <= 12 ? 'build' : 'testing',
+        program_version: programKey === 'black-crown' ? 'v2.0' : 'v2.1',
+        phase_key: programKey === 'black-crown' ? `block-${Math.ceil(week / 6)}` : programKey === 'crown-maintenance' ? 'maintenance' : week <= 12 ? 'build' : 'testing',
         week_number: week,
         day_key: `day-${day.day}`,
         workout_name: day.title,
-        scheduled_for: day.date,
+        scheduled_for: day.date ?? null,
         started_at: now,
         completed_at: null,
         status: 'in_progress',

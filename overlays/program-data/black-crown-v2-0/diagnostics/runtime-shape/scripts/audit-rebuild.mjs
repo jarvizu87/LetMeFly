@@ -36,7 +36,7 @@ assert(crownforgeWeek1.includes("start: '2026-09-07'"), 'Crownforge Week 1 start
 assert(crownforgeWeek1.includes("date: '2026-09-13'"), 'Crownforge Week 1 rest day missing')
 assert(crownforgeIndex.includes('CROWNFORGE_WEEK_14'), 'Crownforge modular package must assemble through Week 14')
 assert(compatibilityPrograms.includes("export * from '../programs/registry'"), 'legacy program facade must delegate to modular registry')
-assert(blackCrownMetadata.includes("status: 'catalog-only'"), 'Black Crown must remain catalog-only until full source import')
+assert(blackCrownMetadata.includes("status: 'active-source'"), 'Black Crown must be active-source after governed v2.0 import')
 
 const packageJson = JSON.parse(read('package.json'))
 assert(/^\d+\.\d+\.\d+$/.test(packageJson.dependencies['@supabase/supabase-js']), 'Supabase JS must be pinned')
@@ -46,7 +46,7 @@ console.log(JSON.stringify({
   result: 'PASS',
   filesScanned: allSourceFiles.length,
   crownforgeOpeningWeek: '2026-09-07..2026-09-13',
-  blackCrown: 'catalog-only',
+  blackCrown: 'active-source-54-weeks',
   privateLocalStorageWrites: 0,
   scriptCsp: 'self-only',
 }, null, 2))

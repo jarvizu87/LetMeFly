@@ -13,6 +13,22 @@ export function getProgram(key: PublicProgramKey) {
   return PROGRAMS.find((program) => program.key === key) ?? null
 }
 
+export function getProgramWeek(key: PublicProgramKey, week: number): ProgramWeek | null {
+  return getProgram(key)?.weekData.find((item) => item.week === week) ?? null
+}
+
+export function getProgramDay(key: PublicProgramKey, week: number, day: number): ProgramDay | null {
+  return getProgramWeek(key, week)?.days.find((item) => item.day === day) ?? null
+}
+
+export function getBlackCrownWeek(week: number): ProgramWeek | null {
+  return getProgramWeek('black-crown', week)
+}
+
+export function getBlackCrownDay(week: number, day: number): ProgramDay | null {
+  return getProgramDay('black-crown', week, day)
+}
+
 export function getCrownforgeWeek(week: number): ProgramWeek | null {
   return CROWNFORGE.weekData.find((item) => item.week === week) ?? null
 }

@@ -192,6 +192,22 @@ export const EXERCISE_LIBRARY: ExerciseLibraryRecord[] = [
   direct('Windmill', 'https://vimeo.com/151366473', ['Crownforge', 'Black Crown', 'Crown Maintenance', 'Reforge'], [], ['Kettlebell']),
   plan('Wrist Flexor/Extensor Pulses', 'https://www.youtube.com/results?search_query=Wrist+Flexor%2FExtensor+Pulses+exercise', ['Crownforge', 'Crown Maintenance', 'Reforge'], [], [], ['Wrist Pulses']),
   plan('Kettlebell Front Rack Carry', 'https://www.youtube.com/results?search_query=StrongFirst+Kettlebell+Front+Rack+Carry+exercise+tutorial', ['Black Crown'], ['CROWN'], ['Kettlebell'], ['Front Rack Carry']),
+  fallback('90/90 Hip Mobility', 'https://www.youtube.com/results?search_query=90%2F90%20Hip%20Mobility%20exercise%20tutorial', ['Black Crown']),
+  fallback('Box Jump', 'https://www.youtube.com/results?search_query=Box%20Jump%20exercise%20tutorial', ['Black Crown']),
+  fallback('Box Squat', 'https://www.youtube.com/results?search_query=Box%20Squat%20exercise%20tutorial', ['Black Crown']),
+  fallback('Broad Jump', 'https://www.youtube.com/results?search_query=Broad%20Jump%20exercise%20tutorial', ['Black Crown']),
+  fallback('Curl', 'https://www.youtube.com/results?search_query=Curl%20exercise%20tutorial', ['Black Crown']),
+  fallback('Explosive Push-Up', 'https://www.youtube.com/results?search_query=Explosive%20Push-Up%20exercise%20tutorial', ['Black Crown']),
+  fallback('Finger Extension', 'https://www.youtube.com/results?search_query=Finger%20Extension%20exercise%20tutorial', ['Black Crown']),
+  fallback('Hip Airplane', 'https://www.youtube.com/results?search_query=Hip%20Airplane%20exercise%20tutorial', ['Black Crown']),
+  fallback('KB Dead-Stop Swing', 'https://www.youtube.com/results?search_query=KB%20Dead-Stop%20Swing%20exercise%20tutorial', ['Black Crown']),
+  fallback('Medicine Ball Chest Pass', 'https://www.youtube.com/results?search_query=Medicine%20Ball%20Chest%20Pass%20exercise%20tutorial', ['Black Crown']),
+  fallback('Pushdown', 'https://www.youtube.com/results?search_query=Pushdown%20exercise%20tutorial', ['Black Crown']),
+  fallback('Rack Pull', 'https://www.youtube.com/results?search_query=Rack%20Pull%20exercise%20tutorial', ['Black Crown']),
+  fallback('Reverse Lunge', 'https://www.youtube.com/results?search_query=Reverse%20Lunge%20exercise%20tutorial', ['Black Crown']),
+  fallback('Snatch-Grip RDL', 'https://www.youtube.com/results?search_query=Snatch-Grip%20RDL%20exercise%20tutorial', ['Black Crown']),
+  fallback('Sorenson Hold', 'https://www.youtube.com/results?search_query=Sorenson%20Hold%20exercise%20tutorial', ['Black Crown']),
+  fallback('Trap-3 Raise', 'https://www.youtube.com/results?search_query=Trap-3%20Raise%20exercise%20tutorial', ['Black Crown']),
 ]
 
 const COMPOSITE_MATCHES: Record<string, string[]> = {
