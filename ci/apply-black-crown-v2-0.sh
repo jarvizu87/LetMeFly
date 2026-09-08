@@ -8,6 +8,7 @@ MANIFEST="$OVERLAY_DIR/BLOCK_MANIFESTS.json"
 
 [[ -d "$TARGET_DIR/src/programs/black-crown" ]]
 [[ -f "$MANIFEST" ]]
+[[ -f "$OVERLAY_DIR/engine-types.patch" ]]
 
 hash_tree() {
   local path="$1"
@@ -95,8 +96,7 @@ for block in manifest['blocks']:
         continue
 
     # For a chunked upload, the compact base64 digest is the transport-integrity
-    # authority. This avoids tar/gzip wrapper-byte drift while the canonical
-    # per-week source hashes below still protect the actual program content.
+    # authority. Canonical per-week source hashes below protect program content.
     if not is_chunked and archive_sha != block['archiveSha256']:
         transport_errors.append(
             f"Block {block['block']}: {source_label} archiveSha256={archive_sha}; "
@@ -148,7 +148,21 @@ index_lines.append('')
 (out_dir / 'index.ts').write_text('\n'.join(index_lines))
 PY
 
+# Gate the source transport before any runtime normalization.
 node "$ROOT_DIR/ci/audit-black-crown-source.mjs" "$TARGET_DIR" "$MANIFEST"
+node "$ROOT_DIR/ci/audit-black-crown-privacy.mjs" "$TARGET_DIR"
+
+# Black Crown needs richer public-engine metadata (RPE/RIR/tempo/rest/source text)
+# and undated ProgramWeek/ProgramDay records. The patch is backward-compatible;
+# Crownforge remains date-bearing and unchanged.
+patch --dry-run -d "$TARGET_DIR" -p1 < "$OVERLAY_DIR/engine-types.patch"
+patch -d "$TARGET_DIR" -p1 < "$OVERLAY_DIR/engine-types.patch"
+
+# Deterministically normalize the audited source weeks into engine-native runtime
+# ProgramWeek data, activate the Black Crown package, extend only missing exercise
+# library names, and wire generic/Black Crown registry lookup.
+node "$ROOT_DIR/ci/generate-black-crown-runtime.mjs" "$TARGET_DIR"
+node "$ROOT_DIR/ci/audit-black-crown-runtime.mjs" "$TARGET_DIR"
 
 CROWNFORGE_AFTER="$(hash_tree "$TARGET_DIR/src/programs/crownforge")"
 MAINTENANCE_AFTER="$(hash_tree "$TARGET_DIR/src/programs/crown-maintenance")"
@@ -162,4 +176,4 @@ MAINTENANCE_AFTER="$(hash_tree "$TARGET_DIR/src/programs/crown-maintenance")"
   exit 1
 }
 
-echo "Black Crown v2.0 source overlay: PASS (54 weeks / 270 sessions staged; Crownforge unchanged)"
+echo "Black Crown v2.0 runtime overlay: PASS (54 weeks / 270 sessions active; Crownforge unchanged)"
