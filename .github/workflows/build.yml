@@ -58,6 +58,9 @@ jobs:
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
 
+      - name: Audit final Exercise Intelligence production dist
+        run: bash ci/audit-exercise-intelligence-production-v1.sh
+
       - name: Publish production build artifact
         uses: actions/upload-artifact@v4
         with:
