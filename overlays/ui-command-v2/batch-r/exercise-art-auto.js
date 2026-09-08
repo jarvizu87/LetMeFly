@@ -9,6 +9,7 @@
   const CANONICAL_ART_ROOT = 'letmefly/private/jp/exercises'
   const MIN_RENDER_DIMENSION = 640
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  const RETRY_DELAYS_MS = [450, 1600]
 
   // These are display-name aliases only. They do not change Crownforge or Black Crown programming.
   // Values retain the legacy jp-* names so older audits and references remain traceable.
@@ -47,6 +48,7 @@
 
   const statusBySlug = new Map()
   const pendingBySlug = new Map()
+  const retryCountBySlug = new Map()
 
   function canonicalSlugForSlug(slug) {
     const legacyPublicId = ALIAS_PUBLIC_IDS[slug]
@@ -77,6 +79,18 @@
     })
   }
 
+  function scheduleRetry(slug) {
+    const attempt = retryCountBySlug.get(slug) || 0
+    if (attempt >= RETRY_DELAYS_MS.length || navigator.onLine === false) {
+      statusBySlug.set(slug, { state: 'missing' })
+      return
+    }
+
+    retryCountBySlug.set(slug, attempt + 1)
+    statusBySlug.delete(slug)
+    window.setTimeout(() => checkSlug(slug), RETRY_DELAYS_MS[attempt])
+  }
+
   function checkSlug(slug) {
     if (!SLUG_PATTERN.test(slug) || navigator.onLine === false) return
 
@@ -99,18 +113,20 @@
         statusBySlug.set(slug, { state: 'missing' })
         return
       }
+      retryCountBySlug.delete(slug)
       statusBySlug.set(slug, { state: 'ready', url })
       activate(slug, url)
     }
     probe.onerror = () => {
       pendingBySlug.delete(slug)
-      statusBySlug.set(slug, { state: 'missing' })
+      scheduleRetry(slug)
     }
     probe.src = url
   }
 
   function queueElement(element) {
     const slug = element.getAttribute('data-exercise-art') || ''
+    if (!SLUG_PATTERN.test(slug)) return
     const known = statusBySlug.get(slug)
     if (known?.state === 'ready') activate(slug, known.url)
     if (observer) observer.observe(element)
@@ -134,11 +150,44 @@
       }, { rootMargin: '320px 0px' })
     : null
 
+  function reconcileElement(element) {
+    if (!(element instanceof Element) || !element.matches('[data-exercise-art]')) return
+    const slug = element.getAttribute('data-exercise-art') || ''
+    if (!SLUG_PATTERN.test(slug)) return
+
+    const source = element.dataset.exerciseArtSource || ''
+    const hasResolvedArt = Boolean(element.style.getPropertyValue('--exercise-art'))
+    if (source.startsWith('private-') || hasResolvedArt) return
+
+    const known = statusBySlug.get(slug)
+    if (known?.state === 'ready') activate(slug, known.url)
+    else if (known?.state !== 'pending') checkSlug(slug)
+  }
+
+  function handleArtAttributeMutation(mutation) {
+    const element = mutation.target
+    if (!(element instanceof Element) || !element.matches('[data-exercise-art]')) return
+
+    if (mutation.attributeName === 'data-exercise-art') {
+      // Workout Flow may reuse DOM nodes. Never let the previous exercise image
+      // remain attached after the exercise slug changes.
+      element.style.removeProperty('--exercise-art')
+      delete element.dataset.exerciseArtSource
+      queueElement(element)
+      return
+    }
+
+    // The private resolver can legitimately remove a missing private override.
+    // If it did not replace that override with a valid private image, immediately
+    // restore the canonical approved Style 2 image instead of leaving mountains.
+    reconcileElement(element)
+  }
+
   function rescanAfterPrivateResolver() {
-    // The existing private resolver may clear a missing local override after this
-    // script has already painted an automatic thumbnail. Re-apply approved auto
-    // art after that resolver finishes, while never overriding a true private map.
-    window.setTimeout(() => scan(document), 0)
+    window.setTimeout(() => {
+      scan(document)
+      document.querySelectorAll('[data-exercise-art]').forEach(reconcileElement)
+    }, 0)
   }
 
   function start() {
@@ -146,24 +195,35 @@
 
     const mutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes') {
+          handleArtAttributeMutation(mutation)
+          return
+        }
         mutation.addedNodes.forEach((node) => {
           if (node instanceof Element) scan(node)
         })
       })
     })
-    mutationObserver.observe(document.documentElement, { childList: true, subtree: true })
+    mutationObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['data-exercise-art', 'data-exercise-art-source', 'style']
+    })
 
     window.addEventListener('lmf:exercise-art-local-loaded', rescanAfterPrivateResolver)
     window.addEventListener('lmf:exercise-art-overrides-loaded', rescanAfterPrivateResolver)
     window.addEventListener('online', () => {
       statusBySlug.clear()
       pendingBySlug.clear()
+      retryCountBySlug.clear()
       scan(document)
     })
 
     // Cover startup races on slower Android devices / installed PWAs.
     window.setTimeout(() => scan(document), 250)
     window.setTimeout(() => scan(document), 1200)
+    window.setTimeout(() => document.querySelectorAll('[data-exercise-art]').forEach(reconcileElement), 2600)
   }
 
   if (document.readyState === 'loading') {
