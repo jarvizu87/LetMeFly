@@ -6,23 +6,70 @@
   const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${TRANSFORM}/`
   const MIN_RENDER_DIMENSION = 640
   const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  const PREFIX_PATTERN = /^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*$/
   const SUPABASE_URL = '__LMF_SUPABASE_URL__'
   const SUPABASE_PUBLISHABLE_KEY = '__LMF_SUPABASE_PUBLISHABLE_KEY__'
   const LOCAL_DB_NAME = 'letmefly-private'
   const LOCAL_META_STORE = 'meta'
   const LOCAL_MAP_KEY = 'privateExerciseArtMap'
   const LOCAL_STORAGE_MAP_KEY = 'lmf_private_exercise_art_map_v1'
+  const LOCAL_STORAGE_PREFIX_KEY = 'lmf_private_exercise_art_prefix_v1'
+
+  // Program/display aliases are generic app semantics, not athlete-specific mappings.
+  const CANONICAL_SLUG_ALIASES = Object.freeze({
+    'band-or-cable-march': 'band-march',
+    'bike-incline-walk': 'recovery-cardio',
+    'bike-row-walk': 'recovery-cardio',
+    'bike-walk': 'recovery-cardio',
+    'bike-or-walk': 'recovery-cardio',
+    'db-curl': 'dumbbell-curl',
+    'dead-bug-or-hollow-hold': 'dead-bug',
+    'front-squat-bench-ramp-sets': 'front-squat',
+    'glute-bridge-iso': 'glute-bridge-isometric-hold',
+    'incline-db-press': 'incline-dumbbell-press',
+    'kb-halo': 'kettlebell-halo',
+    'kb-lateral-clean-or-outside-swing-to-rack': 'kettlebell-lateral-clean',
+    'kb-lateral-lunge': 'kettlebell-lateral-lunge',
+    'kb-swing': 'kettlebell-swing',
+    'lat-pulldown-warm-up': 'lat-pulldown',
+    'light-forward-sled-push': 'forward-sled-push',
+    'mobility': 'hip-opener',
+    'optional-easy-walk': 'recovery-cardio',
+    'pull-up-or-lat-pulldown': 'pull-up',
+    'rdl': 'romanian-deadlift',
+    'rear-delt-fly': 'rear-deltoid-fly',
+    'reverse-crunch-or-dead-bug': 'reverse-crunch',
+    'scap-push-up': 'scapular-push-up',
+    'sled-push': 'forward-sled-push',
+    'walk-or-bike': 'recovery-cardio',
+    'wide-or-neutral-pulldown': 'neutral-grip-lat-pulldown',
+    'farmers-carry': 'farmer-carry',
+    'farmer-s-carry': 'farmer-carry',
+    'leg-curl': 'hamstring-curl',
+    'ohp': 'overhead-press'
+  })
 
   const statusBySlug = new Map()
   const waitingBySlug = new Map()
   let localOverrideMap = {}
   let cloudOverrideMap = {}
   let overrideMap = {}
+  let localPrivatePrefix = ''
   let cloudRefreshStarted = false
   let localRefreshStarted = false
 
   function candidates(slug) {
     return document.querySelectorAll(`[data-exercise-art="${slug}"]`)
+  }
+
+  function canonicalSlug(slug) {
+    return CANONICAL_SLUG_ALIASES[slug] || slug
+  }
+
+  function normalizePrefix(value) {
+    if (typeof value !== 'string') return ''
+    const clean = value.trim().replace(/^\/+|\/+$/g, '')
+    return PREFIX_PATTERN.test(clean) ? clean : ''
   }
 
   function normalizeOverride(value) {
@@ -47,6 +94,36 @@
 
   function mergeOverrideMaps() {
     overrideMap = { ...localOverrideMap, ...cloudOverrideMap }
+  }
+
+  function resolvedAssetForSlug(slug) {
+    const direct = normalizeOverride(overrideMap[slug])
+    if (direct) {
+      const source = cloudOverrideMap[slug] ? 'private-cloud-override' : 'private-local-override'
+      return { asset: direct, source }
+    }
+
+    const canonical = canonicalSlug(slug)
+    if (canonical !== slug) {
+      const canonicalOverride = normalizeOverride(overrideMap[canonical])
+      if (canonicalOverride) {
+        const source = cloudOverrideMap[canonical] ? 'private-cloud-override' : 'private-local-override'
+        return { asset: canonicalOverride, source }
+      }
+    }
+
+    if (localPrivatePrefix && SLUG_PATTERN.test(canonical)) {
+      return {
+        asset: {
+          publicId: `${localPrivatePrefix}/${canonical}/v2`,
+          // Cloudinary can convert the source to WebP even when the original master is PNG.
+          format: 'webp'
+        },
+        source: 'private-local-convention'
+      }
+    }
+
+    return null
   }
 
   function activate(slug, url, source) {
@@ -93,8 +170,8 @@
   function checkSlug(slug) {
     if (!SLUG_PATTERN.test(slug)) return
 
-    const asset = normalizeOverride(overrideMap[slug])
-    if (!asset) {
+    const resolved = resolvedAssetForSlug(slug)
+    if (!resolved) {
       statusBySlug.set(slug, { state: 'missing' })
       clearActivation(slug)
       return
@@ -109,8 +186,7 @@
     if (navigator.onLine === false) return
 
     statusBySlug.set(slug, { state: 'pending' })
-    const source = cloudOverrideMap[slug] ? 'private-cloud-override' : 'private-local-override'
-    probeOverride(slug, asset, source)
+    probeOverride(slug, resolved.asset, resolved.source)
   }
 
   function queueElement(element) {
@@ -133,6 +209,14 @@
       return normalizeMap(JSON.parse(localStorage.getItem(LOCAL_STORAGE_MAP_KEY) || '{}'))
     } catch {
       return {}
+    }
+  }
+
+  function readLocalStoragePrefix() {
+    try {
+      return normalizePrefix(localStorage.getItem(LOCAL_STORAGE_PREFIX_KEY) || '')
+    } catch {
+      return ''
     }
   }
 
@@ -184,13 +268,17 @@
     if (localRefreshStarted) return
     localRefreshStarted = true
     try {
+      localPrivatePrefix = readLocalStoragePrefix()
       localOverrideMap = await readLocalMap()
       mergeOverrideMaps()
       statusBySlug.clear()
       waitingBySlug.clear()
       scan(document)
       window.dispatchEvent(new CustomEvent('lmf:exercise-art-local-loaded', {
-        detail: { count: Object.keys(localOverrideMap).length }
+        detail: {
+          count: Object.keys(localOverrideMap).length,
+          conventionEnabled: Boolean(localPrivatePrefix)
+        }
       }))
     } finally {
       localRefreshStarted = false
@@ -295,6 +383,12 @@
       refreshFromLocal()
       refreshFromCloud()
       scan(document)
+    })
+
+    window.addEventListener('storage', (event) => {
+      if (event.key !== LOCAL_STORAGE_PREFIX_KEY && event.key !== LOCAL_STORAGE_MAP_KEY) return
+      statusBySlug.clear()
+      refreshFromLocal()
     })
 
     window.addEventListener('lmf:exercise-art-overrides-updated', () => {
