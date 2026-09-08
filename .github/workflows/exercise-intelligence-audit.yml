@@ -6,12 +6,14 @@ on:
     paths:
       - 'overlays/exercise-intelligence/**'
       - 'ci/verify-exercise-intelligence.sh'
+      - 'ci/install-exercise-intelligence-v1.sh'
       - '.github/workflows/exercise-intelligence-audit.yml'
   pull_request:
     branches: [main]
     paths:
       - 'overlays/exercise-intelligence/**'
       - 'ci/verify-exercise-intelligence.sh'
+      - 'ci/install-exercise-intelligence-v1.sh'
       - '.github/workflows/exercise-intelligence-audit.yml'
   workflow_dispatch:
 
@@ -34,6 +36,21 @@ jobs:
       - name: Verify Exercise Intelligence payload
         run: bash ci/verify-exercise-intelligence.sh
 
+      - name: Audit read-only runtime sources
+        run: |
+          node --check overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
+          node --check overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
+          bash -n ci/verify-exercise-intelligence.sh
+          bash -n ci/install-exercise-intelligence-v1.sh
+          grep -Fq 'program-packages-only' overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
+          grep -Fq 'data-exercise-info' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
+          grep -Fq 'PROGRAM SAFETY' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
+          grep -Fq '.lmf-intel-modal' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.css
+          ! grep -Fq 'data-substitute' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
+          ! grep -Fq 'localStorage' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
+          ! grep -Fq 'sessionStorage' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
+          echo 'Exercise Intelligence read-only runtime audit: PASS'
+
       - name: Materialize and inspect payload
         run: |
           node overlays/exercise-intelligence/materialize.mjs --output=/tmp/exercise-intelligence-v1.json
@@ -45,5 +62,14 @@ jobs:
           if (payload.integrationStatus !== 'READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION') {
             throw new Error('unexpected integration status');
           }
+          if (payload.exercises.some((exercise) =>
+            exercise.thumbnail && ('driveFileId' in exercise.thumbnail || 'driveUrl' in exercise.thumbnail)
+          )) {
+            throw new Error('private thumbnail provenance leaked into runtime payload');
+          }
+          const blocked = payload.substitutionRules.filter((rule) =>
+            String(rule.promotionStatus || '').startsWith('DO NOT')
+          );
+          if (blocked.length !== 2) throw new Error('expected 2 default-blocked substitutions');
           console.log('Exercise Intelligence materialized payload audit: PASS');
           NODE
