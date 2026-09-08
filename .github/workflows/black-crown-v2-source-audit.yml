@@ -9,6 +9,7 @@ on:
       - 'ci/apply-black-crown-v2-0.sh'
       - 'ci/audit-black-crown-source.mjs'
       - 'ci/audit-black-crown-privacy.mjs'
+      - 'ci/audit-black-crown-exercise-coverage.mjs'
       - '.github/workflows/black-crown-v2-source-audit.yml'
   workflow_dispatch:
 
@@ -45,6 +46,10 @@ jobs:
       - name: Validate public-source privacy
         shell: bash
         run: node ci/audit-black-crown-privacy.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Inspect exercise-name coverage
+        shell: bash
+        run: node ci/audit-black-crown-exercise-coverage.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
 
       - name: Validate source and regression boundaries
         shell: bash
