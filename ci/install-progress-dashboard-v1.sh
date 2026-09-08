@@ -58,6 +58,24 @@ cp "$CSS_SOURCE" "$DIST_DIR/ui/progress-dashboard-v1.css"
 cp "$CSS_V2_SOURCE" "$DIST_DIR/ui/progress-dashboard-v2.css"
 cp "$CSS_V3_SOURCE" "$DIST_DIR/ui/progress-dashboard-v3.css"
 
+# The base Progress observer sees many legitimate DOM mutations from strength,
+# PWA, and other presentation overlays. Its historical debounce cleared and
+# restarted the same 160 ms render timer on every mutation, which could starve
+# the first Progress mount indefinitely on a busy/fresh mobile route. Preserve
+# the same render behavior but let an already-scheduled non-forced render fire.
+PROGRESS_JS="$DIST_DIR/ui/progress-dashboard-v1.js" python - <<'PY'
+from pathlib import Path
+import os
+
+p = Path(os.environ['PROGRESS_JS'])
+text = p.read_text()
+old = "function queueRender(force=false){if(force)vaultCache.at=0;clearTimeout(timer);timer=setTimeout(()=>void render(force),force?30:160)}"
+new = "function queueRender(force=false){if(force)vaultCache.at=0;if(timer&&!force)return;clearTimeout(timer);timer=setTimeout(()=>{timer=0;void render(force)},force?30:160)}"
+if text.count(old) != 1:
+    raise SystemExit(f'Progress queueRender starvation patch expected one source block, found {text.count(old)}')
+p.write_text(text.replace(old, new, 1))
+PY
+
 DIST_DIR="$DIST_DIR" python - <<'PY'
 from pathlib import Path
 import os
@@ -100,7 +118,8 @@ grep -Fq '/ui/progress-dashboard-mount-guard.js' "$DIST_DIR/index.html"
 grep -Fq 'PROGRESS DASHBOARD' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'Private vault data' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'never rewrite programming' "$DIST_DIR/ui/progress-dashboard-v1.js"
+grep -Fq 'if(timer&&!force)return' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq '__LMF_PROGRESS_POLISH__' "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
 grep -Fq 'data-lmf-progress-anchor' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 
-echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + route mount guard: PASS"
+echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + starvation-safe route mount guard: PASS"
