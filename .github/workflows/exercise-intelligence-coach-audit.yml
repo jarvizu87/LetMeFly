@@ -1,0 +1,93 @@
+name: Exercise Intelligence Coach Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-v1.css'
+      - 'ci/install-exercise-intelligence-coach-v1.sh'
+      - '.github/workflows/exercise-intelligence-coach-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-coach-v1.css'
+      - 'ci/install-exercise-intelligence-coach-v1.sh'
+      - '.github/workflows/exercise-intelligence-coach-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Audit set-focus Coach source boundary
+        run: |
+          set -euo pipefail
+          JS='overlays/exercise-intelligence/runtime/exercise-intelligence-coach-v1.js'
+          CSS='overlays/exercise-intelligence/runtime/exercise-intelligence-coach-v1.css'
+          node --check "$JS"
+          bash -n ci/install-exercise-intelligence-coach-v1.sh
+          test -s "$CSS"
+          grep -Fq 'sessionStorage' "$JS"
+          grep -Fq 'data-action="go-coach"' "$JS"
+          grep -Fq 'focusQuestion' "$JS"
+          grep -Fq 'SET COACHING CONTEXT' "$JS"
+          grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$JS"
+          grep -Fq '.lmf-coach-intel-context' "$CSS"
+          ! grep -Fq 'localStorage' "$JS"
+          ! grep -Fq 'indexedDB' "$JS"
+          ! grep -Fq 'data-substitute' "$JS"
+          ! grep -Fq 'getSubstitutions' "$JS"
+          ! grep -Fq 'fetch(' "$JS"
+          echo 'Exercise Intelligence Coach read-only boundary audit: PASS'
+
+      - name: Smoke-test Coach installer and offline shell resources
+        run: |
+          set -euo pipefail
+          TEST_DIST="$(mktemp -d)"
+          trap 'rm -rf "$TEST_DIST"' EXIT
+          mkdir -p "$TEST_DIST/data" "$TEST_DIST/ui"
+          cat > "$TEST_DIST/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head><meta charset="utf-8"><title>LMF Coach installer smoke test</title></head>
+            <body>
+              <div id="app"></div>
+              <script defer src="/ui/exercise-intelligence-runtime-v1.js"></script>
+            </body>
+          </html>
+          HTML
+          cat > "$TEST_DIST/service-worker.js" <<'JS'
+          const CACHE_NAME = 'lmf-coach-smoke-test'
+          const PRECACHE = ['/', '/manifest.webmanifest', '/data/exercise-intelligence-v1.json', '/ui/exercise-intelligence-runtime-v1.js']
+          function isPrivateOrAuth(request) {
+            const url = new URL(request.url)
+            if (url.hostname.endsWith('.supabase.co')) return true
+            if (/\/auth\/v1\//.test(url.pathname)) return true
+            return false
+          }
+          JS
+          printf '%s\n' '{"integrationStatus":"READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION"}' > "$TEST_DIST/data/exercise-intelligence-v1.json"
+          printf '%s\n' 'window.LetMeFlyExerciseIntelligence = Object.freeze({});' > "$TEST_DIST/ui/exercise-intelligence-runtime-v1.js"
+          bash ci/install-exercise-intelligence-coach-v1.sh "$TEST_DIST"
+          test -f "$TEST_DIST/ui/exercise-intelligence-coach-v1.js"
+          test -f "$TEST_DIST/ui/exercise-intelligence-coach-v1.css"
+          grep -Fq '/ui/exercise-intelligence-coach-v1.js' "$TEST_DIST/index.html"
+          grep -Fq '/ui/exercise-intelligence-coach-v1.css' "$TEST_DIST/index.html"
+          grep -Fq "'/ui/exercise-intelligence-coach-v1.js'" "$TEST_DIST/service-worker.js"
+          grep -Fq "'/ui/exercise-intelligence-coach-v1.css'" "$TEST_DIST/service-worker.js"
+          grep -Fq "hostname.endsWith('.supabase.co')" "$TEST_DIST/service-worker.js"
+          echo 'Exercise Intelligence Coach installer + offline precache smoke test: PASS'
