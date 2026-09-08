@@ -23,7 +23,7 @@
       "aliases": ["Hip Abductor Machine", "Seated Hip Abduction Machine"],
       "sourcePrograms": ["Black Crown"],
       "movementRoles": ["Lateral Hip / Frontal-Plane Support"],
-      "trainingCategories": ["Structural / Lateral Hip", "Glute Hypertrophy Support"],
+      "trainingCategory": "Structural / Lateral Hip",
       "equipment": ["Hip Abductor Machine"],
       "primaryMuscles": ["Gluteus Medius", "Gluteus Minimus"],
       "secondaryMuscles": ["Gluteus Maximus", "Tensor Fasciae Latae", "Trunk Stabilizers"],
@@ -40,12 +40,21 @@
         "Chasing extreme range that changes pelvic position.",
         "Loading the movement so heavily that the low-axial support role becomes a maximal-effort set."
       ],
-      "stopSignals": [
-        "Reduce load or range if pelvic control, hip position, or pain-free motion cannot stay consistent."
-      ],
+      "reviewStatus": "READY FOR REVIEW",
       "demo": {
+        "currentStatus": "direct-verified",
         "currentUrl": "https://www.youtube.com/watch?v=tn-ABeb1QAM",
-        "status": "direct-verified"
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "thumbnail": {
+        "canonicalKey": "machine-hip-abduction",
+        "reuses": false,
+        "reuseTarget": null,
+        "productionStatus": null,
+        "approval": null,
+        "assetNote": null,
+        "alignmentAudit": "NO PRODUCTION-STATUS RECORD"
       },
       "evidenceClassification": "BOOK-INFORMED + NORMALIZED ANATOMY/COACHING",
       "evidenceBasis": "Jeff Nippard glute-specialization role evidence + LetMeFly RT-020 lateral-hip role governance + Black Crown v2.1 intentional program amendment"
@@ -56,7 +65,7 @@
       "aliases": ["Seated Band Abduction", "Band Hip Abduction"],
       "sourcePrograms": ["Black Crown"],
       "movementRoles": ["Lateral Hip / Frontal-Plane Support"],
-      "trainingCategories": ["Structural / Lateral Hip", "Glute Hypertrophy Support"],
+      "trainingCategory": "Structural / Lateral Hip",
       "equipment": ["Mini-Band", "Loop Band"],
       "primaryMuscles": ["Gluteus Medius", "Gluteus Minimus"],
       "secondaryMuscles": ["Gluteus Maximus", "Tensor Fasciae Latae", "Trunk Stabilizers"],
@@ -73,12 +82,21 @@
         "Letting the knees snap inward between reps.",
         "Using a band too heavy to control."
       ],
-      "stopSignals": [
-        "Use a lighter band or smaller range if pelvic control or knee tracking cannot remain clean."
-      ],
+      "reviewStatus": "READY FOR REVIEW",
       "demo": {
+        "currentStatus": "direct-verified",
         "currentUrl": "https://www.youtube.com/watch?v=BqZIR0PvxxU",
-        "status": "direct-verified"
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "thumbnail": {
+        "canonicalKey": "seated-band-hip-abduction",
+        "reuses": false,
+        "reuseTarget": null,
+        "productionStatus": null,
+        "approval": null,
+        "assetNote": null,
+        "alignmentAudit": "NO PRODUCTION-STATUS RECORD"
       },
       "evidenceClassification": "BOOK-INFORMED + NORMALIZED ANATOMY/COACHING",
       "evidenceBasis": "Jeff Nippard glute-specialization role evidence + LetMeFly RT-020 lateral-hip role governance"
