@@ -1,5 +1,5 @@
 [build]
-  command = "bash ci/verify-exercise-intelligence.sh && bash ci/build-command-v2-cloudinary.sh && bash ci/install-smart-names-bar-loader.sh && bash ci/install-exercise-intelligence-v1.sh && bash ci/install-exercise-intelligence-coach-v1.sh && bash ci/install-exercise-intelligence-substitutions-v1.sh && bash ci/install-voice-notes-v2.sh && bash ci/install-strength-maxes-v1.sh && bash ci/install-progress-dashboard-v1.sh && bash ci/install-command-refresh.sh && mkdir -p .build-src/letmefly_app/dist/.well-known && cp android-twa/site/assetlinks.json .build-src/letmefly_app/dist/.well-known/assetlinks.json"
+  command = "bash ci/verify-exercise-intelligence.sh && bash ci/build-command-v2-cloudinary.sh && bash ci/install-smart-names-bar-loader.sh && bash ci/install-exercise-intelligence-v1.sh && bash ci/install-exercise-intelligence-coach-v1.sh && bash ci/install-exercise-intelligence-substitutions-v1.sh && bash ci/install-voice-notes-v2.sh && bash ci/install-strength-maxes-v1.sh && bash ci/install-progress-dashboard-v1.sh && bash ci/install-command-refresh.sh && bash ci/audit-exercise-intelligence-production-v1.sh && mkdir -p .build-src/letmefly_app/dist/.well-known && cp android-twa/site/assetlinks.json .build-src/letmefly_app/dist/.well-known/assetlinks.json"
   publish = ".build-src/letmefly_app/dist"
 
 [build.environment]
