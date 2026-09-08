@@ -1,0 +1,59 @@
+name: Refine Black Crown Runtime Normalizer
+
+on:
+  push:
+    branches:
+      - black-crown-v2-0-modular-import
+    paths:
+      - .github/workflows/black-crown-runtime-refine.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refine exercise parsing without changing source prescriptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('ci/generate-black-crown-runtime.mjs')
+          text = p.read_text()
+
+          old_alias = "  'cable march': 'Cable March',\n}))"
+          new_alias = "  'cable march': 'Cable March',\n  'chest-supported/kelso shrug': 'Chest-Supported Shrug',\n  'kelso shrug': 'Chest-Supported Shrug',\n  'trap-3': 'Trap-3 Raise',\n}))"
+          if text.count(old_alias) != 1:
+              raise SystemExit(f'alias insertion point count={text.count(old_alias)}')
+          text = text.replace(old_alias, new_alias, 1)
+
+          old_candidate = "  candidate = candidate.replace(/\\s+(?:Technique|Strength Volume|Strength Maintenance|Warm-Up|Primer)$/i, '').trim()\n  if (!candidate || narrativeReject.test(candidate)) return null"
+          new_candidate = "  candidate = candidate.replace(/\\s+(?:Technique|Strength Volume|Strength Maintenance|Warm-Up|Primer)$/i, '').trim()\n  candidate = candidate.replace(/\\s+\\d+(?:\\s*(?:to|–|-)\\s*\\d+)?\\s*[x×]\\s*\\d+(?:\\s*(?:to|–|-)\\s*\\d+)?(?:\\s*\\/\\s*\\w+)?\\s*$/i, '').trim()\n  if (!candidate || narrativeReject.test(candidate)) return null"
+          if text.count(old_candidate) != 1:
+              raise SystemExit(f'fallback cleanup insertion point count={text.count(old_candidate)}')
+          text = text.replace(old_candidate, new_candidate, 1)
+
+          old_duration = "  if (percentage !== undefined) {\n    return [makeSet('Percentage work', undefined)]\n  }"
+          new_duration = "  const durationMatch = sourceText.match(/\\b(\\d+(?:\\s*(?:to|–|-)\\s*\\d+)?)\\s*(minutes?|mins?|seconds?|secs?)(?:\\s+easy)?\\b/i)\n  if (durationMatch) {\n    const duration = durationMatch[1].replace(/\\s*(?:to|–)\\s*/g, '-')\n    return [makeSet('Duration', duration, durationMatch[2])]\n  }\n\n  if (percentage !== undefined) {\n    return [makeSet('Percentage work', undefined)]\n  }"
+          if text.count(old_duration) != 1:
+              raise SystemExit(f'duration insertion point count={text.count(old_duration)}')
+          text = text.replace(old_duration, new_duration, 1)
+
+          p.write_text(text)
+          PY
+
+      - name: Commit parser refinement
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ci/generate-black-crown-runtime.mjs
+          git commit -m 'Refine Black Crown exercise and duration normalization'
+          git push origin HEAD:black-crown-v2-0-modular-import
