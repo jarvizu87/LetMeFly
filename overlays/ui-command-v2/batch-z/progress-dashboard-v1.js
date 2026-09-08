@@ -22,7 +22,6 @@
   let activeTab = readSetting(TAB_KEY, 'overview', TABS)
   let range = readSetting(RANGE_KEY, '30d', RANGES)
   let timer = 0
-  let timerForce = false
   let scanQueued = false
   let generation = 0
   let vaultCache = { at:0, range:'', data:null }
@@ -215,96 +214,171 @@
     const now=Date.now()
     if (!force && vaultCache.data && vaultCache.range===range && now-vaultCache.at<2500) return vaultCache.data
     const empty={source:'fallback',athlete:null,program:null,tms:new Map(),sessions:[],completedSessions:[],workoutExercises:[],workoutSets:[],body:[],readiness:[],personalRecords:[],conditioning:[],e1rm:new Map(),events:[]}
-    const db=await openExistingDb(); if (!db) return empty
+    const db=await openExistingDb(); if (!db) { vaultCache={at:now,range,data:empty}; return empty }
     try {
-      const athlete=await chooseAthlete(db); if(!athlete){db.close();return empty}
-      const names=['programInstances','trainingMaxes','workoutSessions','workoutExercises','workoutSets','bodyweightEntries','readinessEntries','personalRecords']
-      const values=await Promise.all(names.map(name=>readStoreForAthlete(db,name,athlete.id)))
-      db.close()
-      const [programs,tms,sessions,exercises,sets,body,readiness,prs]=values
-      const program=byNewest(programs,'updated_at')[0] || byNewest(programs,'created_at')[0] || null
-      const tmMap=latestTmMap(tms)
-      const completedSessions=sessions.filter(x=>x.status==='completed').filter(x=>inRange(x.completed_at || x.started_at))
-      const filteredSessions=sessions.filter(x=>inRange(x.completed_at || x.started_at))
-      const sessionIds=new Set(filteredSessions.map(x=>x.id))
-      const filteredExercises=exercises.filter(x=>sessionIds.has(x.workout_session_id))
-      const exerciseIds=new Set(filteredExercises.map(x=>x.id))
-      const filteredSets=sets.filter(x=>exerciseIds.has(x.workout_exercise_id) && inRange(setDate(x,filteredSessions.find(s=>s.id===(x.workout_session_id||filteredExercises.find(e=>e.id===x.workout_exercise_id)?.workout_session_id)))))
-      const data={source:'indexeddb',athlete,program,tms:tmMap,sessions:filteredSessions,completedSessions,workoutExercises:filteredExercises,workoutSets:filteredSets,body:bodyRows(body,athlete),readiness:readiness.filter(x=>inRange(x.recorded_at || x.created_at)),personalRecords:prs.filter(x=>inRange(x.achieved_at || x.created_at)),conditioning:conditioningRows(filteredExercises,filteredSessions),e1rm:null,events:null}
-      data.e1rm=deriveE1rm(data.workoutExercises,data.workoutSets,data.sessions);data.events=dedupeEvents([...corePrEvents(data.personalRecords),...derivedE1rmEvents(data.e1rm),...localMaxEvents()])
-      vaultCache={at:now,range,data};return data
-    } catch (_) { try{db.close()}catch(__){};return empty }
+      const athlete=await chooseAthlete(db); if (!athlete) { db.close(); vaultCache={at:now,range,data:empty}; return empty }
+      const id=athlete.id
+      const [tmRows,programRows,sessionRows,exerciseRows,setRows,bodyRaw,readinessRows,prRows]=await Promise.all([
+        readStoreForAthlete(db,'trainingMaxHistory',id),readStoreForAthlete(db,'programInstances',id),readStoreForAthlete(db,'workoutSessions',id),readStoreForAthlete(db,'workoutExercises',id),readStoreForAthlete(db,'workoutSets',id),readStoreForAthlete(db,'bodyweightEntries',id),readStoreForAthlete(db,'readinessEntries',id),readStoreForAthlete(db,'personalRecords',id)
+      ])
+      const program=byNewest(programRows.filter(x=>x.status==='active'),'updated_at')[0] || byNewest(programRows,'started_on')[0] || null
+      const sessions=byNewest(sessionRows,'started_at').filter(x=>inRange(x.completed_at || x.started_at || x.created_at))
+      const completedSessions=sessions.filter(x=>x.status==='completed' || x.completed_at)
+      const sessionIds=new Set(sessions.map(x=>x.id))
+      const workoutExercises=exerciseRows.filter(x=>sessionIds.has(x.workout_session_id))
+      const workoutExerciseIds=new Set(workoutExercises.map(x=>x.id))
+      const workoutSets=setRows.filter(x=>sessionIds.has(x.workout_session_id) || workoutExerciseIds.has(x.workout_exercise_id))
+      const body=bodyRows(bodyRaw,athlete)
+      const readiness=readinessRows.filter(x=>inRange(x.recorded_at || x.created_at)).sort((a,b)=>(asDate(a.recorded_at||a.created_at)?.getTime()||0)-(asDate(b.recorded_at||b.created_at)?.getTime()||0))
+      const e1rmMap=deriveE1rm(workoutExercises,workoutSets,sessions)
+      const events=dedupeEvents([...localMaxEvents(),...corePrEvents(prRows),...derivedE1rmEvents(e1rmMap)])
+      const data={source:'indexeddb',athlete,program,tms:latestTmMap(tmRows),sessions,completedSessions,workoutExercises,workoutSets,body,readiness,personalRecords:prRows,conditioning:conditioningRows(workoutExercises,sessions),e1rm:e1rmMap,events}
+      vaultCache={at:now,range,data}; return data
+    } catch (error) {
+      console.warn('LetMeFly Progress dashboard could not read private vault',error)
+      return empty
+    } finally { try { db.close() } catch (_) {} }
   }
 
-  function currentTm(vault,liftId){const row=resolveTm(vault.tms,liftId);return row?{value:num(row.tm_value),unit:String(row.tm_unit||'lb').toLowerCase()==='kg'?'kg':'lb'}:null}
-  function mergedLifts(vault){return LIFT_META.map(meta=>{const local=localStrengthRows().find(x=>x.id===meta.id);const tm=currentTm(vault,meta.id);const points=vault.e1rm.get(meta.id)||[];const best=points.reduce((a,b)=>!a||b.value>a.value?b:a,null);const latest=points.at(-1)||null;return{...meta,local,tm,best,latest,points}})}
-  function tab(id,label){return `<button type="button" class="${activeTab===id?'active':''}" data-pg-tab="${id}" role="tab" aria-selected="${activeTab===id?'true':'false'}">${label}</button>`}
-  function readinessLabel(vault){const row=byNewest(vault.readiness,'recorded_at')[0]||byNewest(vault.readiness,'created_at')[0];if(!row)return{value:'—',label:'No check-in'};const raw=[row.sleep_quality,row.energy,row.soreness?6-num(row.soreness):null,row.stress?6-num(row.stress):null].filter(x=>num(x)!=null);const score=raw.length?Math.round(raw.reduce((a,b)=>a+num(b),0)/raw.length*20):null;return{value:score==null?'—':String(score),label:score==null?'Readiness recorded':score>=80?'Ready to push':score>=60?'Train as written':'Use allowed auto-regulation'}}
-  function coachInsight(vault,rows){const r=readinessLabel(vault);const recent=vault.completedSessions.length;const active=rows.filter(x=>x.tm?.value||x.local?.trainingMax||x.local?.actualMax).length;return r.value==='—'?`Log readiness and complete a session to unlock athlete-aware trends. ${active?`${active} strength profiles are already tracked.`:''}`:`Readiness is ${r.value}/100 (${r.label.toLowerCase()}). ${recent?`${recent} completed session${recent===1?'':'s'} are in this view.`:'Finish a workout to start the performance trend.'}`}
-  function nextMilestone(rows){const candidates=rows.filter(x=>x.local?.actualMax&&x.local?.goalMax).map(x=>({name:x.name,current:num(x.local.actualMax),goal:num(x.local.goalMax),unit:x.local.unit||'lb'})).filter(x=>x.current&&x.goal&&x.goal>x.current).map(x=>({...x,gap:x.goal-x.current,pct:x.current/x.goal})).sort((a,b)=>b.pct-a.pct);if(!candidates.length)return{title:'Build the baseline',copy:'Set an actual max and goal in Strength Maxes; LetMeFly will surface the nearest target here.'};const x=candidates[0];return{title:`${x.name}: ${formatNumber(x.current)} → ${formatNumber(x.goal)} ${x.unit}`,copy:`${formatNumber(x.gap)} ${x.unit} to the next strength goal.`}}
-  function overview(vault,rows){const r=readinessLabel(vault);const tm=rows.filter(x=>x.tm?.value).length;const bw=vault.body.at(-1);const milestone=nextMilestone(rows);return `<div class="lmf-pg-kpis"><article><span>READINESS</span><strong>${r.value}${r.value==='—'?'':'%'}</strong><small>${r.label}</small></article><article><span>SESSIONS</span><strong>${vault.completedSessions.length}</strong><small>${range==='all'?'All recorded':'Selected range'}</small></article><article><span>TRAINING MAXES</span><strong>${tm}</strong><small>Authoritative TM records</small></article><article><span>BODYWEIGHT</span><strong>${bw?loadText(bw.value,bw.unit):'—'}</strong><small>${bw?dateLabel(bw.date):'No entries yet'}</small></article></div><div class="lmf-pg-insight"><div><span>COACH INSIGHT</span><h3>${esc(coachInsight(vault,rows))}</h3></div><a href="#/coach">ASK COACH</a></div><div class="lmf-pg-milestone"><span>NEXT MILESTONE</span><strong>${esc(milestone.title)}</strong><small>${esc(milestone.copy)}</small></div><div class="lmf-pg-chart"><div class="lmf-pg-section-head"><div><span>STRENGTH TREND</span><h3>e1RM vs TM vs Max</h3></div><small>Calculated e1RM is derived only from completed sets.</small></div>${spark(rows)}</div>`}
-  function spark(rows){const candidates=rows.filter(x=>x.points.length||x.tm?.value||x.local?.trainingMax||x.local?.actualMax).slice(0,4);if(!candidates.length)return'<div class="lmf-pg-empty">No completed strength sets yet. Training Maxes remain available below.</div>';return `<div class="lmf-pg-spark-grid">${candidates.map(row=>{const pts=row.points.slice(-10);const all=[...pts.map(x=>x.value),num(row.tm?.value),num(row.local?.trainingMax),num(row.local?.actualMax)].filter(x=>x&&x>0);const min=Math.min(...all)*.92,max=Math.max(...all)*1.05,span=Math.max(1,max-min);const coords=pts.map((p,i)=>`${pts.length===1?50:i/(pts.length-1)*100},${100-(p.value-min)/span*100}`).join(' ');return `<article><header><strong>${esc(row.name)}</strong><small>${row.latest?`e1RM ${loadText(row.latest.value,row.latest.unit)}`:'No e1RM yet'}</small></header><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="${esc(row.name)} trend">${row.tm?.value?`<line x1="0" x2="100" y1="${100-(row.tm.value-min)/span*100}" y2="${100-(row.tm.value-min)/span*100}" class="tm"/>`:''}${row.local?.actualMax?`<line x1="0" x2="100" y1="${100-(row.local.actualMax-min)/span*100}" y2="${100-(row.local.actualMax-min)/span*100}" class="max"/>`:''}${coords?`<polyline points="${coords}" class="e1rm"/>`:''}</svg><footer><span>e1RM</span><span>TM</span><span>MAX</span></footer></article>`}).join('')}</div>`}
-  function strengthView(rows){const cards=rows.map(row=>`<article class="lmf-pg-lift"><header><div><span>${esc(row.name)}</span><strong>${row.latest?loadText(row.latest.value,row.latest.unit):'—'}</strong><small>Latest e1RM</small></div><div><span>TM</span><strong>${row.tm?loadText(row.tm.value,row.tm.unit):row.local?.trainingMax?loadText(row.local.trainingMax,row.local.unit):'—'}</strong></div><div><span>MAX</span><strong>${row.local?.actualMax?loadText(row.local.actualMax,row.local.unit):'—'}</strong></div></header>${spark([row])}</article>`).join('');return `<div class="lmf-pg-section-head"><div><span>STRENGTH</span><h3>Max / TM / estimated performance</h3></div><button type="button" data-pg-manage-tms>MANAGE MAXES & TMs</button></div><div class="lmf-pg-lifts">${cards}</div>`}
-  function bodyView(vault){const body=vault.body;if(!body.length)return'<div class="lmf-pg-empty">No bodyweight entries yet. Add them through Profile or the connected private-data tools.</div>';const first=body[0],last=body.at(-1),delta=last.value-first.value;return `<div class="lmf-pg-kpis body"><article><span>CURRENT</span><strong>${loadText(last.value,last.unit)}</strong><small>${dateLabel(last.date)}</small></article><article><span>CHANGE</span><strong>${delta>0?'+':''}${formatNumber(delta)} ${last.unit}</strong><small>${dateLabel(first.date)} → ${dateLabel(last.date)}</small></article></div><div class="lmf-pg-body-list">${body.slice(-12).reverse().map(x=>`<div><span>${dateLabel(x.date)}</span><strong>${loadText(x.value,x.unit)}</strong></div>`).join('')}</div>`}
-  function conditioningView(vault){const rows=vault.conditioning;if(!rows.length)return'<div class="lmf-pg-empty">No conditioning/carry sessions are identifiable in this range yet. Completed sled, carry, erg, run, bike, and GPP work will appear here.</div>';const counts=new Map();for(const row of rows){const key=row.name||row.category||'Conditioning';counts.set(key,(counts.get(key)||0)+1)}return `<div class="lmf-pg-section-head"><div><span>CONDITIONING</span><h3>Work-capacity exposure</h3></div><small>Completed-session exercise records</small></div><div class="lmf-pg-conditioning">${[...counts.entries()].sort((a,b)=>b[1]-a[1]).map(([name,count])=>`<article><span>${esc(name)}</span><strong>${count}</strong><small>session exposure${count===1?'':'s'}</small></article>`).join('')}</div>`}
-  function prView(events){if(!events.length)return'<div class="lmf-pg-empty">No PRs detected in this range yet. LetMeFly combines stored PR records with clearly labeled derived e1RM improvements.</div>';return `<div class="lmf-pg-section-head"><div><span>PERSONAL RECORDS</span><h3>Recent breakthroughs</h3></div><small>Stored + labeled derived records</small></div><div class="lmf-pg-prs">${events.slice(0,30).map(event=>`<article><span>${esc(String(event.type).replace(/_/g,' ').toUpperCase())}</span><strong>${esc(event.liftName||'Performance')}</strong><b>${event.display?esc(event.display):loadText(event.value,event.unit)}</b><small>${dateLabel(event.date)}${event.source?` • ${esc(event.source)}`:''}</small></article>`).join('')}</div>`}
-  function nativeProgressContainer(root){return root.querySelector('#progress-content')}
-  function organizeNativeProgress(root){const native=nativeProgressContainer(root);if(!native)return;let details=root.querySelector('#lmf-pg-native-tools');if(!details){details=document.createElement('details');details.id='lmf-pg-native-tools';details.className='lmf-pg-native-tools';details.innerHTML='<summary>MANAGE TRAINING MAXES & VIEW RAW HISTORY</summary><div data-pg-native-body></div>';document.getElementById(ROOT_ID)?.insertAdjacentElement('afterend',details)}const body=details.querySelector('[data-pg-native-body]');if(body&&native.parentElement!==body)body.appendChild(native);details.open=readSetting(TOOLS_KEY,'closed',['open','closed'])==='open';details.addEventListener('toggle',()=>writeSetting(TOOLS_KEY,details.open?'open':'closed'))}
-  function openNativeTools(root){organizeNativeProgress(root);const details=root.querySelector('#lmf-pg-native-tools');if(details){details.open=true;writeSetting(TOOLS_KEY,'open');details.scrollIntoView({behavior:'smooth',block:'start'})}}
-  function progressHeading(){
-    const anchored = document.querySelector('[data-lmf-progress-anchor]')
-    if (anchored && anchored.isConnected) return anchored
-    const hash = location.hash || ''
-    const routeActive = /^#\/progress(?:[/?#]|$)/i.test(hash)
-    const headings=[...document.querySelectorAll('main h1,main h2,main h3,[role="main"] h1,[role="main"] h2,[role="main"] h3,.page-head h1,.page-head h2')]
-    const exact = headings.find(h=>(h.textContent||'').trim().toUpperCase()==='PROGRESS' && !h.closest('nav,button,a,[role="button"]'))
-    if (exact) return exact
-    if (routeActive) {
-      const native = document.querySelector('#progress-content')
-      if (native?.parentElement) return native.parentElement
-      const root = document.querySelector('main,[role="main"],#app')
-      if (root) return root
-    }
-    return null
+  function isVisible(el) { if (!el?.isConnected) return false; const s=getComputedStyle(el); return s.display!=='none' && s.visibility!=='hidden' && el.getClientRects().length>0 }
+  function progressHeading() { return [...document.querySelectorAll('h1,h2,h3')].find(el => /^progress$/i.test((el.textContent||'').trim()) && isVisible(el)) || null }
+  function progressRoot(h) { return h?.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || h?.parentElement || null }
+
+  function mergedLifts(vault) {
+    const locals=localStrengthRows(); const localMap=new Map(locals.map(x=>[x.id,x])); const ids=new Set([...LIFT_META.map(x=>x.id),...locals.map(x=>x.id)])
+    return [...ids].map(id => {
+      const local=localMap.get(id) || {id,name:liftMeta(id).name,unit:'lb',history:[]}
+      const tm=resolveTm(vault.tms,id)
+      const derived=vault.e1rm.get(id) || []
+      const derivedBest=derived.reduce((best,p)=>!best||p.value>best.value?p:best,null)
+      const localEstimate=num(local.estimated1rm)
+      let estimate=localEstimate,estimateUnit=local.unit || 'lb',estimateDate=local.estimatedDate || null
+      if (derivedBest && (!estimate || (derivedBest.unit===estimateUnit && derivedBest.value>estimate))) { estimate=derivedBest.value; estimateUnit=derivedBest.unit; estimateDate=derivedBest.date }
+      return {...local,id,name:local.name || liftMeta(id).name,tmValue:num(tm?.tm_value),tmUnit:tm?.tm_unit || null,tmDate:tm?.effective_at || null,displayEstimate:estimate,displayEstimateUnit:estimateUnit,displayEstimateDate:estimateDate,derivedPoints:derived}
+    })
   }
-  function progressRoot(h){return h.closest('main,[role="main"]')||document.querySelector('main,[role="main"],#app')||h.parentElement}
-  function render(force=false) {
+  function trendFor(lift) {
+    const points=(lift.derivedPoints || []).slice(-8)
+    if (points.length<2) {
+      const local=(Array.isArray(lift.history)?lift.history:[]).filter(x=>/estimate|e1rm/i.test(String(x.type||''))&&num(x.value)).sort((a,b)=>(asDate(a.date||a.createdAt)?.getTime()||0)-(asDate(b.date||b.createdAt)?.getTime()||0)).slice(-8)
+      if(local.length<2)return{dir:'flat',label:'No trend yet',points:[]}
+      return trendFromPoints(local)
+    }
+    return trendFromPoints(points)
+  }
+  function trendFromPoints(points) {
+    const first=num(points[0].value),last=num(points[points.length-1].value); if(!first||!last)return{dir:'flat',label:'No trend yet',points}
+    const pct=(last-first)/first
+    return pct>=.015?{dir:'up',label:'Improving',points}:pct<=-.015?{dir:'down',label:'Down recently',points}:{dir:'flat',label:'Stable',points}
+  }
+  function spark(points,w=220,h=58) {
+    const values=points.map(x=>num(x.value)).filter(x=>x!=null)
+    if(values.length<2)return'<div class="lmf-pg-empty-chart">More history needed</div>'
+    const min=Math.min(...values),max=Math.max(...values),span=Math.max(1,max-min)
+    const coords=values.map((v,i)=>`${(8+i*(w-16)/(values.length-1)).toFixed(1)},${(h-8-(v-min)*(h-16)/span).toFixed(1)}`).join(' ')
+    return `<svg class="lmf-pg-spark" viewBox="0 0 ${w} ${h}" role="img" aria-label="Performance trend"><polyline points="${coords}" fill="none" vector-effect="non-scaling-stroke"/></svg>`
+  }
+  function bodyChart(points) { return points.length<2?'<div class="lmf-pg-empty-chart is-large">Log at least two bodyweight entries to see a trend.</div>':spark(points.map(x=>({value:x.value})),520,130) }
+  function summary(label,value,detail='') { return `<article class="lmf-pg-summary-card"><span>${esc(label)}</span><strong>${esc(value)}</strong>${detail?`<small>${esc(detail)}</small>`:''}</article>` }
+  function rangeLabel(){return range==='7d'?'Last 7 days':range==='30d'?'Last 30 days':'All stored history'}
+  function programLabel(program){if(!program)return'Current program';return `${program.program_name || String(program.program_key||'').replace(/-/g,' ') || 'Current program'}${program.current_week?` · Week ${program.current_week}`:''}`}
+
+  function milestone(rows) {
+    for(const lift of rows){const actual=num(lift.actual1rm),est=num(lift.displayEstimate);if(actual&&est&&lift.displayEstimateUnit===lift.unit&&est>=actual*1.025)return `Review ${lift.name}: e1RM is above the current tested 1RM.`}
+    const missing=rows.find(x=>!num(x.actual1rm));if(missing)return `Record a current tested 1RM for ${missing.name}.`
+    const pr=rows.find(x=>!num(x.allTimePr));if(pr)return `Add the all-time PR for ${pr.name}.`
+    return 'Keep building verified training history in the current program.'
+  }
+  function insight(rows,vault) {
+    const up=rows.map(lift=>({lift,t:trendFor(lift)})).find(x=>x.t.dir==='up');if(up)return `${up.lift.name} e1RM is trending upward across recent completed sets.`
+    if(vault.body.length>=2){const a=vault.body[0],b=vault.body.at(-1),d=Math.round((b.value-a.value)*10)/10;if(d)return `Bodyweight changed ${d>0?'+':''}${d} ${b.unit||'lb'} in the selected range.`}
+    const avgEnergy=average(vault.readiness,'energy');if(avgEnergy!=null)return `Average readiness energy is ${avgEnergy}/5 across ${vault.readiness.length} check-in${vault.readiness.length===1?'':'s'}.`
+    if(vault.conditioning.length)return `${vault.conditioning.length} conditioning or carry exposure${vault.conditioning.length===1?'':'s'} found in the selected range.`
+    return 'More logged training history will unlock stronger trend and milestone insights.'
+  }
+
+  function overview(vault,rows) {
+    const body=vault.body.at(-1),latest=vault.completedSessions[0]
+    return `<div class="lmf-pg-overview">
+      <div class="lmf-pg-summary-grid">${summary('Current Program',programLabel(vault.program),vault.program?.current_phase_key ? String(vault.program.current_phase_key).replace(/-/g,' ') : 'Active training context')}${summary('Completed Sessions',String(vault.completedSessions.length),rangeLabel())}${summary('Bodyweight',body?`${formatNumber(body.value)} ${body.unit}`:'—',body?dateLabel(body.date):'No entry found')}${summary('PR / Max Events',String(vault.events.length),rangeLabel())}</div>
+      <div class="lmf-pg-two-col"><article class="lmf-pg-panel"><span class="lmf-pg-kicker">PROGRAM MOMENTUM</span><h3>Training Snapshot</h3><div class="lmf-pg-momentum"><strong>${vault.completedSessions.length}</strong><span>completed sessions</span></div><p>${latest?`Latest: ${dateLabel(latest.completed_at||latest.started_at)} · ${esc(latest.workout_name||'Workout')}${latest.week_number?` · W${esc(latest.week_number)}`:''}.`:'No completed session was found in the selected range.'}</p></article><article class="lmf-pg-panel insight"><span class="lmf-pg-kicker">COACH INSIGHT</span><h3>What the data says</h3><p>${esc(insight(rows,vault))}</p><div class="lmf-pg-milestone"><small>NEXT MILESTONE</small><strong>${esc(milestone(rows))}</strong></div></article></div>
+      <article class="lmf-pg-panel"><span class="lmf-pg-kicker">STRENGTH SNAPSHOT</span><h3>Main Lift Status</h3><div class="lmf-pg-strength-strip">${rows.slice(0,7).map(lift=>{const t=trendFor(lift);return `<span><b>${esc(lift.name)}</b><strong>${loadText(lift.displayEstimate||lift.actual1rm,lift.displayEstimate?lift.displayEstimateUnit:lift.unit)}</strong><small class="is-${t.dir}">${t.dir==='up'?'↑':t.dir==='down'?'↓':'→'} ${esc(t.label)}</small></span>`}).join('')}</div></article>
+      <div class="lmf-pg-two-col"><article class="lmf-pg-panel chart"><span class="lmf-pg-kicker">BODYWEIGHT TREND</span><h3>${esc(rangeLabel())}</h3>${bodyChart(vault.body)}</article><article class="lmf-pg-panel"><span class="lmf-pg-kicker">RECENT PRs</span><h3>Latest Performance Events</h3>${vault.events.length?`<div class="lmf-pg-mini-feed">${vault.events.slice(0,4).map(x=>`<div><span>${esc(x.liftName)}</span><b>${x.value?loadText(x.value,x.unit):esc(x.display||'PR')}</b><small>${dateLabel(x.date)}</small></div>`).join('')}</div>`:'<div class="lmf-pg-empty compact">No PR or max events in this range yet.</div>'}</article></div>
+    </div>`
+  }
+  function strengthView(rows) {
+    return `<div class="lmf-pg-strength-actions"><div><span class="lmf-pg-kicker">STRENGTH RECORDS</span><strong>Actual 1RM, TM, e1RM and all-time PR stay separate.</strong></div><button type="button" data-pg-manage-tms>MANAGE TRAINING MAXES</button><a href="#/profile">EDIT 1RM / PRs IN PROFILE</a></div><div class="lmf-pg-lift-grid">${rows.map(lift=>{const t=trendFor(lift),points=t.points,recent=(lift.derivedPoints||[]).at(-1);return `<article class="lmf-pg-lift-card"><header><div><span>STRENGTH</span><h3>${esc(lift.name)}</h3></div><b class="is-${t.dir}">${t.dir==='up'?'↑':t.dir==='down'?'↓':'→'} ${esc(t.label)}</b></header><div class="lmf-pg-lift-metrics"><span><small>ACTUAL 1RM</small><strong>${loadText(lift.actual1rm,lift.unit)}</strong></span><span class="is-tm"><small>TRAINING MAX</small><strong>${loadText(lift.tmValue,lift.tmUnit)}</strong></span><span><small>e1RM</small><strong>${loadText(lift.displayEstimate,lift.displayEstimateUnit)}</strong></span><span><small>ALL-TIME PR</small><strong>${loadText(lift.allTimePr,lift.unit)}</strong></span><span><small>LAST TESTED</small><strong>${lift.actualDate?dateLabel(lift.actualDate):'—'}</strong></span></div>${spark(points)}<footer>${recent?`Latest completed-set estimate: ${esc(`${formatNumber(recent.load)} ${recent.unit} × ${formatNumber(recent.reps)}${recent.rpe?` @ RPE ${formatNumber(recent.rpe)}`:''}`)} · ${dateLabel(recent.date)}`:'Completed-set estimates will appear here as history builds.'}</footer></article>`}).join('')}</div>`
+  }
+  function readinessCards(vault) {
+    const rows=vault.readiness
+    return `<div class="lmf-pg-readiness-grid">${summary('Sleep Quality',average(rows,'sleep_quality')==null?'—':`${formatNumber(average(rows,'sleep_quality'))}/5`,`${rows.length} check-in${rows.length===1?'':'s'}`)}${summary('Energy',average(rows,'energy')==null?'—':`${formatNumber(average(rows,'energy'))}/5`,'Selected range')}${summary('Soreness',average(rows,'soreness')==null?'—':`${formatNumber(average(rows,'soreness'))}/5`,'Lower is generally better')}${summary('Stress',average(rows,'stress')==null?'—':`${formatNumber(average(rows,'stress'))}/5`,'Selected range')}</div>`
+  }
+  function bodyView(vault) {
+    const pts=vault.body,current=pts.at(-1),first=pts[0],delta=current&&first?Math.round((current.value-first.value)*10)/10:null
+    return `<div class="lmf-pg-body-stack"><div class="lmf-pg-summary-grid compact">${summary('Current Bodyweight',current?`${formatNumber(current.value)} ${current.unit}`:'—',current?dateLabel(current.date):'No entry found')}${summary('Range Change',delta==null?'—':`${delta>0?'+':''}${formatNumber(delta)} ${current?.unit||'lb'}`,pts.length>=2?`${pts.length} entries`:'Need 2+ entries')}${summary('Entries',String(pts.length),rangeLabel())}</div><article class="lmf-pg-panel chart"><span class="lmf-pg-kicker">BODY TREND</span><h3>Bodyweight</h3>${bodyChart(pts)}</article><article class="lmf-pg-panel"><span class="lmf-pg-kicker">READINESS AVERAGES</span><h3>Recovery Context</h3>${readinessCards(vault)}</article></div>`
+  }
+  function conditioningView(vault) {
+    const grouped=new Map();vault.conditioning.forEach(x=>grouped.set(x.name,(grouped.get(x.name)||0)+1));const top=[...grouped.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10)
+    return `<div class="lmf-pg-two-col"><article class="lmf-pg-panel"><span class="lmf-pg-kicker">WORK CAPACITY</span><h3>Conditioning Summary</h3><div class="lmf-pg-big-number">${vault.conditioning.length}</div><p>Conditioning, sled, carry, cardio, GPP, or work-capacity exposures detected from completed/private workout history in the selected range.</p></article><article class="lmf-pg-panel"><span class="lmf-pg-kicker">ACTIVITY MIX</span><h3>Most Logged</h3>${top.length?`<ul class="lmf-pg-simple-list">${top.map(([name,count])=>`<li><span>${esc(name)}</span><b>${count}</b></li>`).join('')}</ul>`:'<div class="lmf-pg-empty compact">No conditioning entries detected yet.</div>'}</article></div>`
+  }
+  function eventLabel(event) {
+    const type=String(event.type||'').toLowerCase()
+    if(type.includes('all_time_pr'))return'ALL-TIME PR'
+    if(type.includes('actual'))return'ACTUAL 1RM'
+    if(type.includes('estimate')||type.includes('e1rm'))return event.kind==='derived-e1rm'?'CALC e1RM':'e1RM'
+    return String(event.type || 'PR').replace(/[_-]+/g,' ').toUpperCase()
+  }
+  function prView(events) {
+    if(!events.length)return'<div class="lmf-pg-empty">No PR, max, or estimated-1RM events in this range yet.</div>'
+    return `<div class="lmf-pg-feed">${events.slice(0,60).map(x=>{const source=x.load&&x.reps?`${formatNumber(x.load)} ${x.unit} × ${formatNumber(x.reps)}${x.rpe?` @ RPE ${formatNumber(x.rpe)}`:''}`:x.source;return `<article><div class="lmf-pg-pr-badge">${esc(eventLabel(x))}</div><div><h3>${esc(x.liftName)}</h3><strong>${x.value?loadText(x.value,x.unit):esc(x.display||'Recorded PR')}</strong>${source?`<small>${esc(source)}</small>`:''}</div><time>${dateLabel(x.date)}</time></article>`}).join('')}</div>`
+  }
+  function tab(id,label){return `<button type="button" role="tab" data-pg-tab="${id}" aria-selected="${activeTab===id?'true':'false'}">${label}</button>`}
+
+  function organizeNativeProgress(root) {
+    const native=root.querySelector('#progress-content'); if(!native)return
+    native.classList.add('lmf-pg-native-content')
+    native.querySelectorAll(':scope > .progress-score-grid,:scope > .strength-progress-card,:scope > .v2-analytics').forEach(el=>el.classList.add('lmf-pg-native-duplicate'))
+    let tools=native.querySelector('#lmf-pg-native-tools')
+    if(!tools){
+      tools=document.createElement('details');tools.id='lmf-pg-native-tools';tools.className='lmf-pg-native-tools';tools.open=readSetting(TOOLS_KEY,'closed',['open','closed'])==='open';tools.innerHTML='<summary><div><span>TRAINING DATA</span><strong>Manage TMs & Recent Workout History</strong></div><i>⌄</i></summary><div class="lmf-pg-native-tools-body"></div>'
+      tools.addEventListener('toggle',()=>writeSetting(TOOLS_KEY,tools.open?'open':'closed'))
+      native.appendChild(tools)
+    }
+    const body=tools.querySelector('.lmf-pg-native-tools-body')
+    const tm=native.querySelector(':scope > .tm-board')
+    if(tm)body.appendChild(tm)
+    const titles=[...native.querySelectorAll(':scope > .section-title')]
+    const historyTitle=titles.find(el=>/recent workouts/i.test(el.textContent||''))
+    if(historyTitle)body.appendChild(historyTitle)
+    const history=native.querySelector(':scope > .history-list')
+    if(history)body.appendChild(history)
+  }
+  function openNativeTools(root) {
+    organizeNativeProgress(root)
+    const tools=root.querySelector('#lmf-pg-native-tools'); if(!tools)return
+    tools.open=true; writeSetting(TOOLS_KEY,'open'); tools.scrollIntoView({behavior:'smooth',block:'start'})
+  }
+
+  async function render(force=false) {
     const h=progressHeading();if(!h)return
     const root=progressRoot(h);if(!root)return
     const token=++generation
     let el=document.getElementById(ROOT_ID)
     if(!el){el=document.createElement('section');el.id=ROOT_ID;el.className='lmf-progress-dashboard';h.insertAdjacentElement('afterend',el)}
     if(force || !el.dataset.loaded) el.innerHTML='<div class="lmf-pg-loading">Reading your private training history…</div>'
-    return readVault(force).then(vault=>{
-      if(token!==generation)return
-      const rows=mergedLifts(vault)
-      el.dataset.loaded='1'
-      el.innerHTML=`<header class="lmf-pg-header"><div><span>ATHLETE PERFORMANCE</span><h2>PROGRESS DASHBOARD</h2><p>${vault.source==='indexeddb'?'Private vault data':'Private strength data'} first. Calculated values stay labeled and never rewrite programming.</p></div><select data-pg-range aria-label="Progress date range"><option value="7d" ${range==='7d'?'selected':''}>7 DAYS</option><option value="30d" ${range==='30d'?'selected':''}>30 DAYS</option><option value="all" ${range==='all'?'selected':''}>ALL TIME</option></select></header><nav class="lmf-pg-tabs" role="tablist" aria-label="Progress sections">${tab('overview','OVERVIEW')}${tab('strength','STRENGTH')}${tab('body','BODY')}${tab('conditioning','CONDITIONING')}${tab('prs','PRs')}</nav><div class="lmf-pg-tabbody" role="tabpanel" data-pg-panel="${activeTab}">${activeTab==='overview'?overview(vault,rows):activeTab==='strength'?strengthView(rows):activeTab==='body'?bodyView(vault):activeTab==='conditioning'?conditioningView(vault):prView(vault.events)}</div>`
-      const legacy=root.querySelector('#lmf-strength-maxes-progress');if(legacy)legacy.hidden=true
-      organizeNativeProgress(root)
-      el.querySelectorAll('[data-pg-tab]').forEach(button=>button.addEventListener('click',()=>{const next=button.dataset.pgTab;if(!TABS.includes(next)||next===activeTab)return;activeTab=next;writeSetting(TAB_KEY,next);queueRender(false)}))
-      el.querySelector('[data-pg-range]')?.addEventListener('change',event=>{const next=event.target.value;if(!RANGES.includes(next))return;range=next;writeSetting(RANGE_KEY,next);vaultCache.at=0;queueRender(true)})
-      el.querySelector('[data-pg-manage-tms]')?.addEventListener('click',()=>openNativeTools(root))
-      window.__LMF_PROGRESS_DASHBOARD__={version:2,source:vault.source,refresh:()=>queueRender(true),getTab:()=>activeTab,setTab:next=>{if(TABS.includes(next)){activeTab=next;writeSetting(TAB_KEY,next);queueRender(false)}}}
-    })
+    const vault=await readVault(force);if(token!==generation)return
+    const rows=mergedLifts(vault)
+    el.dataset.loaded='1'
+    el.innerHTML=`<header class="lmf-pg-header"><div><span>ATHLETE PERFORMANCE</span><h2>PROGRESS DASHBOARD</h2><p>${vault.source==='indexeddb'?'Private vault data':'Private strength data'} first. Calculated values stay labeled and never rewrite programming.</p></div><select data-pg-range aria-label="Progress date range"><option value="7d" ${range==='7d'?'selected':''}>7 DAYS</option><option value="30d" ${range==='30d'?'selected':''}>30 DAYS</option><option value="all" ${range==='all'?'selected':''}>ALL TIME</option></select></header><nav class="lmf-pg-tabs" role="tablist" aria-label="Progress sections">${tab('overview','OVERVIEW')}${tab('strength','STRENGTH')}${tab('body','BODY')}${tab('conditioning','CONDITIONING')}${tab('prs','PRs')}</nav><div class="lmf-pg-tabbody" role="tabpanel" data-pg-panel="${activeTab}">${activeTab==='overview'?overview(vault,rows):activeTab==='strength'?strengthView(rows):activeTab==='body'?bodyView(vault):activeTab==='conditioning'?conditioningView(vault):prView(vault.events)}</div>`
+    const legacy=root.querySelector('#lmf-strength-maxes-progress');if(legacy)legacy.hidden=true
+    organizeNativeProgress(root)
+    el.querySelectorAll('[data-pg-tab]').forEach(button=>button.addEventListener('click',()=>{const next=button.dataset.pgTab;if(!TABS.includes(next)||next===activeTab)return;activeTab=next;writeSetting(TAB_KEY,next);queueRender(false)}))
+    el.querySelector('[data-pg-range]')?.addEventListener('change',event=>{const next=event.target.value;if(!RANGES.includes(next))return;range=next;writeSetting(RANGE_KEY,next);vaultCache.at=0;queueRender(true)})
+    el.querySelector('[data-pg-manage-tms]')?.addEventListener('click',()=>openNativeTools(root))
+    window.__LMF_PROGRESS_DASHBOARD__={version:2,source:vault.source,refresh:()=>queueRender(true),getTab:()=>activeTab,setTab:next=>{if(TABS.includes(next)){activeTab=next;writeSetting(TAB_KEY,next);queueRender(false)}}}
   }
 
-  function queueRender(force=false) {
-    if (force) vaultCache.at=0
-    // A normal SPA/MutationObserver pulse must never postpone an already queued
-    // render. Previously every mutation cleared and restarted the 160 ms timer,
-    // so a busy fresh route could starve Progress forever. Forced data refreshes
-    // are allowed to supersede a normal pending render and run sooner.
-    if (timer && !force) return
-    if (timer) clearTimeout(timer)
-    timerForce = Boolean(force)
-    timer = setTimeout(() => {
-      const runForce = timerForce
-      timer = 0
-      timerForce = false
-      void render(runForce)
-    }, force ? 30 : 80)
-  }
+  function queueRender(force=false){if(force)vaultCache.at=0;clearTimeout(timer);timer=setTimeout(()=>void render(force),force?30:160)}
   function queueScan(){if(scanQueued)return;scanQueued=true;requestAnimationFrame(()=>{scanQueued=false;if(progressHeading())queueRender(false)})}
   function boot(){
     queueScan()
