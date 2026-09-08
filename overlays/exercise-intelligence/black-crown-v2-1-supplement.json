@@ -3,11 +3,17 @@
   "integrationStatus": "READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION",
   "baseCounts": {
     "exercises": 92,
-    "substitutionRules": 25
+    "substitutionRules": 25,
+    "roleCoverage": 92,
+    "coachingCoverage": 92,
+    "readyForReview": 92
   },
   "finalCounts": {
     "exercises": 94,
-    "substitutionRules": 27
+    "substitutionRules": 27,
+    "roleCoverage": 94,
+    "coachingCoverage": 94,
+    "readyForReview": 94
   },
   "programPrescriptionOwner": "program-packages-only",
   "exercises": [
@@ -38,8 +44,8 @@
         "Reduce load or range if pelvic control, hip position, or pain-free motion cannot stay consistent."
       ],
       "demo": {
-        "currentUrl": "https://www.youtube.com/results?search_query=Machine+Hip+Abduction+exercise+tutorial",
-        "status": "search-fallback"
+        "currentUrl": "https://www.youtube.com/watch?v=tn-ABeb1QAM",
+        "status": "direct-verified"
       },
       "evidenceClassification": "BOOK-INFORMED + NORMALIZED ANATOMY/COACHING",
       "evidenceBasis": "Jeff Nippard glute-specialization role evidence + LetMeFly RT-020 lateral-hip role governance + Black Crown v2.1 intentional program amendment"
@@ -71,8 +77,8 @@
         "Use a lighter band or smaller range if pelvic control or knee tracking cannot remain clean."
       ],
       "demo": {
-        "currentUrl": "https://www.youtube.com/results?search_query=Seated+Band+Hip+Abduction+exercise+tutorial",
-        "status": "search-fallback"
+        "currentUrl": "https://www.youtube.com/watch?v=BqZIR0PvxxU",
+        "status": "direct-verified"
       },
       "evidenceClassification": "BOOK-INFORMED + NORMALIZED ANATOMY/COACHING",
       "evidenceBasis": "Jeff Nippard glute-specialization role evidence + LetMeFly RT-020 lateral-hip role governance"
