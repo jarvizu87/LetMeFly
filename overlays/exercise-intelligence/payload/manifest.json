@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "payload": "exercise-intelligence-v1",
+  "encoding": "gzip+base64",
+  "chunking": {
+    "partCount": 4,
+    "partLength": 8486,
+    "concatenationOrder": "lexicographic filename order"
+  },
+  "source": {
+    "filename": "letmefly-exercise-intelligence-v1.json",
+    "bytes": 183669,
+    "sha256": "b7bef69e9942568c59cc779ac33a2feaceba2e03535df68a0d663a766aedd350",
+    "exerciseCount": 92,
+    "substitutionRuleCount": 25
+  },
+  "gzip": {
+    "bytes": 25458,
+    "sha256": "b964368cb52670513e4e56ffacc0fcb1b3d5bd5f6a9ff8170e02a541c8c4b79c",
+    "mtimeUnix": 1788829463,
+    "compresslevel": 9
+  },
+  "base64": {
+    "characters": 33944,
+    "sha256": "a42ba4bd1c78d0cfcbe7e5bc605b2e50332699af989c86adc24019ceddb882ce"
+  },
+  "parts": [
+    {
+      "file": "exercise-intelligence-v1.part-001.b64",
+      "characters": 8486,
+      "sha256": "98d71f84127a379e9cef043b48b62a4c7b4183f49ff858d3e8c36324768dc71f",
+      "gitBlobSha": "1aca692579d39b6889e7f4388996a586e452058c"
+    },
+    {
+      "file": "exercise-intelligence-v1.part-002.b64",
+      "characters": 8486,
+      "sha256": "9818ce3198ae175a9192bc072a78fbbf6f72cfb618b2057d287b3814fb1ef9d6",
+      "gitBlobSha": "26fcff866bd0e95cdab03c8da2ef865362a17d6d"
+    },
+    {
+      "file": "exercise-intelligence-v1.part-003.b64",
+      "characters": 8486,
+      "sha256": "891dc0381f1dffc79576a7852cbeb203a5ce6cb98d3fce43402360005f57d646",
+      "gitBlobSha": "bf62cf083e0e02485b3ba19900312e3d269b229d"
+    },
+    {
+      "file": "exercise-intelligence-v1.part-004.b64",
+      "characters": 8486,
+      "sha256": "fcce21d7b17d22051edbe7e3dbd1dea6a8814c7e53818339a50ebebdcb0e33b3",
+      "gitBlobSha": "fc42387f547c850d7523ed33521528ad75a1b445"
+    }
+  ],
+  "authority": {
+    "programPrescription": "Program packages only",
+    "integrationMode": "non-prescription inert data overlay",
+    "directVideoCandidates": "review-only until manually validated",
+    "privateThumbnailProvenance": "must not be exposed as public runtime storage URLs"
+  }
+}
