@@ -1,0 +1,137 @@
+name: Exercise Intelligence Active Program Coverage Audit
+
+on:
+  push:
+    branches:
+      - main
+      - exercise-intelligence-active-program-coverage-v1
+    paths:
+      - 'overlays/exercise-intelligence/active-program-coverage-supplement-v1.json'
+      - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.css'
+      - 'ci/install-exercise-intelligence-v1.sh'
+      - 'ci/install-exercise-intelligence-v2-supplement.sh'
+      - 'ci/install-exercise-intelligence-active-program-coverage-v1.sh'
+      - 'ci/install-exercise-intelligence-library-v1.sh'
+      - 'ci/install-exercise-intelligence-coach-v1.sh'
+      - 'ci/install-exercise-intelligence-coach-substitutions-v1.sh'
+      - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - 'ci/audit-exercise-intelligence-production-v1.sh'
+      - 'ci/audit-exercise-intelligence-library-production-v1.sh'
+      - '.github/workflows/exercise-intelligence-active-program-coverage-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/active-program-coverage-supplement-v1.json'
+      - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.css'
+      - 'ci/install-exercise-intelligence-v1.sh'
+      - 'ci/install-exercise-intelligence-v2-supplement.sh'
+      - 'ci/install-exercise-intelligence-active-program-coverage-v1.sh'
+      - 'ci/install-exercise-intelligence-library-v1.sh'
+      - 'ci/install-exercise-intelligence-coach-v1.sh'
+      - 'ci/install-exercise-intelligence-coach-substitutions-v1.sh'
+      - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - 'ci/audit-exercise-intelligence-production-v1.sh'
+      - 'ci/audit-exercise-intelligence-library-production-v1.sh'
+      - '.github/workflows/exercise-intelligence-active-program-coverage-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  active-program-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Audit active-program source contract
+        run: |
+          set -euo pipefail
+          bash -n ci/install-exercise-intelligence-active-program-coverage-v1.sh
+          bash -n ci/install-exercise-intelligence-library-v1.sh
+          bash -n ci/audit-exercise-intelligence-production-v1.sh
+          bash -n ci/audit-exercise-intelligence-library-production-v1.sh
+          node --check overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
+          node - <<'NODE'
+          const fs = require('fs');
+          const s = JSON.parse(fs.readFileSync('overlays/exercise-intelligence/active-program-coverage-supplement-v1.json', 'utf8'));
+          const ids = new Set((s.exercises || []).map((item) => item.id));
+          const expected = new Set([
+            '90-90-hip-mobility','box-jump','box-squat','broad-jump','explosive-push-up',
+            'finger-extension','hip-airplane','kb-dead-stop-swing','medicine-ball-chest-pass',
+            'rack-pull','reverse-lunge','snatch-grip-rdl','sorenson-hold','trap-3-raise'
+          ]);
+          if (s.baseSchemaVersion !== '1.1-black-crown-v2-1') throw new Error('base schema mismatch');
+          if (s.finalSchemaVersion !== '1.2-active-program-coverage') throw new Error('final schema mismatch');
+          if (s.baseCounts?.exercises !== 94 || s.baseCounts?.substitutionRules !== 27) throw new Error('base counts mismatch');
+          if (s.finalCounts?.exercises !== 108 || s.finalCounts?.substitutionRules !== 27) throw new Error('final counts mismatch');
+          if (ids.size !== 14 || [...expected].some((id) => !ids.has(id))) throw new Error('14-record active-program ID set mismatch');
+          if ((s.substitutionRules || []).length !== 0) throw new Error('active-program supplement must add zero substitution rules');
+          if ((s.compoundProgramDisplayNames || []).length !== 13) throw new Error('expected 13 intentional compound labels');
+          console.log('Active-program Exercise Intelligence source contract: PASS');
+          NODE
+
+      - name: Build governed program shell
+        run: bash ci/build-command-v2-v2-1.sh
+
+      - name: Install base Exercise Intelligence
+        run: bash ci/install-exercise-intelligence-v1.sh
+
+      - name: Install Black Crown v2.1 Exercise Intelligence supplement
+        run: bash ci/install-exercise-intelligence-v2-supplement.sh
+
+      - name: Install active-program Exercise Intelligence supplement
+        run: bash ci/install-exercise-intelligence-active-program-coverage-v1.sh
+
+      - name: Verify 108-record identity coverage before UI layers
+        run: |
+          DATA=.build-src/letmefly_app/dist/data/exercise-intelligence-v1.json node - <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync(process.env.DATA, 'utf8'));
+          if (data.schemaVersion !== '1.2-active-program-coverage') throw new Error('schema is not active-program coverage');
+          const expectedCounts = {exercises:108, substitutionRules:27, roleCoverage:108, coachingCoverage:108, readyForReview:108};
+          for (const [key, value] of Object.entries(expectedCounts)) {
+            if (data.counts?.[key] !== value) throw new Error(`${key} mismatch: ${data.counts?.[key]} != ${value}`);
+          }
+          if ((data.compoundProgramDisplayNames || []).length !== 13) throw new Error('compound display-name count mismatch');
+          if ((data.substitutionRules || []).length !== 27) throw new Error('substitution rule delta detected');
+          console.log('Active-program Exercise Intelligence data: PASS (108/27/108/108/108)');
+          NODE
+
+      - name: Install full catalog and governed Coach layers
+        run: |
+          bash ci/install-exercise-intelligence-library-v1.sh
+          bash ci/install-exercise-intelligence-coach-v1.sh
+          bash ci/install-exercise-intelligence-coach-substitutions-v1.sh
+          bash ci/install-exercise-intelligence-substitutions-v1.sh
+
+      - name: Run final Exercise Intelligence production audits
+        run: |
+          bash ci/audit-exercise-intelligence-production-v1.sh
+          bash ci/audit-exercise-intelligence-library-production-v1.sh
+
+      - name: Confirm program prescription authority is unchanged
+        run: |
+          set -euo pipefail
+          grep -Fq 'program-packages-only' .build-src/letmefly_app/dist/ui/exercise-intelligence-runtime-v1.js
+          grep -Fq 'PROGRAM PRESCRIPTION LOCKED' .build-src/letmefly_app/dist/ui/exercise-intelligence-coach-v1.js
+          grep -Fq 'PROGRAM PRESCRIPTION LOCKED' .build-src/letmefly_app/dist/ui/exercise-intelligence-substitutions-v1.js
+          ! grep -Fq 'localStorage' .build-src/letmefly_app/dist/ui/exercise-intelligence-library-v1.js
+          ! grep -Fq 'data-action="apply' .build-src/letmefly_app/dist/ui/exercise-intelligence-library-v1.js
+          echo 'Active-program Exercise Intelligence prescription boundary: PASS'
