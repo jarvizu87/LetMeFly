@@ -40,8 +40,11 @@ jobs:
       - name: Install read-only Exercise Intelligence runtime
         run: bash ci/install-exercise-intelligence-v1.sh
 
-      - name: Install Exercise Intelligence set-focus Coach
+      - name: Install Exercise Intelligence descriptive Coach
         run: bash ci/install-exercise-intelligence-coach-v1.sh
+
+      - name: Install governed Coach substitution guidance
+        run: bash ci/install-exercise-intelligence-coach-substitutions-v1.sh
 
       - name: Install governed Exercise Intelligence substitution viewer
         run: bash ci/install-exercise-intelligence-substitutions-v1.sh
