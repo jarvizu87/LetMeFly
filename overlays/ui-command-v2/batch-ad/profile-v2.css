@@ -1,0 +1,133 @@
+/* LetMeFly Profile v2 — private athlete dossier
+   Presentation + private athlete context only. Governed programs are read-only here. */
+
+body.lmf-profile-v2-active{
+  --pf-red:#ff2444;
+  --pf-purple:#8f67ff;
+  --pf-green:#51dda9;
+  --pf-line:#273640;
+  --pf-panel:#081118;
+  --pf-panel-2:#0b151d;
+  --pf-muted:#84939d;
+}
+
+.lmf-profile-v2{display:grid;gap:12px;margin:12px 0 18px}
+.lmf-profile-v2 *{box-sizing:border-box}
+
+.lmf-profile-v2-head{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;
+  min-height:112px;padding:18px;border:1px solid #2a3943;border-radius:12px;
+  background:
+    radial-gradient(circle at 88% 18%,rgba(143,103,255,.15),transparent 32%),
+    radial-gradient(circle at 8% 110%,rgba(255,36,68,.13),transparent 36%),
+    linear-gradient(145deg,#0b151d,#050a0e 70%);
+  box-shadow:0 15px 32px rgba(0,0,0,.28)
+}
+.lmf-profile-v2-identity{display:grid;grid-template-columns:64px minmax(0,1fr);gap:13px;align-items:center;min-width:0}
+.lmf-profile-v2-avatar{width:64px;height:64px;display:grid;place-items:center;border-radius:50%;border:1px solid #3d4d58;background:linear-gradient(145deg,#151f28,#080e13);box-shadow:0 0 0 4px rgba(255,255,255,.025),0 0 24px rgba(255,36,68,.12);color:#fff;font:900 21px/1 system-ui,sans-serif;letter-spacing:.04em}
+.lmf-profile-v2-identity span,.lmf-profile-section-title>span,.lmf-profile-program-card span{display:block;color:var(--pf-red);font:800 8px/1.2 system-ui,sans-serif;letter-spacing:.16em}
+.lmf-profile-v2-identity h2{margin:4px 0 3px;color:#f5f7f8;font:900 24px/1 system-ui,sans-serif;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lmf-profile-v2-identity p{margin:0;color:#87959e;font:500 10px/1.45 system-ui,sans-serif}
+
+.lmf-profile-completion{--profile-completion:0deg;width:66px;height:66px;display:grid;place-items:center;align-content:center;border-radius:50%;background:radial-gradient(circle at center,#091117 57%,transparent 59%),conic-gradient(var(--pf-red) 0 var(--profile-completion),#24313a var(--profile-completion) 360deg);box-shadow:0 0 0 1px #263640;color:#fff}
+.lmf-profile-completion strong{font:900 15px/1 system-ui,sans-serif}
+.lmf-profile-completion small{margin-top:4px;color:#7e8c95;font:800 5.5px/1 system-ui,sans-serif;letter-spacing:.13em}
+
+.lmf-profile-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.lmf-profile-stat{min-width:0;min-height:68px;display:flex;gap:8px;align-items:center;padding:10px;border:1px solid #26343e;border-radius:9px;background:linear-gradient(150deg,#0a141b,#060c10)}
+.lmf-profile-stat i{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:7px;background:#101a22;border:1px solid #2c3b46;color:var(--pf-red);font-style:normal;font-size:13px}
+.lmf-profile-stat div{min-width:0;display:grid;gap:3px}
+.lmf-profile-stat strong{color:#f3f6f7;font:900 14px/1 system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lmf-profile-stat small{color:#74838c;font:700 6.5px/1.15 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+
+.lmf-profile-program-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid #2a3944;border-left:3px solid var(--pf-red);border-radius:9px;background:linear-gradient(90deg,#0b151d,#071017)}
+.lmf-profile-program-card h3{margin:4px 0 3px;color:#f4f6f7;font:900 18px/1.05 system-ui,sans-serif}
+.lmf-profile-program-card p{margin:0;color:#8c9aa3;font:600 9px/1.35 system-ui,sans-serif}
+.lmf-profile-program-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.lmf-profile-program-actions a,.lmf-profile-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid #34454f;border-radius:6px;background:#0b151c;color:#dfe5e8;font:800 7px/1 system-ui,sans-serif;letter-spacing:.08em;min-height:31px;padding:0 10px}
+.lmf-profile-program-actions a:first-child{border-color:rgba(255,36,68,.45);color:#fff}
+
+.lmf-profile-section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:7px 2px -4px}
+.lmf-profile-section-title>small{color:#697780;font:600 7px/1.2 system-ui,sans-serif;text-align:right}
+
+.lmf-profile-form-card,.lmf-profile-strength-card{display:grid;gap:11px;padding:14px;border:1px solid #263640;border-radius:10px;background:linear-gradient(150deg,var(--pf-panel-2),var(--pf-panel));box-shadow:0 10px 28px rgba(0,0,0,.18)}
+.lmf-profile-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lmf-profile-form-grid.compact{grid-template-columns:repeat(4,minmax(0,1fr))}
+.lmf-profile-field{display:grid;gap:6px;min-width:0}
+.lmf-profile-field>span{color:#8d9aa3;font:800 7px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.08em}
+.lmf-profile-field input,.lmf-profile-field textarea{width:100%;min-width:0;border:1px solid #30414c;border-radius:7px;background:#050b0f;color:#f0f3f5;outline:none;font:650 12px/1.35 system-ui,sans-serif;padding:10px 11px;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.lmf-profile-field input{height:41px}
+.lmf-profile-field textarea{min-height:82px;resize:vertical}
+.lmf-profile-field input:focus,.lmf-profile-field textarea:focus{border-color:rgba(255,36,68,.72);box-shadow:0 0 0 3px rgba(255,36,68,.08);background:#071017}
+.lmf-profile-field input[readonly]{color:#87959e;background:#081015;border-style:dashed}
+.lmf-profile-field small{color:#63717a;font:600 7px/1.35 system-ui,sans-serif}
+.lmf-profile-field input::placeholder,.lmf-profile-field textarea::placeholder{color:#4e5b63;opacity:1}
+
+.lmf-profile-lifts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.lmf-profile-lifts>div{display:grid;gap:5px;min-height:58px;padding:10px;border:1px solid #263640;border-radius:7px;background:#071017}
+.lmf-profile-lifts span{color:#7f8d96;font:700 7px/1.15 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lmf-profile-lifts strong{color:#f2f5f6;font:900 14px/1 system-ui,sans-serif}
+.lmf-profile-empty{padding:13px;border:1px dashed #2e3d47;border-radius:7px;color:#7f8d96;font:600 10px/1.45 system-ui,sans-serif;text-align:center}
+.lmf-profile-link{justify-self:end;margin-top:1px;color:#fff;border-color:rgba(143,103,255,.42);background:linear-gradient(90deg,rgba(143,103,255,.10),#0b151c)}
+.lmf-profile-link b{margin-left:9px;color:var(--pf-purple);font-size:14px}
+
+.lmf-profile-savebar{position:sticky;bottom:76px;z-index:9;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 13px;border:1px solid #34444f;border-radius:10px;background:rgba(5,10,14,.94);backdrop-filter:blur(14px);box-shadow:0 16px 40px rgba(0,0,0,.42)}
+.lmf-profile-savebar>div{min-width:0;display:grid;gap:3px}
+.lmf-profile-savebar strong{color:#f3f6f7;font:800 11px/1 system-ui,sans-serif}
+.lmf-profile-savebar small{color:#75848d;font:600 7.5px/1.25 system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lmf-profile-savebar button{min-height:39px;border:1px solid #ff3552;border-radius:7px;background:linear-gradient(180deg,#ff2948,#d80f30);box-shadow:0 8px 20px rgba(255,28,60,.18);color:white;font:900 8px/1 system-ui,sans-serif;letter-spacing:.07em;padding:0 14px;cursor:pointer}
+.lmf-profile-savebar button:disabled{opacity:.52;cursor:wait}
+
+/* Keep the legacy identity/vault tools available, but make Profile v2 the primary dossier. */
+body.lmf-profile-v2-active .profile-card{border-color:#24343e!important}
+body.lmf-profile-v2-active .profile-card .page-kicker{color:#7d8b94!important}
+body.lmf-profile-v2-active .profile-hero{margin-bottom:0!important}
+
+@media(max-width:780px){
+  .lmf-profile-v2{gap:10px;margin-top:10px}
+  .lmf-profile-v2-head{padding:14px;min-height:105px}
+  .lmf-profile-v2-identity{grid-template-columns:56px minmax(0,1fr);gap:11px}
+  .lmf-profile-v2-avatar{width:56px;height:56px;font-size:18px}
+  .lmf-profile-v2-identity h2{font-size:21px}
+  .lmf-profile-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .lmf-profile-stat{min-height:63px}
+  .lmf-profile-form-grid.compact{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lmf-profile-lifts{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:520px){
+  .lmf-profile-v2{margin-left:0;margin-right:0;padding-bottom:6px}
+  .lmf-profile-v2-head{grid-template-columns:minmax(0,1fr) 58px;gap:9px;padding:12px;border-radius:9px}
+  .lmf-profile-v2-identity{grid-template-columns:48px minmax(0,1fr);gap:9px}
+  .lmf-profile-v2-avatar{width:48px;height:48px;font-size:16px}
+  .lmf-profile-v2-identity h2{font-size:18px}
+  .lmf-profile-v2-identity p{font-size:8px;line-height:1.35}
+  .lmf-profile-completion{width:56px;height:56px}
+  .lmf-profile-completion strong{font-size:13px}
+  .lmf-profile-stat{padding:9px;gap:7px}
+  .lmf-profile-stat i{width:27px;height:27px;flex-basis:27px;font-size:11px}
+  .lmf-profile-stat strong{font-size:12px}
+  .lmf-profile-program-card{grid-template-columns:1fr;gap:9px;padding:12px}
+  .lmf-profile-program-actions{justify-content:flex-start}
+  .lmf-profile-program-actions a{min-height:29px}
+  .lmf-profile-section-title{align-items:center;margin-top:6px}
+  .lmf-profile-section-title>small{font-size:6.2px;max-width:52%}
+  .lmf-profile-form-card,.lmf-profile-strength-card{padding:11px;gap:10px;border-radius:8px}
+  .lmf-profile-form-grid,.lmf-profile-form-grid.compact{grid-template-columns:1fr;gap:10px}
+  .lmf-profile-field input{height:43px;font-size:12px}
+  .lmf-profile-field textarea{min-height:88px;font-size:11px}
+  .lmf-profile-lifts{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .lmf-profile-lifts>div{min-height:55px;padding:9px}
+  .lmf-profile-lifts strong{font-size:12px}
+  .lmf-profile-savebar{bottom:72px;padding:10px;gap:8px}
+  .lmf-profile-savebar button{min-height:40px;padding:0 10px;font-size:7px}
+}
+
+@media(max-width:360px){
+  .lmf-profile-v2-head{grid-template-columns:1fr}
+  .lmf-profile-completion{position:absolute;right:22px;margin-top:2px}
+  .lmf-profile-v2-identity{padding-right:58px}
+  .lmf-profile-stat-grid,.lmf-profile-lifts{grid-template-columns:1fr}
+  .lmf-profile-savebar{grid-template-columns:1fr;bottom:70px}
+  .lmf-profile-savebar button{width:100%}
+}
