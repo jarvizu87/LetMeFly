@@ -1,0 +1,123 @@
+name: Exercise Intelligence Substitution Viewer Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.css'
+      - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - '.github/workflows/exercise-intelligence-substitution-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.css'
+      - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - '.github/workflows/exercise-intelligence-substitution-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Audit read-only substitution boundary
+        run: |
+          set -euo pipefail
+          JS='overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
+          CSS='overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.css'
+          node --check "$JS"
+          bash -n ci/install-exercise-intelligence-substitutions-v1.sh
+          test -s "$CSS"
+          grep -Fq 'data-substitute' "$JS"
+          grep -Fq 'getSubstitutions' "$JS"
+          grep -Fq 'includeBlocked: true' "$JS"
+          grep -Fq 'NOT A DEFAULT SUBSTITUTE' "$JS"
+          grep -Fq 'FUTURE LIBRARY CANDIDATES' "$JS"
+          grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$JS"
+          grep -Fq 'VIEW ONLY' "$JS"
+          grep -Fq '.lmf-sub-modal' "$CSS"
+          ! grep -Fq 'localStorage' "$JS"
+          ! grep -Fq 'sessionStorage' "$JS"
+          ! grep -Fq 'indexedDB' "$JS"
+          ! grep -Fq 'data-action="apply' "$JS"
+          echo 'Exercise Intelligence substitution viewer boundary audit: PASS'
+
+      - name: Verify governed rule classifications
+        run: |
+          node overlays/exercise-intelligence/materialize.mjs --output=/tmp/exercise-intelligence-v1.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/exercise-intelligence-v1.json', 'utf8'));
+          const rules = payload.substitutionRules;
+          const byStatus = rules.reduce((map, rule) => {
+            map[rule.promotionStatus] = (map[rule.promotionStatus] || 0) + 1;
+            return map;
+          }, {});
+          const expected = {
+            'PROMOTE CORE': 7,
+            'PROMOTE CONTEXTUAL': 9,
+            'PROMOTE SLOT-LEVEL': 5,
+            'LIBRARY CANDIDATE': 2,
+            'DO NOT DEFAULT': 2,
+          };
+          for (const [status, count] of Object.entries(expected)) {
+            if (byStatus[status] !== count) throw new Error(`${status}: expected ${count}, got ${byStatus[status] || 0}`);
+          }
+          const blocked = rules.filter((rule) => rule.promotionStatus === 'DO NOT DEFAULT');
+          const blockedIds = blocked.map((rule) => `${rule.primaryExerciseId}->${rule.alternativeExerciseId}`).sort();
+          const expectedBlocked = ['overhead-press->push-press', 'romanian-deadlift->hamstring-curl'].sort();
+          if (JSON.stringify(blockedIds) !== JSON.stringify(expectedBlocked)) {
+            throw new Error(`blocked substitution set changed: ${blockedIds.join(', ')}`);
+          }
+          if (rules.filter((rule) => rule.alternativeInCurrentApp).length !== 23) {
+            throw new Error('expected 23 substitution rules whose alternatives are in the current app');
+          }
+          console.log('Exercise Intelligence governed substitution classification audit: PASS');
+          NODE
+
+      - name: Smoke-test substitution installer and offline resources
+        run: |
+          set -euo pipefail
+          TEST_DIST="$(mktemp -d)"
+          trap 'rm -rf "$TEST_DIST"' EXIT
+          mkdir -p "$TEST_DIST/data" "$TEST_DIST/ui"
+          cat > "$TEST_DIST/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head><meta charset="utf-8"><title>LMF substitution smoke test</title></head>
+            <body><div id="app"></div><script defer src="/ui/exercise-intelligence-runtime-v1.js"></script></body>
+          </html>
+          HTML
+          cat > "$TEST_DIST/service-worker.js" <<'JS'
+          const CACHE_NAME = 'lmf-substitution-smoke-test'
+          const PRECACHE = ['/', '/manifest.webmanifest', '/data/exercise-intelligence-v1.json', '/ui/exercise-intelligence-runtime-v1.js']
+          function isPrivateOrAuth(request) {
+            const url = new URL(request.url)
+            if (url.hostname.endsWith('.supabase.co')) return true
+            if (/\/auth\/v1\//.test(url.pathname)) return true
+            return false
+          }
+          JS
+          printf '%s\n' '{"integrationStatus":"READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION"}' > "$TEST_DIST/data/exercise-intelligence-v1.json"
+          printf '%s\n' 'window.LetMeFlyExerciseIntelligence = Object.freeze({});' > "$TEST_DIST/ui/exercise-intelligence-runtime-v1.js"
+          bash ci/install-exercise-intelligence-substitutions-v1.sh "$TEST_DIST"
+          test -f "$TEST_DIST/ui/exercise-intelligence-substitutions-v1.js"
+          test -f "$TEST_DIST/ui/exercise-intelligence-substitutions-v1.css"
+          grep -Fq '/ui/exercise-intelligence-substitutions-v1.js' "$TEST_DIST/index.html"
+          grep -Fq '/ui/exercise-intelligence-substitutions-v1.css' "$TEST_DIST/index.html"
+          grep -Fq "'/ui/exercise-intelligence-substitutions-v1.js'" "$TEST_DIST/service-worker.js"
+          grep -Fq "'/ui/exercise-intelligence-substitutions-v1.css'" "$TEST_DIST/service-worker.js"
+          echo 'Exercise Intelligence substitution installer + offline smoke test: PASS'
