@@ -73,3 +73,24 @@ jobs:
           if (blocked.length !== 2) throw new Error('expected 2 default-blocked substitutions');
           console.log('Exercise Intelligence materialized payload audit: PASS');
           NODE
+
+      - name: Smoke-test runtime installer
+        run: |
+          TEST_DIST="$(mktemp -d)"
+          trap 'rm -rf "$TEST_DIST"' EXIT
+          cat > "$TEST_DIST/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head><meta charset="utf-8"><title>LMF installer smoke test</title></head>
+            <body><div id="app"></div></body>
+          </html>
+          HTML
+          bash ci/install-exercise-intelligence-v1.sh "$TEST_DIST"
+          test -f "$TEST_DIST/data/exercise-intelligence-v1.json"
+          test -f "$TEST_DIST/ui/exercise-intelligence-runtime-v1.js"
+          test -f "$TEST_DIST/ui/exercise-intelligence-ui-v1.js"
+          test -f "$TEST_DIST/ui/exercise-intelligence-ui-v1.css"
+          grep -Fq '/ui/exercise-intelligence-runtime-v1.js' "$TEST_DIST/index.html"
+          grep -Fq '/ui/exercise-intelligence-ui-v1.js' "$TEST_DIST/index.html"
+          grep -Fq '/ui/exercise-intelligence-ui-v1.css' "$TEST_DIST/index.html"
+          echo 'Exercise Intelligence installer smoke test: PASS'
