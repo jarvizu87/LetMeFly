@@ -71,7 +71,7 @@ jobs:
         run: bash ci/install-mobile-recording-regression-v1.sh
 
       - name: Audit all programs, governed days, screens, tabs, features, and full mock training cycle
-        run: node ci/audit-full-app-cycle.mjs .build-src/letmefly_app
+        run: node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
 
       - name: Audit final Exercise Intelligence production dist
         run: bash ci/audit-exercise-intelligence-production-v1.sh
