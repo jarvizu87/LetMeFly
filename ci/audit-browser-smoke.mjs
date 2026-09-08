@@ -17,7 +17,9 @@ const failures = []
 const warnings = []
 const screens = []
 const errors = []
-const externalNoise = /supabase|cloudinary|net::ERR_|Failed to fetch|NetworkError/i
+// Cross-origin exercise art/cloud services can legitimately decline a probe in the
+// disposable CI browser. Same-origin HTTP failures are tracked separately below.
+const externalNoise = /supabase|cloudinary|net::ERR_|Failed to fetch|NetworkError|Failed to load resource/i
 const pass = (label, detail = '') => console.log(`PASS  ${label}${detail ? ` — ${detail}` : ''}`)
 const fail = (label, detail = '') => { failures.push({ label, detail }); console.log(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`) }
 const warn = (label, detail = '') => { warnings.push({ label, detail }); console.log(`WARN  ${label}${detail ? ` — ${detail}` : ''}`) }
@@ -33,9 +35,6 @@ async function firstVisible(locator) {
 }
 
 async function clickable(page, label) {
-  // App controls frequently include an icon before the visible label (for example
-  // “⚔ TRAIN”). Match the label as a word instead of requiring the entire text node
-  // to equal it. Prefer semantic controls before falling back to a text target.
   const pattern = new RegExp(`\\b${esc(label)}\\b`, 'i')
   return await firstVisible(page.locator('nav button,nav a,nav [role="button"]').filter({ hasText: pattern }))
     || await firstVisible(page.locator('button,a,[role="button"]').filter({ hasText: pattern }))
@@ -53,7 +52,7 @@ async function clickLabel(page, label, required = true) {
     return false
   })
   if (!clicked) return false
-  await page.waitForTimeout(220)
+  await page.waitForTimeout(260)
   return true
 }
 
@@ -64,15 +63,11 @@ async function bootstrapEphemeralAthlete(page) {
     return
   }
 
-  // The browser context is disposable and is destroyed at the end of this CI run.
-  // Creating this local-only QA athlete therefore exercises first-run onboarding
-  // without touching the user’s private athlete data or any cloud account.
   const create = await clickable(page, 'CREATE LOCAL ATHLETE')
   if (!create) {
     fail('Browser athlete bootstrap', 'Create Local Athlete control not found')
     return
   }
-
   const displayInput = await firstVisible(page.locator('input[type="text"],input:not([type])'))
   if (!displayInput) {
     fail('Browser athlete bootstrap', 'display-name input not found')
@@ -102,6 +97,93 @@ async function capture(page, name) {
   screens.push({ name, file: path.basename(file), text })
 }
 
+async function auditProgressTabs(page) {
+  if (!(await clickLabel(page, 'PROGRESS'))) return
+  const tabs = page.locator('.lmf-pg-tabs')
+  const appeared = await tabs.waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false)
+  if (!appeared) {
+    fail('Progress dashboard runtime', 'Overview / Strength / Body / Conditioning / PRs navigation did not mount')
+    await capture(page, 'Progress Missing Dashboard')
+    return
+  }
+  pass('Progress dashboard runtime', 'section navigation mounted')
+  for (const tab of ['overview', 'strength', 'body', 'conditioning', 'prs']) {
+    const button = page.locator(`[data-pg-tab="${tab}"]`).first()
+    if (!(await button.isVisible().catch(() => false))) {
+      fail(`Progress ${tab} tab`, 'not found/visible')
+      continue
+    }
+    await button.click({ timeout: 5000 })
+    await page.waitForTimeout(350)
+    const selected = await button.getAttribute('aria-selected')
+    if (selected !== 'true') fail(`Progress ${tab} tab`, `aria-selected=${selected}`)
+    else pass(`Progress ${tab} tab`)
+    await capture(page, `Progress ${tab}`)
+    await assertNoOverflow(page, `Progress ${tab}`)
+  }
+}
+
+async function findDay2(page) {
+  const pattern = /^\s*D2\b/i
+  const candidates = [
+    page.locator('[data-day],[data-day-key],[data-position],[data-date],button,[role="button"]').filter({ hasText: pattern }),
+    page.getByText(pattern),
+  ]
+  for (const locator of candidates) {
+    const item = await firstVisible(locator)
+    if (item) return item
+  }
+  return null
+}
+
+async function auditFuturePreview(page) {
+  if (!(await clickLabel(page, 'TRAIN'))) return
+  await page.waitForTimeout(500)
+  const d2 = await findDay2(page)
+  if (!d2) {
+    fail('Future-day browser preview', 'D2 selector not visible after Train settled')
+    return
+  }
+  await d2.click({ timeout: 5000 })
+  await page.waitForTimeout(650)
+  const previewText = await page.locator('body').innerText()
+  if (/Preview position|Preview only/i.test(previewText) && /MAKE CURRENT POSITION/i.test(previewText)) pass('Future-day preview labeling')
+  else fail('Future-day preview labeling', 'preview warning/current-position control missing')
+
+  const forbidden = page.locator('[data-action="start-workout"],[data-action="save-readiness"]')
+  let exposedEnabled = false
+  for (let i = 0; i < await forbidden.count(); i += 1) {
+    const item = forbidden.nth(i)
+    if (await item.isVisible().catch(() => false) && await item.isEnabled().catch(() => false)) exposedEnabled = true
+  }
+  if (exposedEnabled) fail('Future-day write lock', 'enabled start/readiness action is visible')
+  else pass('Future-day write lock')
+
+  const card = page.locator('.preview-card[data-exercise-art]').first()
+  const toggle = page.locator('.lmf-preview-plan-toggle').first()
+  if (!(await card.isVisible().catch(() => false)) || !(await toggle.isVisible().catch(() => false))) {
+    fail('Future-day compact exercise card', 'compact preview card / VIEW FULL PLAN control missing')
+  } else {
+    const collapsed = await card.getAttribute('data-lmf-preview-collapsed')
+    const box = await card.boundingBox()
+    if (collapsed !== 'true') fail('Future-day compact exercise card', `default collapsed state=${collapsed}`)
+    else if (box && box.height > 190) fail('Future-day compact exercise card', `collapsed card height ${Math.round(box.height)}px is too tall`)
+    else pass('Future-day compact exercise card', box ? `${Math.round(box.height)}px tall` : 'collapsed')
+
+    await toggle.click({ timeout: 5000 })
+    await page.waitForTimeout(220)
+    const expanded = await toggle.getAttribute('aria-expanded')
+    const details = card.locator(':scope > .prescription-block')
+    if (expanded === 'true' && await details.isVisible().catch(() => false)) pass('Future-day full-plan expansion')
+    else fail('Future-day full-plan expansion', `aria-expanded=${expanded}`)
+    await toggle.click({ timeout: 5000 })
+    await page.waitForTimeout(120)
+  }
+
+  await capture(page, 'Train Future Day Preview')
+  await assertNoOverflow(page, 'Train Future Day Preview')
+}
+
 const browser = await chromium.launch({ headless: true, executablePath: chromeBin, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
 const context = await browser.newContext({ viewport: { width: 412, height: 915 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true })
 const page = await context.newPage()
@@ -125,7 +207,6 @@ try {
   await capture(page, 'Home')
   await assertNoOverflow(page, 'Home')
 
-  // Bottom navigation: every primary tab must be reachable on the production DOM.
   for (const tab of ['TRAIN', 'PROGRAM', 'PROGRESS', 'MORE', 'HOME']) {
     if (await clickLabel(page, tab)) {
       await capture(page, tab)
@@ -133,17 +214,8 @@ try {
     }
   }
 
-  // Progress sub-tabs.
-  if (await clickLabel(page, 'PROGRESS')) {
-    for (const tab of ['OVERVIEW', 'STRENGTH', 'BODY', 'CONDITIONING', 'PRS']) {
-      if (await clickLabel(page, tab)) {
-        await capture(page, `Progress ${tab}`)
-        await assertNoOverflow(page, `Progress ${tab}`)
-      }
-    }
-  }
+  await auditProgressTabs(page)
 
-  // More destinations. Return to More before each selection so the same path is exercised repeatedly.
   for (const destination of ['EXERCISES', 'COACH', 'PROFILE', 'CALENDAR']) {
     if (!(await clickLabel(page, 'MORE'))) continue
     if (await clickLabel(page, destination)) {
@@ -152,33 +224,10 @@ try {
     }
   }
 
-  // Train future-day state: selecting D2 must be a preview and must not expose an enabled write/start action.
-  if (await clickLabel(page, 'TRAIN')) {
-    const d2 = await firstVisible(page.locator('button,[role="button"]').filter({ hasText: /^\s*D2\b/i }))
-    if (!d2) warn('Future-day browser preview', 'D2 selector not visible in fresh local state')
-    else {
-      await d2.click()
-      await page.waitForTimeout(350)
-      const previewText = await page.locator('body').innerText()
-      if (/Preview position|Preview only/i.test(previewText) && /MAKE CURRENT POSITION/i.test(previewText)) pass('Future-day preview labeling')
-      else fail('Future-day preview labeling', 'preview warning/current-position control missing')
+  await auditFuturePreview(page)
 
-      const forbidden = page.locator('[data-action="start-workout"],[data-action="save-readiness"]')
-      let exposedEnabled = false
-      for (let i = 0; i < await forbidden.count(); i += 1) {
-        const item = forbidden.nth(i)
-        if (await item.isVisible().catch(() => false) && await item.isEnabled().catch(() => false)) exposedEnabled = true
-      }
-      if (exposedEnabled) fail('Future-day write lock', 'enabled start/readiness action is visible')
-      else pass('Future-day write lock')
-      await capture(page, 'Train Future Day Preview')
-      await assertNoOverflow(page, 'Train Future Day Preview')
-    }
-  }
-
-  // Narrow Galaxy/older-phone width sanity pass.
   await page.setViewportSize({ width: 360, height: 800 })
-  await page.waitForTimeout(120)
+  await page.waitForTimeout(180)
   await assertNoOverflow(page, '360px mobile shell')
   await capture(page, 'Train 360px')
 } finally {
