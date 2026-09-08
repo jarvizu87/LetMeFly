@@ -124,7 +124,7 @@
     }
 
     const resultLabel = document.querySelector('.exercise-results span');
-    if (resultLabel) resultLabel.textContent = 'governed catalog movements';
+    if (resultLabel) resultLabel.textContent = 'visible library entries';
 
     const noResults = document.getElementById('exercise-no-results');
     if (noResults) noResults.textContent = 'No governed exercises match this search and filter.';
@@ -138,7 +138,7 @@
       summary.className = 'lmf-intel-catalog-summary';
       searchCard.parentNode?.insertBefore(summary, searchCard);
     }
-    summary.innerHTML = `<strong>FULL GOVERNED CATALOG</strong><span>${intelligence.counts.exercises} canonical exercises • ${existingResolved} already represented by program-driven cards • ${addedCount} catalog-only card${addedCount === 1 ? '' : 's'} added safely.</span>`;
+    summary.innerHTML = `<strong>FULL GOVERNED CATALOG</strong><span>${intelligence.counts.exercises} canonical exercises • ${existingResolved} canonical records already represented by program-driven cards • ${addedCount} catalog-only canonical card${addedCount === 1 ? '' : 's'} appended safely • programmed aliases remain visible.</span>`;
   }
 
   function applyFilters() {
