@@ -96,6 +96,32 @@ html.lmf-preview-mode .readiness-panel .readiness-graphic{
   margin-bottom:10px!important;
 }
 
+/* Review remains reachable mid-session, but an unfinished workout should never
+   present an ordinary COMPLETE WORKOUT affordance. The existing confirmation
+   remains the persistence guard; this makes the intent obvious before the tap. */
+.lmf-incomplete-review-note{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:14px 0;
+  padding:12px 14px;
+  border:1px solid rgba(255,180,68,.34);
+  border-radius:12px;
+  background:rgba(255,180,68,.07);
+  color:#c7d0d9;
+  font-size:13px;
+  line-height:1.35;
+}
+.lmf-incomplete-review-note strong{
+  color:#f4f7fa;
+  white-space:nowrap;
+}
+.review-panel [data-action="complete-workout"].lmf-end-early{
+  border-color:rgba(255,180,68,.58)!important;
+  box-shadow:none!important;
+}
+
 @media(max-width:420px){
   .workout-panel .exercise-stack .preview-card[data-exercise-art]{
     grid-template-columns:92px minmax(0,1fr)!important;
@@ -108,5 +134,10 @@ html.lmf-preview-mode .readiness-panel .readiness-graphic{
     height:92px!important;
     min-height:92px!important;
     border-radius:12px!important;
+  }
+  .lmf-incomplete-review-note{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:4px;
   }
 }
