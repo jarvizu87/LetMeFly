@@ -72,10 +72,9 @@ cp "$CSS_V3_SOURCE" "$DIST_DIR/ui/progress-dashboard-v3.css"
 #
 # The rebuilt production shell no longer guarantees that the visible PROGRESS
 # label is an h1/h2/h3 or that #progress-content exists. Make the base dashboard
-# route-aware itself: on #/progress it creates the same semantic clipped anchor
-# inside the live app surface. The guard remains a second safety layer, but the
-# dashboard no longer depends on presentation markup or on the guard winning a
-# route-render timing race.
+# route-aware itself, and give the base runtime its own deterministic route
+# pulse. This removes the remaining timing dependency on a heading mutation or
+# on the secondary mount guard winning a race with the SPA route renderer.
 PROGRESS_JS="$DIST_DIR/ui/progress-dashboard-v1.js" python - <<'PY'
 from pathlib import Path
 import os
@@ -99,6 +98,12 @@ new_heading = "function progressHeading() { const visibleHeading=[...document.qu
 if text.count(old_heading) != 1:
     raise SystemExit(f'Progress route-aware mount patch expected one source block, found {text.count(old_heading)}')
 text = text.replace(old_heading, new_heading, 1)
+
+old_boot = "  function boot(){\n    queueScan()"
+new_boot = "  function boot(){\n    window.__LMF_PROGRESS_BOOT__={version:1,refresh:()=>queueRender(true),scan:()=>queueScan()}\n    const routePulse=()=>{queueRender(true);window.setTimeout(()=>queueRender(true),180);window.setTimeout(()=>queueRender(true),650)}\n    window.addEventListener('hashchange',routePulse)\n    window.addEventListener('popstate',routePulse)\n    queueScan()"
+if text.count(old_boot) != 1:
+    raise SystemExit(f'Progress deterministic route boot patch expected one source block, found {text.count(old_boot)}')
+text = text.replace(old_boot, new_boot, 1)
 p.write_text(text)
 PY
 
@@ -108,14 +113,16 @@ import os, re
 
 p = Path(os.environ['DIST_DIR']) / 'index.html'
 text = p.read_text()
-# Remove any older unversioned/versioned mount guard include before inserting v5.
+# Always replace older Progress runtime/guard tags so both CI and installed PWAs
+# receive the deterministic route-boot runtime rather than an unversioned cache.
+text = re.sub(r'\s*<script defer src="/ui/progress-dashboard-v1\.js(?:\?v=\d+)?"></script>\s*', '\n', text)
 text = re.sub(r'\s*<script defer src="/ui/progress-dashboard-mount-guard\.js(?:\?v=\d+)?"></script>\s*', '\n', text)
 css1 = '<link rel="stylesheet" href="/ui/progress-dashboard-v1.css">'
 css2 = '<link rel="stylesheet" href="/ui/progress-dashboard-v2.css">'
 css3 = '<link rel="stylesheet" href="/ui/progress-dashboard-v3.css">'
-js1 = '<script defer src="/ui/progress-dashboard-v1.js"></script>'
+js1 = '<script defer src="/ui/progress-dashboard-v1.js?v=6"></script>'
 js3 = '<script defer src="/ui/progress-dashboard-v3-polish.js"></script>'
-jsg = '<script defer src="/ui/progress-dashboard-mount-guard.js?v=5"></script>'
+jsg = '<script defer src="/ui/progress-dashboard-mount-guard.js?v=6"></script>'
 for css in (css1, css2, css3):
     if css not in text:
         if '</head>' not in text:
@@ -140,9 +147,9 @@ test -s "$DIST_DIR/ui/progress-dashboard-v3.css"
 grep -Fq '/ui/progress-dashboard-v1.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v2.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v3.css' "$DIST_DIR/index.html"
-grep -Fq '/ui/progress-dashboard-v1.js' "$DIST_DIR/index.html"
+grep -Fq '/ui/progress-dashboard-v1.js?v=6' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v3-polish.js' "$DIST_DIR/index.html"
-grep -Fq '/ui/progress-dashboard-mount-guard.js?v=5' "$DIST_DIR/index.html"
+grep -Fq '/ui/progress-dashboard-mount-guard.js?v=6' "$DIST_DIR/index.html"
 grep -Fq 'PROGRESS DASHBOARD' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'Private vault data' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'never rewrite programming' "$DIST_DIR/ui/progress-dashboard-v1.js"
@@ -150,9 +157,11 @@ grep -Fq 'if(timer&&!force)return' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'activeTab=next;writeSetting(TAB_KEY,next);queueRender(true)' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq "document.querySelector('[data-lmf-progress-anchor=\"true\"]')" "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq "location.hash||''" "$DIST_DIR/ui/progress-dashboard-v1.js"
+grep -Fq '__LMF_PROGRESS_BOOT__' "$DIST_DIR/ui/progress-dashboard-v1.js"
+grep -Fq "window.addEventListener('hashchange',routePulse)" "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'progressRouteActive' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 grep -Fq '__LMF_PROGRESS_POLISH__' "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
 grep -Fq 'data-lmf-progress-anchor' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 grep -Fq 'window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID)' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 
-echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + self-mounting route-aware runtime/tab guard: PASS"
+echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + deterministic route-boot runtime/tab guard: PASS"
