@@ -184,7 +184,13 @@
     }
 
     library.dataset[CATALOG_ATTR] = versionKey;
+    activeFilter = 'all';
     ensureExtraFilters();
+    document.querySelectorAll('[data-exercise-filter]').forEach((button) => {
+      const active = button.getAttribute('data-exercise-filter') === 'all';
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
     updatePageCopy(intelligence, missing.length, seen.size);
     applyFilters();
   }
