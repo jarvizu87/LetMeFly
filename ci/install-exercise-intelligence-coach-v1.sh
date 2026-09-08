@@ -27,6 +27,8 @@ grep -Fq 'sessionStorage' "$COACH_SOURCE"
 grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$COACH_SOURCE"
 grep -Fq 'data-action="go-coach"' "$COACH_SOURCE"
 grep -Fq 'focusQuestion' "$COACH_SOURCE"
+grep -Fq 'whyQuestion' "$COACH_SOURCE"
+grep -Fq 'muscleQuestion' "$COACH_SOURCE"
 
 mkdir -p "$DIST_DIR/ui"
 cp "$COACH_SOURCE" "$COACH_OUT"
@@ -65,7 +67,7 @@ if text.index(runtime) > text.index(coach_js):
 p.write_text(text.rstrip() + '\n')
 PY
 
-# Set-focus coaching is public-shell knowledge and remains useful offline.
+# Descriptive exercise coaching is public-shell knowledge and remains useful offline.
 SW_FILE="$SW_FILE" python - <<'PY'
 from pathlib import Path
 import os
@@ -95,10 +97,12 @@ grep -Fq '/ui/exercise-intelligence-coach-v1.js' "$DIST_DIR/index.html"
 grep -Fq '/ui/exercise-intelligence-coach-v1.css' "$DIST_DIR/index.html"
 grep -Fq "'/ui/exercise-intelligence-coach-v1.js'" "$SW_FILE"
 grep -Fq "'/ui/exercise-intelligence-coach-v1.css'" "$SW_FILE"
-grep -Fq 'SET COACHING CONTEXT' "$COACH_OUT"
+grep -Fq 'EXERCISE COACHING CONTEXT' "$COACH_OUT"
+grep -Fq 'Why ' "$COACH_OUT"
+grep -Fq 'Muscle Emphasis' "$COACH_OUT"
 grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$COACH_OUT"
 grep -Fq '.lmf-coach-intel-context' "$COACH_CSS_OUT"
 ! grep -Fq 'localStorage' "$COACH_OUT"
 ! grep -Fq 'data-substitute' "$COACH_OUT"
 
-echo "LetMeFly Exercise Intelligence set-focus Coach integration: PASS"
+echo "LetMeFly Exercise Intelligence descriptive Coach integration: PASS"
