@@ -1,0 +1,30 @@
+{
+  "program": "Black Crown Revised",
+  "version": "v2.1",
+  "baseVersion": "v2.0",
+  "revisionType": "intentional-book-informed-program-edit",
+  "affectedWeeks": [25, 26, 27, 28, 29],
+  "affectedDay": 5,
+  "replacement": {
+    "remove": "Chest-Supported Row 2x8–10 from the later Day-5 structural-support slot",
+    "preserve": "Primary Chest-Supported Row 4x8–10 and Lat Pulldown 2–3x8–10",
+    "addInSameSlot": "Machine Hip Abduction 2x15–25 @ RPE 7–8, 45–60 sec rest",
+    "fallbacks": [
+      "Seated Band Hip Abduction",
+      "Mini-Band Lateral Walk"
+    ]
+  },
+  "setCountPolicy": "replacement-only-no-added-slot",
+  "protected": [
+    "Crownforge",
+    "Crown Maintenance",
+    "Black Crown Weeks 1–24",
+    "Black Crown Week 30",
+    "Black Crown Weeks 31–54",
+    "54 weeks / 270 sessions",
+    "42 Strict OHP exposures",
+    "test/check/opener schedule",
+    "TM and percentage loading governance",
+    "Day-4 recovery identity"
+  ]
+}

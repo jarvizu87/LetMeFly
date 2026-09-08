@@ -13,7 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       # CI validates the build path only. Netlify injects the real browser-safe
       # Supabase URL and publishable key for production builds.
@@ -31,14 +31,17 @@ jobs:
       - name: Audit real-program workout flow edge cases
         run: node ci/audit-workout-flow-edge-cases.mjs
 
-      - name: Build and audit Command V2 + private Cloudinary exercise art
-        run: bash ci/build-command-v2-cloudinary.sh
+      - name: Build and audit Command V2 + Black Crown v2.1 + private Cloudinary exercise art
+        run: bash ci/build-command-v2-v2-1.sh
 
       - name: Install smart names + Bar Loader
         run: bash ci/install-smart-names-bar-loader.sh
 
       - name: Install read-only Exercise Intelligence runtime
         run: bash ci/install-exercise-intelligence-v1.sh
+
+      - name: Install Black Crown v2.1 Exercise Intelligence supplement
+        run: bash ci/install-exercise-intelligence-v2-supplement.sh
 
       - name: Install Exercise Intelligence descriptive Coach
         run: bash ci/install-exercise-intelligence-coach-v1.sh

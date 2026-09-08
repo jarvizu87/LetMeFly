@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "1.1-black-crown-v2-1-supplement",
+  "integrationStatus": "READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION",
+  "baseCounts": {
+    "exercises": 92,
+    "substitutionRules": 25
+  },
+  "finalCounts": {
+    "exercises": 94,
+    "substitutionRules": 27
+  },
+  "programPrescriptionOwner": "program-packages-only",
+  "exercises": [
+    {
+      "id": "machine-hip-abduction",
+      "canonicalName": "Machine Hip Abduction",
+      "aliases": ["Hip Abductor Machine", "Seated Hip Abduction Machine"],
+      "sourcePrograms": ["Black Crown"],
+      "movementRoles": ["Lateral Hip / Frontal-Plane Support"],
+      "trainingCategories": ["Structural / Lateral Hip", "Glute Hypertrophy Support"],
+      "equipment": ["Hip Abductor Machine"],
+      "primaryMuscles": ["Gluteus Medius", "Gluteus Minimus"],
+      "secondaryMuscles": ["Gluteus Maximus", "Tensor Fasciae Latae", "Trunk Stabilizers"],
+      "purpose": "Direct low-axial lateral-glute and hip-abduction work that fills the frontal-plane glute role without adding another squat or hinge.",
+      "coachingCues": [
+        "Set the pelvis and torso before starting the set.",
+        "Drive the knees outward under control instead of bouncing into range.",
+        "Pause briefly in the shortened position and return without letting the stack slam.",
+        "Keep the set in the lateral glutes rather than turning it into a whole-body effort."
+      ],
+      "commonMistakes": [
+        "Rocking the torso to move more weight.",
+        "Using momentum or letting the weight stack crash.",
+        "Chasing extreme range that changes pelvic position.",
+        "Loading the movement so heavily that the low-axial support role becomes a maximal-effort set."
+      ],
+      "stopSignals": [
+        "Reduce load or range if pelvic control, hip position, or pain-free motion cannot stay consistent."
+      ],
+      "demo": {
+        "currentUrl": "https://www.youtube.com/results?search_query=Machine+Hip+Abduction+exercise+tutorial",
+        "status": "search-fallback"
+      },
+      "evidenceClassification": "BOOK-INFORMED + NORMALIZED ANATOMY/COACHING",
+      "evidenceBasis": "Jeff Nippard glute-specialization role evidence + LetMeFly RT-020 lateral-hip role governance + Black Crown v2.1 intentional program amendment"
+    },
+    {
+      "id": "seated-band-hip-abduction",
+      "canonicalName": "Seated Band Hip Abduction",
+      "aliases": ["Seated Band Abduction", "Band Hip Abduction"],
+      "sourcePrograms": ["Black Crown"],
+      "movementRoles": ["Lateral Hip / Frontal-Plane Support"],
+      "trainingCategories": ["Structural / Lateral Hip", "Glute Hypertrophy Support"],
+      "equipment": ["Mini-Band", "Loop Band"],
+      "primaryMuscles": ["Gluteus Medius", "Gluteus Minimus"],
+      "secondaryMuscles": ["Gluteus Maximus", "Tensor Fasciae Latae", "Trunk Stabilizers"],
+      "purpose": "Low-setup, low-axial direct hip-abduction work used when the abductor machine is unavailable while preserving the same lateral-glute support role.",
+      "coachingCues": [
+        "Sit tall with both feet planted and the pelvis steady.",
+        "Press the knees apart smoothly and keep tension through the full set.",
+        "Pause briefly before returning under control.",
+        "Choose a band that allows consistent knee tracking without torso rocking."
+      ],
+      "commonMistakes": [
+        "Bouncing the knees in and out.",
+        "Rocking the torso to create more range.",
+        "Letting the knees snap inward between reps.",
+        "Using a band too heavy to control."
+      ],
+      "stopSignals": [
+        "Use a lighter band or smaller range if pelvic control or knee tracking cannot remain clean."
+      ],
+      "demo": {
+        "currentUrl": "https://www.youtube.com/results?search_query=Seated+Band+Hip+Abduction+exercise+tutorial",
+        "status": "search-fallback"
+      },
+      "evidenceClassification": "BOOK-INFORMED + NORMALIZED ANATOMY/COACHING",
+      "evidenceBasis": "Jeff Nippard glute-specialization role evidence + LetMeFly RT-020 lateral-hip role governance"
+    }
+  ],
+  "substitutionRules": [
+    {
+      "id": "VS-026",
+      "primaryExerciseId": "machine-hip-abduction",
+      "primaryExercise": "Machine Hip Abduction",
+      "alternativeExerciseId": "seated-band-hip-abduction",
+      "alternativeExercise": "Seated Band Hip Abduction",
+      "alternativeInCurrentApp": true,
+      "primaryRole": "Lateral Hip / Frontal-Plane Support",
+      "fitGrade": "A",
+      "rolePreserved": "YES",
+      "importantDifference": "Machine loading is more stable and externally quantifiable; band resistance is less precise but preserves direct abduction intent.",
+      "loadingAdjustment": "Use the program's fallback rep/effort guidance; never copy machine-stack load to band work.",
+      "useCondition": "Hip abductor machine unavailable.",
+      "evidenceClassification": "BOOK-INFORMED + NORMALIZED INTERPRETATION",
+      "evidenceBasis": "Black Crown v2.1 lateral-glute amendment + RT-020",
+      "promotionStatus": "PROMOTE CORE",
+      "coachExplanation": "Same direct lateral-glute role with a different resistance profile.",
+      "programOwnershipRule": "Black Crown owns the slot and dose; substitution does not add volume."
+    },
+    {
+      "id": "VS-027",
+      "primaryExerciseId": "machine-hip-abduction",
+      "primaryExercise": "Machine Hip Abduction",
+      "alternativeExerciseId": "mini-band-lateral-walk",
+      "alternativeExercise": "Mini-Band Lateral Walk",
+      "alternativeInCurrentApp": true,
+      "primaryRole": "Lateral Hip / Frontal-Plane Support",
+      "fitGrade": "B",
+      "rolePreserved": "MOSTLY",
+      "importantDifference": "Lateral walking adds standing balance, locomotion, knee/foot control, and a less isolated resistance profile.",
+      "loadingAdjustment": "Use the program's fallback guidance; do not translate machine load to band resistance.",
+      "useCondition": "Hip abductor machine and seated-band setup are unavailable or standing frontal-plane control is preferred.",
+      "evidenceClassification": "BOOK-INFORMED + NORMALIZED INTERPRETATION",
+      "evidenceBasis": "Black Crown v2.1 lateral-glute amendment + existing RT-020 Mini-Band Lateral Walk role",
+      "promotionStatus": "PROMOTE CONTEXTUAL",
+      "coachExplanation": "Preserves the low-axial lateral-hip job while adding more whole-body frontal-plane control.",
+      "programOwnershipRule": "Black Crown owns the slot and dose; substitution does not add volume."
+    }
+  ]
+}

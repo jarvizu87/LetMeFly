@@ -4,6 +4,7 @@
   const DATA_URL = '/data/exercise-intelligence-v1.json';
   const READY_EVENT = 'letmefly:exercise-intelligence-ready';
   const ERROR_EVENT = 'letmefly:exercise-intelligence-error';
+  const SUPPORTED_COUNTS = Object.freeze(['92/25', '94/27']);
   let payload = null;
   let loadPromise = null;
 
@@ -20,11 +21,15 @@
     if (!data || data.integrationStatus !== 'READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION') {
       throw new Error('Exercise Intelligence payload is not integration-ready');
     }
-    if (data?.counts?.exercises !== 92 || data?.counts?.substitutionRules !== 25) {
-      throw new Error('Exercise Intelligence payload count mismatch');
+    const countKey = `${data?.counts?.exercises}/${data?.counts?.substitutionRules}`;
+    if (!SUPPORTED_COUNTS.includes(countKey)) {
+      throw new Error(`Exercise Intelligence payload count mismatch: ${countKey}`);
     }
     if (!Array.isArray(data.exercises) || !Array.isArray(data.substitutionRules)) {
       throw new Error('Exercise Intelligence payload shape mismatch');
+    }
+    if (data.exercises.length !== data.counts.exercises || data.substitutionRules.length !== data.counts.substitutionRules) {
+      throw new Error('Exercise Intelligence declared/actual count mismatch');
     }
     return data;
   }

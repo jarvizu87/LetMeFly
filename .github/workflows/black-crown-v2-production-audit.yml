@@ -1,22 +1,30 @@
-name: Black Crown v2 Production Audit
+name: Black Crown v2.1 Production Audit
 
 on:
   push:
     branches:
       - main
-      - black-crown-v2-0-modular-import
+      - black-crown-v2-1-glute-specialization
     paths:
       - 'ci/build-command-v2.sh'
       - 'ci/build-command-v2-hardening.sh'
       - 'ci/build-command-v2-cloudinary.sh'
+      - 'ci/build-command-v2-v2-1.sh'
       - 'ci/command-v2-program-compat.sh'
       - 'ci/apply-black-crown-v2-0.sh'
+      - 'ci/apply-black-crown-v2-1.sh'
       - 'ci/apply-black-crown-workout-support.sh'
       - 'ci/apply-black-crown-command-v2-core.sh'
       - 'ci/apply-black-crown-command-v2.sh'
       - 'ci/generate-black-crown-runtime.mjs'
       - 'ci/audit-black-crown-runtime.mjs'
+      - 'ci/audit-black-crown-v2-1.mjs'
+      - 'ci/install-exercise-intelligence-v2-supplement.sh'
       - 'overlays/program-data/black-crown-v2-0/**'
+      - 'overlays/program-data/black-crown-v2-1/**'
+      - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
+      - 'netlify.toml'
       - '.github/workflows/black-crown-v2-production-audit.yml'
   pull_request:
     branches:
@@ -25,14 +33,22 @@ on:
       - 'ci/build-command-v2.sh'
       - 'ci/build-command-v2-hardening.sh'
       - 'ci/build-command-v2-cloudinary.sh'
+      - 'ci/build-command-v2-v2-1.sh'
       - 'ci/command-v2-program-compat.sh'
       - 'ci/apply-black-crown-v2-0.sh'
+      - 'ci/apply-black-crown-v2-1.sh'
       - 'ci/apply-black-crown-workout-support.sh'
       - 'ci/apply-black-crown-command-v2-core.sh'
       - 'ci/apply-black-crown-command-v2.sh'
       - 'ci/generate-black-crown-runtime.mjs'
       - 'ci/audit-black-crown-runtime.mjs'
+      - 'ci/audit-black-crown-v2-1.mjs'
+      - 'ci/install-exercise-intelligence-v2-supplement.sh'
       - 'overlays/program-data/black-crown-v2-0/**'
+      - 'overlays/program-data/black-crown-v2-1/**'
+      - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
+      - 'netlify.toml'
       - '.github/workflows/black-crown-v2-production-audit.yml'
   workflow_dispatch:
 
@@ -42,7 +58,7 @@ permissions:
 jobs:
   production-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
@@ -53,22 +69,13 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Build and audit Command V2 with Black Crown v2
-        run: bash ci/build-command-v2-cloudinary.sh
+      - name: Build and audit Command V2 with Black Crown v2.1
+        run: bash ci/build-command-v2-v2-1.sh
 
-      - name: Show generated UI context on build failure
-        if: failure()
-        shell: bash
+      - name: Re-audit active Black Crown v2.1 after UI overlays
         run: |
-          if [[ -f .build-src/letmefly_app/src/main.ts ]]; then
-            echo '--- main.ts routing/home context ---'
-            nl -ba .build-src/letmefly_app/src/main.ts | sed -n '145,205p'
-            echo '--- main.ts calendar/context ---'
-            nl -ba .build-src/letmefly_app/src/main.ts | sed -n '455,485p'
-          fi
-
-      - name: Re-audit active Black Crown after UI overlays
-        run: node ci/audit-black-crown-runtime.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+          node ci/audit-black-crown-runtime.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+          node ci/audit-black-crown-v2-1.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
 
       - name: Protect Crownforge and package architecture
         working-directory: .build-src/letmefly_app
@@ -79,9 +86,17 @@ jobs:
           npm run typecheck
           npm run build
 
+      - name: Install and verify Exercise Intelligence v2.1 supplement
+        run: |
+          bash ci/install-exercise-intelligence-v1.sh "$GITHUB_WORKSPACE/.build-src/letmefly_app/dist"
+          bash ci/install-exercise-intelligence-v2-supplement.sh "$GITHUB_WORKSPACE/.build-src/letmefly_app/dist"
+
       - name: Confirm production package
         run: |
           set -euo pipefail
           test -f .build-src/letmefly_app/dist/index.html
           grep -Rq 'Black Crown Revised' .build-src/letmefly_app/dist/assets
-          echo 'Black Crown v2 production integration: PASS'
+          grep -Rq 'v2.1' .build-src/letmefly_app/dist/assets
+          grep -Rq 'Machine Hip Abduction' .build-src/letmefly_app/dist/assets
+          grep -Fq 'machine-hip-abduction' .build-src/letmefly_app/dist/data/exercise-intelligence-v1.json
+          echo 'Black Crown v2.1 production integration: PASS'
