@@ -73,6 +73,12 @@ Private Supabase/auth/API requests remain excluded by the existing service-worke
 privacy rules. The dedicated CI smoke test verifies both the runtime installation
 and the offline precache patch.
 
+`ci/install-exercise-intelligence-coach-v1.sh` adds a second isolated runtime layer
+for set-focus coaching. It requires the read-only Exercise Intelligence runtime to
+already exist, adds its own offline-cached JavaScript/CSS resources, and fails if
+its source starts using localStorage, substitution hooks, or direct program-data
+writes.
+
 ## Runtime status
 
 The overlay is **active as a read-only descriptive layer**. The Exercises page
@@ -83,6 +89,26 @@ current Watch Exercise link.
 The INFO enhancement fails open: if the intelligence payload is unavailable or a
 name cannot be resolved, the existing LetMeFly INFO behavior remains available.
 It does not read or mutate workout prescription state.
+
+### Coach Mode set-focus v1
+
+When `ASK COACH` is opened from a workout exercise card, the Coach overlay stores
+only that exercise name in transient `sessionStorage`. The Coach page then exposes
+a Set Coaching Context selector backed by the 92 canonical Exercise Intelligence
+records.
+
+Questions about focus, cues, technique, form, or the current set can return the
+selected exercise's purpose, up to three coaching cues, common mistakes to avoid,
+and primary muscle emphasis. A named exercise in the question takes precedence
+over the remembered selector context.
+
+If no canonical exercise context is available, the overlay does **not** invent an
+answer; LetMeFly's existing program/day Coach behavior remains in control. All
+non-focus Coach questions also continue through the existing Coach handler.
+
+The set-focus response is execution coaching only and displays a **PROGRAM
+PRESCRIPTION LOCKED** boundary. It cannot change the selected exercise, sets,
+reps, load, rest, progression, readiness rules, or program position.
 
 Exercise Intelligence public-shell resources are precached for installed/offline
 use. This does not cache private athlete APIs or move private athlete data into the
