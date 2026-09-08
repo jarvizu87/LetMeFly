@@ -39,9 +39,40 @@ The approved Drive Crownforge v2.1 source remains the human-readable reference u
 - The current approved Black Crown v2.0 human-readable source must be intentionally imported and audited before the app may claim full Black Crown coverage.
 - Do not derive Black Crown weeks from Crownforge or from older historical Black Crown documents.
 
-## Exercise intelligence boundary
+## Exercise Intelligence — STRUCTURED NON-PRESCRIPTION LAYER
 
-Program prescriptions and exercise intelligence are separate concerns. A program may reference an exercise only when its display name resolves through the governed exercise library or through an intentional canonical alias. Substitutions must preserve training role, movement purpose, stimulus, and phase requirements rather than merely matching a muscle group.
+Exercise Intelligence is now maintained as a separate public-shell overlay under
+`overlays/exercise-intelligence/`. It is intentionally descriptive and does not
+own program prescriptions.
+
+Current audited coverage:
+
+- **92 / 92** current app exercise identities.
+- **92 / 92** movement-role and training-purpose records.
+- **92 / 92** primary/secondary muscle records.
+- **92 / 92** coaching-cue and common-mistake records.
+- **25** governed substitution rules.
+- **23** substitution rules whose alternative already exists as a canonical current-app exercise.
+- **2** explicit default-prohibited relationships preserved as blocked rather than treated as equivalents.
+- **11** direct-demo candidates retained as review-only until URL validation is intentional and complete.
+
+The canonical payload is hash-verified from four transport chunks before a build
+may materialize it. The runtime copy is privacy-audited so private Drive file IDs
+or URLs cannot be exposed through the public exercise-intelligence JSON.
+
+The production installer exposes the data through a read-only browser lookup API.
+The Exercises page `INFO` action may use that API to explain purpose, roles,
+equipment, muscles, cues, mistakes, and the current Watch Exercise link. If the
+intelligence layer is unavailable, the existing INFO behavior remains the fallback.
+
+The new INFO integration does **not** override the existing `SUBSTITUTE` action.
+A broader substitution UI must remain gated by role preservation, use condition,
+loading adjustment, and the governing program's phase/prescription rules.
+
+A program may reference an exercise only when its display name resolves through
+the governed exercise library or through an intentional canonical alias.
+Substitutions must preserve training role, movement purpose, stimulus, and phase
+requirements rather than merely matching a muscle group.
 
 ## Safety / source-gap rule
 
