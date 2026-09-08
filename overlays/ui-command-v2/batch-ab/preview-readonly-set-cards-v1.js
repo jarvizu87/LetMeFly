@@ -2,47 +2,70 @@
   'use strict'
 
   // DOM-only future-day presentation. No program/workout/private-data writes.
+  // Reads the authoritative prescription row structure and mirrors it into
+  // Day-1-style controls that are intentionally disabled in preview mode.
   const PREVIEW = /^(Preview position\.|Preview only\.)/i
-  const PREFIX = /^(?:R|S|SET)\s*(\d+)\b[\s:.-]*/i
+  const LABEL = /^(?:R|S|SET)\s*(\d+)\s*$/i
   let queued = false
 
   const txt = (n) => (n?.innerText || n?.textContent || '').replace(/\u00a0/g, ' ').trim()
-  const clean = (v) => String(v || '').replace(/\s+/g, ' ').trim()
-  const short = (v) => { const s = clean(v); return !s ? '—' : s.length > 18 ? `${s.slice(0, 17).trim()}…` : s }
+  const clean = (v) => String(v ?? '').replace(/\s+/g, ' ').trim()
   const preview = () => Boolean(document.querySelector('.train-shell') && [...document.querySelectorAll('.callout.warning strong')].some((n) => PREVIEW.test(txt(n))))
 
   function rowNodes(block) {
-    const direct = [...block.children].filter((n) => !n.classList.contains('lmf-preview-readonly-logger') && txt(n))
-    const rows = direct.filter((n) => PREFIX.test(txt(n)))
-    if (rows.length) return rows
-    const nested = [...block.querySelectorAll('*')].filter((n) => {
-      if (n.closest('.lmf-preview-readonly-logger')) return false
-      const value = txt(n)
-      return value && PREFIX.test(value) && ![...n.children].some((c) => PREFIX.test(txt(c)))
-    })
-    return nested.length ? nested : direct.length ? direct : txt(block) ? [block] : []
+    const directRows = [...block.querySelectorAll(':scope > .prescription-row')]
+    if (directRows.length) return directRows
+    return [...block.children].filter((n) => !n.classList.contains('lmf-preview-readonly-logger') && txt(n))
+  }
+
+  function splitDetail(value) {
+    return clean(value)
+      .replace(/\s*[|·]\s*/g, ' • ')
+      .split(/\s*•\s*/)
+      .map(clean)
+      .filter(Boolean)
+  }
+
+  function classifyLoadText(value) {
+    const loadText = clean(value)
+    if (!loadText) return { load: '—', rpe: '—' }
+
+    const rpeHit = loadText.match(/\bRPE\s*[:@]?\s*([0-9]+(?:\.[0-9]+)?)/i)
+    const rirHit = loadText.match(/\bRIR\s*[:@]?\s*([0-9]+(?:\.[0-9]+)?)/i)
+    if (rpeHit || rirHit) {
+      return {
+        load: 'BY RPE',
+        rpe: rpeHit ? rpeHit[1] : `RIR ${rirHit[1]}`,
+      }
+    }
+
+    return { load: loadText, rpe: '—' }
   }
 
   function parse(node, index) {
-    const raw = txt(node)
-    const hit = raw.match(PREFIX)
-    const setNumber = Number(hit?.[1]) || index + 1
-    let body = clean(hit ? raw.replace(PREFIX, '') : raw)
-    body = body.replace(/\s*[|·]\s*/g, ' • ')
-    const segments = body.split(/\s*•\s*/).map(clean).filter(Boolean)
-    const rpeHit = body.match(/\bRPE\s*[:@]?\s*([0-9]+(?:\.[0-9]+)?)/i)
-    const rirHit = body.match(/\bRIR\s*[:@]?\s*([0-9]+(?:\.[0-9]+)?)/i)
-    const rpe = rpeHit ? rpeHit[1] : rirHit ? `RIR ${rirHit[1]}` : '—'
-    const loadRx = /(?:\b\d+(?:\.\d+)?\s*(?:lb|lbs|kg|kgs)\b(?:\s*\([^)]*\))?(?:\s*[A-Za-z-]+)?|\b\d+(?:\.\d+)?\s*%\s*(?:TM|1RM)?\b|\bbody\s*weight\b|\bbodyweight\b|\bBW\b|\bas prescribed\b)/i
-    const loadHit = body.match(loadRx)
-    const load = loadHit ? short(loadHit[0]) : '—'
-    const work = segments.map((s) => clean(s
-      .replace(/\bRPE\s*[:@]?\s*[0-9]+(?:\.[0-9]+)?/ig, '')
-      .replace(/\bRIR\s*[:@]?\s*[0-9]+(?:\.[0-9]+)?/ig, '')
-      .replace(loadRx, '')
-      .replace(/^[-–—,:;@\s]+|[-–—,:;@\s]+$/g, '')))
-      .find((s) => s && !/^(?:rest|tempo)\b/i.test(s))
-    return { setNumber, reps: short(work || body.replace(loadRx, '')), load, rpe, prescription: body || raw || 'Programmed work', raw }
+    // programExerciseCard renders each governed prescription row as:
+    // <strong>{set.label}</strong><span>{set.reps}[ • {set.loadText}]</span>
+    // Read those fields separately so labels like R1 + 3 reps never collapse into R13.
+    const labelText = clean(node.querySelector(':scope > strong')?.textContent)
+    const detailText = clean(node.querySelector(':scope > span')?.textContent)
+
+    const labelHit = labelText.match(LABEL)
+    const numericLabel = labelText.match(/\d+/)
+    const setNumber = Number(labelHit?.[1] || numericLabel?.[0]) || index + 1
+
+    const pieces = splitDetail(detailText)
+    const reps = pieces[0] || '—'
+    const loadText = pieces.slice(1).join(' • ')
+    const classified = classifyLoadText(loadText)
+
+    return {
+      setNumber,
+      reps,
+      load: classified.load,
+      rpe: classified.rpe,
+      prescription: detailText || 'Programmed work',
+      raw: `${labelText}\u241f${detailText}`,
+    }
   }
 
   function sets(card) {
