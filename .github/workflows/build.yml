@@ -31,7 +31,7 @@ jobs:
       - name: Audit real-program workout flow edge cases
         run: node ci/audit-workout-flow-edge-cases.mjs
 
-      - name: Build and audit Command V2 + Black Crown v2.1 + private Cloudinary exercise art
+      - name: Build and audit Command V2 + Crownforge v2.2 + Black Crown v2.1 + private Cloudinary exercise art
         run: bash ci/build-command-v2-v2-1.sh
 
       - name: Install smart names + Bar Loader
