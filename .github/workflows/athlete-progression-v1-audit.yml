@@ -3,7 +3,16 @@ name: Athlete Progression v1 Audit
 on:
   push:
     branches:
-      - athlete-progression-v1
+      - main
+      - athlete-progression-v1-mainline
+    paths:
+      - 'ci/apply-athlete-program-progression-v1.sh'
+      - 'ci/audit-athlete-program-progression.mjs'
+      - 'ci/build-command-v2-hardening.sh'
+      - '.github/workflows/athlete-progression-v1-audit.yml'
+  pull_request:
+    branches:
+      - main
     paths:
       - 'ci/apply-athlete-program-progression-v1.sh'
       - 'ci/audit-athlete-program-progression.mjs'
