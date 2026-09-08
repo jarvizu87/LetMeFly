@@ -17,12 +17,23 @@ if not root.exists():
     raise SystemExit(f'candidate target does not exist: {root}')
 
 
+def sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def file_hashes(path: Path) -> dict[str, str]:
+    return {
+        str(file.relative_to(path)): sha(file)
+        for file in sorted(p for p in path.rglob('*') if p.is_file())
+    }
+
+
 def tree_hash(path: Path) -> str:
     h = hashlib.sha256()
-    for file in sorted(p for p in path.rglob('*') if p.is_file()):
-        h.update(str(file.relative_to(path)).encode())
+    for rel, digest in file_hashes(path).items():
+        h.update(rel.encode())
         h.update(b'\0')
-        h.update(file.read_bytes())
+        h.update(digest.encode())
         h.update(b'\0')
     return h.hexdigest()
 
@@ -37,6 +48,7 @@ protected_before = {
     'blackCrown': tree_hash(black_crown),
     'crownMaintenance': tree_hash(maintenance),
 }
+cf_before = file_hashes(cf_root)
 
 changes = {
     cf_root / 'weeks/week-01.ts': (
@@ -74,12 +86,28 @@ protected_after = {
 if protected_before != protected_after:
     raise SystemExit('book-informed candidate changed a protected Black Crown or Crown Maintenance tree')
 
+cf_after = file_hashes(cf_root)
+if set(cf_before) != set(cf_after):
+    raise SystemExit('book-informed candidate added or removed Crownforge program files')
+actual_changed = sorted(
+    f'src/programs/crownforge/{rel}'
+    for rel in cf_before
+    if cf_before[rel] != cf_after[rel]
+)
+expected_changed = sorted(changed)
+if actual_changed != expected_changed:
+    raise SystemExit(
+        'book-informed candidate changed unexpected Crownforge files: '
+        + json.dumps({'expected': expected_changed, 'actual': actual_changed})
+    )
+
 marker = {
     'candidate': 'crownforge-day6-kb-primer-conditional-v1',
     'baseProgram': 'Crownforge v2.1',
     'changedFiles': changed,
     'protectedBefore': protected_before,
     'protectedAfter': protected_after,
+    'crownforgeChangedFilesVerified': actual_changed,
     'blackCrownBookCandidate': 'REJECTED — canonical B5 W25-29 source explicitly says no additional loaded glute slot',
 }
 (root / '.book-informed-program-delta-candidate.json').write_text(json.dumps(marker, indent=2) + '\n')
