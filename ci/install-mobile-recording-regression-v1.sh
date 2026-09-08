@@ -42,9 +42,9 @@ for pattern in (
     text = re.sub(pattern, '\n', text)
 
 css = '<link rel="stylesheet" href="/ui/mobile-recording-regression-v1.css?v=5">'
-preview_css = '<link rel="stylesheet" href="/ui/preview-readonly-set-cards-v1.css?v=2">'
+preview_css = '<link rel="stylesheet" href="/ui/preview-readonly-set-cards-v1.css?v=3">'
 js = '<script defer src="/ui/mobile-recording-regression-v1.js?v=5"></script>'
-preview_js = '<script defer src="/ui/preview-readonly-set-cards-v1.js?v=2"></script>'
+preview_js = '<script defer src="/ui/preview-readonly-set-cards-v1.js?v=3"></script>'
 
 if '</head>' not in text:
     raise SystemExit('production index is missing </head>')
@@ -59,20 +59,23 @@ PY
 # and future-day prescriptions use the live Day 1 set-card visual language without writes.
 grep -Fq '/ui/mobile-recording-regression-v1.css?v=5' "$INDEX"
 grep -Fq '/ui/mobile-recording-regression-v1.js?v=5' "$INDEX"
-grep -Fq '/ui/preview-readonly-set-cards-v1.css?v=2' "$INDEX"
-grep -Fq '/ui/preview-readonly-set-cards-v1.js?v=2' "$INDEX"
+grep -Fq '/ui/preview-readonly-set-cards-v1.css?v=3' "$INDEX"
+grep -Fq '/ui/preview-readonly-set-cards-v1.js?v=3' "$INDEX"
 grep -Fq 'active-exercise.lmf-workout-flow-card > .lmf-exercise-media' "$DIST/ui/mobile-recording-regression-v1.css"
 grep -Fq 'background-size:contain!important' "$DIST/ui/mobile-recording-regression-v1.css"
 grep -Fq 'aspect-ratio:1/1!important' "$DIST/ui/mobile-recording-regression-v1.css"
 grep -Fq 'lmfPreviewDay1Style' "$DIST/ui/mobile-recording-regression-v1.js"
 grep -Fq 'lmf-preview-readonly-logger' "$DIST/ui/preview-readonly-set-cards-v1.js"
 grep -Fq 'lmfPreviewSetIndex' "$DIST/ui/preview-readonly-set-cards-v1.js"
+grep -Fq 'lmfPreviewReadonly' "$DIST/ui/preview-readonly-set-cards-v1.js"
 grep -Fq "querySelector(':scope > strong')" "$DIST/ui/preview-readonly-set-cards-v1.js"
 grep -Fq "querySelector(':scope > span')" "$DIST/ui/preview-readonly-set-cards-v1.js"
-grep -Fq "load: 'BY RPE'" "$DIST/ui/preview-readonly-set-cards-v1.js"
+grep -Fq "load: explicitLoad || (effort ? 'BY RPE' : loadText)" "$DIST/ui/preview-readonly-set-cards-v1.js"
+grep -Fq 'A governed row may contain BOTH a resolved load and an RPE/RIR target' "$DIST/ui/preview-readonly-set-cards-v1.js"
 grep -Fq 'lmf-preview-rich-source' "$DIST/ui/preview-readonly-set-cards-v1.css"
 grep -Fq 'overflow-wrap:anywhere' "$DIST/ui/preview-readonly-set-cards-v1.css"
 grep -Fq 'RPE / RIR' "$DIST/ui/preview-readonly-set-cards-v1.js"
+grep -Fq 'aria-disabled="true"' "$DIST/ui/preview-readonly-set-cards-v1.js"
 grep -Fq "Preview only — readiness is locked" "$DIST/ui/mobile-recording-regression-v1.js"
 grep -Fq "['start-workout', 'save-readiness']" "$DIST/ui/mobile-recording-regression-v1.js"
 grep -Fq 'MAKE CURRENT POSITION' "$DIST"/assets/*.js
@@ -81,4 +84,4 @@ grep -Fq 'MAKE CURRENT POSITION' "$DIST"/assets/*.js
 ! grep -Eq 'indexedDB\.|localStorage\.setItem|supabase|programInstances|current_day_key|current_week' "$DIST/ui/mobile-recording-regression-v1.js"
 ! grep -Eq 'indexedDB\.|localStorage\.setItem|supabase|programInstances|current_day_key|current_week|\.click\(\)' "$DIST/ui/preview-readonly-set-cards-v1.js"
 
-echo "LetMeFly mobile recording fixes v5 + future read-only set-card parity v2: PASS"
+echo "LetMeFly mobile recording fixes v5 + future read-only set-card parity v3 with exact loads: PASS"
