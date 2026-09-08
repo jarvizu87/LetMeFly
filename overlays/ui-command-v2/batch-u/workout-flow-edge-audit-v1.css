@@ -1,0 +1,224 @@
+/* LetMeFly Workout Flow Edge Audit v1
+   Crownforge v2.1 + Black Crown v2.0 mobile QA hardening.
+   Presentation only; program prescriptions and persisted logging remain authoritative. */
+
+/* Give REPS / LOAD / RPE the full row width. The completion button lives beside
+   the set label instead of permanently stealing a fourth metric column. */
+.lmf-workout-flow-card .set-row.lmf-set-active{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-template-areas:
+    "set set check"
+    "reps load rpe"
+    "plates plates plates"!important;
+}
+
+/* Missing load/RPE values remain visibly unset rather than looking like zero. */
+.lmf-stepper .set-input::placeholder{
+  color:#667482!important;
+  opacity:1!important;
+}
+
+/* Long active exercise names such as Clean-Grip RDL to Knee and
+   Farmer Carry (Trap-Bar Carry acceptable) may wrap naturally. */
+.lmf-workout-flow-card .exercise-title h3{
+  overflow-wrap:anywhere!important;
+  text-wrap:balance;
+}
+
+/* Compact circuit previews keep the entire approved square art visible. */
+.lmf-compact-thumb,
+.lmf-next-thumb{
+  background-size:contain!important;
+  background-color:#03070a!important;
+}
+
+/* Two-line names/prescriptions beat unreadable ellipsis on real phone widths. */
+.lmf-compact-copy b{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden!important;
+  white-space:normal!important;
+  text-overflow:clip!important;
+  line-height:1.08!important;
+}
+.lmf-compact-copy small{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden!important;
+  white-space:normal!important;
+  text-overflow:clip!important;
+  line-height:1.25!important;
+}
+.lmf-next-strip b{
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden!important;
+  white-space:normal!important;
+  text-overflow:clip!important;
+  line-height:1.25!important;
+}
+
+/* True between-round transition state. During the rest gate every exercise stays
+   compact and the rest card becomes the clear action without becoming a giant modal. */
+.lmf-flow-panel.lmf-flow-resting .exercise-stack .active-exercise{
+  box-shadow:none!important;
+}
+.lmf-round-rest.is-preview{
+  opacity:.78;
+}
+.lmf-round-rest.is-active{
+  grid-template-columns:42px minmax(0,1fr) auto!important;
+  border-color:#7d2635!important;
+  background:linear-gradient(135deg,#1e0d12,#081119)!important;
+  box-shadow:0 0 0 1px #ff173126!important;
+}
+.lmf-round-rest.is-active > button{
+  grid-column:1/-1;
+  min-height:44px;
+  border:1px solid #ff1731;
+  border-radius:10px;
+  color:#fff;
+  background:#2d0e15;
+  font-family:var(--condensed);
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+.lmf-round-rest.is-active > button:active{
+  transform:translateY(1px);
+  background:#42111c;
+}
+
+/* The selected tab should be easy to identify even in 10+ set Crownforge waves. */
+.lmf-set-tab.active{
+  outline:1px solid #ff17314a;
+  outline-offset:1px;
+}
+
+/* Galaxy / small-phone pass. Preserve equal metric cells and readable controls. */
+@media (max-width:430px){
+  .lmf-workout-flow-card .set-table{
+    padding:10px!important;
+  }
+  .lmf-workout-flow-card .set-row.lmf-set-active{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-areas:
+      "set set check"
+      "reps load rpe"
+      "plates plates plates"!important;
+    gap:10px 6px!important;
+    padding:11px 8px!important;
+  }
+  .lmf-workout-flow-card .exercise-actions .btn{
+    font-size:10px!important;
+    padding-inline:7px!important;
+  }
+
+  .lmf-compact-summary{
+    grid-template-columns:60px minmax(0,1fr) 14px!important;
+    grid-template-areas:
+      "thumb copy arrow"
+      "thumb state arrow";
+    row-gap:5px!important;
+  }
+  .lmf-compact-thumb{grid-area:thumb}
+  .lmf-compact-copy{grid-area:copy}
+  .lmf-compact-state{
+    grid-area:state;
+    display:inline-flex!important;
+    width:max-content;
+    max-width:100%;
+    justify-self:start;
+    padding:4px 6px!important;
+    font-size:7px!important;
+  }
+  .lmf-compact-summary > i{grid-area:arrow}
+  .lmf-compact-copy b{font-size:17px!important}
+  .lmf-compact-copy small{font-size:10px!important}
+
+  .lmf-round-rest.is-active{
+    grid-template-columns:36px minmax(0,1fr) auto!important;
+  }
+}
+
+/* 320–360 CSS-pixel phones: keep all three metric fields on one equal row without
+   crushing the input between 36px +/- buttons. */
+@media (max-width:360px){
+  .lmf-workout-flow-card .set-table{
+    padding:8px!important;
+  }
+  .lmf-workout-flow-card .set-row.lmf-set-active{
+    gap:9px 4px!important;
+    padding:10px 6px!important;
+  }
+  .lmf-workout-flow-card .set-label{
+    min-height:54px!important;
+  }
+  .lmf-workout-flow-card .set-label strong{
+    font-size:36px!important;
+  }
+  .lmf-set-total{
+    font-size:23px!important;
+  }
+  .lmf-workout-flow-card .set-check{
+    width:50px!important;
+    height:50px!important;
+    border-radius:13px!important;
+    font-size:25px!important;
+  }
+  .lmf-stepper{
+    grid-template-columns:26px minmax(16px,1fr) 26px!important;
+    gap:2px!important;
+    padding:3px!important;
+    border-radius:10px!important;
+  }
+  .lmf-step-btn{
+    width:26px!important;
+    height:34px!important;
+    border-radius:7px!important;
+    font-size:18px!important;
+  }
+  .lmf-stepper .set-input{
+    height:46px!important;
+    min-height:46px!important;
+    padding-inline:0!important;
+    font-size:17px!important;
+  }
+  .lmf-workout-flow-card .set-field label{
+    font-size:9px!important;
+  }
+  .lmf-plates-line{
+    font-size:10px!important;
+  }
+  .lmf-set-tab{
+    flex-basis:48px!important;
+    min-width:48px!important;
+    height:44px!important;
+  }
+  .lmf-workout-flow-card .exercise-actions{
+    gap:6px!important;
+    padding-inline:10px!important;
+  }
+  .lmf-workout-flow-card .exercise-actions .btn{
+    min-height:44px!important;
+    font-size:9px!important;
+  }
+  .lmf-compact-summary{
+    grid-template-columns:54px minmax(0,1fr) 12px!important;
+    min-height:76px!important;
+    padding:6px!important;
+    gap:7px!important;
+  }
+  .lmf-compact-thumb{
+    width:54px!important;
+    height:54px!important;
+  }
+  .lmf-compact-copy b{font-size:16px!important}
+  .lmf-round-rest,
+  .lmf-next-strip{
+    margin-left:28px!important;
+  }
+}
