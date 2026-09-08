@@ -37,6 +37,9 @@ jobs:
       - name: Install smart names + Bar Loader
         run: bash ci/install-smart-names-bar-loader.sh
 
+      - name: Install voice-note transcription
+        run: bash ci/install-voice-notes-v1.sh
+
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
 
