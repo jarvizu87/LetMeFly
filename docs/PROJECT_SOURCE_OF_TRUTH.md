@@ -45,11 +45,24 @@ Do not infer Black Crown prescriptions from Crownforge.
 
 Exercise Intelligence is separate from program programming.
 
+The current Drive-side Exercise Intelligence authority is **LetMeFly Exercise Intelligence Master v2 — ROLE ENRICHED**. It is derived first from the exact 92-entry exercise registry shipped by the latest successful LetMeFly production build, then selectively enriched only where existing Crown sources provide source-backed role/purpose evidence.
+
+Current v2 state:
+
+- 92 canonical shipped exercise records; no duplicate production exercise IDs or canonical names.
+- 86 are linked to Crownforge and 65 to Black Crown in the current app registry.
+- 91 of 92 app exercise IDs map directly to the current Active Plan thumbnail index; `elliptical` versus `elliptical-trainer` remains an explicit crosswalk exception rather than a silent rename.
+- 31 exercises currently have source-backed movement-role / purpose taxonomy; 61 remain explicitly unenriched.
+- 9 source-backed role families are currently defined: Squat Pattern, Bench / Press Pattern, Hinge / Pull Pattern, Upper-Back Pull Pattern, Knee Support Pattern, Back-Extension Role, Olympic / Power Pattern, Kettlebell Pattern, and Yoke / Trap Pattern.
+- Rich fields that are not yet supported by validated evidence remain blank/queued rather than guessed, including muscle maps, detailed coaching cues, common mistakes, and many direct instructional-video replacements.
+- Older Crown System workbooks remain reference sources. Their 202 active-plan exercise/demo records and 68 historical substitution pairs are not imported wholesale into current canon.
+- Historical substitutions must be revalidated against current role-preservation rules before promotion. For example, a hamstring curl may preserve a knee-flexion hamstring role but does not automatically preserve the loaded-hinge / lengthened posterior-chain role of an RDL.
+
 A canonical exercise record may contain movement pattern, equipment, purpose, muscles, coaching cues, common mistakes, substitutions, demonstration links, and other exercise-level metadata. Program packages reference exercises; the exercise library does not change sets, reps, loads, weekly structure, or phase logic.
 
-Substitutions must preserve the programmed movement's purpose, stimulus, equipment/skill constraints, and phase role. Matching a muscle group alone is not sufficient.
+Substitutions must preserve the programmed movement's purpose, stimulus, equipment/skill constraints, fatigue role, and phase role. Matching a muscle group alone is not sufficient. **Role beats name; replace the exercise, not the training purpose.** If a substitute uses a different loading authority or parent lift, its load must be recalculated from the correct source rather than copying the original exercise's load blindly.
 
-Older Crown System workbooks containing large exercise catalogs and demo/substitution data are valuable reference sources, but they do not automatically supersede the current audited app exercise library.
+Exercise Intelligence version history is preserved under its own Version Archive; superseded masters are retained for provenance rather than deleted.
 
 ## 4. Exercise artwork
 
@@ -58,7 +71,7 @@ There are two intentional artwork conventions:
 - Public repository drop-in artwork: `<exercise-slug>.webp` (or another supported image extension).
 - Approved private JP artwork: `jp-<exercise-slug>-v2`, resolved through the governed private-art/Cloudinary mapping layer.
 
-The `jp-...-v2` filenames are intentional and must not be bulk-renamed just to match the public drop-in convention.
+The `jp-...-v2` filenames are intentional and must not be bulk-renamed just to match the public drop-in convention. Some historical thumbnail-registry notes still reference `jp-...-v1.png`; those are alignment/audit flags, not automatic rename instructions.
 
 Artwork is presentation data. It must not become a source for program logic or private athlete profile data.
 
@@ -95,6 +108,8 @@ The current downstream control/index layer is:
 
 The current Drive-side lineage/provenance map is **LetMeFly Training Intelligence Lineage Index v5**. It records which Training Intelligence artifacts are recovered originals, reconstructions, current, historical, File-Library-only, or superseded. Superseded reconstructions remain archived as provenance checkpoints rather than being deleted.
 
+The **Training Intelligence Recovery Closure Register v1** records the missing-original search paths that have already been exhausted. Reopen a closed recovery target only when materially new evidence appears—for example an exact binary/file object, a new file or revision ID, a complete original row dump, or another independently surviving artifact that exposes exact original IDs. Re-running the same Drive/File-Library searches with different wording is not new evidence.
+
 If an original missing binary is recovered later, compare it against the current reconstruction by IDs, source facts, governance rules, and regression results before promoting it. Do not silently overwrite the recovered lineage.
 
 ## 6. Private athlete data
@@ -127,7 +142,7 @@ When two sources disagree, resolve the conflict in this order:
 1. Safety and data-privacy boundaries.
 2. Current audited application/program package behavior.
 3. Current approved governing human-readable program source.
-4. Current exercise-intelligence source/audit for exercise-level facts.
+4. Current Exercise Intelligence master and its validated source evidence for exercise-level facts.
 5. Current project/build documentation.
 6. Training Intelligence evidence used for intentional future revisions.
 7. Historical/archived material.
@@ -143,5 +158,6 @@ Every meaningful change should preserve these rules:
 - No private athlete data in the public repository.
 - No destructive historical cleanup when archiving is sufficient.
 - No claim that an unrecovered binary is an original.
+- No bulk promotion of historical exercise/substitution data without current role/evidence validation.
 - No build-path reorganization without first updating and validating the reconstruction pipeline.
 - No release should be treated as canonical after a failed relevant audit.
