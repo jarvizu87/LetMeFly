@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 JS_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-v/smart-names-bar-loader-v1.js"
 CSS_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-v/smart-names-bar-loader-v1.css"
+SPEC_SOURCE="$ROOT_DIR/docs/BAR_LOADER_UI_STANDARD_LOCKED_V1.md"
 
 if [[ ! -f "$DIST_DIR/index.html" ]]; then
   echo "LetMeFly production dist is missing: $DIST_DIR" >&2
@@ -13,14 +14,36 @@ fi
 
 test -s "$JS_SOURCE"
 test -s "$CSS_SOURCE"
+test -s "$SPEC_SOURCE"
 node --check "$JS_SOURCE"
 
 grep -Fq "Inc DB Press" "$JS_SOURCE"
 grep -Fq "Half-Kneeling Chop" "$JS_SOURCE"
 grep -Fq "BAR LOADER" "$JS_SOURCE"
 grep -Fq "AVAILABLE PLATES" "$JS_SOURCE"
+grep -Fq "Iron Plates" "$JS_SOURCE"
+grep -Fq "Bumper Plates" "$JS_SOURCE"
+grep -Fq "45 lb Power Bar" "$JS_SOURCE"
+grep -Fq "35 lb Technique Bar" "$JS_SOURCE"
+grep -Fq "20 kg Men’s Bar" "$JS_SOURCE"
+grep -Fq "15 kg Women’s Bar" "$JS_SOURCE"
+grep -Fq "CLOSEST POSSIBLE" "$JS_SOURCE"
+grep -Fq "data-lmf-copy-load" "$JS_SOURCE"
+grep -Fq "lmf-bar-sleeve" "$JS_SOURCE"
+grep -Fq "lmf-outer-collar" "$JS_SOURCE"
+grep -Fq "visualPlateChips(solution.combo, unit, 'left')" "$JS_SOURCE"
+grep -Fq "visualPlateChips(solution.combo, unit, 'right')" "$JS_SOURCE"
 grep -Fq "data-lmf-bar-loader-open" "$JS_SOURCE"
 grep -Fq "programmed workout loads are never changed" <(tr '[:upper:]' '[:lower:]' < "$JS_SOURCE")
+grep -Fq "left and right plates must visibly sit on the sleeves" <(tr '[:upper:]' '[:lower:]' < "$SPEC_SOURCE")
+grep -Fq "Iron Plates" "$SPEC_SOURCE"
+grep -Fq "Bumper Plates" "$SPEC_SOURCE"
+
+grep -Fq ".lmf-bar-sleeve" "$CSS_SOURCE"
+grep -Fq ".lmf-plate-stack.left" "$CSS_SOURCE"
+grep -Fq ".lmf-copy-load" "$CSS_SOURCE"
+grep -Fq ".lmf-bar-inventory" "$CSS_SOURCE"
+grep -Fq "@media (max-width: 360px)" "$CSS_SOURCE"
 
 mkdir -p "$DIST_DIR/ui"
 cp "$JS_SOURCE" "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
@@ -37,7 +60,6 @@ import re
 
 p = Path(os.environ['DIST_DIR']) / 'index.html'
 text = p.read_text()
-original = text
 
 doctype_re = re.compile(r'<!doctype\s+html[^>]*>', re.I)
 matches = list(doctype_re.finditer(text))
@@ -125,10 +147,15 @@ grep -Fq '/ui/pyramid-flow-v1.js' "$DIST_DIR/index.html"
 grep -Fq '/ui/exercise-art-cloudinary.js' "$DIST_DIR/index.html"
 grep -Fq 'Inc DB Press' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq 'Half-Kneeling Chop' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'Iron Plates' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'Bumper Plates' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'COPY LOAD' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'CLOSEST POSSIBLE' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'lmf-bar-sleeve' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq 'Bar Loader' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq '@media (max-width: 360px)' "$DIST_DIR/ui/smart-names-bar-loader-v1.css"
 
 DOCTYPE_COUNT="$(grep -io '<!doctype[[:space:]]\+html[^>]*>' "$DIST_DIR/index.html" | wc -l | tr -d ' ')"
 [[ "$DOCTYPE_COUNT" == "1" ]]
 
-echo "LetMeFly smart exercise-name abbreviations + standalone/contextual Bar Loader + canonical production shell: PASS"
+echo "LetMeFly smart exercise names + locked Bar Loader presets/copy/mirrored sleeve geometry + canonical production shell: PASS"
