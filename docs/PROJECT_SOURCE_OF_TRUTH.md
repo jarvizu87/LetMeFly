@@ -66,17 +66,35 @@ Artwork is presentation data. It must not become a source for program logic or p
 
 The Training Program Intelligence Database is a research, comparison, and decision-support system. It may reveal better methods and justify intentional program revisions, but it does not automatically rewrite Crownforge or Black Crown.
 
-Known lineage:
+Known historical lineage:
 
 1. Stage 1 inventory.
 2. Stage 2 extraction, culminating in the completed authoritative Stage 2 v0.90 handoff.
 3. Stage 3 comparative intelligence, culminating in Stage 3 v0.96 FINAL.
 4. Stage 4A–4I, culminating in Stage4I v1.06 FINAL REGRESSION AUDIT.
-5. Later Crown Training Intelligence System layers built downstream of Stage4I.
+5. Later Crown Training Intelligence System v1.9 layers built downstream of Stage4I.
 
-Stage4I is the known factual master for that lineage and its established IDs must remain authoritative when the original master is recovered.
+### Current recovered authority
 
-The original Stage 2 v0.90, Stage 3 v0.96 FINAL, and Stage4I v1.06 final binaries are currently missing from the accessible stores. Their completed status and lineage are known, but no recreated workbook should be mislabeled as one of those originals. Recover originals when possible; otherwise clearly label any reconstruction as a reconstruction.
+The original Stage 2 v0.90, Stage 3 v0.96 FINAL, and Stage4I v1.06 FINAL REGRESSION AUDIT binaries remain missing from the currently accessible stores. Their completed status and lineage are proven by surviving handoff material and downstream intelligence, but reconstructions must never be relabeled as originals.
+
+The current recovered working master is:
+
+- **Stage4I v1.06R4 — RECONSTRUCTED MASTER**.
+- It preserves the surviving Stage4I control metrics, the complete 51-row comparative-score backfill available downstream, the source-recovered Stage-3 settled decision architecture, the locked Stage-4 operational architecture preserved in the Stage-5 handoff, known exact IDs such as `GR-01.1`, and the exact recovered design-regression result: 270/270 sessions audited, 270/270 primary prescriptions exact-match, and zero listed design-regression failures.
+- Its reconstruction IDs remain distinct from original IDs that have not been recovered.
+- The original Stage-3 Keep/Change/Cut count of 34 decisions is preserved as a factual count, but the original one-to-one 34-row identity is not claimed as recovered.
+- The Stage4B counts of 32 LOCKED, 2 TEST, and 3 CONDITIONAL rules are preserved as factual counts, but the complete original 37-row ID/status mapping is not claimed as recovered.
+
+The current downstream control/index layer is:
+
+- **Crown Training Intelligence System v1.9R2 — RECONSTRUCTED CONTROL INDEX**.
+- It preserves the observed 11-layer engine architecture, downstream module roles, the visible `DR-001` through `DR-020` Prescription Response Matrix, Crown Coach decision-routing logic, governance boundaries, and recovered QA signals.
+- It is a downstream control/schema/intelligence layer only. It must not renumber, replace, or silently override Stage4I factual IDs and registries.
+
+The canonical Drive-side lineage index records which Training Intelligence artifacts are recovered originals, reconstructions, current, historical, or superseded. Superseded reconstructions remain archived as provenance checkpoints rather than being deleted.
+
+If an original missing binary is recovered later, compare it against the current reconstruction by IDs, source facts, governance rules, and regression results before promoting it. Do not silently overwrite the recovered lineage.
 
 ## 6. Private athlete data
 
