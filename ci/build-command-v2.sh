@@ -47,6 +47,7 @@ test -f .build-src/letmefly_app/package.json
 
 # Apply versioned program data before presentation/UI overlays.
 bash ci/apply-crownforge-v2-1.sh "$ROOT_DIR/.build-src/letmefly_app"
+bash ci/apply-black-crown-v2-0.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 # Temporarily expose the legacy home-page source shape expected by the locked
 # Command V2 patch. Prescriptions remain owned by the modular program packages.
