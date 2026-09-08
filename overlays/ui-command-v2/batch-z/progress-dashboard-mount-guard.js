@@ -15,6 +15,10 @@
     return style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0
   }
 
+  function progressRouteActive() {
+    return /^#\/progress(?:[/?#]|$)/i.test(location.hash || '')
+  }
+
   function progressTitle() {
     const roots = [document.querySelector('main'), document.querySelector('#app'), document.body].filter(Boolean)
     for (const root of roots) {
@@ -28,12 +32,29 @@
     return null
   }
 
+  function routeRoot() {
+    if (!progressRouteActive()) return null
+    const candidates = [
+      document.querySelector('main'),
+      document.querySelector('[role="main"]'),
+      document.querySelector('#app'),
+      document.body,
+    ].filter(Boolean)
+    return candidates.find(visible) || null
+  }
+
   function progressSurface() {
     const title = progressTitle()
     if (title) return { title, root: title.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || title.parentElement }
     const native = document.querySelector('#progress-content')
     if (visible(native)) return { title: null, root: native.parentElement || native }
-    return null
+
+    // The rebuilt shell can style the visible PROGRESS label as a non-heading
+    // element and no longer guarantees #progress-content. The hash route is the
+    // authoritative navigation signal in that shell, so mount into the active
+    // main app surface rather than depending on presentation markup.
+    const root = routeRoot()
+    return root ? { title: null, root } : null
   }
 
   function ensureAnchor(surface) {
@@ -70,7 +91,7 @@
     retrying = true
     const script = document.createElement('script')
     script.defer = true
-    script.src = '/ui/progress-dashboard-v1.js?mount-retry=3'
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=4'
     script.setAttribute(RETRY_ATTR, 'true')
     script.addEventListener('load', () => {
       window.setTimeout(() => {
