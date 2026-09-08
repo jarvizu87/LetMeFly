@@ -4,7 +4,7 @@
   const DATA_URL = '/data/exercise-intelligence-v1.json';
   const READY_EVENT = 'letmefly:exercise-intelligence-ready';
   const ERROR_EVENT = 'letmefly:exercise-intelligence-error';
-  const SUPPORTED_COUNTS = Object.freeze(['92/25', '94/27']);
+  const SUPPORTED_COUNTS = Object.freeze(['92/25', '94/27', '108/27']);
   let payload = null;
   let loadPromise = null;
 
