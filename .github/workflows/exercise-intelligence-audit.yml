@@ -1,0 +1,49 @@
+name: Exercise Intelligence Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/**'
+      - 'ci/verify-exercise-intelligence.sh'
+      - '.github/workflows/exercise-intelligence-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/**'
+      - 'ci/verify-exercise-intelligence.sh'
+      - '.github/workflows/exercise-intelligence-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Verify Exercise Intelligence payload
+        run: bash ci/verify-exercise-intelligence.sh
+
+      - name: Materialize and inspect payload
+        run: |
+          node overlays/exercise-intelligence/materialize.mjs --output=/tmp/exercise-intelligence-v1.json
+          node - <<'NODE'
+          const fs = require('fs');
+          const payload = JSON.parse(fs.readFileSync('/tmp/exercise-intelligence-v1.json', 'utf8'));
+          if (payload.counts.exercises !== 92) throw new Error('expected 92 exercises');
+          if (payload.counts.substitutionRules !== 25) throw new Error('expected 25 substitution rules');
+          if (payload.integrationStatus !== 'READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION') {
+            throw new Error('unexpected integration status');
+          }
+          console.log('Exercise Intelligence materialized payload audit: PASS');
+          NODE
