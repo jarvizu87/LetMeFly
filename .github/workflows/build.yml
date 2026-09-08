@@ -73,6 +73,22 @@ jobs:
       - name: Audit all programs, governed days, screens, tabs, features, and full mock training cycle
         run: node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
 
+      - name: Audit production UI in a real mobile browser
+        run: |
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cd ../..
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >/tmp/letmefly-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..20}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 0.25
+          done
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          CHROME_BIN="$CHROME_BIN" node ci/audit-browser-smoke.mjs
+
       - name: Audit final Exercise Intelligence production dist
         run: bash ci/audit-exercise-intelligence-production-v1.sh
 
@@ -87,6 +103,15 @@ jobs:
           path: |
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.json
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Publish mobile browser audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: letmefly-mobile-browser-audit
+          path: .build-src/letmefly_app/BROWSER_SMOKE_AUDIT
           if-no-files-found: warn
           retention-days: 14
 
