@@ -8,3 +8,8 @@ Patch chunks:
 - runtime-v4-to-v5.patch.gz.b64.00: `aca4b26805a7f715a0ef4579a7347873a27e2fd40f771b6cfe8fe03a8a63aa87`
 - runtime-v4-to-v5.patch.gz.b64.01: `ed91534fcab414a9b873d81343f40832b85ccc8cd11a8233fad59ecb6fad282a`
 - runtime-v4-to-v5.patch.gz.b64.02: `034f32ff5ac9d563799991b4d813d59b8e1d75e8ad4cfb505d250a3607457fcb`
+
+Git blob identity verification against uploaded chunk bytes:
+- chunk 00 blob: `5b9460e6a85088dbabf17c9537354068ee7db171`
+- chunk 01 blob: `3bfe367c8a83235497fe2a5eef0e9800842bfa43`
+- chunk 02 blob: `b36aa1531b3ca5e2b40638404a89388fa22943b0`
