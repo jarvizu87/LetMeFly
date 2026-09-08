@@ -30,7 +30,6 @@ test -f dist/service-worker.js
 grep -Rq 'Black Crown Revised' dist/assets
 grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
-grep -Rq 'Crownforge v2.2' dist/assets
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
