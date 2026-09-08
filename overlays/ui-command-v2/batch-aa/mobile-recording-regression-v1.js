@@ -1,7 +1,7 @@
 (() => {
   'use strict'
 
-  // LetMeFly recording-led mobile regression fixes v2.
+  // LetMeFly recording-led mobile regression fixes v3.
   // UI guard only: never changes a program prescription or private athlete position.
 
   const ROOT_CLASS = 'lmf-preview-mode'
@@ -139,42 +139,11 @@
     if (!shell) return
     const cards = [...shell.querySelectorAll('.workout-panel .exercise-stack .preview-card[data-exercise-art]')]
     cards.forEach((card) => {
-      const existing = card.querySelector(':scope > .lmf-preview-plan-toggle')
-      if (!preview) {
-        existing?.remove()
-        delete card.dataset.lmfPreviewCollapsed
-        return
-      }
-
-      let button = existing
-      if (!(button instanceof HTMLButtonElement)) {
-        button = document.createElement('button')
-        button.type = 'button'
-        button.className = 'lmf-preview-plan-toggle'
-        button.setAttribute('aria-expanded', 'false')
-        button.textContent = 'VIEW FULL PLAN'
-        card.dataset.lmfPreviewCollapsed = 'true'
-        card.appendChild(button)
-      }
-
-      const collapsed = card.dataset.lmfPreviewCollapsed !== 'false'
-      button.setAttribute('aria-expanded', collapsed ? 'false' : 'true')
-      button.textContent = collapsed ? 'VIEW FULL PLAN' : 'HIDE DETAILS'
+      card.querySelectorAll(':scope > .lmf-preview-plan-toggle').forEach((node) => node.remove())
+      delete card.dataset.lmfPreviewCollapsed
+      if (preview) card.dataset.lmfPreviewDay1Style = 'true'
+      else delete card.dataset.lmfPreviewDay1Style
     })
-  }
-
-  function togglePreviewPlan(event) {
-    const button = event.target instanceof Element ? event.target.closest('.lmf-preview-plan-toggle') : null
-    if (!(button instanceof HTMLButtonElement) || !isPreviewMode()) return false
-    const card = button.closest('.preview-card[data-exercise-art]')
-    if (!(card instanceof HTMLElement)) return false
-    event.preventDefault()
-    event.stopPropagation()
-    const collapsed = card.dataset.lmfPreviewCollapsed !== 'false'
-    card.dataset.lmfPreviewCollapsed = collapsed ? 'false' : 'true'
-    button.setAttribute('aria-expanded', collapsed ? 'true' : 'false')
-    button.textContent = collapsed ? 'HIDE DETAILS' : 'VIEW FULL PLAN'
-    return true
   }
 
   function markPreviewWarning(warning) {
@@ -230,7 +199,6 @@
   }
 
   function blockPreviewWrite(event) {
-    if (togglePreviewPlan(event)) return
     if (!isPreviewMode()) return
     const target = event.target instanceof Element ? event.target.closest('[data-action]') : null
     const action = target?.getAttribute('data-action') || ''
