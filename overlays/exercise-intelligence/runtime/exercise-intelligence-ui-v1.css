@@ -1,0 +1,204 @@
+:root{
+  --lmf-intel-bg:#0b0d10;
+  --lmf-intel-panel:#12151a;
+  --lmf-intel-panel-2:#181c22;
+  --lmf-intel-border:rgba(255,255,255,.11);
+  --lmf-intel-text:#f7f8fa;
+  --lmf-intel-muted:#aeb6c2;
+  --lmf-intel-accent:#b51f36;
+  --lmf-intel-accent-2:#e44057;
+  --lmf-intel-shadow:0 24px 80px rgba(0,0,0,.58);
+}
+
+body.lmf-intel-modal-open{overflow:hidden}
+
+.lmf-intel-overlay{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding:16px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);
+}
+
+.lmf-intel-modal{
+  position:relative;
+  width:min(760px,100%);
+  max-height:min(88vh,900px);
+  overflow:auto;
+  border:1px solid var(--lmf-intel-border);
+  border-radius:22px;
+  background:
+    linear-gradient(180deg,rgba(181,31,54,.12),transparent 180px),
+    var(--lmf-intel-panel);
+  color:var(--lmf-intel-text);
+  box-shadow:var(--lmf-intel-shadow);
+  padding:24px;
+  -webkit-overflow-scrolling:touch;
+}
+
+.lmf-intel-modal h2{
+  margin:4px 44px 8px 0;
+  font-size:clamp(28px,6vw,42px);
+  line-height:1;
+  letter-spacing:-.03em;
+}
+
+.lmf-intel-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:44px;
+  height:44px;
+  border:1px solid var(--lmf-intel-border);
+  border-radius:14px;
+  background:var(--lmf-intel-panel-2);
+  color:var(--lmf-intel-text);
+  font-size:30px;
+  line-height:1;
+  cursor:pointer;
+}
+
+.lmf-intel-close:focus-visible,
+.lmf-intel-btn:focus-visible{
+  outline:3px solid var(--lmf-intel-accent-2);
+  outline-offset:2px;
+}
+
+.lmf-intel-kicker,
+.lmf-intel-label{
+  color:#ff667b;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.lmf-intel-purpose{
+  margin:0 0 16px;
+  color:var(--lmf-intel-muted);
+  font-size:15px;
+  line-height:1.55;
+}
+
+.lmf-intel-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:0 0 18px;
+}
+
+.lmf-intel-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding:6px 10px;
+  border:1px solid var(--lmf-intel-border);
+  border-radius:999px;
+  background:rgba(255,255,255,.045);
+  color:#dce2ea;
+  font-size:12px;
+  font-weight:800;
+}
+
+.lmf-intel-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin:12px 0;
+}
+
+.lmf-intel-grid>div{
+  border:1px solid var(--lmf-intel-border);
+  border-radius:16px;
+  background:var(--lmf-intel-panel-2);
+  padding:16px;
+}
+
+.lmf-intel-muscles p{
+  margin:7px 0 0;
+  color:#e5e9ef;
+  line-height:1.45;
+}
+
+.lmf-intel-guidance ul{
+  margin:10px 0 0;
+  padding-left:20px;
+  color:#e5e9ef;
+}
+
+.lmf-intel-guidance li{
+  margin:8px 0;
+  line-height:1.42;
+}
+
+.lmf-intel-boundary{
+  display:grid;
+  gap:5px;
+  margin-top:16px;
+  padding:14px 16px;
+  border-left:4px solid var(--lmf-intel-accent);
+  border-radius:10px;
+  background:rgba(181,31,54,.09);
+}
+
+.lmf-intel-boundary strong{
+  font-size:12px;
+  letter-spacing:.1em;
+}
+
+.lmf-intel-boundary span{
+  color:var(--lmf-intel-muted);
+  line-height:1.45;
+  font-size:13px;
+}
+
+.lmf-intel-actions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+.lmf-intel-btn{
+  display:inline-flex;
+  flex:1;
+  min-height:50px;
+  align-items:center;
+  justify-content:center;
+  padding:12px 16px;
+  border:1px solid var(--lmf-intel-border);
+  border-radius:14px;
+  background:var(--lmf-intel-panel-2);
+  color:var(--lmf-intel-text);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:.03em;
+  cursor:pointer;
+}
+
+.lmf-intel-btn-primary{
+  border-color:rgba(228,64,87,.5);
+  background:linear-gradient(180deg,var(--lmf-intel-accent-2),var(--lmf-intel-accent));
+}
+
+@media(min-width:680px){
+  .lmf-intel-overlay{align-items:center;padding:24px}
+  .lmf-intel-grid{grid-template-columns:1fr 1fr}
+  .lmf-intel-modal{padding:30px}
+}
+
+@media(max-width:420px){
+  .lmf-intel-overlay{padding:0;align-items:flex-end}
+  .lmf-intel-modal{
+    width:100%;
+    max-height:92vh;
+    border-radius:22px 22px 0 0;
+    padding:22px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  .lmf-intel-actions{flex-direction:column}
+  .lmf-intel-btn{width:100%}
+}
