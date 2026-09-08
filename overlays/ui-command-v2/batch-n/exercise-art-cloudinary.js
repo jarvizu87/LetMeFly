@@ -12,8 +12,8 @@
   const LOCAL_DB_NAME = 'letmefly-private'
   const LOCAL_META_STORE = 'meta'
   const LOCAL_MAP_KEY = 'privateExerciseArtMap'
+  const LOCAL_PREFIX_KEY = 'privateExerciseArtPrefix'
   const LOCAL_STORAGE_MAP_KEY = 'lmf_private_exercise_art_map_v1'
-  const LOCAL_STORAGE_PREFIX_KEY = 'lmf_private_exercise_art_prefix_v1'
 
   // Program/display aliases are generic app semantics, not athlete-specific mappings.
   const CANONICAL_SLUG_ALIASES = Object.freeze({
@@ -212,23 +212,16 @@
     }
   }
 
-  function readLocalStoragePrefix() {
-    try {
-      return normalizePrefix(localStorage.getItem(LOCAL_STORAGE_PREFIX_KEY) || '')
-    } catch {
-      return ''
-    }
-  }
-
-  function readLocalMap() {
-    const storageFallback = readLocalStorageMap()
+  function readLocalPrivateConfig() {
+    const storageMapFallback = readLocalStorageMap()
+    const fallback = { map: storageMapFallback, prefix: '' }
     return new Promise((resolve) => {
       let request
       let created = false
       try {
         request = indexedDB.open(LOCAL_DB_NAME)
       } catch {
-        resolve(storageFallback)
+        resolve(fallback)
         return
       }
 
@@ -236,29 +229,44 @@
         created = true
         try { request.transaction?.abort() } catch {}
       }
-      request.onerror = () => resolve(storageFallback)
+      request.onerror = () => resolve(fallback)
       request.onsuccess = () => {
         const db = request.result
         try {
           if (created || !db.objectStoreNames.contains(LOCAL_META_STORE)) {
             db.close()
-            resolve(storageFallback)
+            resolve(fallback)
             return
           }
+
           const tx = db.transaction([LOCAL_META_STORE], 'readonly')
-          const getRequest = tx.objectStore(LOCAL_META_STORE).get(LOCAL_MAP_KEY)
-          getRequest.onsuccess = () => {
-            const indexedDbMap = normalizeMap(getRequest.result?.value)
-            db.close()
-            resolve({ ...storageFallback, ...indexedDbMap })
+          const store = tx.objectStore(LOCAL_META_STORE)
+          const mapRequest = store.get(LOCAL_MAP_KEY)
+          const prefixRequest = store.get(LOCAL_PREFIX_KEY)
+          let map = storageMapFallback
+          let prefix = ''
+
+          mapRequest.onsuccess = () => {
+            const indexedDbMap = normalizeMap(mapRequest.result?.value)
+            map = { ...storageMapFallback, ...indexedDbMap }
           }
-          getRequest.onerror = () => {
+          prefixRequest.onsuccess = () => {
+            prefix = normalizePrefix(prefixRequest.result?.value)
+          }
+          tx.oncomplete = () => {
             db.close()
-            resolve(storageFallback)
+            resolve({ map, prefix })
+          }
+          tx.onabort = () => {
+            db.close()
+            resolve(fallback)
+          }
+          tx.onerror = () => {
+            // onabort/oncomplete closes the database and resolves the fallback or result.
           }
         } catch {
           db.close()
-          resolve(storageFallback)
+          resolve(fallback)
         }
       }
     })
@@ -268,8 +276,9 @@
     if (localRefreshStarted) return
     localRefreshStarted = true
     try {
-      localPrivatePrefix = readLocalStoragePrefix()
-      localOverrideMap = await readLocalMap()
+      const localConfig = await readLocalPrivateConfig()
+      localPrivatePrefix = localConfig.prefix
+      localOverrideMap = localConfig.map
       mergeOverrideMaps()
       statusBySlug.clear()
       waitingBySlug.clear()
@@ -383,12 +392,6 @@
       refreshFromLocal()
       refreshFromCloud()
       scan(document)
-    })
-
-    window.addEventListener('storage', (event) => {
-      if (event.key !== LOCAL_STORAGE_PREFIX_KEY && event.key !== LOCAL_STORAGE_MAP_KEY) return
-      statusBySlug.clear()
-      refreshFromLocal()
     })
 
     window.addEventListener('lmf:exercise-art-overrides-updated', () => {
