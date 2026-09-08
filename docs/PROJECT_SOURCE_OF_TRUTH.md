@@ -45,24 +45,31 @@ Do not infer Black Crown prescriptions from Crownforge.
 
 Exercise Intelligence is separate from program programming.
 
-The current Drive-side Exercise Intelligence authority is **LetMeFly Exercise Intelligence Master v2 — ROLE ENRICHED**. It is derived first from the exact 92-entry exercise registry shipped by the latest successful LetMeFly production build, then selectively enriched only where existing Crown sources provide source-backed role/purpose evidence.
+The current Exercise Intelligence authority is **LetMeFly Exercise Intelligence Master v7 — QA Clean / Integration Ready**. It is derived from the exact 92-entry canonical exercise registry shipped by the audited LetMeFly application and enriched under explicit source/evidence boundaries. The Drive `Exercise Intelligence / MASTER` folder contains v7 as the current master; superseded working masters are retained under `Version Archive` for provenance.
 
-Current v2 state:
+Current v7 state:
 
-- 92 canonical shipped exercise records; no duplicate production exercise IDs or canonical names.
-- 86 are linked to Crownforge and 65 to Black Crown in the current app registry.
-- 91 of 92 app exercise IDs map directly to the current Active Plan thumbnail index; `elliptical` versus `elliptical-trainer` remains an explicit crosswalk exception rather than a silent rename.
-- 31 exercises currently have source-backed movement-role / purpose taxonomy; 61 remain explicitly unenriched.
-- 9 source-backed role families are currently defined: Squat Pattern, Bench / Press Pattern, Hinge / Pull Pattern, Upper-Back Pull Pattern, Knee Support Pattern, Back-Extension Role, Olympic / Power Pattern, Kettlebell Pattern, and Yoke / Trap Pattern.
-- Rich fields that are not yet supported by validated evidence remain blank/queued rather than guessed, including muscle maps, detailed coaching cues, common mistakes, and many direct instructional-video replacements.
-- Older Crown System workbooks remain reference sources. Their 202 active-plan exercise/demo records and 68 historical substitution pairs are not imported wholesale into current canon.
-- Historical substitutions must be revalidated against current role-preservation rules before promotion. For example, a hamstring curl may preserve a knee-flexion hamstring role but does not automatically preserve the loaded-hinge / lengthened posterior-chain role of an RDL.
+- 92 canonical current-app exercise records.
+- 92 / 92 movement-role and training-purpose records.
+- 92 / 92 primary/secondary muscle records.
+- 92 / 92 coaching-cue and common-mistake records.
+- 25 governed substitution rules.
+- 23 substitution rules whose alternative already exists as a canonical current-app exercise.
+- 2 relationships explicitly retained as `DO NOT DEFAULT` because the apparent replacement changes the training purpose rather than preserving it.
+- 11 direct-demo candidates remain review-only until their URLs are intentionally validated.
+- Canonical ID/name, required-field, substitution-ID, and spreadsheet-formula QA are clean at the v7 integration gate.
+
+The repository implementation lives under `overlays/exercise-intelligence/`. Its canonical JSON is hash-verified from four transport chunks before builds may materialize it. The public runtime payload is privacy-audited so private Drive file IDs/URLs are not exposed.
+
+The current runtime integration is descriptive and read-only. It may provide exercise lookup and enhance the Exercises page `INFO` action with purpose, movement roles, equipment, muscles, cues, mistakes, and the current Watch Exercise link. If the intelligence layer is unavailable, existing LetMeFly INFO behavior remains the fallback.
+
+The Exercise Intelligence INFO layer does not intercept the existing `SUBSTITUTE` action and does not read or write workout prescription state.
+
+Older Crown System workbooks remain reference sources. Their historical active-plan exercise/demo records and substitution pairs are not imported wholesale into current canon. Historical substitutions must be revalidated against current role-preservation rules before promotion. For example, a hamstring curl may preserve a knee-flexion hamstring role but does not automatically preserve the loaded-hinge / lengthened posterior-chain role of an RDL.
 
 A canonical exercise record may contain movement pattern, equipment, purpose, muscles, coaching cues, common mistakes, substitutions, demonstration links, and other exercise-level metadata. Program packages reference exercises; the exercise library does not change sets, reps, loads, weekly structure, or phase logic.
 
 Substitutions must preserve the programmed movement's purpose, stimulus, equipment/skill constraints, fatigue role, and phase role. Matching a muscle group alone is not sufficient. **Role beats name; replace the exercise, not the training purpose.** If a substitute uses a different loading authority or parent lift, its load must be recalculated from the correct source rather than copying the original exercise's load blindly.
-
-Exercise Intelligence version history is preserved under its own Version Archive; superseded masters are retained for provenance rather than deleted.
 
 ## 4. Exercise artwork
 
