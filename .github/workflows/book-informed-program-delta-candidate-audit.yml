@@ -1,0 +1,70 @@
+name: Book-Informed Program Delta Candidate Audit
+
+on:
+  push:
+    branches:
+      - book-informed-program-delta-candidates
+    paths:
+      - 'ci/apply-book-informed-program-delta-candidate.sh'
+      - 'ci/audit-book-informed-program-delta-candidate.mjs'
+      - 'docs/BOOK_INFORMED_PROGRAM_DELTA_CANDIDATES.md'
+      - '.github/workflows/book-informed-program-delta-candidate-audit.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ci/apply-book-informed-program-delta-candidate.sh'
+      - 'ci/audit-book-informed-program-delta-candidate.mjs'
+      - 'docs/BOOK_INFORMED_PROGRAM_DELTA_CANDIDATES.md'
+      - '.github/workflows/book-informed-program-delta-candidate-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Build current governed production baseline
+        run: bash ci/build-command-v2-cloudinary.sh
+
+      - name: Apply isolated book-informed candidate
+        run: bash ci/apply-book-informed-program-delta-candidate.sh "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Audit exact candidate scope and rejected Black Crown delta
+        run: node ci/audit-book-informed-program-delta-candidate.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Re-run Black Crown runtime protection
+        run: node ci/audit-black-crown-runtime.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
+
+      - name: Re-run production package gates after candidate
+        working-directory: .build-src/letmefly_app
+        run: |
+          npm run audit:source
+          npm run audit:crownforge
+          npm run audit:exercise-library
+          npm run audit:ui
+          npm run typecheck
+          npm run build
+
+      - name: Confirm candidate remains non-production
+        run: |
+          set -euo pipefail
+          test -f .build-src/letmefly_app/.book-informed-program-delta-candidate.json
+          grep -Fq 'crownforge-day6-kb-primer-conditional-v1' .build-src/letmefly_app/.book-informed-program-delta-candidate.json
+          ! grep -Rq 'Machine Hip Abduction' .build-src/letmefly_app/src/programs/black-crown
+          ! grep -Rq 'Seated Band Hip Abduction' .build-src/letmefly_app/src/programs/black-crown
+          echo 'Book-informed program delta candidate production-regression audit: PASS'
