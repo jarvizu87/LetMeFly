@@ -93,10 +93,11 @@ grep -Fq ".v2-bars i.empty" src/command-v2.css
 ! grep -Fq "8 + index * 3" src/main.ts
 
 # Command V2 historically typed active selection as dated calendar programs only.
-# Black Crown is deliberately undated public source, so widen routing only after
-# all legacy UI overlays have landed. This changes navigation/runtime access,
-# never any Crownforge or Black Crown prescription.
+# Black Crown is deliberately undated public source. Widen routing and then add
+# governed Black Crown browsing only after all legacy UI overlays have landed.
+# Neither adapter changes any exercise prescription in Crownforge or Black Crown.
 bash "$ROOT_DIR/ci/apply-black-crown-command-v2-core.sh" "$ROOT_DIR/.build-src/letmefly_app"
+bash "$ROOT_DIR/ci/apply-black-crown-command-v2-ui.sh" "$ROOT_DIR/.build-src/letmefly_app"
 
 npm run audit:source
 npm run audit:crownforge
@@ -116,10 +117,12 @@ grep -Rq "data-exercise-art" dist/assets
 grep -Rq "var(--exercise-art" dist/assets
 grep -Rq "Exercise demo offline" dist/assets
 grep -Rq "No TM data yet" dist/assets
+grep -Rq "54 governed weeks" dist/assets
+grep -Rq "BLACK CROWN WEEKS" dist/assets
 
 for art_file in "${ART_FILES[@]}"; do
   art_name="$(basename "$art_file")"
   test -f "dist/ui/exercises/$art_name"
 done
 
-echo "LetMeFly Command V2 hardening + partial exercise-art + truthful runtime states: PASS"
+echo "LetMeFly Command V2 hardening + Black Crown v2 governed UI + truthful runtime states: PASS"
