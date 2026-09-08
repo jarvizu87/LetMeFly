@@ -1,0 +1,165 @@
+/* LetMeFly Home Reference v3 — mobile hierarchy polish
+   Presentation-only override. Keeps governed program/data behavior untouched. */
+
+@media (max-width: 520px) {
+  body.lmf-home-ref3-active .lmf-home-reference-v3 {
+    padding-bottom: 96px !important;
+  }
+
+  /* Give the command cards room to communicate instead of forcing four dense half-width tiles. */
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .readiness-card,
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .coach-focus-card {
+    grid-column: 1 / -1 !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .readiness-card {
+    min-height: 122px !important;
+    padding: 13px 14px !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .status-card:not(.readiness-card),
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .milestone-card {
+    min-height: 164px !important;
+    padding: 13px !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .coach-focus-card {
+    min-height: 112px !important;
+    padding: 13px 14px !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid .card-head {
+    padding-right: 22px !important;
+    margin-bottom: 7px !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid .card-head .page-kicker {
+    font-size: 7px !important;
+    line-height: 1.15 !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid .card-head h2,
+  body.lmf-home-ref3-active .dashboard-grid > .status-card h2,
+  body.lmf-home-ref3-active .dashboard-grid > .milestone-card h2,
+  body.lmf-home-ref3-active .dashboard-grid > .coach-focus-card h2 {
+    font-size: 14px !important;
+    line-height: 1.08 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+  }
+
+  /* Readiness becomes a strong full-width gate, matching Workout Mode's importance hierarchy. */
+  .lmf-readiness-summary {
+    gap: 13px !important;
+    margin-top: 8px !important;
+  }
+
+  .lmf-readiness-score {
+    width: 58px !important;
+    height: 58px !important;
+    flex-basis: 58px !important;
+  }
+
+  .lmf-readiness-summary b {
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+  }
+
+  .lmf-readiness-summary small {
+    font-size: 8px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Keep the two signal cards compact, but make their information actually readable. */
+  .lmf-performance-mark {
+    height: 40px !important;
+    margin: 9px 0 5px !important;
+  }
+
+  .lmf-performance-mark i {
+    width: 8px !important;
+  }
+
+  body.lmf-home-ref3-active .performance-list > div {
+    padding: 5px 0 !important;
+  }
+
+  body.lmf-home-ref3-active .performance-list span {
+    font-size: 7px !important;
+  }
+
+  body.lmf-home-ref3-active .performance-list strong {
+    max-width: 64% !important;
+    font-size: 8px !important;
+  }
+
+  body.lmf-home-ref3-active .milestone-card p,
+  body.lmf-home-ref3-active .coach-focus-card p {
+    font-size: 8px !important;
+    line-height: 1.45 !important;
+    -webkit-line-clamp: 4 !important;
+  }
+
+  body.lmf-home-ref3-active .milestone-icon {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  /* Four tiny stat columns were illegible on a phone. Use a clean 2 × 2 snapshot grid. */
+  .lmf-home-stat-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    margin-top: 12px !important;
+  }
+
+  .lmf-home-stat-strip > div {
+    min-height: 76px !important;
+    padding: 10px 6px 9px !important;
+    border-right: 1px solid #1c272d !important;
+    border-bottom: 1px solid #1c272d !important;
+  }
+
+  .lmf-home-stat-strip > div:nth-child(2n) {
+    border-right: 0 !important;
+  }
+
+  .lmf-home-stat-strip > div:nth-last-child(-n + 2) {
+    border-bottom: 0 !important;
+  }
+
+  .lmf-home-stat-strip strong {
+    font-size: 16px !important;
+  }
+
+  .lmf-home-stat-strip small {
+    font-size: 7px !important;
+    letter-spacing: .01em !important;
+  }
+
+  /* Preserve the three command facts without micro-text at common phone widths. */
+  .lmf-command-meta small {
+    font-size: 6.2px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  /* Very narrow phones get one-column signal cards rather than clipped copy. */
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > * {
+    grid-column: 1 !important;
+  }
+
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .status-card:not(.readiness-card),
+  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .milestone-card {
+    min-height: 132px !important;
+  }
+}
