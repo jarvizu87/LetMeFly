@@ -70,11 +70,25 @@ jobs:
       - name: Install recording-led mobile regression fixes
         run: bash ci/install-mobile-recording-regression-v1.sh
 
+      - name: Audit all programs, governed days, screens, tabs, features, and full mock training cycle
+        run: node ci/audit-full-app-cycle.mjs .build-src/letmefly_app
+
       - name: Audit final Exercise Intelligence production dist
         run: bash ci/audit-exercise-intelligence-production-v1.sh
 
       - name: Audit final full Exercise Intelligence catalog
         run: bash ci/audit-exercise-intelligence-library-production-v1.sh
+
+      - name: Publish full-app audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: letmefly-full-app-cycle-audit
+          path: |
+            .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.json
+            .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Publish production build artifact
         uses: actions/upload-artifact@v4
