@@ -26,34 +26,109 @@ mkdir -p "$DIST_DIR/ui"
 cp "$JS_SOURCE" "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 cp "$CSS_SOURCE" "$DIST_DIR/ui/smart-names-bar-loader-v1.css"
 
+# Older Command V2 patch layers could occasionally leave two complete HTML documents
+# concatenated in dist/index.html. Browsers tolerated that malformed shell, but new UI
+# utilities should not perpetuate it. Canonicalize to the real Vite app document first,
+# then preserve all governed runtime helpers in that one document.
 DIST_DIR="$DIST_DIR" python - <<'PY'
 from pathlib import Path
 import os
+import re
 
 p = Path(os.environ['DIST_DIR']) / 'index.html'
 text = p.read_text()
+original = text
+
+doctype_re = re.compile(r'<!doctype\s+html[^>]*>', re.I)
+matches = list(doctype_re.finditer(text))
+if not matches:
+    raise SystemExit('index.html is missing <!doctype html>')
+
+if len(matches) > 1:
+    candidates = []
+    for index, match in enumerate(matches):
+        start = match.start()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        chunk = text[start:end].strip()
+        close = chunk.lower().rfind('</html>')
+        if close >= 0:
+            chunk = chunk[:close + len('</html>')]
+
+        compact = chunk.lower()
+        score = 0
+        score += 100 if 'id="app"' in compact or "id='app'" in compact else 0
+        score += 80 if re.search(r'<script[^>]+type=["\']module["\'][^>]+/assets/index-', chunk, re.I) else 0
+        score += 40 if '/assets/index-' in chunk else 0
+        score += 20 if '/ui/workout-flow-v1.js' in chunk else 0
+        score += 20 if '/ui/pyramid-flow-v1.js' in chunk else 0
+        score += 20 if '/ui/exercise-art-cloudinary.js' in chunk else 0
+        score += 10 if '</body>' in compact else 0
+        score += 10 if '</html>' in compact else 0
+        candidates.append((score, len(chunk), chunk))
+
+    score, _, winner = max(candidates, key=lambda item: (item[0], item[1]))
+    if score < 180:
+        raise SystemExit('could not identify the canonical Vite app document while repairing duplicate HTML')
+    text = winner
+    print(f'Normalized duplicate index.html documents: {len(matches)} -> 1')
+
+# The canonical production shell must retain these governed runtime helpers.
+runtime_scripts = [
+    '/ui/exercise-art-auto.js',
+    '/ui/workout-flow-v1.js',
+    '/ui/pyramid-flow-v1.js',
+    '/ui/pwa-install.js',
+    '/ui/pwa-update.js',
+    '/ui/exercise-art-cloudinary.js',
+]
+if '</body>' not in text.lower():
+    raise SystemExit('canonical index.html is missing </body>')
+for src in runtime_scripts:
+    marker = f'<script defer src="{src}"></script>'
+    if src not in text:
+        text = re.sub(r'</body>', f'  {marker}\n</body>', text, count=1, flags=re.I)
+
 css = '<link rel="stylesheet" href="/ui/smart-names-bar-loader-v1.css">'
 js = '<script defer src="/ui/smart-names-bar-loader-v1.js"></script>'
 if css not in text:
-    if '</head>' not in text:
-        raise SystemExit('index.html is missing </head>')
-    text = text.replace('</head>', f'  {css}\n</head>', 1)
+    if '</head>' not in text.lower():
+        raise SystemExit('canonical index.html is missing </head>')
+    text = re.sub(r'</head>', f'  {css}\n</head>', text, count=1, flags=re.I)
 if js not in text:
-    if '</body>' not in text:
-        raise SystemExit('index.html is missing </body>')
-    text = text.replace('</body>', f'  {js}\n</body>', 1)
-if text.lower().count('<!doctype html>') != 1:
-    raise SystemExit('index.html must contain exactly one HTML document')
-p.write_text(text)
+    text = re.sub(r'</body>', f'  {js}\n</body>', text, count=1, flags=re.I)
+
+lower = text.lower()
+checks = {
+    'doctype': len(doctype_re.findall(text)) == 1,
+    'html open': len(re.findall(r'<html\b', text, re.I)) == 1,
+    'html close': len(re.findall(r'</html>', text, re.I)) == 1,
+    'head open': len(re.findall(r'<head\b', text, re.I)) == 1,
+    'head close': len(re.findall(r'</head>', text, re.I)) == 1,
+    'body open': len(re.findall(r'<body\b', text, re.I)) == 1,
+    'body close': len(re.findall(r'</body>', text, re.I)) == 1,
+    'app root': 'id="app"' in lower or "id='app'" in lower,
+    'vite module': bool(re.search(r'<script[^>]+type=["\']module["\'][^>]+/assets/index-', text, re.I)),
+}
+failed = [label for label, ok in checks.items() if not ok]
+if failed:
+    raise SystemExit('canonical index.html validation failed: ' + ', '.join(failed))
+
+p.write_text(text.rstrip() + '\n')
 PY
 
 node --check "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 test -s "$DIST_DIR/ui/smart-names-bar-loader-v1.css"
 grep -Fq '/ui/smart-names-bar-loader-v1.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/smart-names-bar-loader-v1.js' "$DIST_DIR/index.html"
+grep -Fq '/ui/workout-flow-v1.js' "$DIST_DIR/index.html"
+grep -Fq '/ui/pyramid-flow-v1.js' "$DIST_DIR/index.html"
+grep -Fq '/ui/exercise-art-cloudinary.js' "$DIST_DIR/index.html"
 grep -Fq 'Inc DB Press' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq 'Half-Kneeling Chop' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq 'Bar Loader' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq '@media (max-width: 360px)' "$DIST_DIR/ui/smart-names-bar-loader-v1.css"
 
-echo "LetMeFly smart exercise-name abbreviations + standalone/contextual Bar Loader: PASS"
+DOCTYPE_COUNT="$(grep -io '<!doctype[[:space:]]\+html[^>]*>' "$DIST_DIR/index.html" | wc -l | tr -d ' ')"
+[[ "$DOCTYPE_COUNT" == "1" ]]
+
+echo "LetMeFly smart exercise-name abbreviations + standalone/contextual Bar Loader + canonical production shell: PASS"
