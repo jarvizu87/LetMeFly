@@ -85,6 +85,16 @@ jobs:
             <body><div id="app"></div></body>
           </html>
           HTML
+          cat > "$TEST_DIST/service-worker.js" <<'JS'
+          const CACHE_NAME = 'lmf-smoke-test'
+          const PRECACHE = ['/', '/manifest.webmanifest']
+          function isPrivateOrAuth(request) {
+            const url = new URL(request.url)
+            if (url.hostname.endsWith('.supabase.co')) return true
+            if (/\/auth\/v1\//.test(url.pathname)) return true
+            return false
+          }
+          JS
           bash ci/install-exercise-intelligence-v1.sh "$TEST_DIST"
           test -f "$TEST_DIST/data/exercise-intelligence-v1.json"
           test -f "$TEST_DIST/ui/exercise-intelligence-runtime-v1.js"
@@ -93,4 +103,9 @@ jobs:
           grep -Fq '/ui/exercise-intelligence-runtime-v1.js' "$TEST_DIST/index.html"
           grep -Fq '/ui/exercise-intelligence-ui-v1.js' "$TEST_DIST/index.html"
           grep -Fq '/ui/exercise-intelligence-ui-v1.css' "$TEST_DIST/index.html"
-          echo 'Exercise Intelligence installer smoke test: PASS'
+          grep -Fq "'/data/exercise-intelligence-v1.json'" "$TEST_DIST/service-worker.js"
+          grep -Fq "'/ui/exercise-intelligence-runtime-v1.js'" "$TEST_DIST/service-worker.js"
+          grep -Fq "'/ui/exercise-intelligence-ui-v1.js'" "$TEST_DIST/service-worker.js"
+          grep -Fq "'/ui/exercise-intelligence-ui-v1.css'" "$TEST_DIST/service-worker.js"
+          grep -Fq "hostname.endsWith('.supabase.co')" "$TEST_DIST/service-worker.js"
+          echo 'Exercise Intelligence installer + offline precache smoke test: PASS'
