@@ -1,0 +1,300 @@
+/* LetMeFly Home Command Hero v1
+   Presentation-only Home upgrade based on the approved Command Hero direction.
+   This file must not alter program prescriptions, workout state, readiness data,
+   training maxes, or private athlete storage. */
+
+/* HOME HERO — keep Command V2 DNA, tighten hierarchy, make the active session dominant. */
+.command-hero{
+  min-height:420px!important;
+  border-radius:12px!important;
+  border-color:#2b3944!important;
+  background:#05090d!important;
+  box-shadow:0 22px 50px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  isolation:isolate;
+}
+.command-hero::before{
+  background:
+    linear-gradient(180deg,rgba(2,6,9,.03) 0%,rgba(2,6,9,.15) 28%,rgba(2,6,9,.72) 60%,#05090d 100%),
+    linear-gradient(90deg,rgba(3,7,10,.48),rgba(3,7,10,.02) 54%,rgba(3,7,10,.38)),
+    var(--v2-wolf) 93% 28%/auto 82% no-repeat,
+    var(--v2-mountain) 50% 10%/cover no-repeat!important;
+  filter:saturate(.72) contrast(1.12)!important;
+  opacity:.96;
+}
+.command-hero::after{
+  height:58%!important;
+  background:radial-gradient(ellipse at 68% 78%,rgba(255,23,46,.16),transparent 58%)!important;
+}
+.command-hero .hero-content{
+  padding:22px 20px 92px!important;
+  background:linear-gradient(180deg,rgba(3,7,10,.04),rgba(3,7,10,.28) 28%,rgba(3,7,10,.92) 72%,#05090d)!important;
+}
+.command-hero .hero-brandline{
+  display:flex!important;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:7px!important;
+}
+.command-hero .hero-brandline span{
+  font-size:8px!important;
+  color:#d9dfe3!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase;
+}
+.command-hero .hero-brandline em{
+  padding:4px 7px!important;
+  border-radius:4px!important;
+  background:rgba(12,20,27,.9)!important;
+  border:1px solid #33414c!important;
+  color:#aeb9c1!important;
+  font-size:6px!important;
+  letter-spacing:.12em!important;
+}
+.command-hero .hero-content .page-kicker{
+  font-size:7px!important;
+  margin-bottom:5px!important;
+  letter-spacing:.17em!important;
+}
+.command-hero .hero-title{
+  max-width:620px!important;
+  margin:4px 0 7px!important;
+  font-size:clamp(30px,6vw,48px)!important;
+  line-height:.95!important;
+  letter-spacing:.005em!important;
+  text-shadow:0 4px 22px rgba(0,0,0,.9)!important;
+}
+.command-hero .hero-copy{
+  max-width:520px!important;
+  margin:0 0 9px!important;
+  color:#b9c3ca!important;
+  font-size:10px!important;
+  line-height:1.42!important;
+}
+.command-hero .hero-tags{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:5px!important;
+}
+.command-hero .hero-tags span{
+  min-height:27px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  padding:4px 8px!important;
+  border-radius:4px!important;
+  background:rgba(8,15,20,.88)!important;
+  border:1px solid #2b3944!important;
+  color:#d6dde2!important;
+  font-size:6.5px!important;
+  letter-spacing:.06em!important;
+}
+.command-hero .hero-actions{
+  margin-top:11px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+}
+.command-hero .hero-start{
+  width:min(420px,100%)!important;
+  min-height:50px!important;
+  justify-content:center!important;
+  border-radius:6px!important;
+  font-size:9px!important;
+  letter-spacing:.105em!important;
+  box-shadow:0 12px 28px rgba(255,23,46,.22)!important;
+}
+.command-hero .hero-progress{
+  left:18px!important;
+  right:18px!important;
+  bottom:15px!important;
+  padding:9px 11px!important;
+  border-radius:6px!important;
+  background:rgba(4,9,13,.9)!important;
+  border:1px solid #2a3944!important;
+  backdrop-filter:blur(10px);
+  box-shadow:0 10px 30px rgba(0,0,0,.26)!important;
+}
+.command-hero .hero-progress>div:first-child{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:10px!important;
+  margin-bottom:6px!important;
+}
+.command-hero .hero-progress span{font-size:6.5px!important;letter-spacing:.13em!important}
+.command-hero .hero-progress strong{font-size:9px!important;color:#edf1f4!important}
+.command-hero .progress-bar{height:5px!important;border-radius:20px!important;background:#18232c!important}
+.command-hero .progress-bar span{border-radius:20px!important}
+
+/* Session focus strip — visually behaves like the compact command metrics in the approved mockup. */
+.focus-strip{
+  margin:9px 0!important;
+  gap:6px!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.focus-chip{
+  min-height:60px!important;
+  padding:7px 5px!important;
+  gap:3px!important;
+  border-radius:6px!important;
+  border:1px solid #263540!important;
+  background:linear-gradient(180deg,#0b141b,#071016)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)!important;
+  color:#cbd3d9!important;
+  font-size:7px!important;
+  line-height:1.15!important;
+}
+.focus-chip span{
+  font-size:15px!important;
+  color:#ff3548!important;
+  line-height:1!important;
+}
+
+/* HOME DATA GRID — four fast-read command cards, all visible on phones. */
+.dashboard-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+  align-items:stretch!important;
+}
+.dashboard-grid>.card,
+.dashboard-grid>.status-card,
+.dashboard-grid>.milestone-card,
+.dashboard-grid>.coach-focus-card{
+  min-width:0!important;
+  min-height:138px!important;
+  padding:10px!important;
+  border:1px solid #293842!important;
+  border-radius:7px!important;
+  background:linear-gradient(145deg,#0b141b,#071016)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.22)!important;
+  overflow:hidden;
+  position:relative;
+}
+.dashboard-grid>.card::after,
+.dashboard-grid>.status-card::after,
+.dashboard-grid>.milestone-card::after,
+.dashboard-grid>.coach-focus-card::after{
+  content:'›';
+  position:absolute;
+  top:8px;
+  right:9px;
+  color:#8d9aa4;
+  font:700 18px/1 var(--condensed);
+  opacity:.75;
+}
+.dashboard-grid .card-head{
+  margin:0 0 5px!important;
+  padding-right:14px!important;
+}
+.dashboard-grid .card-head .page-kicker{
+  font-size:6px!important;
+  letter-spacing:.14em!important;
+}
+.dashboard-grid .card-head h2,
+.dashboard-grid>.status-card h2,
+.dashboard-grid>.milestone-card h2,
+.dashboard-grid>.coach-focus-card h2{
+  font-size:15px!important;
+  line-height:1.05!important;
+  margin-top:2px!important;
+}
+.readiness-card{order:1!important;grid-column:auto!important}
+.dashboard-grid>.status-card:not(.readiness-card){order:2!important}
+.milestone-card{order:3!important}
+.coach-focus-card{order:4!important;display:block!important}
+.readiness-rings{
+  justify-content:flex-start!important;
+  gap:5px!important;
+  margin:6px 0 4px!important;
+}
+.readiness-ring{
+  width:58px!important;
+  height:58px!important;
+  border-width:2px!important;
+  background:#061016!important;
+}
+.readiness-ring strong{font-size:16px!important}
+.readiness-ring span{font-size:5.5px!important}
+.performance-list{margin-top:3px!important}
+.performance-list>div{padding:5px 0!important;border-color:#1c2932!important}
+.performance-list span{font-size:6.5px!important}
+.performance-list strong{font-size:8px!important}
+.milestone-card{
+  background:linear-gradient(120deg,rgba(117,25,13,.30),#091118 50%)!important;
+  border-color:#41323a!important;
+}
+.milestone-icon{
+  width:34px!important;
+  height:34px!important;
+  border-color:#684c2b!important;
+  color:var(--v2-gold)!important;
+}
+.coach-focus-card{
+  background:radial-gradient(circle at 85% 15%,rgba(164,44,255,.09),transparent 34%),linear-gradient(145deg,#0b141b,#071016)!important;
+}
+.coach-focus-card .callout{
+  margin-top:5px!important;
+  padding:7px!important;
+  border-radius:5px!important;
+  font-size:7px!important;
+  line-height:1.35!important;
+}
+
+/* Desktop/tablet: Command Hero grows horizontally without turning back into a giant poster. */
+@media(min-width:781px){
+  .command-hero{min-height:440px!important}
+  .command-hero .hero-content{padding:30px 28px 94px!important;max-width:760px!important}
+  .focus-strip{grid-template-columns:repeat(4,minmax(130px,1fr))!important}
+  .focus-chip{min-height:68px!important}
+  .dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .dashboard-grid>.card,.dashboard-grid>.status-card,.dashboard-grid>.milestone-card,.dashboard-grid>.coach-focus-card{min-height:158px!important}
+}
+
+/* Phone tuning: this is the approved Command Hero composition, fitted to the existing app shell. */
+@media(max-width:520px){
+  .command-hero{
+    min-height:388px!important;
+    border-radius:9px!important;
+    margin-top:2px!important;
+  }
+  .command-hero::before{
+    background:
+      linear-gradient(180deg,rgba(2,6,9,.05) 0%,rgba(2,6,9,.16) 24%,rgba(2,6,9,.78) 56%,#05090d 100%),
+      linear-gradient(90deg,rgba(3,7,10,.42),rgba(3,7,10,.02) 56%,rgba(3,7,10,.28)),
+      var(--v2-wolf) 105% 24%/auto 70% no-repeat,
+      var(--v2-mountain) 50% 4%/auto 55% no-repeat!important;
+  }
+  .command-hero .hero-content{padding:18px 14px 88px!important}
+  .command-hero .hero-brandline{margin-bottom:5px!important}
+  .command-hero .hero-title{font-size:29px!important;margin:3px 0 6px!important;max-width:88%!important}
+  .command-hero .hero-copy{font-size:8px!important;max-width:82%!important;line-height:1.32!important;margin-bottom:7px!important}
+  .command-hero .hero-tags{gap:4px!important}
+  .command-hero .hero-tags span{min-height:24px!important;padding:3px 6px!important;font-size:5.8px!important}
+  .command-hero .hero-actions{margin-top:8px!important}
+  .command-hero .hero-start{width:100%!important;min-height:47px!important;font-size:8px!important}
+  .command-hero .hero-progress{left:13px!important;right:13px!important;bottom:12px!important;padding:8px 9px!important}
+  .focus-strip{gap:5px!important;margin:7px 0!important}
+  .focus-chip{min-height:56px!important;padding:6px 3px!important;font-size:6px!important}
+  .focus-chip span{font-size:13px!important}
+  .dashboard-grid{gap:6px!important}
+  .dashboard-grid>.card,.dashboard-grid>.status-card,.dashboard-grid>.milestone-card,.dashboard-grid>.coach-focus-card{
+    min-height:124px!important;
+    padding:9px!important;
+  }
+  .dashboard-grid .card-head h2,
+  .dashboard-grid>.status-card h2,
+  .dashboard-grid>.milestone-card h2,
+  .dashboard-grid>.coach-focus-card h2{font-size:13px!important}
+  .readiness-ring{width:52px!important;height:52px!important}
+  .readiness-ring strong{font-size:14px!important}
+  .performance-list>div{padding:4px 0!important}
+  .coach-focus-card .callout{font-size:6.4px!important;padding:6px!important}
+}
+
+@media(max-width:380px){
+  .command-hero{min-height:376px!important}
+  .command-hero .hero-title{font-size:27px!important}
+  .focus-chip{min-height:53px!important;font-size:5.6px!important}
+  .dashboard-grid>.card,.dashboard-grid>.status-card,.dashboard-grid>.milestone-card,.dashboard-grid>.coach-focus-card{min-height:119px!important}
+}
