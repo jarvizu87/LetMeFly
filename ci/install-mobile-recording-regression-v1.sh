@@ -30,8 +30,8 @@ text = p.read_text()
 import re
 text = re.sub(r'\s*<link rel="stylesheet" href="/ui/mobile-recording-regression-v1\.css\?v=\d+">\s*', '\n', text)
 text = re.sub(r'\s*<script defer src="/ui/mobile-recording-regression-v1\.js\?v=\d+"></script>\s*', '\n', text)
-css = '<link rel="stylesheet" href="/ui/mobile-recording-regression-v1.css?v=3">'
-js = '<script defer src="/ui/mobile-recording-regression-v1.js?v=3"></script>'
+css = '<link rel="stylesheet" href="/ui/mobile-recording-regression-v1.css?v=4">'
+js = '<script defer src="/ui/mobile-recording-regression-v1.js?v=4"></script>'
 
 if '</head>' not in text:
     raise SystemExit('production index is missing </head>')
@@ -42,10 +42,12 @@ text = text.replace('</body>', f'  {js}\n</body>', 1)
 p.write_text(text)
 PY
 
-# Recording-led regression boundaries: future-day cards now use Day 1's large
-# exercise-card presentation, show governed details by default, and cannot write state.
-grep -Fq '/ui/mobile-recording-regression-v1.css?v=3' "$INDEX"
-grep -Fq '/ui/mobile-recording-regression-v1.js?v=3' "$INDEX"
+# Recording-led regression boundaries: active workout media and future-day cards
+# keep canonical exercise art square/full-frame, while future previews cannot write state.
+grep -Fq '/ui/mobile-recording-regression-v1.css?v=4' "$INDEX"
+grep -Fq '/ui/mobile-recording-regression-v1.js?v=4' "$INDEX"
+grep -Fq 'active-exercise.lmf-workout-flow-card > .lmf-exercise-media' "$DIST/ui/mobile-recording-regression-v1.css"
+grep -Fq 'background-size:contain!important' "$DIST/ui/mobile-recording-regression-v1.css"
 grep -Fq 'aspect-ratio:1/1!important' "$DIST/ui/mobile-recording-regression-v1.css"
 grep -Fq 'data-lmf-preview-collapsed' "$DIST/ui/mobile-recording-regression-v1.css"
 grep -Fq 'lmfPreviewDay1Style' "$DIST/ui/mobile-recording-regression-v1.js"
@@ -57,4 +59,4 @@ grep -Fq 'MAKE CURRENT POSITION' "$DIST"/assets/*.js
 # or cloud/private records.
 ! grep -Eq 'indexedDB\.|localStorage\.setItem|supabase|programInstances|current_day_key|current_week' "$DIST/ui/mobile-recording-regression-v1.js"
 
-echo "LetMeFly mobile recording regression fixes v3: PASS"
+echo "LetMeFly mobile recording regression fixes v4: PASS"
