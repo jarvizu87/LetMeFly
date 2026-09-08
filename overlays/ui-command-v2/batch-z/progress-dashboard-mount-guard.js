@@ -17,16 +17,26 @@
   }
 
   function progressRouteActive() {
-    return /^#\/progress(?:[/?#]|$)/i.test(location.hash || '')
+    if (/^#\/progress(?:[/?#]|$)/i.test(location.hash || '')) return true
+    const activeNav = [...document.querySelectorAll('nav a[href],nav button,nav [role="button"]')].find(element => {
+      if (!visible(element)) return false
+      const href = element.getAttribute('href') || ''
+      const text = (element.textContent || '').trim()
+      const selected = element.classList.contains('active') || element.getAttribute('aria-current') === 'page' || element.getAttribute('aria-selected') === 'true'
+      return selected && (/^#\/progress(?:[/?#]|$)/i.test(href) || /^progress$/i.test(text))
+    })
+    return Boolean(activeNav)
   }
 
   function progressTitle() {
-    const roots = [document.querySelector('main'), document.querySelector('#app'), document.body].filter(Boolean)
+    const roots = [document.querySelector('main'), document.querySelector('[role="main"]'), document.querySelector('#app'), document.body].filter(Boolean)
     for (const root of roots) {
-      for (const element of root.querySelectorAll('h1,h2,h3,[data-lmf-progress-anchor]')) {
+      const candidates = root.querySelectorAll(`h1,h2,h3,[${ANCHOR_ATTR}],.page-title,.screen-title,.section-title,[class*="heading"],[class*="title"],strong,span,div`)
+      for (const element of candidates) {
         if (!visible(element)) continue
         if ((element.textContent || '').trim().toUpperCase() !== 'PROGRESS') continue
         if (element.closest('nav,button,a,[role="button"],[role="tab"]')) continue
+        if (!element.hasAttribute(ANCHOR_ATTR) && element.getBoundingClientRect().width < 24) continue
         return element
       }
     }
@@ -47,20 +57,26 @@
   function progressSurface() {
     const title = progressTitle()
     if (title) return { title, root: title.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || title.parentElement }
+
     const native = document.querySelector('#progress-content')
-    if (visible(native)) return { title: null, root: native.parentElement || native }
+    if (native) {
+      const nativeVisible = visible(native) || [...native.querySelectorAll(':scope > *')].some(visible)
+      if (nativeVisible) return { title: null, root: native.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || native.parentElement || native }
+    }
+
+    const marker = [...document.querySelectorAll('.progress-score-grid,.strength-progress-card,.tm-board,.history-list')].find(visible)
+    if (marker) return { title: null, root: marker.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || marker.parentElement }
 
     // The rebuilt shell can style the visible PROGRESS label as a non-heading
-    // element and no longer guarantees #progress-content. The hash route is the
-    // authoritative navigation signal in that shell, so mount into the active
-    // main app surface rather than depending on presentation markup.
+    // element and does not always update location.hash before the route paints.
+    // A selected Progress nav item is therefore accepted as a route signal too.
     const root = routeRoot()
     return root ? { title: null, root } : null
   }
 
   function ensureAnchor(surface) {
     if (!surface?.root) return null
-    const existing = surface.root.querySelector(`[${ANCHOR_ATTR}]`)
+    const existing = [...surface.root.querySelectorAll(`[${ANCHOR_ATTR}]`)].find(element => element.isConnected)
     if (existing) return existing
 
     const anchor = document.createElement('h2')
@@ -99,7 +115,7 @@
     retrying = true
     const script = document.createElement('script')
     script.defer = true
-    script.src = '/ui/progress-dashboard-v1.js?mount-retry=6'
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=8'
     script.setAttribute(RETRY_ATTR, 'true')
     script.addEventListener('load', () => {
       window.setTimeout(() => {
