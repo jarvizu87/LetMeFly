@@ -24,9 +24,10 @@ const treeHash = (dir) => {
   files.sort()
   const h = crypto.createHash('sha256')
   for (const file of files) {
+    const fileDigest = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')
     h.update(path.relative(dir, file))
     h.update('\0')
-    h.update(fs.readFileSync(file))
+    h.update(fileDigest)
     h.update('\0')
   }
   return h.digest('hex')
@@ -68,7 +69,8 @@ for (let week = 7; week <= 12; week += 1) {
 assert(builder.includes("config.deload ? '12 kg (25 lb) KB' : (config.primerKb ?? config.kb)"), 'Crownforge deload primer load logic changed')
 assert(builder.includes("repeated(config.deload ? 2 : 4, config.deload ? 10 : '15–20', config.kb"), 'Crownforge main Day-6 swing deload/build logic changed')
 
-// The candidate must not mutate protected programs.
+// The candidate must not mutate protected programs. This matches the apply script's
+// digest-of-digests tree algorithm so the independent post-apply check is comparable.
 const blackCrownHash = treeHash(path.join(target, 'src/programs/black-crown'))
 const maintenanceHash = treeHash(path.join(target, 'src/programs/crown-maintenance'))
 assert(marker.protectedAfter.blackCrown === blackCrownHash, 'Black Crown tree changed after candidate application')
