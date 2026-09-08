@@ -20,6 +20,15 @@
     .trim();
 
   const focusQuestion = (value) => /\b(focus|cue|cues|technique|form)\b|\b(this|my)\s+set\b|during\s+(this|the)\s+set/i.test(String(value || ''));
+  const whyQuestion = (value) => /\bwhy\b.*\b(this|exercise|movement)\b|\bpurpose\b|\bwhat(?:'s| is)\s+(?:the\s+)?point\b/i.test(String(value || ''));
+  const muscleQuestion = (value) => /\b(muscle|muscles|target|targets|working|work)\b.*\b(muscle|muscles|target|targets|working|work|this|exercise|movement)\b|\bwhat\s+does\s+(?:this|it)\s+(?:work|target)\b/i.test(String(value || ''));
+
+  function questionIntent(value) {
+    if (focusQuestion(value)) return 'focus';
+    if (whyQuestion(value)) return 'why';
+    if (muscleQuestion(value)) return 'muscles';
+    return null;
+  }
 
   function writeContext(name) {
     try {
@@ -80,6 +89,10 @@
     return remembered?.name ? intelligence.getExercise(remembered.name) : null;
   }
 
+  function prescriptionLock(copy) {
+    return `<div class="lmf-coach-prescription-lock"><strong>PROGRAM PRESCRIPTION LOCKED</strong><span>${esc(copy)}</span></div>`;
+  }
+
   function renderSetFocus(exercise) {
     const answer = document.getElementById('coach-answer');
     if (!answer) return false;
@@ -95,12 +108,44 @@
       ${cues.length ? `<div class="lmf-coach-focus-block"><strong>FOCUS ON</strong><ul>${cues.map((cue) => `<li>${esc(cue)}</li>`).join('')}</ul></div>` : ''}
       ${mistakes.length ? `<div class="lmf-coach-focus-block lmf-coach-focus-avoid"><strong>AVOID</strong><ul>${mistakes.map((mistake) => `<li>${esc(mistake)}</li>`).join('')}</ul></div>` : ''}
       ${muscles.length ? `<p class="lmf-coach-focus-muscles"><strong>Primary:</strong> ${esc(muscles.join(' • '))}</p>` : ''}
-      <div class="lmf-coach-prescription-lock"><strong>PROGRAM PRESCRIPTION LOCKED</strong><span>These cues coach execution only. Your active program still owns the exercise, sets, reps, load, rest, and progression.</span></div>`;
+      ${prescriptionLock('These cues coach execution only. Your active program still owns the exercise, sets, reps, load, rest, and progression.')}`;
     return true;
   }
 
-  function handleFocusQuestion(question) {
-    if (!focusQuestion(question)) return false;
+  function renderWhy(exercise) {
+    const answer = document.getElementById('coach-answer');
+    if (!answer) return false;
+
+    const roles = exercise.movementRoles || [];
+    answer.innerHTML = `
+      <div class="page-kicker">COACH MODE • EXERCISE INTELLIGENCE</div>
+      <h2>Why ${esc(exercise.canonicalName)}?</h2>
+      <p>${esc(exercise.purpose || 'This movement supports the programmed training role while preserving the intended stimulus.')}</p>
+      ${roles.length ? `<div class="lmf-coach-focus-block"><strong>EXERCISE ROLE</strong><p>${esc(roles.join(' • '))}</p></div>` : ''}
+      <div class="lmf-coach-focus-block"><strong>PROGRAM CONTEXT</strong><p>This explains what the movement contributes. The exact reason it appears in today’s slot, phase, and loading scheme still comes from your active program package.</p></div>
+      ${prescriptionLock('Exercise Intelligence explains purpose; it does not move, replace, add, remove, or reprogram the exercise.')}`;
+    return true;
+  }
+
+  function renderMuscles(exercise) {
+    const answer = document.getElementById('coach-answer');
+    if (!answer) return false;
+
+    const primary = exercise.primaryMuscles || [];
+    const secondary = exercise.secondaryMuscles || [];
+    answer.innerHTML = `
+      <div class="page-kicker">COACH MODE • EXERCISE INTELLIGENCE</div>
+      <h2>${esc(exercise.canonicalName)} — Muscle Emphasis</h2>
+      <p>${esc(exercise.purpose || 'Use the movement to preserve its intended training role, not just to chase a muscle sensation.')}</p>
+      <div class="lmf-coach-focus-block"><strong>PRIMARY</strong><p>${esc(primary.join(' • ') || 'Not specified')}</p></div>
+      <div class="lmf-coach-focus-block"><strong>SECONDARY / STABILIZERS</strong><p>${esc(secondary.join(' • ') || 'Not specified')}</p></div>
+      ${prescriptionLock('Muscle emphasis is descriptive only. Your active program remains the authority for exercise selection and prescription.')}`;
+    return true;
+  }
+
+  function handleExerciseQuestion(question) {
+    const intent = questionIntent(question);
+    if (!intent) return false;
     const intelligence = api();
     if (!intelligence) return false;
     const exercise = selectedExercise(intelligence, question);
@@ -109,7 +154,11 @@
     writeContext(exercise.canonicalName);
     const select = document.getElementById(SELECT_ID);
     if (select) select.value = exercise.id;
-    return renderSetFocus(exercise);
+
+    if (intent === 'focus') return renderSetFocus(exercise);
+    if (intent === 'why') return renderWhy(exercise);
+    if (intent === 'muscles') return renderMuscles(exercise);
+    return false;
   }
 
   function ensureCoachContext() {
@@ -133,12 +182,12 @@
 
     wrapper.innerHTML = `
       <div class="lmf-coach-intel-context-head">
-        <div><span>SET COACHING CONTEXT</span><strong>${rememberedExercise ? esc(rememberedExercise.canonicalName) : 'Choose an exercise'}</strong></div>
+        <div><span>EXERCISE COACHING CONTEXT</span><strong>${rememberedExercise ? esc(rememberedExercise.canonicalName) : 'Choose an exercise'}</strong></div>
         <button type="button" data-lmf-coach-clear-context ${rememberedExercise ? '' : 'disabled'}>CLEAR</button>
       </div>
       <label for="${SELECT_ID}">Exercise</label>
       <select id="${SELECT_ID}">
-        <option value="">Choose an exercise for set-specific cues…</option>
+        <option value="">Choose an exercise for cues, purpose, or muscle emphasis…</option>
         ${exercises.map((exercise) => `<option value="${esc(exercise.id)}"${rememberedExercise?.id === exercise.id ? ' selected' : ''}>${esc(exercise.canonicalName)}</option>`).join('')}
       </select>
       <small>Tap ASK COACH on a workout exercise to carry that movement here automatically, or choose one manually.</small>`;
@@ -172,19 +221,20 @@
     if (name) writeContext(name);
   }, true);
 
-  // Intercept only set-focus/cue questions when a canonical exercise is available.
-  // All other Coach Mode questions continue through LetMeFly's existing program-aware handler.
+  // Intercept only descriptive exercise questions when canonical exercise context
+  // is available. All other Coach Mode questions remain with the existing
+  // program-aware handler, including phase/program rationale without exercise context.
   document.addEventListener('click', (event) => {
     const prompt = event.target.closest?.('[data-coach-prompt]');
     const ask = event.target.closest?.('[data-action="ask-coach"]');
     if (!prompt && !ask) return;
 
     const question = prompt?.getAttribute('data-coach-prompt') || document.getElementById('coach-question')?.value || '';
-    if (!focusQuestion(question)) return;
+    if (!questionIntent(question)) return;
 
     const textarea = document.getElementById('coach-question');
     if (prompt && textarea) textarea.value = question;
-    if (!handleFocusQuestion(question)) return;
+    if (!handleExerciseQuestion(question)) return;
 
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -193,7 +243,7 @@
   document.addEventListener('keydown', (event) => {
     if (event.target?.id !== 'coach-question' || event.key !== 'Enter' || !(event.ctrlKey || event.metaKey)) return;
     const question = event.target.value || '';
-    if (!handleFocusQuestion(question)) return;
+    if (!handleExerciseQuestion(question)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   }, true);
