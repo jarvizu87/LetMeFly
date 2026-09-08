@@ -1,0 +1,102 @@
+name: Exercise Intelligence Full Catalog Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.css'
+      - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
+      - 'ci/install-exercise-intelligence-library-v1.sh'
+      - 'ci/install-exercise-intelligence-v2-supplement.sh'
+      - '.github/workflows/exercise-intelligence-library-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.css'
+      - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
+      - 'ci/install-exercise-intelligence-library-v1.sh'
+      - 'ci/install-exercise-intelligence-v2-supplement.sh'
+      - '.github/workflows/exercise-intelligence-library-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Audit catalog enhancer source boundary
+        run: |
+          set -euo pipefail
+          JS='overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.js'
+          CSS='overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.css'
+          node --check "$JS"
+          bash -n ci/install-exercise-intelligence-library-v1.sh
+          test -s "$CSS"
+          grep -Fq 'FULL GOVERNED CATALOG' "$JS"
+          grep -Fq 'getAllExercises' "$JS"
+          grep -Fq 'getSubstitutions' "$JS"
+          grep -Fq 'data-lmf-intel-added' "$JS"
+          grep -Fq 'data-lmf-intel-watch' "$JS"
+          ! grep -Fq 'localStorage' "$JS"
+          ! grep -Fq 'sessionStorage' "$JS"
+          ! grep -Fq 'indexedDB' "$JS"
+          ! grep -Fq 'fetch(' "$JS"
+          ! grep -Fq 'data-action="apply' "$JS"
+          echo 'Exercise Intelligence full catalog source boundary: PASS'
+
+      - name: Smoke-test full catalog installer
+        run: |
+          set -euo pipefail
+          TEST_DIST="$(mktemp -d)"
+          trap 'rm -rf "$TEST_DIST"' EXIT
+          mkdir -p "$TEST_DIST/data" "$TEST_DIST/ui"
+          cat > "$TEST_DIST/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head><meta charset="utf-8"><title>LMF catalog installer smoke test</title></head>
+            <body>
+              <div id="app"></div>
+              <script defer src="/ui/exercise-intelligence-runtime-v1.js"></script>
+            </body>
+          </html>
+          HTML
+          cat > "$TEST_DIST/service-worker.js" <<'JS'
+          const CACHE_NAME = 'lmf-catalog-smoke-test'
+          const PRECACHE = ['/', '/manifest.webmanifest', '/data/exercise-intelligence-v1.json', '/ui/exercise-intelligence-runtime-v1.js']
+          function isPrivateOrAuth(request) {
+            const url = new URL(request.url)
+            if (url.hostname.endsWith('.supabase.co')) return true
+            if (/\/auth\/v1\//.test(url.pathname)) return true
+            return false
+          }
+          JS
+          cat > "$TEST_DIST/data/exercise-intelligence-v1.json" <<'JSON'
+          {
+            "schemaVersion":"1.1-black-crown-v2-1",
+            "integrationStatus":"READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION",
+            "counts":{"exercises":94,"substitutionRules":27,"roleCoverage":94,"coachingCoverage":94,"readyForReview":94},
+            "exercises":[],"substitutionRules":[]
+          }
+          JSON
+          printf '%s\n' 'window.LetMeFlyExerciseIntelligence = Object.freeze({}); // 94/27' > "$TEST_DIST/ui/exercise-intelligence-runtime-v1.js"
+          bash ci/install-exercise-intelligence-library-v1.sh "$TEST_DIST"
+          test -f "$TEST_DIST/ui/exercise-intelligence-library-v1.js"
+          test -f "$TEST_DIST/ui/exercise-intelligence-library-v1.css"
+          grep -Fq '/ui/exercise-intelligence-library-v1.js' "$TEST_DIST/index.html"
+          grep -Fq '/ui/exercise-intelligence-library-v1.css' "$TEST_DIST/index.html"
+          grep -Fq "'/ui/exercise-intelligence-library-v1.js'" "$TEST_DIST/service-worker.js"
+          grep -Fq "'/ui/exercise-intelligence-library-v1.css'" "$TEST_DIST/service-worker.js"
+          echo 'Exercise Intelligence full catalog installer smoke test: PASS'
