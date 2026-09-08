@@ -67,6 +67,18 @@ count = text.count(old)
 if count != 1:
     raise SystemExit(f'Command V2/program compatibility {mode} expected exactly one source block, found {count}')
 text = text.replace(old, new, 1)
+
+# ProgramDay.date is optional so Black Crown can remain calendar-neutral in the
+# public package. Calendar entries remain dated for Crownforge/Maintenance, but
+# the renderer must satisfy the generic ProgramDay type after UI overlays.
+if mode == 'post':
+    old_date = '<span>${esc(day.date)}</span>'
+    new_date = "<span>${day.date ? esc(day.date) : 'Program'}</span>"
+    count = text.count(old_date)
+    if count != 1:
+        raise SystemExit(f'Command V2 optional-date compatibility expected one calendar marker, found {count}')
+    text = text.replace(old_date, new_date, 1)
+
 p.write_text(text)
 PY
 
@@ -78,5 +90,6 @@ else
   grep -Fq "const homeProgram = today?.program ?? state.selectedProgram" "$TARGET_DIR/src/main.ts"
   grep -Fq "homeProgram === 'black-crown' ? 'Black Crown'" "$TARGET_DIR/src/main.ts"
   grep -Fq "const day = getProgramDay(homeProgram" "$TARGET_DIR/src/main.ts"
+  grep -Fq "day.date ? esc(day.date) : 'Program'" "$TARGET_DIR/src/main.ts"
   echo "Command V2 modular-program post-compatibility: PASS"
 fi
