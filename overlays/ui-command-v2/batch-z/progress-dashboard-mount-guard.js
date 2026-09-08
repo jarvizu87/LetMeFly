@@ -9,6 +9,7 @@
   const RETRY_ATTR = 'data-lmf-progress-script-retry'
   let queued = false
   let retrying = false
+  let progressIntentUntil = 0
 
   function visible(element) {
     if (!(element instanceof Element) || !element.isConnected) return false
@@ -17,12 +18,13 @@
   }
 
   function progressRouteActive() {
+    if (Date.now() < progressIntentUntil) return true
     if (/^#\/progress(?:[/?#]|$)/i.test(location.hash || '')) return true
     const activeNav = [...document.querySelectorAll('nav a[href],nav button,nav [role="button"]')].find(element => {
       if (!visible(element)) return false
       const href = element.getAttribute('href') || ''
       const text = (element.textContent || '').trim()
-      const selected = element.classList.contains('active') || element.getAttribute('aria-current') === 'page' || element.getAttribute('aria-selected') === 'true'
+      const selected = element.classList.contains('active') || Boolean(element.closest('.active')) || element.getAttribute('aria-current') === 'page' || element.getAttribute('aria-selected') === 'true'
       return selected && (/^#\/progress(?:[/?#]|$)/i.test(href) || /^progress$/i.test(text))
     })
     return Boolean(activeNav)
@@ -67,9 +69,9 @@
     const marker = [...document.querySelectorAll('.progress-score-grid,.strength-progress-card,.tm-board,.history-list')].find(visible)
     if (marker) return { title: null, root: marker.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || marker.parentElement }
 
-    // The rebuilt shell can style the visible PROGRESS label as a non-heading
-    // element and does not always update location.hash before the route paints.
-    // A selected Progress nav item is therefore accepted as a route signal too.
+    // A Progress nav tap is remembered briefly while the SPA replaces the route.
+    // That makes the mount deterministic even when neither the hash nor active
+    // nav class is updated before the new screen is painted.
     const root = routeRoot()
     return root ? { title: null, root } : null
   }
@@ -107,15 +109,13 @@
   }
 
   function retryBaseDashboard() {
-    // If the base runtime already has a live dashboard root, never load its IIFE
-    // a second time. Prefer the deterministic boot/dashboard refresh hooks first.
     if (retrying || document.getElementById(DASHBOARD_ID) || !progressSurface()) return
     if (refreshBaseDashboard()) return
     if (document.querySelector(`script[${RETRY_ATTR}]`)) return
     retrying = true
     const script = document.createElement('script')
     script.defer = true
-    script.src = '/ui/progress-dashboard-v1.js?mount-retry=8'
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=9'
     script.setAttribute(RETRY_ATTR, 'true')
     script.addEventListener('load', () => {
       window.setTimeout(() => {
@@ -133,10 +133,6 @@
     const surface = progressSurface()
     if (!surface) return
     ensureAnchor(surface)
-
-    // A same-route tap can cause the SPA to rebuild Progress without changing
-    // location.hash. The original dashboard window hook survives that rebuild,
-    // so call it directly rather than waiting for hashchange or heading discovery.
     refreshBaseDashboard()
     const pulse = document.createElement('span')
     pulse.hidden = true
@@ -162,6 +158,7 @@
     window.setTimeout(queue, 260)
     window.setTimeout(queue, 700)
     window.setTimeout(queue, 1400)
+    window.setTimeout(queue, 2400)
   }
 
   function progressNavTrigger(target) {
@@ -181,7 +178,9 @@
     window.addEventListener('popstate', pulseRouteMount)
     window.addEventListener('hashchange', pulseRouteMount)
     document.addEventListener('click', event => {
-      if (progressNavTrigger(event.target)) pulseRouteMount()
+      if (!progressNavTrigger(event.target)) return
+      progressIntentUntil = Date.now() + 5000
+      pulseRouteMount()
     }, true)
     window.setTimeout(queue, 300)
     window.setTimeout(queue, 850)
