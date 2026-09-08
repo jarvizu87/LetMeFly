@@ -92,6 +92,49 @@
     ensureLockNote(panel, 'review')
   }
 
+  function clarifyActiveReview(panel, preview) {
+    if (!panel || preview) return
+    const complete = panel.querySelector('[data-action="complete-workout"]')
+    const heading = panel.querySelector('h2')
+    if (!(complete instanceof HTMLButtonElement) || !heading) return
+
+    const match = text(heading).match(/^(\d+)\s*\/\s*(\d+)\s+sets logged$/i)
+    const existing = panel.querySelector('.lmf-incomplete-review-note')
+    if (!match) {
+      existing?.remove()
+      complete.classList.remove('lmf-end-early')
+      return
+    }
+
+    const done = Number(match[1])
+    const total = Number(match[2])
+    const remaining = Math.max(0, total - done)
+    if (!remaining) {
+      existing?.remove()
+      complete.classList.remove('lmf-end-early')
+      if (!complete.disabled) complete.textContent = 'COMPLETE WORKOUT'
+      return
+    }
+
+    if (!complete.disabled) complete.textContent = 'END WORKOUT EARLY'
+    complete.classList.add('lmf-end-early')
+
+    let note = existing
+    if (!note) {
+      note = document.createElement('div')
+      note.className = 'lmf-incomplete-review-note'
+      const progress = panel.querySelector('.progress-bar')
+      if (progress?.parentNode) progress.insertAdjacentElement('afterend', note)
+      else heading.insertAdjacentElement('afterend', note)
+    }
+    note.replaceChildren()
+    const strong = document.createElement('strong')
+    const copy = document.createElement('span')
+    strong.textContent = `${remaining} set${remaining === 1 ? '' : 's'} remaining`
+    copy.textContent = 'Use End Workout Early only if you intentionally want to close this session. The existing confirmation still protects the workout record.'
+    note.append(strong, copy)
+  }
+
   function markPreviewWarning(warning) {
     document.querySelectorAll('.lmf-preview-position-warning').forEach((node) => node.classList.remove('lmf-preview-position-warning'))
     warning?.classList.add('lmf-preview-position-warning')
@@ -132,6 +175,7 @@
     } else {
       unlockReadinessPanel(readiness)
       shell.querySelectorAll('.lmf-preview-lock-note').forEach((node) => node.remove())
+      clarifyActiveReview(review, false)
     }
     updateNavigationLabels(preview)
   }
