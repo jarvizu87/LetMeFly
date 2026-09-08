@@ -148,8 +148,8 @@
   }
 }
 
-@media (max-width: 380px) {
-  /* Very narrow phones get one-column signal cards rather than clipped copy. */
+@media (max-width: 430px) {
+  /* Common phone widths need one-column insight cards; half-width text was clipping and overlapping. */
   body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid {
     grid-template-columns: 1fr !important;
   }
@@ -161,5 +161,9 @@
   body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .status-card:not(.readiness-card),
   body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid > .milestone-card {
     min-height: 132px !important;
+  }
+
+  body.lmf-home-ref3-active .performance-list strong {
+    max-width: 72% !important;
   }
 }
