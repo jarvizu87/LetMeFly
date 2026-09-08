@@ -58,8 +58,9 @@ count, or substitution-rule count mismatch.
 
 `ci/verify-exercise-intelligence.sh` verifies the transport payload and the
 program-prescription ownership boundary. Netlify runs this verification before
-the production build. A dedicated GitHub Actions workflow also verifies and
-materializes the payload whenever this overlay changes.
+the production build. Dedicated GitHub Actions workflows independently protect
+the base Exercise Intelligence payload, descriptive Coach layer, Exercise-page
+substitution viewer, and Coach substitution guidance.
 
 `ci/install-exercise-intelligence-v1.sh` materializes a privacy-safe runtime copy
 to `/data/exercise-intelligence-v1.json`, installs the read-only lookup API, and
@@ -67,23 +68,29 @@ installs the INFO modal UI. It rejects private Drive provenance, duplicate IDs,
 unexpected record counts, changed payload hashes, or a missing service-worker
 shell.
 
-The installer also extends the existing public-shell precache with the Exercise
-Intelligence JSON, runtime loader, INFO UI JavaScript, and INFO UI stylesheet.
-Private Supabase/auth/API requests remain excluded by the existing service-worker
-privacy rules. The dedicated CI smoke test verifies both the runtime installation
-and the offline precache patch.
+`ci/install-exercise-intelligence-coach-v1.sh` adds isolated exercise-aware Coach
+behavior. It requires the read-only Exercise Intelligence runtime to already exist,
+adds offline-cached JavaScript/CSS resources, and fails if the layer gains
+persistent storage, substitution-rule access, network requests, or program-write
+hooks.
 
-`ci/install-exercise-intelligence-coach-v1.sh` adds a second isolated runtime layer
-for set-focus coaching. It requires the read-only Exercise Intelligence runtime to
-already exist, adds its own offline-cached JavaScript/CSS resources, and fails if
-its source starts using localStorage, substitution hooks, or direct program-data
-writes.
+`ci/install-exercise-intelligence-coach-substitutions-v1.sh` adds the governed
+Coach substitution answer path. It may read the same transient exercise-name
+context and v7 substitution rules, but it has no Apply/Swap action, persistent
+storage, network write, or program mutation path.
 
 `ci/install-exercise-intelligence-substitutions-v1.sh` installs the governed
-substitution guidance viewer. It may read the v7 substitution rules and intercept
-the existing `SUBSTITUTE` button when a governed rule exists, but it has no apply
-control and no storage or program-write path. Its dedicated audit locks the current
-rule classification totals and the exact two `DO NOT DEFAULT` relationships.
+Exercise-page substitution guidance viewer. It may read the v7 substitution rules
+and intercept the existing `SUBSTITUTE` button when a governed rule exists, but it
+has no apply control and no storage or program-write path. Its dedicated audit
+locks the current rule classification totals and the exact two `DO NOT DEFAULT`
+relationships.
+
+`ci/audit-exercise-intelligence-production-v1.sh` runs against the **finished
+production dist after all later LetMeFly installers**. It verifies the exact v7
+payload hash/counts, privacy boundary, offline precache, all Exercise Intelligence
+runtime assets, the protected substitution relationships, and that program
+packages remain the declared prescription authority.
 
 ## Runtime status
 
@@ -96,27 +103,52 @@ The INFO enhancement fails open: if the intelligence payload is unavailable or a
 name cannot be resolved, the existing LetMeFly INFO behavior remains available.
 It does not read or mutate workout prescription state.
 
-### Coach Mode set-focus v1
+### Exercise-aware Coach v1
 
 When `ASK COACH` is opened from a workout exercise card, the Coach overlay stores
-only that exercise name in transient `sessionStorage`. The Coach page then exposes
-a Set Coaching Context selector backed by the 92 canonical Exercise Intelligence
-records.
+only that exercise name in transient `sessionStorage`. The Coach page exposes an
+**Exercise Coaching Context** selector backed by all 92 canonical Exercise
+Intelligence records. An exercise explicitly named in the question takes
+precedence over remembered/selected context.
 
-Questions about focus, cues, technique, form, or the current set can return the
-selected exercise's purpose, up to three coaching cues, common mistakes to avoid,
-and primary muscle emphasis. A named exercise in the question takes precedence
-over the remembered selector context.
+With valid exercise context, Coach can answer three descriptive intent families:
 
-If no canonical exercise context is available, the overlay does **not** invent an
-answer; LetMeFly's existing program/day Coach behavior remains in control. All
-non-focus Coach questions also continue through the existing Coach handler.
+- **Set focus / cues / technique / form** — purpose, up to three coaching cues,
+  common mistakes to avoid, and primary emphasis.
+- **Why / purpose** — what the movement contributes and its movement-role taxonomy.
+  This answer explicitly does **not** claim why the active program placed it in a
+  particular week, day, slot, phase, or loading scheme; that remains program-owned.
+- **Muscle emphasis** — primary and secondary/stabilizing muscles while preserving
+  the movement's training-purpose framing.
 
-The set-focus response is execution coaching only and displays a **PROGRAM
-PRESCRIPTION LOCKED** boundary. It cannot change the selected exercise, sets,
-reps, load, rest, progression, readiness rules, or program position.
+If canonical exercise context is unavailable, the overlay does **not** invent an
+answer; LetMeFly's existing program/day Coach handler remains in control. Other
+Coach questions also continue through that existing handler.
 
-### Governed substitution viewer v1
+Every exercise-aware response displays a **PROGRAM PRESCRIPTION LOCKED** boundary.
+It cannot change the exercise, sets, reps, load, rest, progression, readiness
+rules, phase, or program position.
+
+### Governed Coach substitution guidance v1
+
+When Coach receives a substitute/substitution/swap/alternative/replacement question
+and a canonical exercise is named or selected, it reads that movement's governed
+v7 substitution rules and presents a **GOVERNED SUBSTITUTIONS • VIEW ONLY** answer.
+
+The Coach answer separates:
+
+- current-app options available to consider;
+- protected `DO NOT DEFAULT` relationships; and
+- future library candidates that are not canonical current-app exercises.
+
+Each rule can explain fit grade, role preservation, important differences, loading
+adjustment, use condition, and coaching rationale. If no canonical exercise or no
+v7 rule exists, the original program-aware Coach remains the fallback.
+
+This is explanation only. Coach cannot apply a substitution or mutate the active
+workout from this path.
+
+### Governed Exercise-page substitution viewer v1
 
 When a `SUBSTITUTE` button resolves to one or more v7 rules, LetMeFly opens a
 **ROLE-PRESERVING SUBSTITUTION GUIDE • VIEW ONLY** rather than silently changing
@@ -143,9 +175,10 @@ The current protected default relationships are:
   leg-driven power movement.
 
 Any actual substitution still requires an existing governed program rule or an
-intentional coaching/program-edit decision. The viewer explains options; it does
-not make the decision or rewrite the prescription.
+intentional coaching/program-edit decision. The viewer and Coach explain options;
+they do not make or apply the program change.
 
-Exercise Intelligence public-shell resources, including the set-focus Coach and
-substitution-viewer files, are precached for installed/offline use. This does not
-cache private athlete APIs or move private athlete data into the public shell.
+Exercise Intelligence public-shell resources, including INFO, exercise-aware
+Coach, Coach substitution guidance, and the Exercise-page substitution viewer, are
+precached for installed/offline use. This does not cache private athlete APIs or
+move private athlete data into the public shell.
