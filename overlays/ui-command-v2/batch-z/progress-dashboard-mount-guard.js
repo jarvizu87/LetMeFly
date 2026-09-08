@@ -62,12 +62,15 @@
   }
 
   function retryBaseDashboard() {
-    if (retrying || document.getElementById(DASHBOARD_ID) || !progressSurface()) return
+    // If the base runtime already exists, never load its IIFE a second time.
+    // A duplicate runtime creates a second activeTab closure/observer and the
+    // two instances can race, visibly snapping a tapped tab back to Overview.
+    if (retrying || window.__LMF_PROGRESS_DASHBOARD__ || document.getElementById(DASHBOARD_ID) || !progressSurface()) return
     if (document.querySelector(`script[${RETRY_ATTR}]`)) return
     retrying = true
     const script = document.createElement('script')
     script.defer = true
-    script.src = '/ui/progress-dashboard-v1.js?mount-retry=2'
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=3'
     script.setAttribute(RETRY_ATTR, 'true')
     script.addEventListener('load', () => {
       window.setTimeout(() => {
@@ -86,7 +89,8 @@
     if (!surface) return
     ensureAnchor(surface)
 
-    // Give the primary observer a direct mutation and refresh opportunity first.
+    // Give the already-loaded primary runtime a direct refresh opportunity.
+    // Only replay the script when no primary runtime exists at all.
     window.__LMF_PROGRESS_DASHBOARD__?.refresh?.()
     const pulse = document.createElement('span')
     pulse.hidden = true
@@ -94,10 +98,10 @@
     surface.root.appendChild(pulse)
     pulse.remove()
 
-    // If the route swap happened before the base observer was listening, replay
-    // the idempotent dashboard IIFE once while Progress is visibly mounted.
     window.setTimeout(() => {
-      if (!document.getElementById(DASHBOARD_ID) && progressSurface()) retryBaseDashboard()
+      if (document.getElementById(DASHBOARD_ID) || !progressSurface()) return
+      if (window.__LMF_PROGRESS_DASHBOARD__?.refresh) window.__LMF_PROGRESS_DASHBOARD__.refresh()
+      else retryBaseDashboard()
     }, 700)
   }
 
