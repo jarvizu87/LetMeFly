@@ -35,6 +35,14 @@ jobs:
       - name: Build and audit Command V2 with Black Crown v2
         run: bash ci/build-command-v2-cloudinary.sh
 
+      - name: Show generated UI context on build failure
+        if: failure()
+        shell: bash
+        run: |
+          if [[ -f .build-src/letmefly_app/src/main.ts ]]; then
+            nl -ba .build-src/letmefly_app/src/main.ts | sed -n '462,480p'
+          fi
+
       - name: Re-audit active Black Crown after UI overlays
         run: node ci/audit-black-crown-runtime.mjs "$GITHUB_WORKSPACE/.build-src/letmefly_app"
 
