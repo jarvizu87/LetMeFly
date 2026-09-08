@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 JS_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-z/progress-dashboard-v1.js"
 JS_V3_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-z/progress-dashboard-v3-polish.js"
+JS_GUARD_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-z/progress-dashboard-mount-guard.js"
 CSS_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-z/progress-dashboard-v1.css"
 CSS_V2_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-z/progress-dashboard-v2.css"
 CSS_V3_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-z/progress-dashboard-v3.css"
@@ -16,11 +17,13 @@ fi
 
 test -s "$JS_SOURCE"
 test -s "$JS_V3_SOURCE"
+test -s "$JS_GUARD_SOURCE"
 test -s "$CSS_SOURCE"
 test -s "$CSS_V2_SOURCE"
 test -s "$CSS_V3_SOURCE"
 node --check "$JS_SOURCE"
 node --check "$JS_V3_SOURCE"
+node --check "$JS_GUARD_SOURCE"
 
 grep -Fq 'PROGRESS DASHBOARD' "$JS_SOURCE"
 grep -Fq "['overview', 'strength', 'body', 'conditioning', 'prs']" "$JS_SOURCE"
@@ -39,6 +42,7 @@ grep -Fq '__LMF_PROGRESS_POLISH__' "$JS_V3_SOURCE"
 grep -Fq 'strengthPoints(data)' "$JS_V3_SOURCE"
 grep -Fq 'conditioningData(data)' "$JS_V3_SOURCE"
 grep -Fq 'Keep programming unchanged' "$JS_V3_SOURCE"
+grep -Fq 'data-lmf-progress-anchor' "$JS_GUARD_SOURCE"
 grep -Fq '.lmf-progress-dashboard' "$CSS_SOURCE"
 grep -Fq '.lmf-pg-lift-card' "$CSS_SOURCE"
 grep -Fq '.lmf-pg-native-tools' "$CSS_V2_SOURCE"
@@ -49,6 +53,7 @@ grep -Fq '@media(max-width:390px)' "$CSS_V3_SOURCE"
 mkdir -p "$DIST_DIR/ui"
 cp "$JS_SOURCE" "$DIST_DIR/ui/progress-dashboard-v1.js"
 cp "$JS_V3_SOURCE" "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
+cp "$JS_GUARD_SOURCE" "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 cp "$CSS_SOURCE" "$DIST_DIR/ui/progress-dashboard-v1.css"
 cp "$CSS_V2_SOURCE" "$DIST_DIR/ui/progress-dashboard-v2.css"
 cp "$CSS_V3_SOURCE" "$DIST_DIR/ui/progress-dashboard-v3.css"
@@ -64,12 +69,13 @@ css2 = '<link rel="stylesheet" href="/ui/progress-dashboard-v2.css">'
 css3 = '<link rel="stylesheet" href="/ui/progress-dashboard-v3.css">'
 js1 = '<script defer src="/ui/progress-dashboard-v1.js"></script>'
 js3 = '<script defer src="/ui/progress-dashboard-v3-polish.js"></script>'
+jsg = '<script defer src="/ui/progress-dashboard-mount-guard.js"></script>'
 for css in (css1, css2, css3):
     if css not in text:
         if '</head>' not in text:
             raise SystemExit('index.html is missing </head>')
         text = text.replace('</head>', f'  {css}\n</head>', 1)
-for js in (js1, js3):
+for js in (js1, js3, jsg):
     if js not in text:
         if '</body>' not in text:
             raise SystemExit('index.html is missing </body>')
@@ -81,6 +87,7 @@ PY
 
 node --check "$DIST_DIR/ui/progress-dashboard-v1.js"
 node --check "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
+node --check "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 test -s "$DIST_DIR/ui/progress-dashboard-v1.css"
 test -s "$DIST_DIR/ui/progress-dashboard-v2.css"
 test -s "$DIST_DIR/ui/progress-dashboard-v3.css"
@@ -89,9 +96,11 @@ grep -Fq '/ui/progress-dashboard-v2.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v3.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v1.js' "$DIST_DIR/index.html"
 grep -Fq '/ui/progress-dashboard-v3-polish.js' "$DIST_DIR/index.html"
+grep -Fq '/ui/progress-dashboard-mount-guard.js' "$DIST_DIR/index.html"
 grep -Fq 'PROGRESS DASHBOARD' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'Private vault data' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'never rewrite programming' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq '__LMF_PROGRESS_POLISH__' "$DIST_DIR/ui/progress-dashboard-v3-polish.js"
+grep -Fq 'data-lmf-progress-anchor' "$DIST_DIR/ui/progress-dashboard-mount-guard.js"
 
-echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI: PASS"
+echo "LetMeFly Progress dashboard v3 polish + authoritative private-vault performance UI + route mount guard: PASS"
