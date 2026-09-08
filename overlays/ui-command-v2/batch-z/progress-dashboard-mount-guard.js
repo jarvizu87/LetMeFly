@@ -5,7 +5,9 @@
   // Presentation only: it never reads or writes athlete/program data.
   const DASHBOARD_ID = 'lmf-progress-dashboard-v1'
   const ANCHOR_ATTR = 'data-lmf-progress-anchor'
+  const RETRY_ATTR = 'data-lmf-progress-script-retry'
   let queued = false
+  let retrying = false
 
   function visible(element) {
     if (!(element instanceof Element) || !element.isConnected) return false
@@ -16,7 +18,7 @@
   function progressTitle() {
     const roots = [document.querySelector('main'), document.querySelector('#app'), document.body].filter(Boolean)
     for (const root of roots) {
-      for (const element of root.querySelectorAll('*')) {
+      for (const element of root.querySelectorAll('h1,h2,h3,[data-lmf-progress-anchor]')) {
         if (!visible(element)) continue
         if ((element.textContent || '').trim().toUpperCase() !== 'PROGRESS') continue
         if (element.closest('nav,button,a,[role="button"],[role="tab"]')) continue
@@ -26,13 +28,18 @@
     return null
   }
 
-  function ensureAnchor() {
-    queued = false
-    if (document.getElementById(DASHBOARD_ID)) return
+  function progressSurface() {
     const title = progressTitle()
-    if (!title) return
-    const root = title.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || title.parentElement
-    if (!root || root.querySelector(`[${ANCHOR_ATTR}]`)) return
+    if (title) return { title, root: title.closest('main,[role="main"],.page,.view,.screen,.tab-panel,section') || title.parentElement }
+    const native = document.querySelector('#progress-content')
+    if (visible(native)) return { title: null, root: native.parentElement || native }
+    return null
+  }
+
+  function ensureAnchor(surface) {
+    if (!surface?.root) return null
+    const existing = surface.root.querySelector(`[${ANCHOR_ATTR}]`)
+    if (existing) return existing
 
     const anchor = document.createElement('h2')
     anchor.setAttribute(ANCHOR_ATTR, 'true')
@@ -49,27 +56,65 @@
       whiteSpace: 'nowrap',
       pointerEvents: 'none',
     })
-    title.insertAdjacentElement('afterend', anchor)
+    if (surface.title) surface.title.insertAdjacentElement('afterend', anchor)
+    else surface.root.insertAdjacentElement('afterbegin', anchor)
+    return anchor
+  }
 
-    // The base dashboard observer reacts to this DOM mutation. If the route had
-    // a non-semantic title, this visible-layout anchor also gives it the h2 it expects.
+  function retryBaseDashboard() {
+    if (retrying || document.getElementById(DASHBOARD_ID) || !progressSurface()) return
+    if (document.querySelector(`script[${RETRY_ATTR}]`)) return
+    retrying = true
+    const script = document.createElement('script')
+    script.defer = true
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=2'
+    script.setAttribute(RETRY_ATTR, 'true')
+    script.addEventListener('load', () => {
+      window.setTimeout(() => {
+        window.__LMF_PROGRESS_DASHBOARD__?.refresh?.()
+        retrying = false
+      }, 220)
+    }, { once: true })
+    script.addEventListener('error', () => { retrying = false }, { once: true })
+    document.body.appendChild(script)
+  }
+
+  function ensureMount() {
+    queued = false
+    if (document.getElementById(DASHBOARD_ID)) return
+    const surface = progressSurface()
+    if (!surface) return
+    ensureAnchor(surface)
+
+    // Give the primary observer a direct mutation and refresh opportunity first.
+    window.__LMF_PROGRESS_DASHBOARD__?.refresh?.()
+    const pulse = document.createElement('span')
+    pulse.hidden = true
+    pulse.setAttribute('data-lmf-progress-mount-pulse', 'true')
+    surface.root.appendChild(pulse)
+    pulse.remove()
+
+    // If the route swap happened before the base observer was listening, replay
+    // the idempotent dashboard IIFE once while Progress is visibly mounted.
     window.setTimeout(() => {
-      window.__LMF_PROGRESS_DASHBOARD__?.refresh?.()
-    }, 220)
+      if (!document.getElementById(DASHBOARD_ID) && progressSurface()) retryBaseDashboard()
+    }, 700)
   }
 
   function queue() {
     if (queued) return
     queued = true
-    requestAnimationFrame(ensureAnchor)
+    requestAnimationFrame(ensureMount)
   }
 
   function start() {
     queue()
     new MutationObserver(queue).observe(document.body, { childList: true, subtree: true })
     window.addEventListener('popstate', queue)
-    window.setTimeout(queue, 400)
-    window.setTimeout(queue, 1100)
+    window.addEventListener('hashchange', queue)
+    window.setTimeout(queue, 300)
+    window.setTimeout(queue, 850)
+    window.setTimeout(queue, 1600)
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true })
