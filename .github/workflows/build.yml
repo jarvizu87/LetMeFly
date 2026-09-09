@@ -111,7 +111,7 @@ jobs:
           rm -f ci/audit-exercise-intelligence.mjs
           test ! -e ci/audit-exercise-intelligence.mjs
           set -o pipefail
-          bash ci/audit-exercise-intelligence-production-v1.sh 2>&1 | tee .build-src/letmefly_app/FINAL_EXERCISE_INTELLIGENCE_AUDIT.log
+          bash -x ci/audit-exercise-intelligence-production-v1.sh 2>&1 | tee .build-src/letmefly_app/FINAL_EXERCISE_INTELLIGENCE_AUDIT.log
 
       - name: Audit final full Exercise Intelligence catalog
         run: bash ci/audit-exercise-intelligence-library-production-v1.sh
@@ -126,6 +126,8 @@ jobs:
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
             .build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
             .build-src/letmefly_app/FINAL_EXERCISE_INTELLIGENCE_AUDIT.log
+            .build-src/letmefly_app/dist/index.html
+            .build-src/letmefly_app/dist/service-worker.js
           if-no-files-found: warn
           retention-days: 14
 
