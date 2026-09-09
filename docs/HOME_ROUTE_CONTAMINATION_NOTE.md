@@ -1,1 +1,0 @@
-A separate UI defect is tracked outside the workout-persistence fix: the production mobile-browser screenshot shows the Progress Dashboard remaining mounted above the Home Command Center. The fix belongs in a separate Home/Progress route-isolation lane and must not be mixed into native workout persistence.
