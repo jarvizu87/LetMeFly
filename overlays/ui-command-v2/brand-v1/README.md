@@ -21,3 +21,7 @@ The production installer verifies SHA-256 hashes before copying any of these ass
 ## Production rule
 
 `ci/install-home-reference-v3.sh` is the active final brand layer. It installs these local assets, creates compatibility SVG wrappers for existing app references, updates the PWA manifest, preserves non-brand service-worker precache entries, and rejects known legacy broken logo URLs.
+
+## Integration boundary
+
+This package is branding-only. It must layer onto the current production app without changing governed program prescriptions, workout persistence, mobile workout scrolling, private athlete data, Home/Progress route behavior, or other non-brand feature contracts.
