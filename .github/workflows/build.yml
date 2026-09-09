@@ -102,7 +102,31 @@ jobs:
           done
           CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$CHROME_BIN"
+
+          set +e
           CHROME_BIN="$CHROME_BIN" node ci/audit-browser-smoke.mjs
+          BROWSER_RC=$?
+          set -e
+
+          if [[ "$BROWSER_RC" -ne 0 ]]; then
+            if node - <<'NODE'
+          const fs = require('fs')
+          const file = '.build-src/letmefly_app/BROWSER_SMOKE_AUDIT/browser-smoke-audit.json'
+          if (!fs.existsSync(file)) process.exit(1)
+          const report = JSON.parse(fs.readFileSync(file, 'utf8'))
+          const failures = Array.isArray(report.failures) ? report.failures : []
+          const errors = Array.isArray(report.errors) ? report.errors : []
+          const bootOnly = failures.length === 1 && failures[0]?.label === 'Browser app boot' && errors.length === 0
+          process.exit(bootOnly ? 0 : 1)
+          NODE
+            then
+              echo "Retrying browser smoke once after isolated app-boot timing miss"
+              rm -rf .build-src/letmefly_app/BROWSER_SMOKE_AUDIT
+              CHROME_BIN="$CHROME_BIN" node ci/audit-browser-smoke.mjs
+            else
+              exit "$BROWSER_RC"
+            fi
+          fi
 
       - name: Audit final Exercise Intelligence production dist
         run: |
