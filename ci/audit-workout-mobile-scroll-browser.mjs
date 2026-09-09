@@ -27,28 +27,82 @@ async function visible(locator) {
 }
 
 async function dismissInstall(page) {
-  const button = await visible(page.locator('button,a,[role="button"]').filter({ hasText: /^\s*Not now\s*$/i }))
-  if (button) await button.click({ timeout: 2500 }).catch(() => null)
+  const candidates = [
+    page.locator('.modal-backdrop button,.modal-backdrop a,.modal-backdrop [role="button"]').filter({ hasText: /^\s*Not now\s*$/i }),
+    page.locator('button,a,[role="button"]').filter({ hasText: /^\s*Not now\s*$/i }),
+  ]
+  for (const locator of candidates) {
+    const button = await visible(locator)
+    if (!button) continue
+    const dismissed = await button.click({ timeout: 2500 }).then(() => true).catch(() => false)
+    if (dismissed) {
+      await page.waitForTimeout(160)
+      return true
+    }
+  }
+  return false
+}
+
+async function settlePrompts(page, attempts = 8) {
+  for (let i = 0; i < attempts; i += 1) {
+    await dismissInstall(page)
+    await page.waitForTimeout(180)
+  }
+}
+
+async function findTrain(page) {
+  const candidates = [
+    page.locator('nav button,nav a,nav [role="button"]').filter({ hasText: /^\s*TRAIN\s*$/i }),
+    page.locator('button,a,[role="button"]').filter({ hasText: /^\s*TRAIN\s*$/i }),
+    page.getByText(/^\s*TRAIN\s*$/i),
+  ]
+  for (const locator of candidates) {
+    const item = await visible(locator)
+    if (item) return item
+  }
+  return null
 }
 
 async function bootstrap(page) {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForSelector('body', { timeout: 10000 })
   await page.waitForFunction(() => /LETMEFLY/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
-  for (let i = 0; i < 8; i += 1) { await dismissInstall(page); await page.waitForTimeout(120) }
 
-  const create = await visible(page.locator('button,[role="button"]').filter({ hasText: /CREATE LOCAL ATHLETE/i }))
+  // The public shell can render before the local-athlete modal. Wait through that
+  // asynchronous first-run boundary so a late modal is never mistaken for a missing nav.
+  let create = null
+  for (let i = 0; i < 20; i += 1) {
+    await dismissInstall(page)
+    create = await visible(page.locator('button,[role="button"]').filter({ hasText: /^\s*CREATE LOCAL ATHLETE\s*$/i }))
+    if (create) break
+    if (await findTrain(page)) break
+    await page.waitForTimeout(180)
+  }
+
   if (create) {
     const input = await visible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
     if (!input) throw new Error('Athlete name input missing')
     await input.fill('Scroll QA Athlete')
+    await dismissInstall(page)
     await create.click({ timeout: 5000 })
-    await page.waitForTimeout(500)
+    await page.waitForFunction(() => !/CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
+    await page.waitForTimeout(450)
   }
-  for (let i = 0; i < 5; i += 1) { await dismissInstall(page); await page.waitForTimeout(120) }
 
-  const train = await visible(page.locator('nav button,nav a,button,a').filter({ hasText: /^\s*TRAIN\s*$/i }))
-  if (!train) throw new Error('Train navigation missing')
+  await settlePrompts(page, 8)
+
+  let train = null
+  for (let i = 0; i < 16; i += 1) {
+    await dismissInstall(page)
+    train = await findTrain(page)
+    if (train) break
+    await page.waitForTimeout(180)
+  }
+  if (!train) {
+    const body = (await page.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 500)
+    throw new Error(`Train navigation missing after settled first-run state: ${body}`)
+  }
+
   await train.click({ timeout: 5000 })
   await page.waitForSelector('#swipe-viewport .swipe-page', { timeout: 10000 })
   await page.waitForTimeout(500)
