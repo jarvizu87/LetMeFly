@@ -1,14 +1,17 @@
 {
   "brand_version": "v1",
   "production_cache_generation": "brand-v8",
-  "source": {
+  "source_provenance": {
     "filename": "letmefly-official-master-source-v1.jpg",
     "dimensions": "1536x1536",
-    "sha256": "2b0bb29e200fb48ade90336bc355ad26c21277ddfcbacdf245474e85f82d348b"
+    "sha256": "2b0bb29e200fb48ade90336bc355ad26c21277ddfcbacdf245474e85f82d348b",
+    "status": "approved source provenance; not required as a production runtime asset"
   },
-  "archive": {
-    "filename": "official-brand-assets-v1.tar.gz",
-    "sha256": "bfbc981846df8a2f99dfb344b82166442350fa37f7f8b70a26478e7f30e817c6"
+  "runtime_transport": {
+    "format": "concatenated Base64 encoding of gzip-compressed tar",
+    "path_prefix": "transport/brand-icons-q256-v1.tar.gz.b64.",
+    "chunk_suffixes": ["00", "01", "02", "03", "04", "05", "06", "07", "08"],
+    "validation": "gzip/tar integrity plus exact SHA-256 of every shipped derivative"
   },
   "derivatives": [
     {
