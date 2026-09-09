@@ -46,6 +46,9 @@ jobs:
       - name: Install Black Crown v2.1 Exercise Intelligence supplement
         run: bash ci/install-exercise-intelligence-v2-supplement.sh
 
+      - name: Install active-program Exercise Intelligence coverage
+        run: bash ci/install-exercise-intelligence-active-program-coverage-v1.sh
+
       - name: Install full governed Exercise Intelligence catalog
         run: bash ci/install-exercise-intelligence-library-v1.sh
 

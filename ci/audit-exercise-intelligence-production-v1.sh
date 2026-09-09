@@ -27,8 +27,8 @@ node --check "$COACH_JS"
 node --check "$COACH_SUB_JS"
 node --check "$SUB_JS"
 
-# Exercise Intelligence v1 is immutable at 92/25. A governed program supplement may
-# extend the descriptive payload, but only through an explicitly recognized schema.
+# Exercise Intelligence v1 is immutable at 92/25. Governed supplements may
+# extend descriptive coverage only through explicitly recognized schemas.
 DATA="$DATA" BASE_JSON_SHA="$BASE_JSON_SHA" RUNTIME="$RUNTIME" node - <<'NODE'
 const fs = require('fs');
 const crypto = require('crypto');
@@ -39,9 +39,15 @@ const runtime = fs.readFileSync(process.env.RUNTIME, 'utf8');
 if (payload.integrationStatus !== 'READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION') {
   throw new Error('Exercise Intelligence production integration status mismatch');
 }
+if (!Array.isArray(payload.exercises) || !Array.isArray(payload.substitutionRules)) {
+  throw new Error('Exercise Intelligence production payload shape mismatch');
+}
 
 const schema = payload.schemaVersion || '1.0';
 const ids = new Set(payload.exercises.map((exercise) => exercise.id));
+if (ids.size !== payload.exercises.length) {
+  throw new Error('Exercise Intelligence production exercise IDs are not unique');
+}
 const blocked = payload.substitutionRules
   .filter((rule) => rule.promotionStatus === 'DO NOT DEFAULT')
   .map((rule) => `${rule.primaryExerciseId}->${rule.alternativeExerciseId}`)
@@ -61,6 +67,12 @@ const coachingCoverage = payload.exercises.filter((exercise) =>
 ).length;
 const readyForReview = payload.exercises.filter((exercise) => exercise.reviewStatus === 'READY FOR REVIEW').length;
 
+if (payload.counts?.exercises !== payload.exercises.length) {
+  throw new Error(`Exercise Intelligence exercise count is stale: ${payload.counts?.exercises} != ${payload.exercises.length}`);
+}
+if (payload.counts?.substitutionRules !== payload.substitutionRules.length) {
+  throw new Error(`Exercise Intelligence substitution count is stale: ${payload.counts?.substitutionRules} != ${payload.substitutionRules.length}`);
+}
 if (payload.counts?.roleCoverage !== roleCoverage) {
   throw new Error(`Exercise Intelligence roleCoverage is stale: ${payload.counts?.roleCoverage} != ${roleCoverage}`);
 }
@@ -71,21 +83,23 @@ if (payload.counts?.readyForReview !== readyForReview) {
   throw new Error(`Exercise Intelligence readyForReview is stale: ${payload.counts?.readyForReview} != ${readyForReview}`);
 }
 
-if (schema === '1.1-black-crown-v2-1') {
+if (schema === '1.1-black-crown-v2-1' || schema === '1.2-active-program-coverage') {
+  const activeProgramCoverage = schema === '1.2-active-program-coverage';
+  const expectedExerciseCount = activeProgramCoverage ? 108 : 94;
   const expectedCounts = {
-    exercises: 94,
+    exercises: expectedExerciseCount,
     substitutionRules: 27,
-    roleCoverage: 94,
-    coachingCoverage: 94,
-    readyForReview: 94,
+    roleCoverage: expectedExerciseCount,
+    coachingCoverage: expectedExerciseCount,
+    readyForReview: expectedExerciseCount,
   };
   for (const [key, expected] of Object.entries(expectedCounts)) {
     if (payload.counts?.[key] !== expected) {
-      throw new Error(`Black Crown v2.1 Exercise Intelligence ${key} mismatch: ${payload.counts?.[key]} != ${expected}`);
+      throw new Error(`Governed Exercise Intelligence ${key} mismatch: ${payload.counts?.[key]} != ${expected}`);
     }
   }
-  if (ids.size !== 94) {
-    throw new Error('Black Crown v2.1 Exercise Intelligence exercise IDs are not unique');
+  if (ids.size !== expectedExerciseCount) {
+    throw new Error(`Governed Exercise Intelligence exercise IDs mismatch: ${ids.size} != ${expectedExerciseCount}`);
   }
   const supplements = payload.bookInformedSupplements || [];
   if (supplements.length !== 1 || supplements[0] !== 'black-crown-v2-1-lateral-glute') {
@@ -120,10 +134,52 @@ if (schema === '1.1-black-crown-v2-1') {
   if (JSON.stringify(machineRules) !== JSON.stringify(expectedMachineRules)) {
     throw new Error(`Machine Hip Abduction fallback hierarchy changed: ${machineRules.join(', ')}`);
   }
-  if (!runtime.includes('94/27')) {
-    throw new Error('Exercise Intelligence runtime is not synchronized to Black Crown v2.1 94/27 catalog');
+
+  if (activeProgramCoverage) {
+    if (JSON.stringify(payload.activeProgramCoverageSupplements || []) !== JSON.stringify(['active-program-coverage-v1'])) {
+      throw new Error(`Active-program supplement marker mismatch: ${JSON.stringify(payload.activeProgramCoverageSupplements)}`);
+    }
+    const requiredActive = [
+      '90-90-hip-mobility', 'box-jump', 'box-squat', 'broad-jump', 'explosive-push-up',
+      'finger-extension', 'hip-airplane', 'kb-dead-stop-swing', 'medicine-ball-chest-pass',
+      'rack-pull', 'reverse-lunge', 'snatch-grip-rdl', 'sorenson-hold', 'trap-3-raise',
+    ];
+    for (const id of requiredActive) {
+      const exercise = payload.exercises.find((item) => item.id === id);
+      if (!exercise) throw new Error(`Missing active-program Exercise Intelligence record: ${id}`);
+      if (!exercise.trainingCategory || !exercise.purpose || !exercise.movementRoles?.length ||
+          !exercise.coachingCues?.length || !exercise.commonMistakes?.length ||
+          exercise.reviewStatus !== 'READY FOR REVIEW') {
+        throw new Error(`Incomplete active-program Exercise Intelligence record: ${id}`);
+      }
+      if (exercise?.demo?.currentStatus !== 'search-fallback' ||
+          !String(exercise?.demo?.currentUrl || '').startsWith('https://www.youtube.com/results?search_query=') ||
+          exercise?.demo?.candidateRequiresValidation !== false) {
+        throw new Error(`Active-program demo governance mismatch: ${id}`);
+      }
+    }
+    const expectedCompounds = [
+      'Bike / Incline Walk', 'Bike / Row / Walk', 'Bike / Walk', 'Bike or Walk', 'Walk or Bike',
+      'Dead Bug or Hollow Hold', 'Front Squat + Bench Ramp Sets',
+      'KB Lateral Clean or Outside Swing to Rack', 'Pull-Up or Lat Pulldown',
+      'Reverse Crunch or Dead Bug', 'Wide or Neutral Pulldown', 'Curl', 'Pushdown',
+    ];
+    if (JSON.stringify(payload.compoundProgramDisplayNames || []) !== JSON.stringify(expectedCompounds)) {
+      throw new Error('Compound program display-name governance mismatch');
+    }
+    if (!runtime.includes('108/27')) {
+      throw new Error('Exercise Intelligence runtime is not synchronized to active-program 108/27 catalog');
+    }
+    console.log('Exercise Intelligence active-program coverage: PASS (108/27 with 108 full coverage)');
+  } else {
+    if ((payload.activeProgramCoverageSupplements || []).length) {
+      throw new Error('Black Crown v2.1 Exercise Intelligence unexpectedly declares active-program coverage');
+    }
+    if (!runtime.includes('94/27')) {
+      throw new Error('Exercise Intelligence runtime is not synchronized to Black Crown v2.1 94/27 catalog');
+    }
+    console.log('Exercise Intelligence governed Black Crown v2.1 supplement: PASS (94/27 with 94 full coverage)');
   }
-  console.log('Exercise Intelligence governed Black Crown v2.1 supplement: PASS (94/27 with 94 full coverage)');
 } else {
   const digest = crypto.createHash('sha256').update(raw).digest('hex');
   if (digest !== process.env.BASE_JSON_SHA) {
@@ -144,7 +200,7 @@ if (schema === '1.1-black-crown-v2-1') {
   if (ids.size !== 92) {
     throw new Error('Exercise Intelligence production exercise IDs are not unique');
   }
-  if ((payload.bookInformedSupplements || []).length) {
+  if ((payload.bookInformedSupplements || []).length || (payload.activeProgramCoverageSupplements || []).length) {
     throw new Error('Base Exercise Intelligence payload unexpectedly declares supplements');
   }
   console.log('Exercise Intelligence immutable base payload: PASS (92/25 with 92 full coverage)');
@@ -157,7 +213,7 @@ for (const exercise of payload.exercises) {
   }
 }
 const serialized = JSON.stringify(payload);
-for (const forbidden of ['drive.google.com', 'service_role', 'DATABASE_PASSWORD']) {
+for (const forbidden of ['drive.google.com', 'driveFileId', 'driveUrl', 'service_role', 'DATABASE_PASSWORD']) {
   if (serialized.includes(forbidden)) throw new Error(`Forbidden Exercise Intelligence production value: ${forbidden}`);
 }
 console.log('Exercise Intelligence final payload governance: PASS');

@@ -18,26 +18,38 @@ node --check "$LIB_JS"
 DATA="$DATA" node - <<'NODE'
 const fs = require('fs');
 const payload = JSON.parse(fs.readFileSync(process.env.DATA, 'utf8'));
-if (payload.schemaVersion !== '1.1-black-crown-v2-1') {
-  throw new Error(`Full catalog final audit requires Black Crown v2.1 schema, got ${payload.schemaVersion}`);
+if (payload.schemaVersion !== '1.2-active-program-coverage') {
+  throw new Error(`Full catalog final audit requires active-program coverage schema, got ${payload.schemaVersion}`);
 }
 const expected = {
-  exercises: 94,
+  exercises: 108,
   substitutionRules: 27,
-  roleCoverage: 94,
-  coachingCoverage: 94,
-  readyForReview: 94,
+  roleCoverage: 108,
+  coachingCoverage: 108,
+  readyForReview: 108,
 };
 for (const [key, value] of Object.entries(expected)) {
   if (payload.counts?.[key] !== value) throw new Error(`Full catalog final count mismatch ${key}: ${payload.counts?.[key]} != ${value}`);
 }
-if (payload.exercises.length !== 94 || new Set(payload.exercises.map((exercise) => exercise.id)).size !== 94) {
+if (payload.exercises.length !== 108 || new Set(payload.exercises.map((exercise) => exercise.id)).size !== 108) {
   throw new Error('Full catalog final exercise identity audit failed');
 }
-for (const id of ['machine-hip-abduction', 'seated-band-hip-abduction']) {
+const required = [
+  'machine-hip-abduction', 'seated-band-hip-abduction',
+  '90-90-hip-mobility', 'box-jump', 'box-squat', 'broad-jump', 'explosive-push-up',
+  'finger-extension', 'hip-airplane', 'kb-dead-stop-swing', 'medicine-ball-chest-pass',
+  'rack-pull', 'reverse-lunge', 'snatch-grip-rdl', 'sorenson-hold', 'trap-3-raise',
+];
+for (const id of required) {
   if (!payload.exercises.some((exercise) => exercise.id === id)) throw new Error(`Full catalog missing ${id}`);
 }
-console.log('Full governed catalog runtime data: PASS (94 canonical exercises)');
+if (JSON.stringify(payload.activeProgramCoverageSupplements || []) !== JSON.stringify(['active-program-coverage-v1'])) {
+  throw new Error('Full catalog active-program coverage marker mismatch');
+}
+if (!Array.isArray(payload.compoundProgramDisplayNames) || payload.compoundProgramDisplayNames.length !== 13) {
+  throw new Error('Full catalog compound program display-name governance mismatch');
+}
+console.log('Full governed catalog runtime data: PASS (108 canonical exercises / 13 intentional compound labels)');
 NODE
 
 grep -Fq '/ui/exercise-intelligence-library-v1.js' "$INDEX"
@@ -66,10 +78,9 @@ grep -Fq 'program packages remain prescription authority' "$LIB_JS"
 ! grep -Fq 'data-action="apply' "$LIB_JS"
 ! grep -Fq 'data-action="swap' "$LIB_JS"
 
-# The enhancer must augment the existing program-derived library, not replace it.
 grep -Fq "const existing = [...library.querySelectorAll('[data-library-card]')]" "$LIB_JS"
 grep -Fq 'existing.forEach((card) => enrichExistingCard' "$LIB_JS"
 grep -Fq 'const missing = all.filter' "$LIB_JS"
 ! grep -Fq 'library.innerHTML =' "$LIB_JS"
 
-echo "LetMeFly final full governed Exercise Intelligence catalog audit: PASS"
+echo "LetMeFly final full governed Exercise Intelligence catalog audit: PASS (108 canonical exercises)"
