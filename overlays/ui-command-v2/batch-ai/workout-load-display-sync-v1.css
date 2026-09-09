@@ -26,26 +26,47 @@
   letter-spacing: -0.03em;
 }
 
-/* Keep the dynamic plate prescription readable when an inventory forces the
-   closest possible load rather than an exact load. */
+/* Keep +/- visually subordinate to the logged load. Reducing the button columns
+   slightly also returns a few pixels to the numeric input without making the
+   controls unnecessarily tiny. */
+.lmf-workout-flow-card .lmf-step-btn {
+  font-size: 19px !important;
+  font-weight: 700;
+}
+
+/* The inline bar-loading prescription is actionable workout information, so it
+   should be comfortably readable at a glance instead of behaving like fine print. */
+.lmf-plates-line[data-lmf-live-load] {
+  min-height: 32px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .lmf-plates-line[data-lmf-live-load] strong {
   min-width: 0;
   overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 @media (max-width: 420px) {
   .lmf-workout-flow-card .lmf-stepper {
-    grid-template-columns: 32px minmax(0, 1fr) 32px;
-    gap: 4px;
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
+    gap: 3px;
     padding: 4px;
   }
 
   .lmf-workout-flow-card .lmf-step-btn {
-    width: 32px;
+    width: 30px;
+    font-size: 18px !important;
   }
 
   .lmf-workout-flow-card .load-field .lmf-stepper .load-input {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .lmf-plates-line[data-lmf-live-load] strong {
+    font-size: 14px;
   }
 }
