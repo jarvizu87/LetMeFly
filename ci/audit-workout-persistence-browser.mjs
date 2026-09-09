@@ -155,22 +155,22 @@ async function waitDone(page, setId, expected) {
   }, { id: setId, expected }, { timeout: 8000 })
 }
 
-async function revealSet(page, setId) {
-  const result = await page.evaluate(id => {
+async function triggerNativeReopen(page, setId) {
+  return page.evaluate(id => {
     const row = document.querySelector(`[data-set-id="${id}"]`)
-    const card = row?.closest('.active-exercise')
-    if (!(row instanceof HTMLElement) || !(card instanceof HTMLElement)) return { ok:false, reason:'row/card missing' }
-    const rows = [...card.querySelectorAll('.set-row[data-set-id]')]
-    const index = rows.indexOf(row)
-    const tab = card.querySelectorAll('.lmf-set-tab')[index]
-    if (tab instanceof HTMLButtonElement) tab.click()
-    row.classList.add('lmf-set-active')
-    card.classList.add('lmf-logging-compact')
-    row.scrollIntoView({ block:'center', inline:'nearest' })
-    return { ok:true, index, tab:Boolean(tab) }
+    if (!(row instanceof HTMLElement)) return { ok:false, route:'missing-row' }
+    const undo = row.querySelector('[data-lmf-saved-set-action="undo"]')
+    if (undo instanceof HTMLButtonElement) {
+      undo.click()
+      return { ok:true, route:'saved-set-undo' }
+    }
+    const check = row.querySelector('.set-check[data-action="toggle-set"]')
+    if (check instanceof HTMLButtonElement) {
+      check.click()
+      return { ok:true, route:'native-set-toggle' }
+    }
+    return { ok:false, route:'missing-toggle' }
   }, setId)
-  if (!result.ok) throw new Error(`Unable to reveal set ${setId}: ${result.reason}`)
-  await page.waitForTimeout(250)
 }
 
 async function findUnprescribedCarryCard(page) {
@@ -198,6 +198,21 @@ async function findUnprescribedCarryCard(page) {
     }
     return null
   })
+}
+
+async function saveUnprescribedForty(page, setId) {
+  return page.evaluate(id => {
+    const row = document.querySelector(`[data-set-id="${id}"]`)
+    if (!(row instanceof HTMLElement)) return { ok:false, reason:'row missing' }
+    const load = row.querySelector('.load-input')
+    const check = row.querySelector('.set-check[data-action="toggle-set"]')
+    if (!(load instanceof HTMLInputElement) || !(check instanceof HTMLButtonElement)) return { ok:false, reason:'input/toggle missing' }
+    load.value = '40'
+    load.dispatchEvent(new Event('input', { bubbles:true }))
+    load.dispatchEvent(new Event('change', { bubbles:true }))
+    check.click()
+    return { ok:true }
+  }, setId)
 }
 
 const browser = await chromium.launch({ headless: true, executablePath: chromeBin, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
@@ -247,15 +262,14 @@ try {
   if (reviewAfterReload.done === 1) pass('Review survives authoritative reload', reviewAfterReload.text)
   else fail('Review survives authoritative reload', `expected 1, saw ${reviewAfterReload.text || 'unreadable'}`)
 
-  const rowReload = page.locator(`[data-set-id="${setId}"]`)
-  if (await rowReload.count()) {
-    await revealSet(page, setId)
-    const reopenCheck = rowReload.locator('.set-check[data-action="toggle-set"]')
-    await reopenCheck.click({ timeout:5000 })
+  if (await page.locator(`[data-set-id="${setId}"]`).count()) {
+    const reopen = await triggerNativeReopen(page, setId)
+    report.observations.reopenRoute = reopen
+    if (!reopen.ok) throw new Error(`Unable to trigger native reopen: ${reopen.route}`)
     await waitDone(page, setId, false)
     await page.waitForTimeout(900)
     const stored2 = await dbSet(page, setId)
-    if (stored2.record?.completed === false) pass('Native IndexedDB reopen', `set ${setId} completed=false`)
+    if (stored2.record?.completed === false) pass('Native IndexedDB reopen', `set ${setId} completed=false via ${reopen.route}`)
     else fail('Native IndexedDB reopen', JSON.stringify(stored2.record))
     const reviewAfterReopen = await readReview(page)
     report.observations.reviewAfterReopen = reviewAfterReopen
@@ -268,13 +282,14 @@ try {
   if (!carry) {
     fail('Unprescribed load carry target', 'no unprescribed multi-set exercise found in current QA workout')
   } else {
-    await revealSet(page, carry.firstId)
-    const firstCarryRow = page.locator(`[data-set-id="${carry.firstId}"]`)
-    await firstCarryRow.locator('.load-input').fill('40')
-    await firstCarryRow.locator('.set-check[data-action="toggle-set"]').click({ timeout:5000 })
+    const triggered = await saveUnprescribedForty(page, carry.firstId)
+    if (!triggered.ok) throw new Error(`Unable to save 40-lb carry source: ${triggered.reason}`)
     await waitDone(page, carry.firstId, true)
-    await page.waitForTimeout(1200)
-    const nextLoad = await page.locator(`[data-set-id="${carry.secondId}"] .load-input`).inputValue()
+    await page.waitForTimeout(1400)
+    const nextLoad = await page.evaluate(id => {
+      const input = document.querySelector(`[data-set-id="${id}"] .load-input`)
+      return input instanceof HTMLInputElement ? input.value : ''
+    }, carry.secondId)
     report.observations.unprescribedCarry = { exercise: carry.name, value: nextLoad }
     if (nextLoad === '40') pass('Unprescribed load carries Set 1 → Set 2', `${carry.name}: 40 lb`)
     else fail('Unprescribed load carries Set 1 → Set 2', `${carry.name}: expected 40, saw ${nextLoad || 'blank'}`)
