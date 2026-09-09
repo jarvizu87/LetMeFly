@@ -101,25 +101,36 @@
 
     if (done) {
       if (pending?.mode === 'saving' || pending?.mode === 'restoring') recovery.delete(setId)
-      const host = ensureHost(row)
-      host.className = 'lmf-saved-set-actions is-saved'
-      host.replaceChildren(
-        makeAction('edit', SAVED_SET_ACTIONS.edit),
-        makeAction('undo', SAVED_SET_ACTIONS.undo),
-      )
-      row.classList.remove('lmf-saved-set-reopened', 'lmf-saved-set-editing')
+      if (existing?.dataset.lmfSavedSetState !== 'saved') {
+        const host = ensureHost(row)
+        host.className = 'lmf-saved-set-actions is-saved'
+        host.dataset.lmfSavedSetState = 'saved'
+        host.replaceChildren(
+          makeAction('edit', SAVED_SET_ACTIONS.edit),
+          makeAction('undo', SAVED_SET_ACTIONS.undo),
+        )
+      }
+      if (row.classList.contains('lmf-saved-set-reopened') || row.classList.contains('lmf-saved-set-editing')) {
+        row.classList.remove('lmf-saved-set-reopened', 'lmf-saved-set-editing')
+      }
       return
     }
 
     if (pending && (pending.mode === 'edit' || pending.mode === 'undo')) {
-      const host = ensureHost(row)
-      const status = document.createElement('span')
-      status.className = 'lmf-saved-set-status'
-      status.textContent = pending.mode === 'edit' ? 'EDITING SAVED SET' : 'SET UNDONE'
-      host.className = 'lmf-saved-set-actions is-reopened'
-      host.replaceChildren(status, makeAction('restore', SAVED_SET_ACTIONS.restore))
-      row.classList.add('lmf-saved-set-reopened')
-      row.classList.toggle('lmf-saved-set-editing', pending.mode === 'edit')
+      if (existing?.dataset.lmfSavedSetState !== pending.mode) {
+        const host = ensureHost(row)
+        const status = document.createElement('span')
+        status.className = 'lmf-saved-set-status'
+        status.textContent = pending.mode === 'edit' ? 'EDITING SAVED SET' : 'SET UNDONE'
+        host.className = 'lmf-saved-set-actions is-reopened'
+        host.dataset.lmfSavedSetState = pending.mode
+        host.replaceChildren(status, makeAction('restore', SAVED_SET_ACTIONS.restore))
+      }
+      if (!row.classList.contains('lmf-saved-set-reopened')) row.classList.add('lmf-saved-set-reopened')
+      const shouldEdit = pending.mode === 'edit'
+      if (row.classList.contains('lmf-saved-set-editing') !== shouldEdit) {
+        row.classList.toggle('lmf-saved-set-editing', shouldEdit)
+      }
       return
     }
 
