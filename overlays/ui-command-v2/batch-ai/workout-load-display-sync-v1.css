@@ -34,6 +34,32 @@
   font-weight: 700;
 }
 
+/* Small workout labels were undersized on a phone. Raise only the labels that
+   must be read during a set; preserve the larger exercise/set/value hierarchy. */
+.lmf-workout-flow-card .set-field label {
+  font-size: 11px !important;
+  letter-spacing: 0.07em !important;
+}
+
+.lmf-workout-flow-card .exercise-actions .btn {
+  font-size: 10px !important;
+  line-height: 1.15;
+}
+
+/* Compact cards still need readable state/prescription text without competing
+   with the exercise name. */
+.lmf-compact-copy small {
+  font-size: 12px !important;
+}
+
+.lmf-compact-state {
+  font-size: 9px !important;
+}
+
+.lmf-round-badge span {
+  font-size: 9px !important;
+}
+
 /* The inline bar-loading prescription is actionable workout information, so it
    should be comfortably readable at a glance instead of behaving like fine print. */
 .lmf-plates-line[data-lmf-live-load] {
