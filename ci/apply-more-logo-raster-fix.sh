@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_DIR="${1:-}"
-BRAND_ARCHIVE="$ROOT_DIR/overlays/ui-command-v2/brand-v1/official-brand-assets-v1.tar.gz"
+BRAND_EXTRACTOR="$ROOT_DIR/ci/extract-authoritative-brand-v1.sh"
 ICON_512_SHA="864067cda8175f18919ca038c4b1d9bf82a865fceb4438ebe777bb0c1ac4c743"
 LOGO_PATH="$TARGET_DIR/public/ui/letmefly-official-logo-512.png"
 
@@ -12,14 +12,10 @@ if [[ -z "$TARGET_DIR" || ! -f "$TARGET_DIR/src/main.ts" || ! -f "$TARGET_DIR/sr
   exit 1
 fi
 
-test -s "$BRAND_ARCHIVE"
-# Validate the archive structurally, then validate the authoritative extracted
-# artwork by exact SHA-256. This protects the actual shipped pixels while
-# avoiding false failures from gzip/tar container metadata.
-tar -tzf "$BRAND_ARCHIVE" >/dev/null
+test -s "$BRAND_EXTRACTOR"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-tar -xzf "$BRAND_ARCHIVE" -C "$TMP"
+bash "$BRAND_EXTRACTOR" "$TMP"
 echo "$ICON_512_SHA  $TMP/letmefly-app-icon-512-v1.png" | sha256sum -c -
 
 mkdir -p "$TARGET_DIR/public/ui"
