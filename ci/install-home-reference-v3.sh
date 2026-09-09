@@ -7,17 +7,16 @@ CSS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3.css"
 POLISH_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3-mobile-polish.css"
 GUARD_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3-route-guard.css"
 JS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ac/home-reference-v3.js"
-BRAND_ARCHIVE="$ROOT_DIR/overlays/ui-command-v2/brand-v1/official-brand-assets-v1.tar.gz"
+BRAND_EXTRACTOR="$ROOT_DIR/ci/extract-authoritative-brand-v1.sh"
 INDEX="$DIST_DIR/index.html"
 MANIFEST="$DIST_DIR/manifest.webmanifest"
 SW="$DIST_DIR/service-worker.js"
 
-MASTER_SHA="2b0bb29e200fb48ade90336bc355ad26c21277ddfcbacdf245474e85f82d348b"
 ICON_192_SHA="978b556783eeeaa4f0d87b8d929fcc22b91f0cbb05f61c8d29f1869d83e87e39"
 ICON_512_SHA="864067cda8175f18919ca038c4b1d9bf82a865fceb4438ebe777bb0c1ac4c743"
 ICON_MASKABLE_SHA="0e0262a8600d3fe62e45b645731264ea930ca4fd70ac28f91e1f671bf0d0fd5f"
 
-for f in "$INDEX" "$MANIFEST" "$SW" "$CSS_SRC" "$POLISH_SRC" "$GUARD_SRC" "$JS_SRC" "$BRAND_ARCHIVE"; do
+for f in "$INDEX" "$MANIFEST" "$SW" "$CSS_SRC" "$POLISH_SRC" "$GUARD_SRC" "$JS_SRC" "$BRAND_EXTRACTOR"; do
   test -s "$f" || { echo "Missing required Home/brand asset: $f" >&2; exit 1; }
 done
 
@@ -40,32 +39,28 @@ cp "$POLISH_SRC" "$DIST_DIR/ui/home-reference-v3-mobile-polish.css"
 cp "$GUARD_SRC" "$DIST_DIR/ui/home-reference-v3-route-guard.css"
 cp "$JS_SRC" "$DIST_DIR/ui/home-reference-v3.js"
 
-# Authoritative LetMeFly brand v1. This archive is generated only from the
-# user-approved 1536x1536 master artwork. No redraw, simplification, recolor,
-# alternate mascot, or legacy Cloudinary logo is allowed in this layer.
-# Validate the container structurally, then validate every extracted source and
-# derivative by exact SHA-256 so the shipped pixels are the integrity boundary.
-tar -tzf "$BRAND_ARCHIVE" >/dev/null
+# Authoritative LetMeFly brand v1 runtime assets. The text transport was created
+# from deterministic derivatives of the user-approved 1536x1536 master. Rebuild
+# it locally, verify the gzip/tar container, then enforce the exact derivative
+# SHA-256 hashes. No redraw, simplification, recolor, alternate mascot, or legacy
+# Cloudinary logo is allowed through this layer.
 BRAND_TMP="$(mktemp -d)"
 trap 'rm -rf "$BRAND_TMP"' EXIT
-tar -xzf "$BRAND_ARCHIVE" -C "$BRAND_TMP"
+bash "$BRAND_EXTRACTOR" "$BRAND_TMP"
 
-MASTER="$BRAND_TMP/letmefly-official-master-source-v1.jpg"
 ICON_192="$BRAND_TMP/letmefly-app-icon-192-v1.png"
 ICON_512="$BRAND_TMP/letmefly-app-icon-512-v1.png"
 ICON_MASKABLE="$BRAND_TMP/letmefly-app-icon-512-maskable-v1.png"
-for f in "$MASTER" "$ICON_192" "$ICON_512" "$ICON_MASKABLE"; do
-  test -s "$f" || { echo "Authoritative brand bundle is incomplete: $f" >&2; exit 1; }
+for f in "$ICON_192" "$ICON_512" "$ICON_MASKABLE"; do
+  test -s "$f" || { echo "Authoritative brand transport is incomplete: $f" >&2; exit 1; }
 done
 
-echo "$MASTER_SHA  $MASTER" | sha256sum -c -
 echo "$ICON_192_SHA  $ICON_192" | sha256sum -c -
 echo "$ICON_512_SHA  $ICON_512" | sha256sum -c -
 echo "$ICON_MASKABLE_SHA  $ICON_MASKABLE" | sha256sum -c -
 
 # Local, deterministic install assets. The 512 More-tab compatibility path is
 # deliberately retained so any older compiled view receives the correct face.
-cp "$MASTER" "$DIST_DIR/ui/letmefly-official-master-v1.jpg"
 cp "$ICON_192" "$DIST_DIR/app-icon-192.png"
 cp "$ICON_512" "$DIST_DIR/app-icon-512.png"
 cp "$ICON_MASKABLE" "$DIST_DIR/app-icon-512-maskable.png"
@@ -198,9 +193,8 @@ sw = sw[:precache_match.start()] + replacement + sw[precache_match.end():]
 sw_path.write_text(sw)
 PY
 
-# Exact-fidelity gates: the approved uploaded artwork and derivatives must be the
-# files that ship. These hashes make accidental replacement impossible to miss.
-echo "$MASTER_SHA  $DIST_DIR/ui/letmefly-official-master-v1.jpg" | sha256sum -c -
+# Exact-fidelity gates: the approved derivatives must be the files that ship.
+# These hashes make accidental replacement or corruption impossible to miss.
 echo "$ICON_192_SHA  $DIST_DIR/app-icon-192.png" | sha256sum -c -
 echo "$ICON_512_SHA  $DIST_DIR/app-icon-512.png" | sha256sum -c -
 echo "$ICON_MASKABLE_SHA  $DIST_DIR/app-icon-512-maskable.png" | sha256sum -c -
@@ -243,4 +237,4 @@ grep -Fq '/app-icon-192.png?v=8' "$SW"
 grep -Fq '/app-icon-512-maskable.png?v=8' "$SW"
 ! grep -Rq 'letmefly-app-icon-192-v2.png\|letmefly-app-icon-512-v2.png\|letmefly-app-icon-512-maskable-v2.png' "$DIST_DIR"
 
-echo "LetMeFly structural Home v4 + authoritative master logo brand v8: PASS"
+echo "LetMeFly structural Home v4 + verified authoritative logo derivatives brand v8: PASS"
