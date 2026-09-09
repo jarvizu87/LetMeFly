@@ -32,17 +32,29 @@ gzip -t "$ARCHIVE"
 tar -tzf "$ARCHIVE" >/dev/null
 tar -xzf "$ARCHIVE" -C "$OUT_DIR"
 
-ICON_192="$OUT_DIR/letmefly-app-icon-192-v1.png"
-ICON_512="$OUT_DIR/letmefly-app-icon-512-v1.png"
-ICON_MASKABLE="$OUT_DIR/letmefly-app-icon-512-maskable-v1.png"
-for f in "$ICON_192" "$ICON_512" "$ICON_MASKABLE"; do
+# The text-safe recovery bundle uses -q256 transport filenames. Normalize them
+# back to the canonical runtime filenames, then validate the exact approved bytes.
+SOURCE_192="$OUT_DIR/letmefly-app-icon-192-v1-q256.png"
+SOURCE_512="$OUT_DIR/letmefly-app-icon-512-v1-q256.png"
+SOURCE_MASKABLE="$OUT_DIR/letmefly-app-icon-512-maskable-v1-q256.png"
+for f in "$SOURCE_192" "$SOURCE_512" "$SOURCE_MASKABLE"; do
   test -s "$f" || {
-    echo "Authoritative brand transport did not reconstruct required file: $f" >&2
+    echo "Authoritative brand transport did not reconstruct required source: $f" >&2
     echo "Transport contents:" >&2
     tar -tzf "$ARCHIVE" >&2
     exit 1
   }
 done
+
+echo "Recovered authoritative derivative SHA-256 values:"
+sha256sum "$SOURCE_192" "$SOURCE_512" "$SOURCE_MASKABLE"
+
+ICON_192="$OUT_DIR/letmefly-app-icon-192-v1.png"
+ICON_512="$OUT_DIR/letmefly-app-icon-512-v1.png"
+ICON_MASKABLE="$OUT_DIR/letmefly-app-icon-512-maskable-v1.png"
+cp "$SOURCE_192" "$ICON_192"
+cp "$SOURCE_512" "$ICON_512"
+cp "$SOURCE_MASKABLE" "$ICON_MASKABLE"
 
 echo "$ICON_192_SHA  $ICON_192" | sha256sum -c -
 echo "$ICON_512_SHA  $ICON_512" | sha256sum -c -
