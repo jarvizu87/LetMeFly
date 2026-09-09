@@ -3,9 +3,9 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
-TRANSPORT_DIR="$ROOT_DIR/branding/source/transport"
+RUNTIME_TRANSPORT_DIR="$ROOT_DIR/branding/source/runtime-master-v2"
 MATERIALIZER="$ROOT_DIR/ci/materialize-official-brand-v2.py"
-SOURCE_SHA="2b0bb29e200fb48ade90336bc355ad26c21277ddfcbacdf245474e85f82d348b"
+RUNTIME_SHA="e130ad7f388f9caab28d43a2fef731f9719275b79b527684b0fed9d43cb54e7b"
 
 for f in "$DIST_DIR/index.html" "$DIST_DIR/manifest.webmanifest" "$DIST_DIR/service-worker.js" "$MATERIALIZER"; do
   test -s "$f" || { echo "Missing required brand/install input: $f" >&2; exit 1; }
@@ -13,14 +13,15 @@ done
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-MASTER_GZ="$TMP/approved-master.jpg.gz"
-MASTER="$TMP/approved-master.jpg"
-PARTS=("$TRANSPORT_DIR"/letmefly-logo-master-approved-2026-09-09.jpg.gz.b64.*)
-[[ ${#PARTS[@]} -ge 1 && -e "${PARTS[0]}" ]] || { echo "Official master transport chunks missing" >&2; exit 1; }
-cat "${PARTS[@]}" | base64 --decode > "$MASTER_GZ"
-gzip -t "$MASTER_GZ"
-gzip -dc "$MASTER_GZ" > "$MASTER"
-echo "$SOURCE_SHA  $MASTER" | sha256sum -c -
+RUNTIME_MASTER="$TMP/approved-runtime-master.webp"
+PARTS=("$RUNTIME_TRANSPORT_DIR"/letmefly-logo-runtime-master-512-lossless-icc.webp.b64.*)
+[[ ${#PARTS[@]} -eq 7 && -e "${PARTS[0]}" ]] || { echo "Official runtime-master transport must contain exactly 7 chunks" >&2; exit 1; }
+for part in "${PARTS[@]}"; do
+  bytes="$(wc -c < "$part" | tr -d '[:space:]')"
+  (( bytes % 4 == 0 )) || { echo "Runtime transport chunk is not Base64-aligned: $part ($bytes bytes)" >&2; exit 1; }
+done
+cat "${PARTS[@]}" | base64 --decode > "$RUNTIME_MASTER"
+echo "$RUNTIME_SHA  $RUNTIME_MASTER" | sha256sum -c -
 
 if ! python3 - <<'PY' >/dev/null 2>&1
 import PIL
@@ -32,7 +33,7 @@ then
 fi
 
 OUT="$TMP/runtime"
-python3 "$MATERIALIZER" "$MASTER" "$OUT"
+python3 "$MATERIALIZER" "$RUNTIME_MASTER" "$OUT"
 mkdir -p "$DIST_DIR/brand" "$DIST_DIR/icons" "$DIST_DIR/ui"
 cp "$OUT/brand/letmefly-logo-display-512.png" "$DIST_DIR/brand/letmefly-logo-display-512.png"
 cp "$OUT/icons/"*.png "$DIST_DIR/icons/"
