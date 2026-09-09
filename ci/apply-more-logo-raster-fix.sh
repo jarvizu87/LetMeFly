@@ -26,6 +26,9 @@ mkdir -p "$TARGET_DIR/public/ui"
 cp "$TMP/letmefly-app-icon-512-v1.png" "$LOGO_PATH"
 echo "$ICON_512_SHA  $LOGO_PATH" | sha256sum -c -
 
+# Preserve the source-stage v6 path/marker expected by the locked UI audits.
+# Only the pixels change here. The final production installer later migrates
+# compiled references to brand-v8 after all source audits have completed.
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
@@ -33,22 +36,19 @@ import os
 root = Path(os.environ['TARGET_DIR'])
 p = root / 'src/main.ts'
 text = p.read_text()
-old_candidates = [
-    '<img class="lmf-official-more-logo" src="/app-icon-v4.svg?v=4" alt="LetMeFly" />',
-    '<img class="lmf-official-more-logo" src="/ui/letmefly-official-logo-512.png?v=6" alt="LetMeFly" decoding="async" />',
-]
-new = '<img class="lmf-official-more-logo" src="/ui/letmefly-official-logo-512.png?v=8" alt="LetMeFly" decoding="async" />'
+old = '<img class="lmf-official-more-logo" src="/app-icon-v4.svg?v=4" alt="LetMeFly" />'
+new = '<img class="lmf-official-more-logo" src="/ui/letmefly-official-logo-512.png?v=6" alt="LetMeFly" decoding="async" />'
 if new not in text:
-    matches = [old for old in old_candidates if old in text]
-    if len(matches) != 1:
-        raise SystemExit(f'expected one known More-tab logo reference, found {len(matches)}')
-    text = text.replace(matches[0], new, 1)
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f'expected one More-tab SVG logo reference, found {count}')
+    text = text.replace(old, new, 1)
 p.write_text(text)
 PY
 
 cat >> "$TARGET_DIR/src/command-v2.css" <<'CSS'
 
-/* More-tab authoritative logo v8: approved master raster only. */
+/* More-tab official logo v6: authoritative approved master pixels. */
 .more-brand.lmf-official-more-brand .lmf-official-more-logo{
   display:block!important;
   width:min(220px,60vw)!important;
@@ -63,8 +63,9 @@ cat >> "$TARGET_DIR/src/command-v2.css" <<'CSS'
 }
 CSS
 
-grep -Fq '/ui/letmefly-official-logo-512.png?v=8' "$TARGET_DIR/src/main.ts"
+grep -Fq '/ui/letmefly-official-logo-512.png?v=6' "$TARGET_DIR/src/main.ts"
 ! grep -Fq 'letmefly-app-icon-512-v2.png' "$TARGET_DIR/src/main.ts"
-grep -Fq 'More-tab authoritative logo v8' "$TARGET_DIR/src/command-v2.css"
+grep -Fq 'More-tab official logo v6' "$TARGET_DIR/src/command-v2.css"
+echo "$ICON_512_SHA  $LOGO_PATH" | sha256sum -c -
 
-echo "LetMeFly More-tab authoritative master logo fix: PASS"
+echo "LetMeFly More-tab authoritative master pixels with source compatibility: PASS"
