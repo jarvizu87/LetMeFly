@@ -1,0 +1,1 @@
+This diagnostic/fix lane must not modify any program prescription. It may only repair native workout persistence/review correctness and the already-approved unprescribed-load carry-forward ergonomics.
