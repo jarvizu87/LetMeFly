@@ -59,3 +59,7 @@ echo "LetMeFly Workout Logging v2 auto-advance + governed load carry + compact m
 # Saved-set recovery is an additive ergonomics layer. It never bypasses the
 # native set toggle or changes program prescriptions.
 bash "$ROOT_DIR/ci/install-saved-set-recovery-v1.sh" "$DIST"
+
+# Recording-driven mobile guard: vertical day scrolling takes priority over
+# direct horizontal section swipes; section tabs/arrows remain authoritative.
+bash "$ROOT_DIR/ci/install-workout-mobile-scroll-v1.sh" "$DIST"
