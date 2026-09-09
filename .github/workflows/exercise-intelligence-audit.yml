@@ -7,6 +7,7 @@ on:
       - 'overlays/exercise-intelligence/**'
       - 'ci/verify-exercise-intelligence.sh'
       - 'ci/install-exercise-intelligence-v1.sh'
+      - 'ci/install-exercise-intelligence-active-program-coverage-v1.sh'
       - '.github/workflows/exercise-intelligence-audit.yml'
   pull_request:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - 'overlays/exercise-intelligence/**'
       - 'ci/verify-exercise-intelligence.sh'
       - 'ci/install-exercise-intelligence-v1.sh'
+      - 'ci/install-exercise-intelligence-active-program-coverage-v1.sh'
       - '.github/workflows/exercise-intelligence-audit.yml'
   workflow_dispatch:
 
@@ -42,7 +44,9 @@ jobs:
           node --check overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
           bash -n ci/verify-exercise-intelligence.sh
           bash -n ci/install-exercise-intelligence-v1.sh
+          bash -n ci/install-exercise-intelligence-active-program-coverage-v1.sh
           grep -Fq 'program-packages-only' overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
+          grep -Fq '108/27' overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
           grep -Fq 'data-exercise-info' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
           grep -Fq 'PROGRAM SAFETY' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
           grep -Fq '.lmf-intel-modal' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.css
@@ -51,7 +55,22 @@ jobs:
           ! grep -Fq 'sessionStorage' overlays/exercise-intelligence/runtime/exercise-intelligence-ui-v1.js
           echo 'Exercise Intelligence read-only runtime audit: PASS'
 
-      - name: Materialize and inspect payload
+      - name: Inspect active-program coverage supplement contract
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const supplement = JSON.parse(fs.readFileSync('overlays/exercise-intelligence/active-program-coverage-supplement-v1.json', 'utf8'));
+          if (supplement.baseSchemaVersion !== '1.1-black-crown-v2-1') throw new Error('unexpected active-program base schema');
+          if (supplement.finalSchemaVersion !== '1.2-active-program-coverage') throw new Error('unexpected active-program final schema');
+          if (supplement.baseCounts?.exercises !== 94 || supplement.baseCounts?.substitutionRules !== 27) throw new Error('unexpected active-program base counts');
+          if (supplement.finalCounts?.exercises !== 108 || supplement.finalCounts?.substitutionRules !== 27) throw new Error('unexpected active-program final counts');
+          if (!Array.isArray(supplement.exercises) || supplement.exercises.length !== 14) throw new Error('expected exactly 14 active-program exercise records');
+          if (!Array.isArray(supplement.substitutionRules) || supplement.substitutionRules.length !== 0) throw new Error('active-program supplement must not add substitution rules');
+          if (!Array.isArray(supplement.compoundProgramDisplayNames) || supplement.compoundProgramDisplayNames.length !== 13) throw new Error('expected exactly 13 program-owned compound labels');
+          console.log('Exercise Intelligence active-program supplement source contract: PASS');
+          NODE
+
+      - name: Materialize and inspect immutable base payload
         run: |
           node overlays/exercise-intelligence/materialize.mjs --output=/tmp/exercise-intelligence-v1.json
           node - <<'NODE'
@@ -71,10 +90,10 @@ jobs:
             String(rule.promotionStatus || '').startsWith('DO NOT')
           );
           if (blocked.length !== 2) throw new Error('expected 2 default-blocked substitutions');
-          console.log('Exercise Intelligence materialized payload audit: PASS');
+          console.log('Exercise Intelligence immutable materialized payload audit: PASS (92/25)');
           NODE
 
-      - name: Smoke-test runtime installer
+      - name: Smoke-test immutable runtime installer
         run: |
           TEST_DIST="$(mktemp -d)"
           trap 'rm -rf "$TEST_DIST"' EXIT
@@ -108,4 +127,4 @@ jobs:
           grep -Fq "'/ui/exercise-intelligence-ui-v1.js'" "$TEST_DIST/service-worker.js"
           grep -Fq "'/ui/exercise-intelligence-ui-v1.css'" "$TEST_DIST/service-worker.js"
           grep -Fq "hostname.endsWith('.supabase.co')" "$TEST_DIST/service-worker.js"
-          echo 'Exercise Intelligence installer + offline precache smoke test: PASS'
+          echo 'Exercise Intelligence immutable installer + offline precache smoke test: PASS'
