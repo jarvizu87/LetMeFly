@@ -30,24 +30,27 @@ grep -Fq 'program packages remain prescription authority' "$LIB_SOURCE"
 ! grep -Fq 'fetch(' "$LIB_SOURCE"
 ! grep -Fq 'data-action="apply' "$LIB_SOURCE"
 
-# The full catalog enhancer belongs after the governed Black Crown v2.1 supplement.
+# The full catalog enhancer belongs after all governed Exercise Intelligence supplements.
 DATA="$DATA" node - <<'NODE'
 const fs = require('fs');
 const payload = JSON.parse(fs.readFileSync(process.env.DATA, 'utf8'));
-if (payload.schemaVersion !== '1.1-black-crown-v2-1') {
-  throw new Error(`Full catalog requires governed Black Crown v2.1 Exercise Intelligence schema, got ${payload.schemaVersion}`);
+if (payload.schemaVersion !== '1.2-active-program-coverage') {
+  throw new Error(`Full catalog requires governed active-program Exercise Intelligence schema, got ${payload.schemaVersion}`);
 }
 const expected = {
-  exercises: 94,
+  exercises: 108,
   substitutionRules: 27,
-  roleCoverage: 94,
-  coachingCoverage: 94,
-  readyForReview: 94,
+  roleCoverage: 108,
+  coachingCoverage: 108,
+  readyForReview: 108,
 };
 for (const [key, value] of Object.entries(expected)) {
   if (payload.counts?.[key] !== value) throw new Error(`Full catalog count mismatch ${key}: ${payload.counts?.[key]} != ${value}`);
 }
-console.log('Full Exercise Intelligence catalog prerequisite: PASS (94/27, full coverage)');
+if (JSON.stringify(payload.activeProgramCoverageSupplements || []) !== JSON.stringify(['active-program-coverage-v1'])) {
+  throw new Error(`Full catalog active-program coverage marker mismatch: ${JSON.stringify(payload.activeProgramCoverageSupplements)}`);
+}
+console.log('Full Exercise Intelligence catalog prerequisite: PASS (108/27, full active-program coverage)');
 NODE
 
 mkdir -p "$DIST_DIR/ui"
@@ -117,4 +120,4 @@ grep -Fq 'data-lmf-intel-watch' "$LIB_OUT"
 ! grep -Fq 'indexedDB' "$LIB_OUT"
 ! grep -Fq 'fetch(' "$LIB_OUT"
 
-echo "LetMeFly full governed Exercise Intelligence catalog enhancer: PASS"
+echo "LetMeFly full governed Exercise Intelligence catalog enhancer: PASS (108 canonical exercises)"
