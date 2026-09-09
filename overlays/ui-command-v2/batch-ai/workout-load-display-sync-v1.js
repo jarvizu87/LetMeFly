@@ -32,6 +32,12 @@
     return Number.isInteger(number) ? String(number) : String(Math.round(number * 100) / 100)
   }
 
+  function writeText(node, value) {
+    if (!node) return
+    const next = String(value)
+    if (node.textContent !== next) node.textContent = next
+  }
+
   function settingsRead() {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY)
@@ -141,7 +147,7 @@
 
   function restoreOriginal(line, strong) {
     const original = clean(line.dataset.lmfOriginalPlateHelper)
-    strong.textContent = original || 'Load / bodyweight as prescribed'
+    writeText(strong, original || 'Load / bodyweight as prescribed')
     line.classList.toggle('is-empty', !original)
     line.removeAttribute('data-lmf-live-load')
     line.removeAttribute('data-lmf-load-exact')
@@ -176,7 +182,7 @@
     line.dataset.lmfLiveLoad = formatWeight(target)
 
     if (target < minimum) {
-      strong.textContent = `${formatWeight(selectedBar)} ${unit} bar • target below bar${collars > 0 ? ' + collars' : ''}`
+      writeText(strong, `${formatWeight(selectedBar)} ${unit} bar • target below bar${collars > 0 ? ' + collars' : ''}`)
       line.dataset.lmfLoadExact = 'false'
       return
     }
@@ -186,10 +192,10 @@
     const eachSide = plates.length ? plates.map(formatWeight).join(' + ') : 'none'
 
     if (solution.exact) {
-      strong.textContent = `${formatWeight(selectedBar)} ${unit} bar • per side: ${eachSide}`
+      writeText(strong, `${formatWeight(selectedBar)} ${unit} bar • per side: ${eachSide}`)
       line.dataset.lmfLoadExact = 'true'
     } else {
-      strong.textContent = `${formatWeight(selectedBar)} ${unit} bar • closest ${formatWeight(solution.achievedTotal)} ${unit} • per side: ${eachSide}`
+      writeText(strong, `${formatWeight(selectedBar)} ${unit} bar • closest ${formatWeight(solution.achievedTotal)} ${unit} • per side: ${eachSide}`)
       line.dataset.lmfLoadExact = 'false'
     }
   }
