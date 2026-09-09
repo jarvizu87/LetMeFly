@@ -27,7 +27,7 @@ jobs:
       - name: Reconstruct governed production source
         run: bash ci/build-command-v2-v2-1.sh
 
-      - name: Install Workout Logging v2 and saved-set recovery
+      - name: Install Workout Logging v2, saved-set recovery, and mobile scroll guard
         run: bash ci/install-workout-logging-v2.sh
 
       - name: Expose authoritative workout persistence source
@@ -48,6 +48,7 @@ jobs:
           CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$CHROME_BIN"
           CHROME_BIN="$CHROME_BIN" node ci/audit-workout-persistence-browser.mjs
+          CHROME_BIN="$CHROME_BIN" node ci/audit-workout-mobile-scroll-browser.mjs
 
       - name: Publish persistence diagnostics
         if: always()
@@ -57,5 +58,6 @@ jobs:
           path: |
             .build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
             .build-src/letmefly_app/WORKOUT_PERSISTENCE_BROWSER_AUDIT
+            .build-src/letmefly_app/WORKOUT_MOBILE_SCROLL_AUDIT
           if-no-files-found: warn
           retention-days: 3
