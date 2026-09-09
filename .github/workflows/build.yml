@@ -88,6 +88,9 @@ jobs:
       - name: Install approved Home reference + official app icon
         run: bash ci/install-home-reference-v3.sh
 
+      - name: Isolate Home and Progress route lifecycles
+        run: bash ci/install-home-progress-route-isolation-v1.sh
+
       - name: Install private athlete Profile v2
         run: bash ci/install-profile-v2.sh
 
@@ -136,6 +139,8 @@ jobs:
               exit "$BROWSER_RC"
             fi
           fi
+
+          CHROME_BIN="$CHROME_BIN" node ci/audit-home-progress-route-isolation.mjs
 
       - name: Audit final Exercise Intelligence production dist
         run: |

@@ -20,17 +20,34 @@
     return style.display !== 'none' && style.visibility !== 'hidden' && element.getClientRects().length > 0
   }
 
-  function progressRouteActive() {
-    if (Date.now() < progressIntentUntil) return true
-    if (/^#\/progress(?:[/?#]|$)/i.test(location.hash || '')) return true
-    const activeNav = [...document.querySelectorAll('nav a[href],nav button,nav [role="button"]')].find(element => {
+  function selectedNavItem() {
+    return [...document.querySelectorAll('nav a[href],nav button,nav [role="button"]')].find(element => {
       if (!visible(element)) return false
-      const href = element.getAttribute('href') || ''
-      const text = (element.textContent || '').trim()
-      const selected = element.classList.contains('active') || Boolean(element.closest('.active')) || element.getAttribute('aria-current') === 'page' || element.getAttribute('aria-selected') === 'true'
-      return selected && (/^#\/progress(?:[/?#]|$)/i.test(href) || /^progress$/i.test(text))
-    })
-    return Boolean(activeNav)
+      return element.classList.contains('active') || Boolean(element.closest('.active')) || element.getAttribute('aria-current') === 'page' || element.getAttribute('aria-selected') === 'true'
+    }) || null
+  }
+
+  function navItemIsProgress(element) {
+    if (!(element instanceof Element)) return false
+    const href = element.getAttribute('href') || ''
+    const label = (element.textContent || '').trim()
+    return /^#\/progress(?:[/?#]|$)/i.test(href) || /^progress$/i.test(label)
+  }
+
+  function progressRouteActive() {
+    const hash = location.hash || ''
+    if (/^#\/progress(?:[/?#]|$)/i.test(hash)) return true
+
+    // Any explicit non-Progress hash wins over stale click intent. This is the
+    // critical Home/Train/Program isolation boundary.
+    if (hash && !/^#\/?$/i.test(hash)) return false
+
+    const selected = selectedNavItem()
+    if (selected) return navItemIsProgress(selected)
+
+    // Intent is only a short pre-route bridge when the SPA has not committed a
+    // hash or selected nav item yet. It can never override an explicit route.
+    return Date.now() < progressIntentUntil
   }
 
   function progressTitle() {
@@ -54,8 +71,8 @@
   }
 
   function progressSurface() {
-    // Never mount Progress UI merely because another screen contains progress-like
-    // cards. The route/nav intent is authoritative and prevents Home contamination.
+    // Route intent is authoritative. Generic history/progress-looking content on
+    // Home must never be enough to mount the Progress dashboard.
     if (!progressRouteActive()) return null
 
     const title = progressTitle()
@@ -89,6 +106,12 @@
     if (surface.title) surface.title.insertAdjacentElement('afterend', anchor)
     else surface.root.insertAdjacentElement('afterbegin', anchor)
     return anchor
+  }
+
+  function unmountProgressSurface() {
+    document.getElementById(DASHBOARD_ID)?.remove()
+    document.querySelectorAll(`[${ANCHOR_ATTR}]`).forEach(element => element.remove())
+    retrying = false
   }
 
   function storedTab() {
@@ -163,11 +186,11 @@
     if (document.querySelector(`script[${RETRY_ATTR}]`)) return
     retrying = true
     const script = document.createElement('script')
-    script.src = '/ui/progress-dashboard-v1.js?mount-retry=10'
+    script.src = '/ui/progress-dashboard-v1.js?mount-retry=11'
     script.setAttribute(RETRY_ATTR, 'true')
     script.addEventListener('load', () => {
       window.setTimeout(() => {
-        requestBaseRender()
+        if (progressRouteActive()) requestBaseRender()
         retrying = false
       }, 120)
     }, { once: true })
@@ -178,7 +201,10 @@
   function ensureMount() {
     queued = false
     const surface = progressSurface()
-    if (!surface) return
+    if (!surface) {
+      unmountProgressSurface()
+      return
+    }
     ensureAnchor(surface)
     const dashboard = ensureBootstrapShell(surface)
     requestBaseRender()
@@ -190,7 +216,10 @@
 
     window.setTimeout(() => {
       const current = document.getElementById(DASHBOARD_ID)
-      if (!current || !progressSurface()) return
+      if (!current || !progressSurface()) {
+        if (!progressRouteActive()) unmountProgressSurface()
+        return
+      }
       if (current.dataset.loaded === '1' && baseDashboardReady()) {
         current.removeAttribute(BOOTSTRAP_ATTR)
         return
@@ -220,10 +249,15 @@
     const link = target.closest('a[href],button,[role="button"]')
     if (!link) return null
     const href = link.getAttribute('href') || ''
-    const text = (link.textContent || '').trim()
+    const label = (link.textContent || '').trim()
     if (/^#\/progress(?:[/?#]|$)/i.test(href)) return link
-    if (link.closest('nav') && /^progress$/i.test(text)) return link
+    if (link.closest('nav') && /^progress$/i.test(label)) return link
     return null
+  }
+
+  function routeChanged() {
+    if (!/^#\/progress(?:[/?#]|$)/i.test(location.hash || '')) progressIntentUntil = 0
+    pulseRouteMount()
   }
 
   function start() {
@@ -232,8 +266,8 @@
       const outside = records.some(record => !(record.target instanceof Element) || !record.target.closest(`#${DASHBOARD_ID}`))
       if (outside) queue()
     }).observe(document.body, { childList: true, subtree: true })
-    window.addEventListener('popstate', pulseRouteMount)
-    window.addEventListener('hashchange', pulseRouteMount)
+    window.addEventListener('popstate', routeChanged)
+    window.addEventListener('hashchange', routeChanged)
     document.addEventListener('click', event => {
       if (!progressNavTrigger(event.target)) return
       progressIntentUntil = Date.now() + 5000
