@@ -1,0 +1,57 @@
+/* LetMeFly Saved Set Recovery v1 — recovery controls only; native set persistence remains authoritative. */
+.lmf-saved-set-actions{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:7px;
+  padding:7px 4px 2px;
+}
+.lmf-saved-set-action{
+  min-height:34px;
+  padding:0 12px;
+  border:1px solid #33414d;
+  border-radius:9px;
+  background:#0b141c;
+  color:#d8e0e7;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.lmf-saved-set-action:focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:2px;
+}
+.lmf-saved-set-edit{
+  border-color:#5a4a83;
+  color:#c7b8f5;
+}
+.lmf-saved-set-undo{
+  border-color:#6b3f48;
+  color:#f1b5bf;
+}
+.lmf-saved-set-restore{
+  border-color:#2e8f65;
+  color:#b9f4d5;
+}
+.lmf-saved-set-actions.is-reopened{
+  justify-content:space-between;
+  border-top:1px solid rgba(139,92,246,.18);
+}
+.lmf-saved-set-status{
+  color:#a998df;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.set-row.lmf-saved-set-reopened{
+  box-shadow:inset 3px 0 0 #8b5cf6!important;
+}
+.set-row.lmf-saved-set-editing .set-input{
+  border-color:#68549b!important;
+}
+@media(max-width:430px){
+  .lmf-saved-set-actions{padding-top:6px}
+  .lmf-saved-set-action{min-height:36px;padding:0 11px}
+}
