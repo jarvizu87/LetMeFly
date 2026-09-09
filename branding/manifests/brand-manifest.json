@@ -1,0 +1,22 @@
+{
+  "brandName": "LetMeFly",
+  "brandVersion": "official-brand-v2",
+  "approvalDate": "2026-09-09",
+  "authoritativeSource": {
+    "originalUploadFilename": "1000006062.png",
+    "detectedMimeType": "image/jpeg",
+    "dimensions": [1536, 1536],
+    "sha256": "2b0bb29e200fb48ade90336bc355ad26c21277ddfcbacdf245474e85f82d348b",
+    "transport": "branding/source/transport/letmefly-logo-master-approved-2026-09-09.jpg.gz.b64.*",
+    "driveArchiveId": "1fkRdPr9iOgrR7pCCcH6sEaxw30yt_RLG"
+  },
+  "productionGeneration": "brand-v9",
+  "runtimeAssets": {
+    "displayLogo512": {"path":"/brand/letmefly-logo-display-512.png","sha256":"56cedda2ac66e0c741579a2621bca3a2aec3ef8dc449f2dccf2da99ae6733b99","dimensions":[512,512]},
+    "appIcon192": {"path":"/icons/app-icon-192.png","sha256":"a139fca7b39f392c9674bf953366e7fccfa621733244405070a5ccfa3ffc106e","dimensions":[192,192]},
+    "appIcon512": {"path":"/icons/app-icon-512.png","sha256":"f1a07af19ba28db8ffed25db96b3093fe3ce45b6f37916f8b839a4345176169f","dimensions":[512,512]},
+    "appIcon512Maskable": {"path":"/icons/app-icon-512-maskable.png","sha256":"37c2b1e1695afe27394db706eac78c93cd7c398514c797af5a8656e08ca694af","dimensions":[512,512]},
+    "favicon32": {"path":"/icons/favicon-32.png","sha256":"44d34910aa1dd9a3e65a78c56d4610ff3c9afc71ad145372042f491587468494","dimensions":[32,32]},
+    "appleTouchIcon": {"path":"/icons/apple-touch-icon.png","sha256":"8d2631bda1c2266b7803e967769db716bfd93f9a786e6f932fd52a91db39b332","dimensions":[180,180]}
+  }
+}
