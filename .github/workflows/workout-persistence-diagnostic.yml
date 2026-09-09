@@ -11,7 +11,7 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
@@ -27,14 +27,35 @@ jobs:
       - name: Reconstruct governed production source
         run: bash ci/build-command-v2-v2-1.sh
 
+      - name: Install Workout Logging v2 and saved-set recovery
+        run: bash ci/install-workout-logging-v2.sh
+
       - name: Expose authoritative workout persistence source
         run: node ci/audit-workout-persistence-source.mjs .build-src/letmefly_app
 
-      - name: Publish persistence source audit
+      - name: Run real browser persistence regression
+        run: |
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cd ../..
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >/tmp/letmefly-persistence-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..20}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 0.25
+          done
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          CHROME_BIN="$CHROME_BIN" node ci/audit-workout-persistence-browser.mjs
+
+      - name: Publish persistence diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: workout-persistence-source-diagnostic
-          path: .build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
-          if-no-files-found: error
+          name: workout-persistence-diagnostic
+          path: |
+            .build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
+            .build-src/letmefly_app/WORKOUT_PERSISTENCE_BROWSER_AUDIT
+          if-no-files-found: warn
           retention-days: 3
