@@ -2,7 +2,7 @@
    Presentation-only mobile legibility + live bar-load helper. */
 
 /* Number inputs need an explicit shrink boundary inside the 3-column workout grid.
-   Without this, Android can keep the input's intrinsic width and clip a 3-digit load. */
+   Without this, Android can keep the input's intrinsic width and clip multi-digit loads. */
 .lmf-workout-flow-card .lmf-stepper,
 .lmf-workout-flow-card .lmf-stepper .set-input {
   min-width: 0 !important;
@@ -10,10 +10,29 @@
   box-sizing: border-box !important;
 }
 
+/* Use the full center cell for load entry. Three digits stay large/readable; the
+   runtime progressively tightens only when 4+ characters are actually entered. */
 .lmf-workout-flow-card .load-field .lmf-stepper .load-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: center;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
   font-size: clamp(20px, 5.7vw, 24px) !important;
+  line-height: 1.05;
   letter-spacing: -0.02em;
+}
+
+.lmf-workout-flow-card .load-field .lmf-stepper .load-input[data-lmf-load-size="four"] {
+  font-size: clamp(18px, 5.1vw, 21px) !important;
+  letter-spacing: -0.03em;
+}
+
+.lmf-workout-flow-card .load-field .lmf-stepper .load-input[data-lmf-load-size="long"] {
+  font-size: clamp(16px, 4.6vw, 19px) !important;
+  letter-spacing: -0.04em;
 }
 
 /* Keep the dynamic plate prescription readable when an inventory forces the
