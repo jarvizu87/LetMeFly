@@ -159,3 +159,7 @@ DOCTYPE_COUNT="$(grep -io '<!doctype[[:space:]]\+html[^>]*>' "$DIST_DIR/index.ht
 [[ "$DOCTYPE_COUNT" == "1" ]]
 
 echo "LetMeFly smart exercise names + locked Bar Loader presets/copy/mirrored sleeve geometry + canonical production shell: PASS"
+
+# Keep the workout-specific load legibility and live inline plate helper in the
+# same isolated utility lane, after the canonical Bar Loader has been installed.
+bash "$ROOT_DIR/ci/install-workout-load-display-sync-v1.sh" "$DIST_DIR"
