@@ -12,6 +12,11 @@ bash "$ROOT_DIR/ci/apply-black-crown-v2-1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-black-crown-v2-1-ui.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-crownforge-v2-2.sh" "$TARGET"
 
+# Recording-driven workout persistence fix. The native IndexedDB write already
+# succeeds; refresh the visible Session Review from the authoritative reloaded
+# workout bundle without rerendering/resetting Workout Mode position.
+bash "$ROOT_DIR/ci/apply-workout-review-live-count-v1.sh" "$TARGET"
+
 cd "$TARGET"
 npm run audit:source
 npm run audit:crownforge
@@ -29,7 +34,9 @@ test -f dist/service-worker.js
 grep -Rq 'Black Crown Revised' dist/assets
 grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
+grep -Rq 'refreshedStats' dist/assets
+grep -Rq 'Set saved locally' dist/assets
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2: PASS"
+echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + live workout Review persistence refresh: PASS"
