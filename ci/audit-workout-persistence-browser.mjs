@@ -105,10 +105,17 @@ async function bootstrapEphemeralAthlete(page) {
 }
 
 async function fillReadiness(page) {
-  const radios = page.locator('.readiness-field input[type="radio"][value="4"]')
-  const count = await radios.count()
-  if (count < 4) throw new Error(`Expected four readiness groups, found ${count}`)
-  for (let i = 0; i < 4; i += 1) await radios.nth(i).check({ force: true })
+  const selected = await page.evaluate(() => {
+    const inputs = [...document.querySelectorAll('.readiness-field input[type="radio"][value="4"]')]
+    for (const node of inputs) {
+      if (!(node instanceof HTMLInputElement)) continue
+      node.checked = true
+      node.dispatchEvent(new Event('input', { bubbles: true }))
+      node.dispatchEvent(new Event('change', { bubbles: true }))
+    }
+    return inputs.length
+  })
+  if (selected < 4) throw new Error(`Expected four readiness groups, found ${selected}`)
 }
 
 async function readReview(page) {
@@ -236,8 +243,6 @@ try {
     else fail('Review decrements after reopen', `expected 0, saw ${reviewAfterReopen.text || 'unreadable'}`)
   } else fail('Reloaded set control', 'original set ID not found after reload')
 
-  // Find a genuinely unprescribed multi-set exercise rather than assuming the
-  // first exercise qualifies. This models the user's Incline DB Press example.
   const carry = await findUnprescribedCarryCard(page)
   report.observations.carryTarget = carry
   if (!carry) {
