@@ -1,14 +1,30 @@
 #!/usr/bin/env node
+import fs from 'node:fs'
 import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const target = path.join(root, '.build-src', 'letmefly_app')
+const outDir = path.join(target, 'HOME_DASHBOARD_POLISH_AUDIT')
+fs.mkdirSync(outDir, { recursive:true })
 const requireFromTarget = createRequire(path.join(target, 'package.json'))
 const { chromium } = requireFromTarget('playwright-core')
 const chromeBin = process.env.CHROME_BIN
 if (!chromeBin) throw new Error('CHROME_BIN is required')
+
+const report = { result:'PASS', failures:[], passes:[], layout:null, error:null }
+const pass = (label, detail='') => {
+  report.passes.push({ label, detail })
+  console.log(`PASS  ${label}${detail ? ` — ${detail}` : ''}`)
+}
+const check = (condition, label, detail='') => {
+  if (condition) { pass(label, detail); return true }
+  report.result = 'FAIL'
+  report.failures.push({ label, detail })
+  console.log(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`)
+  return false
+}
 
 const browser = await chromium.launch({ headless:true, executablePath:chromeBin, args:['--no-sandbox','--disable-dev-shm-usage'] })
 const context = await browser.newContext({ viewport:{ width:412, height:915 }, isMobile:true, hasTouch:true })
@@ -38,10 +54,6 @@ async function bootstrapAthlete() {
     await dismissOptionalInstall()
     await page.waitForTimeout(160)
   }
-}
-
-function assert(condition, message) {
-  if (!condition) throw new Error(message)
 }
 
 try {
@@ -88,43 +100,60 @@ try {
       panels,
       stats,
       progressMounts:document.querySelectorAll('#lmf-progress-dashboard-v1').length,
+      bodyWidth:document.documentElement.scrollWidth,
+      viewportWidth:window.innerWidth,
     }
   })
+  report.layout = layout
 
-  assert(layout.meta && layout.focus, 'Home workout summary or Focus row missing')
-  assert(layout.focus.width >= layout.meta.width * .94, `Focus row did not span mobile summary: ${layout.focus.width} vs ${layout.meta.width}`)
-  assert(layout.focusText?.whiteSpace !== 'nowrap', `Focus text is still nowrap: ${layout.focusText?.whiteSpace}`)
-  console.log(`PASS  Focus expands full width and wraps — ${Math.round(layout.focus.width)}px / ${Math.round(layout.meta.width)}px`)
-
-  assert(layout.performance?.height >= 185, `Recent Performance remains cramped: ${layout.performance?.height}px`)
-  if (layout.performanceItem) {
-    assert(layout.performanceItem.whiteSpace === 'normal', `Recent Performance text does not wrap: ${layout.performanceItem.whiteSpace}`)
+  const metaReady = Boolean(layout.meta && layout.focus)
+  check(metaReady, 'Home workout summary and Focus row present', JSON.stringify({ meta:layout.meta, focus:layout.focus }))
+  if (metaReady) {
+    check(layout.focus.width >= layout.meta.width * .94, 'Focus spans the mobile workout summary', `${Math.round(layout.focus.width)}px / ${Math.round(layout.meta.width)}px`)
+    check(layout.focusText?.whiteSpace !== 'nowrap', 'Focus text wraps', `white-space=${layout.focusText?.whiteSpace || 'missing'}`)
   }
-  console.log(`PASS  Recent Performance has readable mobile space — ${Math.round(layout.performance?.height || 0)}px`)
+
+  check((layout.performance?.height || 0) >= 185, 'Recent Performance has readable mobile space', `${Math.round(layout.performance?.height || 0)}px`)
+  if (layout.performanceItem) check(layout.performanceItem.whiteSpace === 'normal', 'Recent Performance text wraps', `white-space=${layout.performanceItem.whiteSpace}`)
 
   const boxes = layout.panels.map((entry) => entry.box)
-  assert(boxes.every(Boolean), 'One or more Home intelligence panels are missing')
-  for (let i=1;i<boxes.length;i+=1) {
-    assert(Math.abs(boxes[i].x - boxes[0].x) < 3, `Home intelligence panel ${i} is not in the same mobile column`)
-    assert(boxes[i].y > boxes[i-1].y + boxes[i-1].height - 2, `Home intelligence panel order overlaps or is not vertical at index ${i}`)
+  const allPanels = boxes.every(Boolean)
+  check(allPanels, 'All Home intelligence panels are present', JSON.stringify(layout.panels))
+  if (allPanels) {
+    let sameColumn = true
+    let verticalOrder = true
+    for (let i=1;i<boxes.length;i+=1) {
+      if (Math.abs(boxes[i].x - boxes[0].x) >= 3) sameColumn = false
+      if (!(boxes[i].y > boxes[i-1].y + boxes[i-1].height - 2)) verticalOrder = false
+    }
+    check(sameColumn, 'Home intelligence cards share one mobile column', JSON.stringify(layout.panels))
+    check(verticalOrder, 'Home cards stack readiness → performance → milestone → coach', JSON.stringify(layout.panels))
   }
-  console.log('PASS  Home intelligence cards stack readiness → performance → milestone → coach')
 
-  assert(layout.coach?.height >= 175, `Coach Insight remains too compressed: ${layout.coach?.height}px`)
-  console.log(`PASS  Coach Insight has expanded mobile hierarchy — ${Math.round(layout.coach?.height || 0)}px`)
+  check((layout.coach?.height || 0) >= 175, 'Coach Insight has expanded mobile hierarchy', `${Math.round(layout.coach?.height || 0)}px`)
 
-  assert(layout.stats.length === 4, `Expected four athlete snapshot cells, found ${layout.stats.length}`)
-  const [s1,s2,s3,s4] = layout.stats
-  assert(Math.abs(s1.y - s2.y) < 3, 'Athlete snapshot first row is not aligned')
-  assert(Math.abs(s3.y - s4.y) < 3, 'Athlete snapshot second row is not aligned')
-  assert(s2.x > s1.x + 20, 'Athlete snapshot did not form two columns')
-  assert(s3.y > s1.y + 20, 'Athlete snapshot did not form two rows')
-  assert(Math.abs(s1.x - s3.x) < 3 && Math.abs(s2.x - s4.x) < 3, 'Athlete snapshot 2x2 columns are misaligned')
-  console.log('PASS  Athlete snapshot renders as a legible 2 × 2 mobile rail')
+  const stats = layout.stats || []
+  const fourStats = stats.length === 4
+  check(fourStats, 'Athlete snapshot has four cells', `count=${stats.length}`)
+  if (fourStats) {
+    const [s1,s2,s3,s4] = stats
+    check(Math.abs(s1.y - s2.y) < 3 && Math.abs(s3.y - s4.y) < 3, 'Athlete snapshot rows align', JSON.stringify(stats))
+    check(s2.x > s1.x + 20 && s3.y > s1.y + 20, 'Athlete snapshot forms two columns and two rows', JSON.stringify(stats))
+    check(Math.abs(s1.x - s3.x) < 3 && Math.abs(s2.x - s4.x) < 3, 'Athlete snapshot 2 × 2 columns align', JSON.stringify(stats))
+  }
 
-  assert(layout.progressMounts === 0, `Progress dashboard contaminated polished Home: ${layout.progressMounts} mount(s)`)
-  console.log('PASS  Home polish preserves Progress route isolation')
-  console.log('LetMeFly Home dashboard polish browser audit: PASS')
+  check(layout.progressMounts === 0, 'Home polish preserves Progress route isolation', `progress mounts=${layout.progressMounts}`)
+  check(layout.bodyWidth <= layout.viewportWidth + 1, 'Home polish introduces no horizontal page overflow', `${layout.bodyWidth}px / ${layout.viewportWidth}px`)
+} catch (error) {
+  report.result = 'FAIL'
+  report.error = error instanceof Error ? error.message : String(error)
+  report.failures.push({ label:'Home polish browser audit execution', detail:report.error })
+  console.log(`FAIL  Home polish browser audit execution — ${report.error}`)
 } finally {
+  await page.screenshot({ path:path.join(outDir, 'home-polish.png'), fullPage:true }).catch(() => null)
+  fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)
   await browser.close()
 }
+
+if (report.failures.length) process.exit(1)
+console.log('LetMeFly Home dashboard polish browser audit: PASS')
