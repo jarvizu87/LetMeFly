@@ -51,15 +51,48 @@ async function settlePrompts(page, attempts = 8) {
 }
 
 async function findTrain(page) {
+  const pattern = /\bTRAIN\b/i
   const candidates = [
-    page.locator('nav button,nav a,nav [role="button"]').filter({ hasText: /^\s*TRAIN\s*$/i }),
-    page.locator('button,a,[role="button"]').filter({ hasText: /^\s*TRAIN\s*$/i }),
-    page.getByText(/^\s*TRAIN\s*$/i),
+    page.locator('nav button,nav a,nav [role="button"]').filter({ hasText: pattern }),
+    page.locator('button,a,[role="button"]').filter({ hasText: pattern }),
+    page.getByText(pattern),
   ]
   for (const locator of candidates) {
     const item = await visible(locator)
     if (item) return item
   }
+  return null
+}
+
+async function findStartWorkout(page) {
+  const candidates = [
+    page.locator('[data-action="start-workout"]'),
+    page.locator('button,a,[role="button"]').filter({ hasText: /\bSTART WORKOUT\b/i }),
+    page.getByText(/\bSTART WORKOUT\b/i),
+  ]
+  for (const locator of candidates) {
+    const item = await visible(locator)
+    if (item) return item
+  }
+  return null
+}
+
+async function enterWorkoutSurface(page) {
+  const train = await findTrain(page)
+  if (train) {
+    await train.click({ timeout: 5000 })
+    return 'train-nav'
+  }
+
+  // On some mobile Home shells the primary navigation label is not exposed as a
+  // literal TRAIN control, while the canonical Home CTA is. That CTA is a valid
+  // user path into the same workout surface and should not make this scroll audit fail.
+  const startWorkout = await findStartWorkout(page)
+  if (startWorkout) {
+    await startWorkout.click({ timeout: 5000 })
+    return 'home-start-workout'
+  }
+
   return null
 }
 
@@ -75,7 +108,7 @@ async function bootstrap(page) {
     await dismissInstall(page)
     create = await visible(page.locator('button,[role="button"]').filter({ hasText: /^\s*CREATE LOCAL ATHLETE\s*$/i }))
     if (create) break
-    if (await findTrain(page)) break
+    if (await findTrain(page) || await findStartWorkout(page)) break
     await page.waitForTimeout(180)
   }
 
@@ -91,19 +124,19 @@ async function bootstrap(page) {
 
   await settlePrompts(page, 8)
 
-  let train = null
+  let entryRoute = null
   for (let i = 0; i < 16; i += 1) {
     await dismissInstall(page)
-    train = await findTrain(page)
-    if (train) break
+    entryRoute = await enterWorkoutSurface(page)
+    if (entryRoute) break
     await page.waitForTimeout(180)
   }
-  if (!train) {
-    const body = (await page.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 500)
-    throw new Error(`Train navigation missing after settled first-run state: ${body}`)
+  if (!entryRoute) {
+    const body = (await page.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 700)
+    throw new Error(`Workout entry missing after settled first-run state: ${body}`)
   }
 
-  await train.click({ timeout: 5000 })
+  report.observations.entryRoute = entryRoute
   await page.waitForSelector('#swipe-viewport .swipe-page', { timeout: 10000 })
   await page.waitForTimeout(500)
 }
