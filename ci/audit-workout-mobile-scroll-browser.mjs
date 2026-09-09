@@ -17,6 +17,24 @@ const report = { result: 'PASS', failures: [], passes: [], observations: {} }
 const pass = (label, detail = '') => { report.passes.push({ label, detail }); console.log(`PASS  ${label}${detail ? ` — ${detail}` : ''}`) }
 const fail = (label, detail = '') => { report.result = 'FAIL'; report.failures.push({ label, detail }); console.log(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`) }
 
+// This is the precise regression boundary. Element.scrollIntoView on a set tab
+// can move both the horizontal tab strip and the page itself. LetMeFly must use
+// the tab strip's own scrollTo so set selection/auto-advance cannot move scrollY.
+const workoutFlowRuntime = path.join(target, 'dist', 'ui', 'workout-flow-v1.js')
+if (!fs.existsSync(workoutFlowRuntime)) {
+  fail('Workout Flow scroll runtime present', workoutFlowRuntime)
+} else {
+  const runtimeText = fs.readFileSync(workoutFlowRuntime, 'utf8')
+  const usesIsolatedScroll = runtimeText.includes("tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })")
+  const usesPageCapableScroll = runtimeText.includes('activeTab.scrollIntoView')
+  report.observations.runtimeScrollIsolation = { usesIsolatedScroll, usesPageCapableScroll }
+  if (usesIsolatedScroll && !usesPageCapableScroll) {
+    pass('Set-tab centering is horizontally isolated', 'tabs.scrollTo present; activeTab.scrollIntoView absent')
+  } else {
+    fail('Set-tab centering is horizontally isolated', JSON.stringify({ usesIsolatedScroll, usesPageCapableScroll }))
+  }
+}
+
 async function visible(locator) {
   const count = await locator.count()
   for (let i = 0; i < count; i += 1) {
@@ -233,6 +251,55 @@ try {
   } else {
     fail('Exercise set-tab horizontal scrolling preserved', JSON.stringify(setTabs))
   }
+
+  // Exercise the actual set-selection callback while the tab strip is just below
+  // the viewport. A safe horizontal-only scroll leaves window.scrollY unchanged;
+  // scrollIntoView would pull the page toward the newly selected tab.
+  const jumpProbe = await page.evaluate(() => {
+    const tabs = [...document.querySelectorAll('.lmf-set-tabs')].find((node) => node instanceof HTMLElement && node.querySelectorAll('.lmf-set-tab').length > 1)
+    if (!(tabs instanceof HTMLElement)) return { present: false }
+    const buttons = [...tabs.querySelectorAll('.lmf-set-tab')]
+    const targetButton = buttons.at(-1)
+    if (!(targetButton instanceof HTMLElement)) return { present: false }
+
+    tabs.style.width = '96px'
+    tabs.style.maxWidth = '96px'
+    tabs.style.overflowX = 'auto'
+    const rect = tabs.getBoundingClientRect()
+    const documentTop = rect.top + window.scrollY
+    const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+    const targetY = Math.min(maxY, Math.max(0, Math.round(documentTop - window.innerHeight - 16)))
+    window.scrollTo(0, targetY)
+    return {
+      present: true,
+      targetY,
+      clientWidth: tabs.clientWidth,
+      scrollWidth: tabs.scrollWidth,
+      targetIndex: buttons.length - 1,
+    }
+  })
+  await page.waitForTimeout(120)
+
+  let jumpResult = { ...jumpProbe, beforeY: null, afterY: null, deltaY: null }
+  if (jumpProbe.present) {
+    const beforeY = await page.evaluate(() => window.scrollY)
+    await page.evaluate(() => {
+      const tabs = [...document.querySelectorAll('.lmf-set-tabs')].find((node) => node instanceof HTMLElement && node.querySelectorAll('.lmf-set-tab').length > 1)
+      const button = tabs?.querySelectorAll('.lmf-set-tab')?.item(tabs.querySelectorAll('.lmf-set-tab').length - 1)
+      if (button instanceof HTMLElement) button.click()
+    })
+    await page.waitForTimeout(500)
+    const afterY = await page.evaluate(() => window.scrollY)
+    jumpResult = { ...jumpProbe, beforeY, afterY, deltaY: afterY - beforeY }
+    if (Math.abs(afterY - beforeY) <= 2) {
+      pass('Set selection does not move page vertically', `scrollY ${Math.round(beforeY)} → ${Math.round(afterY)}`)
+    } else {
+      fail('Set selection does not move page vertically', `scrollY ${Math.round(beforeY)} → ${Math.round(afterY)}`)
+    }
+  } else {
+    pass('Set selection does not move page vertically', 'No multi-set tab strip in preview; runtime isolation contract verified')
+  }
+  report.observations.setSelectionScrollJump = jumpResult
 } catch (error) {
   fail('Mobile workout scroll audit execution', error instanceof Error ? error.message : String(error))
 } finally {

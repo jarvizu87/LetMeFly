@@ -145,6 +145,7 @@ jobs:
 
           CHROME_BIN="$CHROME_BIN" node ci/audit-home-progress-route-isolation.mjs
           CHROME_BIN="$CHROME_BIN" node ci/audit-home-dashboard-polish.mjs
+          CHROME_BIN="$CHROME_BIN" node ci/audit-workout-mobile-scroll-browser.mjs
 
       - name: Audit final Exercise Intelligence production dist
         run: |
@@ -176,7 +177,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: letmefly-mobile-browser-audit
-          path: .build-src/letmefly_app/BROWSER_SMOKE_AUDIT
+          path: |
+            .build-src/letmefly_app/BROWSER_SMOKE_AUDIT
+            .build-src/letmefly_app/WORKOUT_MOBILE_SCROLL_AUDIT
           if-no-files-found: warn
           retention-days: 14
 
