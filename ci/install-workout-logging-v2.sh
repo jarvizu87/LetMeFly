@@ -55,3 +55,7 @@ grep -Fq '/ui/workout-logging-v2.js?v=2' "$INDEX"
 node --check "$DIST/ui/workout-logging-v2.js"
 
 echo "LetMeFly Workout Logging v2 auto-advance + governed load carry + compact mobile logging: PASS"
+
+# Saved-set recovery is an additive ergonomics layer. It never bypasses the
+# native set toggle or changes program prescriptions.
+bash "$ROOT_DIR/ci/install-saved-set-recovery-v1.sh" "$DIST"
