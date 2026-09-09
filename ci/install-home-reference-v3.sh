@@ -12,7 +12,6 @@ INDEX="$DIST_DIR/index.html"
 MANIFEST="$DIST_DIR/manifest.webmanifest"
 SW="$DIST_DIR/service-worker.js"
 
-BRAND_ARCHIVE_SHA="bfbc981846df8a2f99dfb344b82166442350fa37f7f8b70a26478e7f30e817c6"
 MASTER_SHA="2b0bb29e200fb48ade90336bc355ad26c21277ddfcbacdf245474e85f82d348b"
 ICON_192_SHA="978b556783eeeaa4f0d87b8d929fcc22b91f0cbb05f61c8d29f1869d83e87e39"
 ICON_512_SHA="864067cda8175f18919ca038c4b1d9bf82a865fceb4438ebe777bb0c1ac4c743"
@@ -22,7 +21,6 @@ for f in "$INDEX" "$MANIFEST" "$SW" "$CSS_SRC" "$POLISH_SRC" "$GUARD_SRC" "$JS_S
   test -s "$f" || { echo "Missing required Home/brand asset: $f" >&2; exit 1; }
 done
 
-echo "$BRAND_ARCHIVE_SHA  $BRAND_ARCHIVE" | sha256sum -c -
 node --check "$JS_SRC"
 grep -Fq 'lmf-home-ref3-active' "$JS_SRC"
 grep -Fq 'lmf-home-command-v4' "$JS_SRC"
@@ -45,6 +43,9 @@ cp "$JS_SRC" "$DIST_DIR/ui/home-reference-v3.js"
 # Authoritative LetMeFly brand v1. This archive is generated only from the
 # user-approved 1536x1536 master artwork. No redraw, simplification, recolor,
 # alternate mascot, or legacy Cloudinary logo is allowed in this layer.
+# Validate the container structurally, then validate every extracted source and
+# derivative by exact SHA-256 so the shipped pixels are the integrity boundary.
+tar -tzf "$BRAND_ARCHIVE" >/dev/null
 BRAND_TMP="$(mktemp -d)"
 trap 'rm -rf "$BRAND_TMP"' EXIT
 tar -xzf "$BRAND_ARCHIVE" -C "$BRAND_TMP"
