@@ -1,238 +1,157 @@
-/* LetMeFly Home Reference v3
-   Approved mockup is the layout contract. Presentation only: no program/data writes. */
+/* LetMeFly Home Reference v4 structural rebuild.
+   Approved mockup is the layout contract. Presentation only: no program/data writes.
+   Legacy installer markers retained: .lmf-approved-command-copy .lmf-home-stat-strip */
 
 body.lmf-home-ref3-active{
   --hm-bg:#05080b;
   --hm-panel:#0a1116;
-  --hm-panel2:#0d151b;
-  --hm-line:#26323a;
-  --hm-muted:#89949c;
+  --hm-panel-2:#0d151b;
+  --hm-panel-3:#101920;
+  --hm-line:#26333b;
+  --hm-line-soft:#19242a;
+  --hm-muted:#8b969d;
   --hm-text:#f3f5f6;
-  --hm-red:#ff2339;
-  --hm-red2:#d9162b;
+  --hm-red:#ff263e;
+  --hm-red-2:#d91830;
+  --hm-green:#70dfbf;
+  --hm-gold:#d8b56a;
+  background:#05080b;
 }
 
-/* HOME HEADER — compact brand lockup + profile affordances like the approved target. */
-body.lmf-home-ref3-active .topbar{
-  min-height:76px!important;
-  padding:10px 16px!important;
-  background:linear-gradient(180deg,#06090d,#070b0f)!important;
-  border-bottom:0!important;
-  box-shadow:none!important;
-}
+/* Home owns its composition. The legacy dashboard remains mounted as a data/event source only. */
+body.lmf-home-ref3-active .lmf-home-source-v4{display:none!important}
+body.lmf-home-ref3-active .focus-strip{display:none!important}
+body.lmf-home-ref3-active .lmf-home-reference-v3{width:min(100%,1040px)!important;margin:0 auto!important;padding:0 18px 104px!important}
+
+/* Home-only topbar lockup. */
+body.lmf-home-ref3-active .topbar{min-height:72px!important;padding:9px 18px!important;background:linear-gradient(180deg,#06090d,#070b0f)!important;border-bottom:1px solid rgba(255,255,255,.035)!important;box-shadow:none!important}
 body.lmf-home-ref3-active .topbar>*:not(.lmf-home-topbar-shell){display:none!important}
-.lmf-home-topbar-shell{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-}
-.lmf-home-brand-lockup{display:flex;align-items:center;gap:9px;min-width:0}
-.lmf-home-brand-lockup>img{width:48px;height:48px;object-fit:contain;display:block;filter:drop-shadow(0 4px 10px rgba(0,0,0,.45))}
-.lmf-home-brand-lockup>div{display:grid;gap:1px;min-width:0}
-.lmf-home-brand-lockup strong{font-family:var(--condensed,system-ui),system-ui,sans-serif;font-style:italic;font-weight:900;font-size:25px;line-height:.95;letter-spacing:-.02em;color:#f5f6f7;white-space:nowrap}
+.lmf-home-topbar-shell{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.lmf-home-brand-lockup{display:flex;align-items:center;gap:10px;min-width:0}
+.lmf-home-brand-lockup>img{width:48px;height:48px;object-fit:contain;display:block;filter:drop-shadow(0 5px 12px rgba(0,0,0,.42))}
+.lmf-home-brand-lockup>div{display:grid;gap:2px;min-width:0}
+.lmf-home-brand-lockup strong{font-family:var(--condensed,system-ui),system-ui,sans-serif;font-style:italic;font-weight:900;font-size:25px;line-height:.95;letter-spacing:-.025em;color:#f5f6f7;white-space:nowrap}
 .lmf-home-brand-lockup strong span{color:var(--hm-red)}
 .lmf-home-brand-lockup small{font-size:5.5px;letter-spacing:.27em;font-weight:800;color:#87929a;white-space:nowrap}
-.lmf-home-header-actions{display:flex;align-items:center;gap:10px;flex:0 0 auto}
-.lmf-home-bell{width:32px;height:32px;display:grid;place-items:center;color:#aab3b9}
-.lmf-home-bell svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.lmf-home-avatar{width:39px;height:39px;border-radius:50%;display:grid;place-items:center;border:1px solid #2a343b;background:#11171c;color:#dce1e4;font:700 12px/1 system-ui,sans-serif}
 
-/* The Home route uses the narrow, intentional composition from the chosen phone mockup. */
-body.lmf-home-ref3-active .lmf-home-reference-v3{
-  width:min(100%,620px)!important;
-  margin:0 auto!important;
-  padding:0 12px 86px!important;
-}
-.lmf-home-greeting{padding:12px 7px 11px;margin:0}
-.lmf-home-greeting h1{margin:0;color:var(--hm-text);font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:28px;line-height:1;font-weight:850;letter-spacing:.01em}
-.lmf-home-greeting p{margin:5px 0 0;color:#aeb6bb;font-size:10px;line-height:1.3;letter-spacing:.01em}
+.lmf-home-command-v4{display:grid;gap:14px;padding-top:10px;color:var(--hm-text)}
 
-/* MAIN COMMAND CARD */
-body.lmf-home-ref3-active .command-hero.lmf-reference-command-card{
-  min-height:376px!important;
-  margin:0!important;
-  border:1px solid #334049!important;
-  border-radius:12px!important;
-  overflow:hidden!important;
-  background:#070b0f!important;
-  box-shadow:0 18px 40px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.025)!important;
-}
-body.lmf-home-ref3-active .command-hero.lmf-reference-command-card::before{
-  opacity:.9!important;
-  filter:grayscale(.08) saturate(.78) contrast(1.08)!important;
-  background:
-    linear-gradient(180deg,rgba(4,7,10,.1),rgba(4,7,10,.12) 28%,rgba(4,7,10,.75) 61%,#070b0f 88%),
-    linear-gradient(90deg,rgba(2,5,8,.35),rgba(2,5,8,.02) 64%),
-    var(--v2-mountain) 50% 2%/cover no-repeat!important;
-}
-body.lmf-home-ref3-active .command-hero.lmf-reference-command-card::after{
-  height:40%!important;
-  background:linear-gradient(180deg,transparent,rgba(255,35,57,.035))!important;
-}
-body.lmf-home-ref3-active .command-hero .hero-content{
-  position:relative!important;
-  z-index:2!important;
-  max-width:none!important;
-  padding:21px 16px 101px!important;
-  background:linear-gradient(180deg,rgba(4,7,10,.08),rgba(4,7,10,.12) 34%,rgba(4,7,10,.88) 69%,#070b0f 88%)!important;
-}
-.lmf-ref3-source-hidden{display:none!important}
-.lmf-approved-command-copy{display:block;max-width:100%}
-.lmf-command-kicker{font:800 8px/1 system-ui,sans-serif;letter-spacing:.08em;color:var(--hm-red);margin-bottom:7px}
-.lmf-approved-command-copy h2{margin:0;color:#fff;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:30px;line-height:.94;font-weight:900;letter-spacing:.015em;text-shadow:0 2px 16px rgba(0,0,0,.8)}
-.lmf-command-tagline{margin-top:4px;color:#a3abb1;font-size:7px;font-weight:700;letter-spacing:.19em}
-.lmf-command-position{margin-top:15px;color:#f4f5f6;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:16px;font-weight:750;letter-spacing:.02em}
-.lmf-approved-command-copy h3{margin:3px 0 0;color:#fff;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:23px;line-height:1.04;font-weight:850;letter-spacing:.01em;text-shadow:0 2px 14px rgba(0,0,0,.85)}
-.lmf-command-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:17px;padding:10px 0 9px;border-top:1px solid rgba(121,137,147,.17);border-bottom:1px solid rgba(121,137,147,.17)}
-.lmf-command-meta>span{display:flex;align-items:center;gap:6px;min-width:0;padding:0 8px;border-right:1px solid rgba(121,137,147,.13)}
-.lmf-command-meta>span:first-child{padding-left:0}
-.lmf-command-meta>span:last-child{border-right:0;padding-right:0}
-.lmf-command-meta b{font:700 15px/1 system-ui;color:#c2c9ce;flex:0 0 auto}
-.lmf-command-meta small{min-width:0;color:#b1b9be;font-size:6.5px;line-height:1.2;letter-spacing:.035em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.lmf-home-ref3-active .command-hero .hero-actions{position:absolute!important;left:16px!important;right:16px!important;bottom:53px!important;margin:0!important;z-index:4!important}
-body.lmf-home-ref3-active .command-hero .hero-start{
-  width:100%!important;
-  min-height:50px!important;
-  border-radius:7px!important;
-  background:linear-gradient(180deg,#ff263e,#e9162e)!important;
-  border:1px solid #ff4054!important;
-  box-shadow:0 12px 30px rgba(255,20,46,.22)!important;
-  color:#fff!important;
-  font-size:9px!important;
-  font-weight:900!important;
-  letter-spacing:.15em!important;
-}
-body.lmf-home-ref3-active .command-hero .hero-progress{
-  left:16px!important;right:16px!important;bottom:12px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;
-}
-body.lmf-home-ref3-active .command-hero .hero-progress>div:first-child{margin-bottom:5px!important}
-body.lmf-home-ref3-active .command-hero .hero-progress span{font-size:6px!important;letter-spacing:.1em!important;color:#9aa4aa!important}
-body.lmf-home-ref3-active .command-hero .hero-progress strong{font-size:7px!important;color:#d5dade!important}
-body.lmf-home-ref3-active .command-hero .progress-bar{height:7px!important;background:#1a242b!important;border-radius:2px!important;overflow:hidden!important}
-body.lmf-home-ref3-active .command-hero .progress-bar span{background:linear-gradient(90deg,#ff2339,#f14152)!important;border-radius:2px!important}
+/* Greeting is intentionally open — not another card. */
+.lmf-home-v4-greeting{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:12px 4px 4px}
+.lmf-home-v4-eyebrow{margin:0 0 7px;color:var(--hm-red);font:850 8px/1 system-ui,sans-serif;letter-spacing:.16em}
+.lmf-home-v4-greeting h1{margin:0;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:clamp(30px,5vw,48px);line-height:.94;font-weight:900;letter-spacing:-.015em;color:#fff}
+.lmf-home-v4-greeting>div:first-child>p:last-child{margin:8px 0 0;color:#a2adb3;font-size:11px;line-height:1.4}
+.lmf-home-v4-identity{flex:0 0 auto;padding-bottom:2px}
+.lmf-home-v4-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;border:1px solid #37444c;background:#11181d;color:#e1e5e7;font:800 12px/1 system-ui,sans-serif;box-shadow:0 8px 22px rgba(0,0,0,.24)}
 
-/* The approved design does not use the three legacy section tiles below the hero. */
-body.lmf-home-ref3-active .focus-strip{display:none!important}
+/* Primary mission card — one dominant surface instead of three tiny workout tiles. */
+.lmf-home-v4-command{position:relative;min-height:360px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(220px,.55fr);border:1px solid #34424b;border-radius:15px;background:radial-gradient(circle at 83% 20%,rgba(255,38,62,.14),transparent 28%),linear-gradient(118deg,rgba(7,11,15,.97) 0%,rgba(8,13,17,.95) 53%,rgba(13,20,25,.96) 100%);box-shadow:0 24px 58px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.025)}
+.lmf-home-v4-command::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(125deg,transparent 0 55%,rgba(255,255,255,.025) 55.2% 55.6%,transparent 55.8%)}
+.lmf-home-v4-command-main{position:relative;z-index:2;padding:28px 30px 26px;display:flex;flex-direction:column;align-items:flex-start}
+.lmf-home-v4-kicker{margin:0 0 8px;color:var(--hm-red);font:900 8px/1 system-ui,sans-serif;letter-spacing:.15em}
+.lmf-home-v4-program-row{display:flex;align-items:center;gap:11px;min-width:0}
+.lmf-home-v4-program-row h2{margin:0;color:#fff;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:clamp(34px,6vw,58px);line-height:.9;font-weight:950;letter-spacing:.015em;text-shadow:0 4px 18px rgba(0,0,0,.5)}
+.lmf-home-v4-live{display:inline-flex;align-items:center;gap:5px;padding:5px 7px 4px;border:1px solid rgba(255,38,62,.4);border-radius:999px;background:rgba(255,38,62,.08);color:#ff6575;font:850 7px/1 system-ui,sans-serif;letter-spacing:.1em}
+.lmf-home-v4-live::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--hm-red);box-shadow:0 0 10px rgba(255,38,62,.7)}
+.lmf-home-v4-tagline{margin:7px 0 0;color:#99a4aa;font-size:7px;font-weight:800;letter-spacing:.2em}
+.lmf-home-v4-position{margin:24px 0 0;color:#c7cdd1;font:750 12px/1.15 system-ui,sans-serif;letter-spacing:.045em;text-transform:uppercase}
+.lmf-home-v4-command-main h3{margin:6px 0 0;max-width:720px;color:#fff;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:clamp(25px,4.3vw,42px);line-height:1;font-weight:900;letter-spacing:.005em}
+.lmf-home-v4-meta{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:25px;border-top:1px solid rgba(155,169,177,.14);border-bottom:1px solid rgba(155,169,177,.14)}
+.lmf-home-v4-meta>div{min-width:0;padding:11px 16px 10px;border-right:1px solid rgba(155,169,177,.11);display:grid;gap:4px}
+.lmf-home-v4-meta>div:first-child{padding-left:0}
+.lmf-home-v4-meta>div:last-child{border-right:0}
+.lmf-home-v4-meta span{color:#707d84;font:800 6px/1 system-ui,sans-serif;letter-spacing:.12em}
+.lmf-home-v4-meta strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#dfe4e6;font:750 9px/1.15 system-ui,sans-serif}
+.lmf-home-v4-start{margin-top:auto;min-width:230px;min-height:50px;padding:0 20px;border:1px solid #ff465a;border-radius:8px;background:linear-gradient(180deg,#ff2c44,#e41730);box-shadow:0 13px 30px rgba(255,24,49,.2);color:#fff;font:900 9px/1 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.lmf-home-v4-start:hover{filter:brightness(1.05);box-shadow:0 15px 34px rgba(255,24,49,.27);transform:translateY(-1px)}
+.lmf-home-v4-start:active{transform:translateY(0)}
+.lmf-home-v4-start:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.lmf-home-v4-start span{font-size:17px;line-height:1}
+.lmf-home-v4-command-mark{position:relative;z-index:1;display:grid;place-items:center;align-content:center;gap:12px;min-height:100%;border-left:1px solid rgba(255,255,255,.045);background:radial-gradient(circle at 50% 42%,rgba(255,38,62,.12),transparent 46%),linear-gradient(180deg,rgba(17,25,31,.6),rgba(7,11,15,.35))}
+.lmf-home-v4-crown{font-family:Georgia,serif;font-size:90px;line-height:.9;color:rgba(255,255,255,.09);text-shadow:0 0 38px rgba(255,38,62,.1)}
+.lmf-home-v4-command-mark span{color:#636f76;font:850 7px/1 system-ui,sans-serif;letter-spacing:.22em;writing-mode:vertical-rl;transform:rotate(180deg);position:absolute;right:20px;bottom:22px}
 
-/* 2 x 2 command card grid */
-body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:8px!important;
-  margin-top:10px!important;
-}
-body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.card,
-body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.status-card,
-body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.milestone-card,
-body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.coach-focus-card{
-  min-height:145px!important;
-  max-height:none!important;
-  padding:12px!important;
-  border:1px solid #29363e!important;
-  border-radius:9px!important;
-  background:linear-gradient(145deg,#0c1419,#080e12)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)!important;
-  overflow:hidden!important;
-  cursor:pointer;
-}
-body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>*::after{content:'›'!important;top:10px!important;right:11px!important;font-size:18px!important;color:#a2abb1!important}
-body.lmf-home-ref3-active .dashboard-grid .card-head{margin:0 0 6px!important;padding-right:18px!important}
-body.lmf-home-ref3-active .dashboard-grid .card-head .page-kicker{font-size:6.5px!important;letter-spacing:.08em!important;color:#d3d8dc!important}
-body.lmf-home-ref3-active .dashboard-grid .card-head h2,
-body.lmf-home-ref3-active .dashboard-grid>.status-card h2,
-body.lmf-home-ref3-active .dashboard-grid>.milestone-card h2,
-body.lmf-home-ref3-active .dashboard-grid>.coach-focus-card h2{font-size:13px!important;line-height:1.05!important;margin:2px 0 0!important;color:#f2f4f5!important}
+/* Secondary intelligence: four useful modules, not a wall of equal boxes. */
+.lmf-home-v4-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:'readiness performance' 'milestone coach';gap:12px}
+.lmf-home-v4-panel{position:relative;min-width:0;min-height:164px;padding:18px 18px 16px;border:1px solid var(--hm-line);border-radius:12px;background:linear-gradient(145deg,#0d151a,#080e12);box-shadow:inset 0 1px 0 rgba(255,255,255,.018);overflow:hidden;cursor:pointer;transition:border-color .16s ease,transform .16s ease,background .16s ease}
+.lmf-home-v4-panel:hover{transform:translateY(-1px);border-color:#40505a;background:linear-gradient(145deg,#101a20,#091015)}
+.lmf-home-v4-panel:focus-visible{outline:2px solid rgba(255,255,255,.85);outline-offset:2px}
+.lmf-home-v4-readiness{grid-area:readiness}.lmf-home-v4-performance{grid-area:performance}.lmf-home-v4-milestone{grid-area:milestone}.lmf-home-v4-coach{grid-area:coach}
+.lmf-home-v4-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.lmf-home-v4-panel-head span{color:#dbe0e3;font:900 8px/1 system-ui,sans-serif;letter-spacing:.1em}
+.lmf-home-v4-panel-head b{color:#69767d;font:750 7px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.lmf-home-v4-readiness-body{display:flex;align-items:center;gap:16px;padding-right:8px}
+.lmf-home-v4-score{width:72px;height:72px;flex:0 0 72px;border-radius:50%;display:flex;align-items:baseline;justify-content:center;place-content:center;border:5px solid var(--hm-green);background:#071116;box-shadow:inset 0 0 0 2px #1b3432,0 0 24px rgba(112,223,191,.08)}
+.lmf-home-v4-score strong{color:#fff;font:900 21px/1 system-ui,sans-serif}
+.lmf-home-v4-score small{color:#6f7c82;font:750 7px/1 system-ui,sans-serif;margin-left:2px}
+.lmf-home-v4-readiness h3,.lmf-home-v4-milestone h3{margin:0;color:#f4f6f7;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:18px;line-height:1.05;font-weight:850}
+.lmf-home-v4-readiness p,.lmf-home-v4-milestone p{margin:6px 0 0;color:#8f9aa0;font-size:9px;line-height:1.45}
+.lmf-home-v4-panel-link{position:absolute;left:18px;right:18px;bottom:13px;display:flex;align-items:center;justify-content:space-between;color:#839097;font:800 7px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.lmf-home-v4-panel-link span{font-size:14px;color:#b9c1c5}
+.lmf-home-v4-spark{height:45px;display:flex;align-items:flex-end;gap:5px;margin:1px 0 6px}
+.lmf-home-v4-spark i{display:block;width:9px;border-radius:2px 2px 0 0;background:linear-gradient(#ff4658,#d91931)}
+.lmf-home-v4-spark i:nth-child(1){height:18px}.lmf-home-v4-spark i:nth-child(2){height:28px}.lmf-home-v4-spark i:nth-child(3){height:22px}.lmf-home-v4-spark i:nth-child(4){height:39px}.lmf-home-v4-spark i:nth-child(5){height:33px}
+.lmf-home-v4-performance ul{list-style:none;margin:0 0 21px;padding:0;display:grid;gap:4px}
+.lmf-home-v4-performance li{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#a7b0b5;font-size:8px;line-height:1.3}
+.lmf-home-v4-milestone-icon{width:36px;height:36px;margin:0 0 10px;border:1px solid #64453a;border-radius:9px;background:#191317;color:var(--hm-gold);display:grid;place-items:center;font-size:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
+.lmf-home-v4-milestone p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;padding-right:8px;margin-bottom:24px}
+.lmf-home-v4-coach::before{content:'“';position:absolute;right:18px;top:36px;color:rgba(255,38,62,.18);font-family:Georgia,serif;font-size:64px;line-height:1}
+.lmf-home-v4-coach blockquote{position:relative;z-index:1;margin:18px 10px 28px 0;padding:0;color:#d5dadd;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:17px;line-height:1.23;font-weight:700;font-style:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 
-/* Readiness becomes one clear score, while its original logged components remain in the DOM. */
-body.lmf-home-ref3-active .readiness-card .readiness-rings{display:none!important}
-.lmf-readiness-summary{display:flex;align-items:center;gap:11px;margin-top:9px}
-.lmf-readiness-score{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;flex:0 0 62px;border:5px solid #75e2c5;background:#081116;box-shadow:inset 0 0 0 2px #1b3333,0 0 18px rgba(84,231,190,.08)}
-.lmf-readiness-score strong{font:800 18px/1 system-ui;color:#fff}
-.lmf-readiness-summary>div:last-child{display:grid;gap:5px;min-width:0}
-.lmf-readiness-summary b{font-size:12px;line-height:1.05;color:#f4f6f7}
-.lmf-readiness-summary small{font-size:7px!important;line-height:1.35!important;color:#8d989f!important}
-body.lmf-home-ref3-active .readiness-card>p,
-body.lmf-home-ref3-active .readiness-card>.muted{display:none!important}
+/* Athlete snapshot is a restrained rail rather than four more cards. */
+.lmf-home-v4-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid #222d33;border-bottom:1px solid #222d33;background:rgba(8,13,17,.45)}
+.lmf-home-v4-stats>div{min-width:0;min-height:76px;padding:14px 16px;display:grid;align-content:center;gap:7px;border-right:1px solid #1b252b}
+.lmf-home-v4-stats>div:last-child{border-right:0}
+.lmf-home-v4-stats span{color:#69767d;font:800 6px/1 system-ui,sans-serif;letter-spacing:.12em}
+.lmf-home-v4-stats strong{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f0f3f4;font-family:var(--condensed,system-ui),system-ui,sans-serif;font-size:20px;line-height:1;font-weight:900}
 
-/* Performance signal mirrors the bar icon in the reference without inventing a percentage. */
-.lmf-performance-mark{height:37px;display:flex;align-items:flex-end;gap:4px;margin:7px 0 4px}
-.lmf-performance-mark i{display:block;width:7px;border-radius:1px 1px 0 0;background:linear-gradient(#ff3549,#e31329)}
-.lmf-performance-mark i:nth-child(1){height:16px}.lmf-performance-mark i:nth-child(2){height:24px}.lmf-performance-mark i:nth-child(3){height:33px}
-body.lmf-home-ref3-active .performance-list{margin-top:3px!important}
-body.lmf-home-ref3-active .performance-list>div{padding:4px 0!important;border-color:#1d292f!important}
-body.lmf-home-ref3-active .performance-list span{font-size:6px!important;color:#828d94!important}
-body.lmf-home-ref3-active .performance-list strong{font-size:7px!important;color:#e4e8ea!important;max-width:68%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.lmf-home-ref3-active .performance-list>div:nth-child(n+3){display:none!important}
+body.lmf-home-ref3-active .navbar{background:rgba(5,8,11,.98)!important;border-top:1px solid #202a30!important;box-shadow:0 -12px 30px rgba(0,0,0,.22)!important}
 
-body.lmf-home-ref3-active .milestone-card{background:linear-gradient(145deg,#0c1419,#080e12)!important;border-color:#29363e!important}
-body.lmf-home-ref3-active .milestone-icon{width:34px!important;height:34px!important;margin-bottom:6px!important;border-color:#694338!important;background:#191216!important;color:#f1cc92!important}
-body.lmf-home-ref3-active .milestone-card p,
-body.lmf-home-ref3-active .coach-focus-card p{font-size:7px!important;line-height:1.35!important;color:#9aa4aa!important;margin:5px 0!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;overflow:hidden!important}
-body.lmf-home-ref3-active .milestone-card .progress-bar{height:5px!important;margin-top:10px!important}
-body.lmf-home-ref3-active .coach-focus-card .callout{display:none!important}
-body.lmf-home-ref3-active .coach-focus-card .btn{display:none!important}
-
-/* Bottom snapshot row from the approved Home screen. Values are read from the private vault. */
-.lmf-home-stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px;border:1px solid #28343c;border-radius:9px;background:linear-gradient(180deg,#0b1217,#080e12);overflow:hidden}
-.lmf-home-stat-strip>div{min-width:0;min-height:82px;padding:10px 4px 8px;display:grid;place-items:center;align-content:center;text-align:center;border-right:1px solid #1c272d}
-.lmf-home-stat-strip>div:last-child{border-right:0}
-.lmf-home-stat-strip span{font-size:15px;line-height:1;color:#b9c2c7;margin-bottom:5px}
-.lmf-home-stat-strip strong{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f4f6f7;font:800 17px/1 system-ui,sans-serif}
-.lmf-home-stat-strip small{margin-top:5px;color:#7f8a91;font-size:6px;line-height:1.2}
-
-/* Refine navigation to the icon-first proportions in the target. */
-body.lmf-home-ref3-active .navbar{min-height:66px!important;padding:0 8px max(4px,env(safe-area-inset-bottom))!important;background:rgba(5,8,11,.98)!important;border-top:1px solid #202a30!important;box-shadow:0 -12px 30px rgba(0,0,0,.25)!important}
-body.lmf-home-ref3-active .navbar .nav-item{min-height:62px!important;gap:4px!important;padding:8px 2px 5px!important;color:#7e898f!important;font-size:6.5px!important;font-weight:700!important;letter-spacing:.02em!important;border-top:2px solid transparent!important}
-body.lmf-home-ref3-active .navbar .nav-item span{font-size:19px!important;line-height:1!important}
-body.lmf-home-ref3-active .navbar .nav-item.active{color:var(--hm-red)!important;background:linear-gradient(180deg,rgba(255,35,57,.08),transparent 70%)!important;border-top-color:var(--hm-red)!important}
-
-@media(max-width:520px){
-  body.lmf-home-ref3-active .lmf-home-reference-v3{padding-left:11px!important;padding-right:11px!important}
-  .lmf-home-greeting{padding:11px 5px 10px}
-  .lmf-home-greeting h1{font-size:26px}
-  body.lmf-home-ref3-active .command-hero.lmf-reference-command-card{min-height:365px!important}
-  body.lmf-home-ref3-active .command-hero .hero-content{padding:18px 14px 99px!important}
-  .lmf-approved-command-copy h2{font-size:28px}
-  .lmf-approved-command-copy h3{font-size:21px}
-  .lmf-command-position{font-size:14px;margin-top:14px}
-  .lmf-command-meta{margin-top:14px;padding:9px 0 8px}
-  .lmf-command-meta>span{padding:0 5px;gap:4px}
-  .lmf-command-meta small{font-size:5.8px}
-  body.lmf-home-ref3-active .command-hero .hero-actions{left:14px!important;right:14px!important}
-  body.lmf-home-ref3-active .command-hero .hero-progress{left:14px!important;right:14px!important}
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.card,
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.status-card,
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.milestone-card,
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.coach-focus-card{min-height:138px!important;padding:10px!important}
-  .lmf-readiness-score{width:56px;height:56px;flex-basis:56px;border-width:4px}
-  .lmf-readiness-score strong{font-size:17px}
-  .lmf-readiness-summary{gap:8px}
-  .lmf-readiness-summary b{font-size:10px}
-  .lmf-home-stat-strip>div{min-height:76px;padding:8px 3px 7px}
-  .lmf-home-stat-strip strong{font-size:15px}
+@media (max-width:700px){
+  body.lmf-home-ref3-active .lmf-home-reference-v3{padding-left:12px!important;padding-right:12px!important}
+  .lmf-home-command-v4{gap:11px;padding-top:5px}
+  .lmf-home-v4-greeting{padding:9px 4px 2px;align-items:center}
+  .lmf-home-v4-greeting h1{font-size:31px}
+  .lmf-home-v4-greeting>div:first-child>p:last-child{font-size:9px;margin-top:6px}
+  .lmf-home-v4-avatar{width:37px;height:37px}
+  .lmf-home-v4-command{min-height:0;grid-template-columns:1fr}
+  .lmf-home-v4-command-main{padding:23px 18px 20px}
+  .lmf-home-v4-command-mark{display:none}
+  .lmf-home-v4-program-row{align-items:flex-start;justify-content:space-between;width:100%;gap:8px}
+  .lmf-home-v4-program-row h2{font-size:36px}
+  .lmf-home-v4-live{margin-top:2px}
+  .lmf-home-v4-position{margin-top:20px;font-size:10px}
+  .lmf-home-v4-command-main h3{font-size:27px;line-height:1.02}
+  .lmf-home-v4-meta{margin-top:20px}
+  .lmf-home-v4-meta>div{padding:10px 9px}.lmf-home-v4-meta>div:first-child{padding-left:0}
+  .lmf-home-v4-meta strong{font-size:7px}.lmf-home-v4-meta span{font-size:5.5px}
+  .lmf-home-v4-start{width:100%;min-width:0;min-height:52px;margin-top:21px}
+  .lmf-home-v4-grid{grid-template-columns:1fr;grid-template-areas:'readiness' 'performance' 'milestone' 'coach';gap:9px}
+  .lmf-home-v4-panel{min-height:148px;padding:16px}
+  .lmf-home-v4-panel-link{left:16px;right:16px}
+  .lmf-home-v4-performance li{font-size:8.5px;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35}
+  .lmf-home-v4-milestone p{-webkit-line-clamp:3}
+  .lmf-home-v4-coach blockquote{-webkit-line-clamp:5;margin-top:14px}
+  .lmf-home-v4-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lmf-home-v4-stats>div{min-height:68px;padding:12px;border-bottom:1px solid #1b252b}
+  .lmf-home-v4-stats>div:nth-child(2n){border-right:0}.lmf-home-v4-stats>div:nth-last-child(-n+2){border-bottom:0}
+  .lmf-home-v4-stats strong{font-size:18px}
 }
 
-@media(max-width:380px){
-  .lmf-home-brand-lockup>img{width:43px;height:43px}
-  .lmf-home-brand-lockup strong{font-size:22px}
-  .lmf-home-greeting h1{font-size:24px}
-  body.lmf-home-ref3-active .command-hero.lmf-reference-command-card{min-height:356px!important}
-  .lmf-approved-command-copy h2{font-size:26px}
-  .lmf-approved-command-copy h3{font-size:19px}
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid{gap:6px!important}
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.card,
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.status-card,
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.milestone-card,
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid>.coach-focus-card{min-height:134px!important;padding:9px!important}
-  .lmf-readiness-score{width:51px;height:51px;flex-basis:51px}
-  .lmf-home-stat-strip strong{font-size:13px}
-  .lmf-home-stat-strip small{font-size:5.3px}
+@media (max-width:390px){
+  .lmf-home-v4-eyebrow{font-size:7px}.lmf-home-v4-greeting h1{font-size:28px}
+  .lmf-home-v4-command-main{padding:21px 16px 19px}
+  .lmf-home-v4-program-row h2{font-size:33px}
+  .lmf-home-v4-command-main h3{font-size:24px}
+  .lmf-home-v4-meta>div{padding-left:7px;padding-right:7px}
+  .lmf-home-v4-readiness-body{gap:13px}.lmf-home-v4-score{width:64px;height:64px;flex-basis:64px}
 }
 
-@media(min-width:781px){
-  body.lmf-home-ref3-active .lmf-home-reference-v3{width:min(100%,900px)!important}
-  body.lmf-home-ref3-active .dashboard-grid.lmf-home-command-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
-  .lmf-home-greeting h1{font-size:32px}
+@media (min-width:900px){
+  .lmf-home-command-v4{gap:16px;padding-top:18px}
+  .lmf-home-v4-command{min-height:395px}
+  .lmf-home-v4-command-main{padding:34px 38px 30px}
+  .lmf-home-v4-grid{gap:14px}
+  .lmf-home-v4-panel{min-height:178px;padding:20px}
+  .lmf-home-v4-panel-link{left:20px;right:20px}
 }
