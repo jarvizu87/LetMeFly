@@ -17,6 +17,11 @@ bash "$ROOT_DIR/ci/apply-crownforge-v2-2.sh" "$TARGET"
 # workout bundle without rerendering/resetting Workout Mode position.
 bash "$ROOT_DIR/ci/apply-workout-review-live-count-v1.sh" "$TARGET"
 
+# Assert the source-level persistence/count boundary before minification. Vite is
+# allowed to rename local identifiers such as refreshedStats in the final bundle.
+grep -Fq "const refreshedStats = state.workout ? completionStats(state.workout) : null" "$TARGET/src/main.ts"
+grep -Fq "Set saved locally\${refreshedStats ? \` • \${refreshedStats.done}/\${refreshedStats.total}\` : ''}" "$TARGET/src/main.ts"
+
 cd "$TARGET"
 npm run audit:source
 npm run audit:crownforge
@@ -34,7 +39,7 @@ test -f dist/service-worker.js
 grep -Rq 'Black Crown Revised' dist/assets
 grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
-grep -Rq 'refreshedStats' dist/assets
+# User-visible save confirmation must survive minification; local variable names do not.
 grep -Rq 'Set saved locally' dist/assets
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
