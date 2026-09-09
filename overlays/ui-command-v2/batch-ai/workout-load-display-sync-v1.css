@@ -1,0 +1,41 @@
+/* LetMeFly Workout Load Display Sync v1
+   Presentation-only mobile legibility + live bar-load helper. */
+
+/* Number inputs need an explicit shrink boundary inside the 3-column workout grid.
+   Without this, Android can keep the input's intrinsic width and clip a 3-digit load. */
+.lmf-workout-flow-card .lmf-stepper,
+.lmf-workout-flow-card .lmf-stepper .set-input {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.lmf-workout-flow-card .load-field .lmf-stepper .load-input {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(20px, 5.7vw, 24px) !important;
+  letter-spacing: -0.02em;
+}
+
+/* Keep the dynamic plate prescription readable when an inventory forces the
+   closest possible load rather than an exact load. */
+.lmf-plates-line[data-lmf-live-load] strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 420px) {
+  .lmf-workout-flow-card .lmf-stepper {
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .lmf-workout-flow-card .lmf-step-btn {
+    width: 32px;
+  }
+
+  .lmf-workout-flow-card .load-field .lmf-stepper .load-input {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
