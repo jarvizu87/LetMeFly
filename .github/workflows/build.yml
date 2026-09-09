@@ -49,6 +49,12 @@ jobs:
       - name: Install active-program Exercise Intelligence coverage
         run: bash ci/install-exercise-intelligence-active-program-coverage-v1.sh
 
+      - name: Install final program-name Exercise Intelligence coverage
+        run: bash ci/install-exercise-intelligence-program-name-coverage-v1.sh
+
+      - name: Audit governed program names against Exercise Intelligence
+        run: node ci/audit-exercise-intelligence-program-name-resolution.mjs .build-src/letmefly_app
+
       - name: Install full governed Exercise Intelligence catalog
         run: bash ci/install-exercise-intelligence-library-v1.sh
 
@@ -151,6 +157,8 @@ jobs:
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.json
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
             .build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
+            .build-src/letmefly_app/EXERCISE_INTELLIGENCE_NAME_RESOLUTION_AUDIT.json
+            .build-src/letmefly_app/EXERCISE_INTELLIGENCE_NAME_RESOLUTION_AUDIT.md
           if-no-files-found: warn
           retention-days: 14
 

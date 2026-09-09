@@ -7,6 +7,7 @@ on:
       - exercise-intelligence-active-program-coverage-v1
     paths:
       - 'overlays/exercise-intelligence/active-program-coverage-supplement-v1.json'
+      - 'overlays/exercise-intelligence/program-name-coverage-supplement-v1.json'
       - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.js'
@@ -14,6 +15,8 @@ on:
       - 'ci/install-exercise-intelligence-v1.sh'
       - 'ci/install-exercise-intelligence-v2-supplement.sh'
       - 'ci/install-exercise-intelligence-active-program-coverage-v1.sh'
+      - 'ci/install-exercise-intelligence-program-name-coverage-v1.sh'
+      - 'ci/audit-exercise-intelligence-program-name-resolution.mjs'
       - 'ci/install-exercise-intelligence-library-v1.sh'
       - 'ci/install-exercise-intelligence-coach-v1.sh'
       - 'ci/install-exercise-intelligence-coach-substitutions-v1.sh'
@@ -25,6 +28,7 @@ on:
     branches: [main]
     paths:
       - 'overlays/exercise-intelligence/active-program-coverage-supplement-v1.json'
+      - 'overlays/exercise-intelligence/program-name-coverage-supplement-v1.json'
       - 'overlays/exercise-intelligence/black-crown-v2-1-supplement.json'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-library-v1.js'
@@ -32,6 +36,8 @@ on:
       - 'ci/install-exercise-intelligence-v1.sh'
       - 'ci/install-exercise-intelligence-v2-supplement.sh'
       - 'ci/install-exercise-intelligence-active-program-coverage-v1.sh'
+      - 'ci/install-exercise-intelligence-program-name-coverage-v1.sh'
+      - 'ci/audit-exercise-intelligence-program-name-resolution.mjs'
       - 'ci/install-exercise-intelligence-library-v1.sh'
       - 'ci/install-exercise-intelligence-coach-v1.sh'
       - 'ci/install-exercise-intelligence-coach-substitutions-v1.sh'
@@ -60,31 +66,41 @@ jobs:
         with:
           node-version: '22.12.0'
 
-      - name: Audit active-program source contract
+      - name: Audit active-program and final-name source contracts
         run: |
           set -euo pipefail
           bash -n ci/install-exercise-intelligence-active-program-coverage-v1.sh
+          bash -n ci/install-exercise-intelligence-program-name-coverage-v1.sh
           bash -n ci/install-exercise-intelligence-library-v1.sh
           bash -n ci/audit-exercise-intelligence-production-v1.sh
           bash -n ci/audit-exercise-intelligence-library-production-v1.sh
+          node --check ci/audit-exercise-intelligence-program-name-resolution.mjs
           node --check overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
           node - <<'NODE'
           const fs = require('fs');
-          const s = JSON.parse(fs.readFileSync('overlays/exercise-intelligence/active-program-coverage-supplement-v1.json', 'utf8'));
-          const ids = new Set((s.exercises || []).map((item) => item.id));
+          const active = JSON.parse(fs.readFileSync('overlays/exercise-intelligence/active-program-coverage-supplement-v1.json', 'utf8'));
+          const ids = new Set((active.exercises || []).map((item) => item.id));
           const expected = new Set([
             '90-90-hip-mobility','box-jump','box-squat','broad-jump','explosive-push-up',
             'finger-extension','hip-airplane','kb-dead-stop-swing','medicine-ball-chest-pass',
             'rack-pull','reverse-lunge','snatch-grip-rdl','sorenson-hold','trap-3-raise'
           ]);
-          if (s.baseSchemaVersion !== '1.1-black-crown-v2-1') throw new Error('base schema mismatch');
-          if (s.finalSchemaVersion !== '1.2-active-program-coverage') throw new Error('final schema mismatch');
-          if (s.baseCounts?.exercises !== 94 || s.baseCounts?.substitutionRules !== 27) throw new Error('base counts mismatch');
-          if (s.finalCounts?.exercises !== 108 || s.finalCounts?.substitutionRules !== 27) throw new Error('final counts mismatch');
+          if (active.baseSchemaVersion !== '1.1-black-crown-v2-1') throw new Error('base schema mismatch');
+          if (active.finalSchemaVersion !== '1.2-active-program-coverage') throw new Error('active final schema mismatch');
+          if (active.baseCounts?.exercises !== 94 || active.baseCounts?.substitutionRules !== 27) throw new Error('active base counts mismatch');
+          if (active.finalCounts?.exercises !== 108 || active.finalCounts?.substitutionRules !== 27) throw new Error('active final counts mismatch');
           if (ids.size !== 14 || [...expected].some((id) => !ids.has(id))) throw new Error('14-record active-program ID set mismatch');
-          if ((s.substitutionRules || []).length !== 0) throw new Error('active-program supplement must add zero substitution rules');
-          if ((s.compoundProgramDisplayNames || []).length !== 13) throw new Error('expected 13 intentional compound labels');
-          console.log('Active-program Exercise Intelligence source contract: PASS');
+          if ((active.substitutionRules || []).length !== 0) throw new Error('active-program supplement must add zero substitution rules');
+          if ((active.compoundProgramDisplayNames || []).length !== 13) throw new Error('expected 13 initial program-owned compound labels');
+
+          const final = JSON.parse(fs.readFileSync('overlays/exercise-intelligence/program-name-coverage-supplement-v1.json', 'utf8'));
+          const finalIds = new Set((final.exercises || []).map((item) => item.id));
+          const expectedFinal = new Set(['cable-pull-through','pause-bench-press','hip-opener','relaxed-breathing']);
+          if (final.supplementId !== 'program-name-coverage-v1') throw new Error('final supplement ID mismatch');
+          if (finalIds.size !== 4 || [...expectedFinal].some((id) => !finalIds.has(id))) throw new Error('4-record final movement ID set mismatch');
+          if ((final.additionalCompoundProgramDisplayNames || []).length !== 7) throw new Error('expected 7 additional program-owned choice labels');
+          if ((final.programControlDisplayNames || []).length !== 7) throw new Error('expected 7 control/rest labels');
+          console.log('Exercise Intelligence 108 + 112 source contracts: PASS');
           NODE
 
       - name: Build governed program shell
@@ -99,7 +115,7 @@ jobs:
       - name: Install active-program Exercise Intelligence supplement
         run: bash ci/install-exercise-intelligence-active-program-coverage-v1.sh
 
-      - name: Verify 108-record identity coverage before UI layers
+      - name: Verify 108-record identity coverage before final layer
         run: |
           DATA=.build-src/letmefly_app/dist/data/exercise-intelligence-v1.json node - <<'NODE'
           const fs = require('fs');
@@ -109,10 +125,16 @@ jobs:
           for (const [key, value] of Object.entries(expectedCounts)) {
             if (data.counts?.[key] !== value) throw new Error(`${key} mismatch: ${data.counts?.[key]} != ${value}`);
           }
-          if ((data.compoundProgramDisplayNames || []).length !== 13) throw new Error('compound display-name count mismatch');
+          if ((data.compoundProgramDisplayNames || []).length !== 13) throw new Error('initial compound display-name count mismatch');
           if ((data.substitutionRules || []).length !== 27) throw new Error('substitution rule delta detected');
           console.log('Active-program Exercise Intelligence data: PASS (108/27/108/108/108)');
           NODE
+
+      - name: Install final program-name Exercise Intelligence coverage
+        run: bash ci/install-exercise-intelligence-program-name-coverage-v1.sh
+
+      - name: Audit every governed program label
+        run: node ci/audit-exercise-intelligence-program-name-resolution.mjs .build-src/letmefly_app
 
       - name: Install full catalog and governed Coach layers
         run: |
@@ -134,4 +156,4 @@ jobs:
           grep -Fq 'PROGRAM PRESCRIPTION LOCKED' .build-src/letmefly_app/dist/ui/exercise-intelligence-substitutions-v1.js
           ! grep -Fq 'localStorage' .build-src/letmefly_app/dist/ui/exercise-intelligence-library-v1.js
           ! grep -Fq 'data-action="apply' .build-src/letmefly_app/dist/ui/exercise-intelligence-library-v1.js
-          echo 'Active-program Exercise Intelligence prescription boundary: PASS'
+          echo 'Final Exercise Intelligence prescription boundary: PASS (108 checkpoint preserved; 112 final catalog)'

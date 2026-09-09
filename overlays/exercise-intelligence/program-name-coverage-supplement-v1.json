@@ -1,0 +1,193 @@
+{
+  "schemaVersion": "1.0",
+  "supplementId": "program-name-coverage-v1",
+  "purpose": "Close the final canonical movement gaps exposed by governed program-name resolution while explicitly preserving program-owned choice and non-exercise control labels.",
+  "exercises": [
+    {
+      "id": "cable-pull-through",
+      "canonicalName": "Cable Pull-Through",
+      "aliases": [],
+      "sourcePrograms": ["Crownforge"],
+      "movementRoles": ["Hip Hinge / Posterior-Chain Support"],
+      "trainingCategory": "Strength Support / Hip Hinge",
+      "equipment": ["Cable"],
+      "purpose": "Low-spinal-load hip-hinge accessory used to train glute/hamstring hip extension without turning the slot into another heavy barbell hinge.",
+      "primaryMuscles": ["Gluteus Maximus", "Hamstrings"],
+      "secondaryMuscles": ["Adductors", "Spinal Erectors", "Abdominals/Obliques"],
+      "coachingCues": [
+        "Face away from the cable with the line of pull between the legs",
+        "unlock the knees and push the hips back",
+        "keep ribs stacked and spine neutral",
+        "stand by driving the hips through",
+        "finish tall without leaning back"
+      ],
+      "commonMistakes": [
+        "Turning the movement into a squat",
+        "rounding the low back",
+        "pulling with the arms",
+        "overextending at lockout",
+        "using more load than the hinge position can control"
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Cable+Pull-Through+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "thumbnail": {
+        "canonicalKey": "cable-pull-through",
+        "reuses": false,
+        "reuseTarget": null,
+        "productionStatus": null,
+        "approval": null,
+        "assetNote": null,
+        "alignmentAudit": "NO PRODUCTION-STATUS RECORD"
+      }
+    },
+    {
+      "id": "pause-bench-press",
+      "canonicalName": "Pause Bench Press",
+      "aliases": ["Paused Bench Press"],
+      "sourcePrograms": ["Crownforge"],
+      "movementRoles": ["Bench / Press Pattern"],
+      "trainingCategory": "Strength / Horizontal Press",
+      "equipment": ["Barbell"],
+      "purpose": "Bench-press variation that removes bounce and reinforces control, position and force production from a deliberate dead-stop pause on the chest.",
+      "primaryMuscles": ["Pectoralis Major", "Triceps Brachii"],
+      "secondaryMuscles": ["Anterior Deltoids", "Upper Back/Scapular Stabilizers", "Lats"],
+      "coachingCues": [
+        "Use the same stable bench setup as the competition-style press",
+        "lower under control to the normal touch point",
+        "hold the pause without relaxing the upper back",
+        "keep wrists stacked over forearms",
+        "press back and up without heaving the bar"
+      ],
+      "commonMistakes": [
+        "Letting the bar sink into the chest during the pause",
+        "losing scapular tension",
+        "lifting the butt to restart the bar",
+        "bouncing before the pause is established",
+        "turning every paused rep into a grinder"
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Pause+Bench+Press+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "thumbnail": {
+        "canonicalKey": "pause-bench-press",
+        "reuses": false,
+        "reuseTarget": null,
+        "productionStatus": null,
+        "approval": null,
+        "assetNote": null,
+        "alignmentAudit": "NO PRODUCTION-STATUS RECORD"
+      }
+    },
+    {
+      "id": "hip-opener",
+      "canonicalName": "Hip Opener",
+      "aliases": [],
+      "sourcePrograms": ["Crown Maintenance"],
+      "movementRoles": ["Hip / Lower-Body Mobility Reset"],
+      "trainingCategory": "Mobility / Hip",
+      "equipment": [],
+      "purpose": "Short general hip-mobility slot used before testing or on recovery days. The programmed job is to improve comfortable usable hip motion without adding fatigue or forcing a single drill when the athlete needs a different pain-free opener.",
+      "primaryMuscles": ["Hip Rotators/Flexors (mobility targets)"],
+      "secondaryMuscles": ["Adductors", "Gluteals", "Trunk Stabilizers"],
+      "coachingCues": [
+        "Choose a comfortable hip-opening motion appropriate to the day",
+        "move slowly through pain-free range",
+        "keep the pelvis and ribs controlled",
+        "use relaxed breathing rather than forcing depth",
+        "finish feeling looser rather than fatigued"
+      ],
+      "commonMistakes": [
+        "Forcing end range",
+        "working through hip pinching or sharp pain",
+        "turning the mobility slot into loaded training",
+        "using ballistic motion before a max-effort test",
+        "chasing stretch sensation instead of better movement"
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Hip+Opener+mobility+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "thumbnail": {
+        "canonicalKey": "hip-opener",
+        "reuses": false,
+        "reuseTarget": null,
+        "productionStatus": null,
+        "approval": null,
+        "assetNote": null,
+        "alignmentAudit": "NO PRODUCTION-STATUS RECORD"
+      }
+    },
+    {
+      "id": "relaxed-breathing",
+      "canonicalName": "Relaxed Breathing",
+      "aliases": [],
+      "sourcePrograms": ["Crown Maintenance"],
+      "movementRoles": ["Breathing / Downshift"],
+      "trainingCategory": "Recovery / Breathing",
+      "equipment": [],
+      "purpose": "Low-fatigue breathing downshift after recovery movement to reduce unnecessary tension and finish the session in a calm recovery state.",
+      "primaryMuscles": ["Diaphragm"],
+      "secondaryMuscles": ["Abdominals/Obliques", "Intercostals"],
+      "coachingCues": [
+        "Use a comfortable supported position",
+        "keep the jaw and shoulders relaxed",
+        "breathe quietly through a comfortable range",
+        "let the exhale lengthen naturally without straining",
+        "stop if breathing feels light-headed or uncomfortable"
+      ],
+      "commonMistakes": [
+        "Forcing very large breaths",
+        "holding the breath between cycles",
+        "shrugging on every inhale",
+        "turning the drill into a hard breath-hold challenge",
+        "continuing through dizziness"
+      ],
+      "reviewStatus": "READY FOR REVIEW",
+      "demo": {
+        "currentStatus": "search-fallback",
+        "currentUrl": "https://www.youtube.com/results?search_query=Relaxed+Breathing+recovery+exercise+tutorial",
+        "candidateDirectUrl": null,
+        "candidateRequiresValidation": false
+      },
+      "thumbnail": {
+        "canonicalKey": "relaxed-breathing",
+        "reuses": false,
+        "reuseTarget": null,
+        "productionStatus": null,
+        "approval": null,
+        "assetNote": null,
+        "alignmentAudit": "NO PRODUCTION-STATUS RECORD"
+      }
+    }
+  ],
+  "additionalCompoundProgramDisplayNames": [
+    "Bike or Incline Walk",
+    "Bike, Row, or Elliptical",
+    "Walk, Bike, or Elliptical",
+    "Easy Sled Drag",
+    "Easy Walk / Bike",
+    "Full Rest / Easy Walk",
+    "Close-Grip/Pause Bench Press"
+  ],
+  "programControlDisplayNames": [
+    "Back Squat Governed Attempts",
+    "Bench Press Governed Attempts",
+    "Deadlift Governed Attempts",
+    "Front Squat Governed Attempts",
+    "Black Crown Entry TM Rules",
+    "Verified Crownforge Results",
+    "Full Rest"
+  ]
+}

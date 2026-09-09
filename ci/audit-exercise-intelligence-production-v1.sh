@@ -83,9 +83,15 @@ if (payload.counts?.readyForReview !== readyForReview) {
   throw new Error(`Exercise Intelligence readyForReview is stale: ${payload.counts?.readyForReview} != ${readyForReview}`);
 }
 
-if (schema === '1.1-black-crown-v2-1' || schema === '1.2-active-program-coverage') {
-  const activeProgramCoverage = schema === '1.2-active-program-coverage';
-  const expectedExerciseCount = activeProgramCoverage ? 108 : 94;
+const governedSchemas = new Set([
+  '1.1-black-crown-v2-1',
+  '1.2-active-program-coverage',
+  '1.3-program-name-coverage',
+]);
+if (governedSchemas.has(schema)) {
+  const activeProgramCoverage = schema === '1.2-active-program-coverage' || schema === '1.3-program-name-coverage';
+  const programNameCoverage = schema === '1.3-program-name-coverage';
+  const expectedExerciseCount = programNameCoverage ? 112 : activeProgramCoverage ? 108 : 94;
   const expectedCounts = {
     exercises: expectedExerciseCount,
     substitutionRules: 27,
@@ -158,22 +164,67 @@ if (schema === '1.1-black-crown-v2-1' || schema === '1.2-active-program-coverage
         throw new Error(`Active-program demo governance mismatch: ${id}`);
       }
     }
-    const expectedCompounds = [
+
+    const baseCompounds = [
       'Bike / Incline Walk', 'Bike / Row / Walk', 'Bike / Walk', 'Bike or Walk', 'Walk or Bike',
       'Dead Bug or Hollow Hold', 'Front Squat + Bench Ramp Sets',
       'KB Lateral Clean or Outside Swing to Rack', 'Pull-Up or Lat Pulldown',
       'Reverse Crunch or Dead Bug', 'Wide or Neutral Pulldown', 'Curl', 'Pushdown',
     ];
-    if (JSON.stringify(payload.compoundProgramDisplayNames || []) !== JSON.stringify(expectedCompounds)) {
-      throw new Error('Compound program display-name governance mismatch');
+
+    if (programNameCoverage) {
+      const finalExercises = ['cable-pull-through', 'pause-bench-press', 'hip-opener', 'relaxed-breathing'];
+      for (const id of finalExercises) {
+        const exercise = payload.exercises.find((item) => item.id === id);
+        if (!exercise) throw new Error(`Missing final program-name Exercise Intelligence record: ${id}`);
+        if (!exercise.trainingCategory || !exercise.purpose || !exercise.movementRoles?.length ||
+            !exercise.coachingCues?.length || !exercise.commonMistakes?.length ||
+            exercise.reviewStatus !== 'READY FOR REVIEW') {
+          throw new Error(`Incomplete final program-name Exercise Intelligence record: ${id}`);
+        }
+        if (exercise?.demo?.currentStatus !== 'search-fallback' ||
+            !String(exercise?.demo?.currentUrl || '').startsWith('https://www.youtube.com/results?search_query=') ||
+            exercise?.demo?.candidateRequiresValidation !== false) {
+          throw new Error(`Final program-name demo governance mismatch: ${id}`);
+        }
+      }
+      if (JSON.stringify(payload.programNameCoverageSupplements || []) !== JSON.stringify(['program-name-coverage-v1'])) {
+        throw new Error(`Program-name supplement marker mismatch: ${JSON.stringify(payload.programNameCoverageSupplements)}`);
+      }
+      const expectedCompounds = [
+        ...baseCompounds,
+        'Bike or Incline Walk', 'Bike, Row, or Elliptical', 'Walk, Bike, or Elliptical',
+        'Easy Sled Drag', 'Easy Walk / Bike', 'Full Rest / Easy Walk', 'Close-Grip/Pause Bench Press',
+      ];
+      const expectedControls = [
+        'Back Squat Governed Attempts', 'Bench Press Governed Attempts', 'Deadlift Governed Attempts',
+        'Front Squat Governed Attempts', 'Black Crown Entry TM Rules', 'Verified Crownforge Results', 'Full Rest',
+      ];
+      if (JSON.stringify(payload.compoundProgramDisplayNames || []) !== JSON.stringify(expectedCompounds)) {
+        throw new Error('Final program-owned choice/ambiguity label governance mismatch');
+      }
+      if (JSON.stringify(payload.programControlDisplayNames || []) !== JSON.stringify(expectedControls)) {
+        throw new Error('Final program-control/rest label governance mismatch');
+      }
+      if (!runtime.includes('112/27')) {
+        throw new Error('Exercise Intelligence runtime is not synchronized to final 112/27 catalog');
+      }
+      console.log('Exercise Intelligence final program-name coverage: PASS (112/27; 20 choice labels; 7 control/rest labels)');
+    } else {
+      if ((payload.programNameCoverageSupplements || []).length || (payload.programControlDisplayNames || []).length) {
+        throw new Error('Active-program 108 payload unexpectedly declares final program-name coverage');
+      }
+      if (JSON.stringify(payload.compoundProgramDisplayNames || []) !== JSON.stringify(baseCompounds)) {
+        throw new Error('Compound program display-name governance mismatch');
+      }
+      if (!runtime.includes('108/27')) {
+        throw new Error('Exercise Intelligence runtime is not synchronized to active-program 108/27 catalog');
+      }
+      console.log('Exercise Intelligence active-program coverage: PASS (108/27 with 108 full coverage)');
     }
-    if (!runtime.includes('108/27')) {
-      throw new Error('Exercise Intelligence runtime is not synchronized to active-program 108/27 catalog');
-    }
-    console.log('Exercise Intelligence active-program coverage: PASS (108/27 with 108 full coverage)');
   } else {
-    if ((payload.activeProgramCoverageSupplements || []).length) {
-      throw new Error('Black Crown v2.1 Exercise Intelligence unexpectedly declares active-program coverage');
+    if ((payload.activeProgramCoverageSupplements || []).length || (payload.programNameCoverageSupplements || []).length) {
+      throw new Error('Black Crown v2.1 Exercise Intelligence unexpectedly declares later coverage supplements');
     }
     if (!runtime.includes('94/27')) {
       throw new Error('Exercise Intelligence runtime is not synchronized to Black Crown v2.1 94/27 catalog');
@@ -200,7 +251,8 @@ if (schema === '1.1-black-crown-v2-1' || schema === '1.2-active-program-coverage
   if (ids.size !== 92) {
     throw new Error('Exercise Intelligence production exercise IDs are not unique');
   }
-  if ((payload.bookInformedSupplements || []).length || (payload.activeProgramCoverageSupplements || []).length) {
+  if ((payload.bookInformedSupplements || []).length || (payload.activeProgramCoverageSupplements || []).length ||
+      (payload.programNameCoverageSupplements || []).length || (payload.programControlDisplayNames || []).length) {
     throw new Error('Base Exercise Intelligence payload unexpectedly declares supplements');
   }
   console.log('Exercise Intelligence immutable base payload: PASS (92/25 with 92 full coverage)');

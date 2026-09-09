@@ -18,20 +18,20 @@ node --check "$LIB_JS"
 DATA="$DATA" node - <<'NODE'
 const fs = require('fs');
 const payload = JSON.parse(fs.readFileSync(process.env.DATA, 'utf8'));
-if (payload.schemaVersion !== '1.2-active-program-coverage') {
-  throw new Error(`Full catalog final audit requires active-program coverage schema, got ${payload.schemaVersion}`);
+if (payload.schemaVersion !== '1.3-program-name-coverage') {
+  throw new Error(`Full catalog final audit requires program-name coverage schema, got ${payload.schemaVersion}`);
 }
 const expected = {
-  exercises: 108,
+  exercises: 112,
   substitutionRules: 27,
-  roleCoverage: 108,
-  coachingCoverage: 108,
-  readyForReview: 108,
+  roleCoverage: 112,
+  coachingCoverage: 112,
+  readyForReview: 112,
 };
 for (const [key, value] of Object.entries(expected)) {
   if (payload.counts?.[key] !== value) throw new Error(`Full catalog final count mismatch ${key}: ${payload.counts?.[key]} != ${value}`);
 }
-if (payload.exercises.length !== 108 || new Set(payload.exercises.map((exercise) => exercise.id)).size !== 108) {
+if (payload.exercises.length !== 112 || new Set(payload.exercises.map((exercise) => exercise.id)).size !== 112) {
   throw new Error('Full catalog final exercise identity audit failed');
 }
 const required = [
@@ -39,6 +39,7 @@ const required = [
   '90-90-hip-mobility', 'box-jump', 'box-squat', 'broad-jump', 'explosive-push-up',
   'finger-extension', 'hip-airplane', 'kb-dead-stop-swing', 'medicine-ball-chest-pass',
   'rack-pull', 'reverse-lunge', 'snatch-grip-rdl', 'sorenson-hold', 'trap-3-raise',
+  'cable-pull-through', 'pause-bench-press', 'hip-opener', 'relaxed-breathing',
 ];
 for (const id of required) {
   if (!payload.exercises.some((exercise) => exercise.id === id)) throw new Error(`Full catalog missing ${id}`);
@@ -46,10 +47,16 @@ for (const id of required) {
 if (JSON.stringify(payload.activeProgramCoverageSupplements || []) !== JSON.stringify(['active-program-coverage-v1'])) {
   throw new Error('Full catalog active-program coverage marker mismatch');
 }
-if (!Array.isArray(payload.compoundProgramDisplayNames) || payload.compoundProgramDisplayNames.length !== 13) {
-  throw new Error('Full catalog compound program display-name governance mismatch');
+if (JSON.stringify(payload.programNameCoverageSupplements || []) !== JSON.stringify(['program-name-coverage-v1'])) {
+  throw new Error('Full catalog program-name coverage marker mismatch');
 }
-console.log('Full governed catalog runtime data: PASS (108 canonical exercises / 13 intentional compound labels)');
+if (!Array.isArray(payload.compoundProgramDisplayNames) || payload.compoundProgramDisplayNames.length !== 20) {
+  throw new Error('Full catalog program-owned choice/ambiguity label governance mismatch');
+}
+if (!Array.isArray(payload.programControlDisplayNames) || payload.programControlDisplayNames.length !== 7) {
+  throw new Error('Full catalog program-control/rest label governance mismatch');
+}
+console.log('Full governed catalog runtime data: PASS (112 canonical exercises / 20 program-owned choice labels / 7 control-rest labels)');
 NODE
 
 grep -Fq '/ui/exercise-intelligence-library-v1.js' "$INDEX"
@@ -83,4 +90,4 @@ grep -Fq 'existing.forEach((card) => enrichExistingCard' "$LIB_JS"
 grep -Fq 'const missing = all.filter' "$LIB_JS"
 ! grep -Fq 'library.innerHTML =' "$LIB_JS"
 
-echo "LetMeFly final full governed Exercise Intelligence catalog audit: PASS (108 canonical exercises)"
+echo "LetMeFly final full governed Exercise Intelligence catalog audit: PASS (112 canonical exercises)"

@@ -34,15 +34,15 @@ grep -Fq 'program packages remain prescription authority' "$LIB_SOURCE"
 DATA="$DATA" node - <<'NODE'
 const fs = require('fs');
 const payload = JSON.parse(fs.readFileSync(process.env.DATA, 'utf8'));
-if (payload.schemaVersion !== '1.2-active-program-coverage') {
-  throw new Error(`Full catalog requires governed active-program Exercise Intelligence schema, got ${payload.schemaVersion}`);
+if (payload.schemaVersion !== '1.3-program-name-coverage') {
+  throw new Error(`Full catalog requires final governed program-name Exercise Intelligence schema, got ${payload.schemaVersion}`);
 }
 const expected = {
-  exercises: 108,
+  exercises: 112,
   substitutionRules: 27,
-  roleCoverage: 108,
-  coachingCoverage: 108,
-  readyForReview: 108,
+  roleCoverage: 112,
+  coachingCoverage: 112,
+  readyForReview: 112,
 };
 for (const [key, value] of Object.entries(expected)) {
   if (payload.counts?.[key] !== value) throw new Error(`Full catalog count mismatch ${key}: ${payload.counts?.[key]} != ${value}`);
@@ -50,7 +50,16 @@ for (const [key, value] of Object.entries(expected)) {
 if (JSON.stringify(payload.activeProgramCoverageSupplements || []) !== JSON.stringify(['active-program-coverage-v1'])) {
   throw new Error(`Full catalog active-program coverage marker mismatch: ${JSON.stringify(payload.activeProgramCoverageSupplements)}`);
 }
-console.log('Full Exercise Intelligence catalog prerequisite: PASS (108/27, full active-program coverage)');
+if (JSON.stringify(payload.programNameCoverageSupplements || []) !== JSON.stringify(['program-name-coverage-v1'])) {
+  throw new Error(`Full catalog program-name coverage marker mismatch: ${JSON.stringify(payload.programNameCoverageSupplements)}`);
+}
+if ((payload.compoundProgramDisplayNames || []).length !== 20) {
+  throw new Error(`Full catalog program-owned choice label count mismatch: ${payload.compoundProgramDisplayNames?.length}`);
+}
+if ((payload.programControlDisplayNames || []).length !== 7) {
+  throw new Error(`Full catalog program-control/rest label count mismatch: ${payload.programControlDisplayNames?.length}`);
+}
+console.log('Full Exercise Intelligence catalog prerequisite: PASS (112/27, complete governed program-name coverage)');
 NODE
 
 mkdir -p "$DIST_DIR/ui"
@@ -120,4 +129,4 @@ grep -Fq 'data-lmf-intel-watch' "$LIB_OUT"
 ! grep -Fq 'indexedDB' "$LIB_OUT"
 ! grep -Fq 'fetch(' "$LIB_OUT"
 
-echo "LetMeFly full governed Exercise Intelligence catalog enhancer: PASS (108 canonical exercises)"
+echo "LetMeFly full governed Exercise Intelligence catalog enhancer: PASS (112 canonical exercises)"
