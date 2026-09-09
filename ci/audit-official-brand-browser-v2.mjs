@@ -1,16 +1,20 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { chromium } from 'playwright-core'
+import { pathToFileURL } from 'node:url'
 
 const chrome=process.env.CHROME_BIN
 if (!chrome) throw new Error('CHROME_BIN is required')
 const root=path.resolve('.build-src/letmefly_app')
+const pw=path.join(root,'node_modules','playwright-core','index.mjs')
+if (!fs.existsSync(pw)) throw new Error('reconstructed playwright-core is required')
+const { chromium } = await import(pathToFileURL(pw).href)
 const outDir=path.join(root,'OFFICIAL_BRAND_AUDIT'); fs.mkdirSync(outDir,{recursive:true})
 const browser=await chromium.launch({headless:true,executablePath:chrome,args:['--no-sandbox']})
 const page=await browser.newPage({viewport:{width:412,height:915},deviceScaleFactor:1})
 const failures=[]
 try {
-  await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:30000})
+  await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:30000})
+  await page.waitForTimeout(1000)
   for (const url of ['/brand/letmefly-logo-display-512.png?v=9','/icons/app-icon-192.png?v=9','/icons/app-icon-512.png?v=9','/icons/app-icon-512-maskable.png?v=9','/icons/favicon-32.png?v=9','/icons/apple-touch-icon.png?v=9']) {
     const r=await page.request.get(`http://127.0.0.1:4173${url}`)
     if (!r.ok()) failures.push(`${url} returned ${r.status()}`)
