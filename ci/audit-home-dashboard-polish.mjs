@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const target = path.join(root, '.build-src', 'letmefly_app')
-const outDir = path.join(target, 'HOME_DASHBOARD_POLISH_AUDIT')
+const outDir = path.join(target, 'BROWSER_SMOKE_AUDIT', 'home-dashboard-polish')
 fs.mkdirSync(outDir, { recursive:true })
 const requireFromTarget = createRequire(path.join(target, 'package.json'))
 const { chromium } = requireFromTarget('playwright-core')
