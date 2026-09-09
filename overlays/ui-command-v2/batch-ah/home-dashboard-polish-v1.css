@@ -1,0 +1,121 @@
+/* LetMeFly Home Dashboard Polish v1
+   Presentation only. Improves mobile information hierarchy without changing
+   governed programs, workout persistence, or private athlete data behavior. */
+
+@media (max-width:700px){
+  /* Let Session + Progress stay compact while Focus gets enough room to read. */
+  .lmf-home-v4-meta{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .lmf-home-v4-meta>div:nth-child(3){
+    grid-column:1 / -1!important;
+    border-top:1px solid rgba(155,169,177,.11)!important;
+    border-right:0!important;
+    padding:11px 0 12px!important;
+  }
+  .lmf-home-v4-meta>div:nth-child(3) strong{
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:anywhere!important;
+    line-height:1.3!important;
+  }
+
+  /* Mobile Home should read top-to-bottom like a coaching brief, not four cramped tiles. */
+  .lmf-home-v4-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-areas:
+      'readiness'
+      'performance'
+      'milestone'
+      'coach'!important;
+    gap:15px!important;
+  }
+  .lmf-home-v4-panel{
+    min-height:164px!important;
+    padding:19px 19px 17px!important;
+  }
+  .lmf-home-v4-panel-link{
+    left:19px!important;
+    right:19px!important;
+    bottom:14px!important;
+  }
+
+  /* Recent performance gets enough vertical rhythm for actual history instead of microcopy. */
+  .lmf-home-v4-performance{
+    min-height:194px!important;
+  }
+  .lmf-home-v4-performance ul{
+    gap:7px!important;
+    margin:0 0 31px!important;
+  }
+  .lmf-home-v4-performance li{
+    font-size:9px!important;
+    line-height:1.5!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  .lmf-home-v4-spark{
+    margin-bottom:9px!important;
+  }
+
+  /* Give the decision-oriented cards more visual weight below performance. */
+  .lmf-home-v4-milestone{
+    min-height:166px!important;
+  }
+  .lmf-home-v4-milestone p{
+    -webkit-line-clamp:3!important;
+    line-height:1.5!important;
+    margin-bottom:29px!important;
+  }
+  .lmf-home-v4-coach{
+    min-height:184px!important;
+  }
+  .lmf-home-v4-coach blockquote{
+    margin:17px 14px 34px 0!important;
+    font-size:16px!important;
+    line-height:1.32!important;
+    -webkit-line-clamp:5!important;
+  }
+
+  /* Athlete snapshot becomes a legible 2 x 2 rail on phones. */
+  .lmf-home-v4-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .lmf-home-v4-stats>div{
+    min-height:76px!important;
+    padding:15px 16px!important;
+    border-right:1px solid #1b252b!important;
+    border-bottom:1px solid #1b252b!important;
+  }
+  .lmf-home-v4-stats>div:nth-child(2n){
+    border-right:0!important;
+  }
+  .lmf-home-v4-stats>div:nth-last-child(-n+2){
+    border-bottom:0!important;
+  }
+  .lmf-home-v4-stats strong{
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:anywhere!important;
+    line-height:1.2!important;
+  }
+}
+
+@media (max-width:430px){
+  .lmf-home-v4-command-main{
+    padding-bottom:24px!important;
+  }
+  .lmf-home-v4-meta>div{
+    padding-top:10px!important;
+    padding-bottom:10px!important;
+  }
+  .lmf-home-v4-performance{
+    min-height:198px!important;
+  }
+  .lmf-home-v4-coach{
+    min-height:188px!important;
+  }
+}
