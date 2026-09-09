@@ -19,6 +19,14 @@ bash ci/apply-readiness-persistence-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 # automatic approved exercise art, locked Workout Flow v1, and Pyramid Flow v1.
 bash ci/apply-mobile-workout-video-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
 
+# Keep set-tab centering inside its horizontal strip. Element.scrollIntoView can
+# also move the page vertically during set selection/auto-advance, which makes a
+# phone workout appear to jump or reset its scroll position.
+bash ci/apply-workout-flow-scroll-safety-v1.sh "$ROOT_DIR/.build-src/letmefly_app"
+
+grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" "$ROOT_DIR/.build-src/letmefly_app/public/ui/workout-flow-v1.js"
+! grep -Fq "activeTab.scrollIntoView" "$ROOT_DIR/.build-src/letmefly_app/public/ui/workout-flow-v1.js"
+
 test -s "$CLOUDINARY_JS"
 test -s "$CLOUDINARY_CSS"
 test -s "$READINESS_COMFORT_CSS"
@@ -73,6 +81,8 @@ node --check public/ui/exercise-art-cloudinary.js
 
 grep -Fq "privateExerciseArtMap" public/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" public/exercise-art-import.html
+grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" public/ui/workout-flow-v1.js
+! grep -Fq "activeTab.scrollIntoView" public/ui/workout-flow-v1.js
 
 python - <<'PY'
 from pathlib import Path
@@ -119,6 +129,8 @@ grep -Fq 'jp-${slug}-v2' dist/ui/exercise-art-auto.js
 grep -Fq "lmf-set-tabs" dist/ui/workout-flow-v1.js
 grep -Fq "lmf-compact-summary" dist/ui/workout-flow-v1.js
 grep -Fq "Between Rounds" dist/ui/workout-flow-v1.js
+grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" dist/ui/workout-flow-v1.js
+! grep -Fq "activeTab.scrollIntoView" dist/ui/workout-flow-v1.js
 grep -Fq "PYRAMID PLAN" dist/ui/pyramid-flow-v1.js
 grep -Fq "lmf-pyramid-plan-row" dist/ui/pyramid-flow-v1.js
 ! grep -Fq "localStorage.setItem" dist/ui/exercise-art-cloudinary.js
@@ -171,4 +183,4 @@ PY
 # Minification is allowed to rename function identifiers in dist.
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly private exercise-art + readiness + mobile workout/video + Workout Flow v1 + Pyramid Flow v1 pipeline: PASS"
+echo "LetMeFly private exercise-art + readiness + mobile workout/video + Workout Flow v1 + Pyramid Flow v1 + vertical-scroll isolation pipeline: PASS"
