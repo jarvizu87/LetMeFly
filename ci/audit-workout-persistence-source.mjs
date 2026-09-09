@@ -10,10 +10,25 @@ function read(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : ''
 }
 
+function lineNumberAt(source, index) {
+  return source.slice(0, Math.max(0, index)).split('\n').length
+}
+
+function excerptAround(source, needle, radius = 2200) {
+  const i = source.indexOf(needle)
+  if (i < 0) return null
+  const start = Math.max(0, i - radius)
+  const end = Math.min(source.length, i + needle.length + radius)
+  return {
+    code: source.slice(start, end),
+    line: lineNumberAt(source, i),
+  }
+}
+
 function extractFunction(source, name) {
   const patterns = [
-    new RegExp(`(?:async\\s+)?function\\s+${name}\\s*\\(`),
-    new RegExp(`const\\s+${name}\\s*=\\s*(?:async\\s*)?\\(`),
+    new RegExp(`(?:export\\s+)?(?:async\\s+)?function\\s+${name}\\s*\\(`),
+    new RegExp(`(?:export\\s+)?const\\s+${name}\\s*=\\s*(?:async\\s*)?\\(`),
   ]
   let start = -1
   for (const pattern of patterns) {
@@ -21,36 +36,47 @@ function extractFunction(source, name) {
     if (match) { start = match.index; break }
   }
   if (start < 0) return null
-  const brace = source.indexOf('{', start)
-  if (brace < 0) return null
-  let depth = 0
-  let quote = null
-  let escaped = false
-  let templateDepth = 0
-  for (let i = brace; i < source.length; i += 1) {
-    const ch = source[i]
-    if (escaped) { escaped = false; continue }
-    if (quote) {
-      if (ch === '\\') { escaped = true; continue }
-      if (quote === '`' && ch === '$' && source[i + 1] === '{') { templateDepth += 1; i += 1; continue }
-      if (quote === '`' && templateDepth && ch === '}') { templateDepth -= 1; continue }
-      if (ch === quote && templateDepth === 0) quote = null
-      continue
-    }
-    if (ch === '"' || ch === "'" || ch === '`') { quote = ch; continue }
-    if (ch === '{') depth += 1
-    if (ch === '}') {
-      depth -= 1
-      if (depth === 0) return source.slice(start, i + 1)
-    }
-  }
-  return source.slice(start, Math.min(source.length, start + 8000))
-}
 
-function excerptAround(source, needle, radius = 1600) {
-  const i = source.indexOf(needle)
-  if (i < 0) return null
-  return source.slice(Math.max(0, i - radius), Math.min(source.length, i + needle.length + radius))
+  // Return-type object literals may contain braces before the actual function
+  // body. Find a brace whose matching block is followed by function-level
+  // syntax rather than stopping at the first return-type brace.
+  let brace = source.indexOf('{', start)
+  while (brace >= 0) {
+    let depth = 0
+    let quote = null
+    let escaped = false
+    let templateDepth = 0
+    for (let i = brace; i < source.length; i += 1) {
+      const ch = source[i]
+      if (escaped) { escaped = false; continue }
+      if (quote) {
+        if (ch === '\\') { escaped = true; continue }
+        if (quote === '`' && ch === '$' && source[i + 1] === '{') { templateDepth += 1; i += 1; continue }
+        if (quote === '`' && templateDepth && ch === '}') { templateDepth -= 1; continue }
+        if (ch === quote && templateDepth === 0) quote = null
+        continue
+      }
+      if (ch === '"' || ch === "'" || ch === '`') { quote = ch; continue }
+      if (ch === '{') depth += 1
+      if (ch === '}') {
+        depth -= 1
+        if (depth === 0) {
+          const before = source.slice(start, brace)
+          const looksLikeBody = /\)\s*(?::[^=]+)?\s*$/.test(before) || /=>\s*$/.test(before)
+          if (looksLikeBody) {
+            return {
+              code: source.slice(start, i + 1),
+              line: lineNumberAt(source, start),
+            }
+          }
+          brace = source.indexOf('{', i + 1)
+          break
+        }
+      }
+    }
+    if (brace < 0) break
+  }
+  return null
 }
 
 const main = read(mainPath)
@@ -60,6 +86,16 @@ if (!main || !service) {
   process.exit(1)
 }
 
+const blocks = []
+const seen = new Set()
+function addBlock(sourceName, name, result) {
+  if (!result) return
+  const key = `${sourceName}:${name}:${result.line}`
+  if (seen.has(key)) return
+  seen.add(key)
+  blocks.push({ source: sourceName, name, ...result })
+}
+
 const mainNames = [
   'toggleSetFromRow',
   'completionStats',
@@ -67,35 +103,54 @@ const mainNames = [
   'startSelectedWorkout',
   'refreshWorkout',
   'workoutSwipePages',
-  'workoutExerciseCard',
-  'activeWorkoutExerciseCard',
+  'setRow',
+  'loggedExerciseCard',
 ]
 const serviceNames = [
   'startWorkout',
+  'logSet',
+  'uncompleteSet',
   'updateWorkoutSet',
   'completeWorkout',
   'findWorkoutForDay',
+  'loadWorkoutBundle',
   'getWorkoutBundle',
-  'loadWorkout',
+  'setRecordFromProgram',
 ]
 
-const blocks = []
-for (const name of mainNames) {
-  const code = extractFunction(main, name)
-  if (code) blocks.push({ source: 'src/main.ts', name, code })
-}
-for (const name of serviceNames) {
-  const code = extractFunction(service, name)
-  if (code) blocks.push({ source: 'src/services/workout-service.ts', name, code })
-}
+for (const name of mainNames) addBlock('src/main.ts', name, extractFunction(main, name))
+for (const name of serviceNames) addBlock('src/services/workout-service.ts', name, extractFunction(service, name))
 
-for (const [sourceName, source] of [['src/main.ts', main], ['src/services/workout-service.ts', service]]) {
-  for (const needle of ['set.completed', 'load_value', 'workoutSets', 'COMPLETE WORKOUT', 'sets logged']) {
-    if (blocks.some(block => block.code.includes(needle))) continue
-    const code = excerptAround(source, needle)
-    if (code) blocks.push({ source: sourceName, name: `excerpt: ${needle}`, code })
-  }
-}
+const mainNeedles = [
+  'function completionStats',
+  'sets logged',
+  'data-action="toggle-set"',
+  'Set saved locally',
+  'COMPLETE WORKOUT',
+]
+const serviceNeedles = [
+  'logSet',
+  'uncompleteSet',
+  'completed: true',
+  'completed: false',
+  'load_value',
+  'performance_data',
+  'workoutSets',
+  'loadWorkoutBundle',
+  'getAllFromIndex',
+  'putEntityWithOutbox',
+]
+for (const needle of mainNeedles) addBlock('src/main.ts', `excerpt: ${needle}`, excerptAround(main, needle))
+for (const needle of serviceNeedles) addBlock('src/services/workout-service.ts', `excerpt: ${needle}`, excerptAround(service, needle))
+
+// The service is the authoritative local persistence layer and is intentionally
+// included in full for this diagnostic artifact. It contains no athlete data.
+blocks.push({
+  source: 'src/services/workout-service.ts',
+  name: 'FULL AUTHORITATIVE SERVICE SOURCE',
+  line: 1,
+  code: service,
+})
 
 const report = [
   '# LetMeFly Workout Persistence Source Audit',
@@ -109,6 +164,8 @@ const report = [
   ...blocks.flatMap(block => [
     `## ${block.source} — ${block.name}`,
     '',
+    `Approx source line: ${block.line}`,
+    '',
     '```ts',
     block.code,
     '```',
@@ -118,4 +175,4 @@ const report = [
 
 fs.writeFileSync(outPath, report.join('\n'))
 console.log(`Workout persistence source audit: PASS — ${blocks.length} block(s) written to ${outPath}`)
-for (const block of blocks) console.log(`  ${block.source}: ${block.name}`)
+for (const block of blocks) console.log(`  ${block.source}:${block.line}: ${block.name}`)

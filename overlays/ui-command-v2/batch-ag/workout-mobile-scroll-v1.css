@@ -1,0 +1,30 @@
+/* LetMeFly Workout Mobile Scroll v1
+   Recording-driven ergonomics fix. On phone-sized layouts the workout section
+   carousel remains programmatically navigable through the existing section tabs
+   and previous/next controls, but direct page gestures are reserved for vertical
+   day scrolling. Exercise set-tab carousels retain their own horizontal scroll. */
+
+@media (max-width:780px){
+  #swipe-viewport.swipe-viewport{
+    overflow-x:hidden!important;
+    scroll-snap-type:none!important;
+    overscroll-behavior-x:none;
+  }
+
+  #swipe-viewport.swipe-viewport > .swipe-page{
+    scroll-snap-align:none!important;
+  }
+
+  #swipe-viewport .lmf-set-tabs{
+    overflow-x:auto!important;
+    scroll-snap-type:x proximity!important;
+  }
+
+  .swipe-meta > span{
+    font-size:0!important;
+  }
+  .swipe-meta > span::after{
+    content:"Tap a section or use arrows";
+    font-size:6px;
+  }
+}

@@ -9,6 +9,7 @@
   const PRESCRIBED_PATTERN = /(?:\b\d+(?:\.\d+)?\s*%\b|\bpercent(?:age)?\b|\btraining\s*max\b|\bTM\b|\b\d+(?:\.\d+)?\s*(?:lb|lbs|kg|kgs)\b|\bbody\s*weight\b|\bbodyweight\b|\bBW\b)/i
   let refreshTimer = 0
   let userIsEditing = false
+  let manualTouchUntil = 0
 
   const text = node => (node?.textContent || '').trim()
   const rowsFor = card => [...card.querySelectorAll('.set-row[data-set-id]')]
@@ -111,6 +112,14 @@
     return { card: active, row: firstIncompleteRow(active) }
   }
 
+  function noteManualTouch() {
+    manualTouchUntil = Date.now() + 1200
+  }
+
+  function mayAutoScroll() {
+    return !userIsEditing && Date.now() >= manualTouchUntil
+  }
+
   function activateRow(card, row, shouldScroll = true) {
     if (!card || !row) return false
     carryLoadIfAllowed(card, row)
@@ -121,8 +130,10 @@
     row.classList.add('lmf-set-active')
     card.classList.add('lmf-logging-compact')
     card.dataset.lmfLoggingActive = 'true'
-    if (shouldScroll && !userIsEditing) {
-      window.setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80)
+    if (shouldScroll && mayAutoScroll()) {
+      window.setTimeout(() => {
+        if (mayAutoScroll() && card.isConnected) card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
+      }, 80)
     }
     return true
   }
@@ -170,19 +181,51 @@
     refreshTimer = window.setTimeout(enhanceAll, delay)
   }
 
+  function respondToNativeSetState(check) {
+    if (!(check instanceof Element) || !check.matches('.set-check[data-action="toggle-set"]')) return
+    const row = check.closest('.set-row')
+    const card = check.closest('.active-exercise')
+    const panel = check.closest('.workout-panel')
+    if (!row || !card || !panel) return
+
+    // The native button changes its done class only after the authoritative
+    // IndexedDB write/reopen resolves. React to that state instead of guessing
+    // how long persistence will take on a phone.
+    if (isDone(row)) card.classList.add('lmf-logging-compact')
+
+    if (!grouped(panel)) {
+      const next = firstIncompleteRow(card)
+      if (next && next !== row) {
+        activateRow(card, next, true)
+        return
+      }
+    }
+
+    window.setTimeout(() => autoAdvance(panel, true), 0)
+    window.setTimeout(() => autoAdvance(panel, false), 120)
+  }
+
+  function respondToActiveSet(row) {
+    if (!(row instanceof Element) || !row.matches('.set-row.lmf-set-active')) return
+    const card = row.closest('.active-exercise')
+    if (card) carryLoadIfAllowed(card, row)
+  }
+
   function afterAuthoritativeToggle(check, row, card, panel) {
-    // Let the native toggle/persistence handler and Workout Flow v1 finish first.
+    // Fallback for older browsers/DOM paths. The MutationObserver below is the
+    // primary completion signal because it reacts to the native done-class change.
     const settle = delay => window.setTimeout(() => {
       if (!row.isConnected || !card.isConnected) return
       const done = isDone(row)
       if (done) card.classList.add('lmf-logging-compact')
       if (!panel?.isConnected) return
-      autoAdvance(panel, delay >= 120)
+      autoAdvance(panel, delay >= 180)
       enhanceAll()
     }, delay)
-    settle(20)
-    settle(140)
-    settle(380)
+    settle(40)
+    settle(180)
+    settle(500)
+    settle(1000)
   }
 
   function handleClick(event) {
@@ -193,7 +236,7 @@
     if (rest) {
       const panel = rest.closest('.workout-panel')
       window.setTimeout(() => autoAdvance(panel, true), 40)
-      window.setTimeout(() => autoAdvance(panel, true), 180)
+      window.setTimeout(() => autoAdvance(panel, false), 180)
       return
     }
 
@@ -237,9 +280,18 @@
     document.addEventListener('click', handleClick, true)
     document.addEventListener('focusin', handleFocus, true)
     document.addEventListener('focusout', handleBlur, true)
+    document.addEventListener('touchstart', noteManualTouch, { passive: true })
+    document.addEventListener('touchmove', noteManualTouch, { passive: true })
+
     new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.type !== 'attributes' || !(mutation.target instanceof Element)) return
+        if (mutation.target.matches('.set-check[data-action="toggle-set"]')) respondToNativeSetState(mutation.target)
+        if (mutation.target.matches('.set-row.lmf-set-active')) respondToActiveSet(mutation.target)
+      })
       if (mutations.some(mutation => mutation.addedNodes.length || mutation.type === 'attributes')) schedule(30)
     }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] })
+
     window.addEventListener('hashchange', () => schedule(20))
     window.__LMF_WORKOUT_LOGGING_V2__ = {
       version: 2,
