@@ -12,6 +12,11 @@ bash "$ROOT_DIR/ci/apply-black-crown-v2-1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-black-crown-v2-1-ui.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-crownforge-v2-2.sh" "$TARGET"
 
+# The foundational mobile build must already have isolated set-tab centering
+# from page-level vertical scroll. Program overlays may not regress that runtime.
+grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" "$TARGET/public/ui/workout-flow-v1.js"
+! grep -Fq "activeTab.scrollIntoView" "$TARGET/public/ui/workout-flow-v1.js"
+
 # Recording-driven workout persistence fix. The native IndexedDB write already
 # succeeds; refresh the visible Session Review from the authoritative reloaded
 # workout bundle without rerendering/resetting Workout Mode position.
@@ -41,7 +46,9 @@ grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
 # User-visible save confirmation must survive minification; local variable names do not.
 grep -Rq 'Set saved locally' dist/assets
+grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" dist/ui/workout-flow-v1.js
+! grep -Fq "activeTab.scrollIntoView" dist/ui/workout-flow-v1.js
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + live workout Review persistence refresh: PASS"
+echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + live workout Review persistence refresh + vertical-scroll isolation: PASS"
