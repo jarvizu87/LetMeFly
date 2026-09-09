@@ -2,7 +2,7 @@
    Presentation-only mobile legibility + live bar-load helper. */
 
 /* Number inputs need an explicit shrink boundary inside the 3-column workout grid.
-   Without this, Android can keep the input's intrinsic width and clip a 3-digit load. */
+   Without this, Android can keep the input's intrinsic width and clip multi-digit loads. */
 .lmf-workout-flow-card .lmf-stepper,
 .lmf-workout-flow-card .lmf-stepper .set-input {
   min-width: 0 !important;
@@ -10,32 +10,89 @@
   box-sizing: border-box !important;
 }
 
+/* Optimize the load field for the normal strength-training range instead of one
+   specific value. 22px max keeps 3-digit loads large and clear while leaving
+   enough horizontal reserve for substantially larger values later. */
 .lmf-workout-flow-card .load-field .lmf-stepper .load-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: center;
   font-variant-numeric: tabular-nums;
-  font-size: clamp(20px, 5.7vw, 24px) !important;
-  letter-spacing: -0.02em;
+  font-feature-settings: "tnum" 1;
+  font-size: clamp(19px, 5.2vw, 22px) !important;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
-/* Keep the dynamic plate prescription readable when an inventory forces the
-   closest possible load rather than an exact load. */
+/* Keep +/- visually subordinate to the logged load. Reducing the button columns
+   slightly also returns a few pixels to the numeric input without making the
+   controls unnecessarily tiny. */
+.lmf-workout-flow-card .lmf-step-btn {
+  font-size: 19px !important;
+  font-weight: 700;
+}
+
+/* Small workout labels were undersized on a phone. Raise only the labels that
+   must be read during a set; preserve the larger exercise/set/value hierarchy. */
+.lmf-workout-flow-card .set-field label {
+  font-size: 11px !important;
+  letter-spacing: 0.07em !important;
+}
+
+.lmf-workout-flow-card .exercise-actions .btn {
+  font-size: 10px !important;
+  line-height: 1.15;
+}
+
+/* Compact cards still need readable state/prescription text without competing
+   with the exercise name. */
+.lmf-compact-copy small {
+  font-size: 12px !important;
+}
+
+.lmf-compact-state {
+  font-size: 9px !important;
+}
+
+.lmf-round-badge span {
+  font-size: 9px !important;
+}
+
+/* The inline bar-loading prescription is actionable workout information, so it
+   should be comfortably readable at a glance instead of behaving like fine print. */
+.lmf-plates-line[data-lmf-live-load] {
+  min-height: 32px;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .lmf-plates-line[data-lmf-live-load] strong {
   min-width: 0;
   overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 @media (max-width: 420px) {
   .lmf-workout-flow-card .lmf-stepper {
-    grid-template-columns: 32px minmax(0, 1fr) 32px;
-    gap: 4px;
+    grid-template-columns: 30px minmax(0, 1fr) 30px;
+    gap: 3px;
     padding: 4px;
   }
 
   .lmf-workout-flow-card .lmf-step-btn {
-    width: 32px;
+    width: 30px;
+    font-size: 18px !important;
   }
 
   .lmf-workout-flow-card .load-field .lmf-stepper .load-input {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .lmf-plates-line[data-lmf-live-load] strong {
+    font-size: 14px;
   }
 }
