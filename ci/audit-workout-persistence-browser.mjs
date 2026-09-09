@@ -155,6 +155,24 @@ async function waitDone(page, setId, expected) {
   }, { id: setId, expected }, { timeout: 8000 })
 }
 
+async function revealSet(page, setId) {
+  const result = await page.evaluate(id => {
+    const row = document.querySelector(`[data-set-id="${id}"]`)
+    const card = row?.closest('.active-exercise')
+    if (!(row instanceof HTMLElement) || !(card instanceof HTMLElement)) return { ok:false, reason:'row/card missing' }
+    const rows = [...card.querySelectorAll('.set-row[data-set-id]')]
+    const index = rows.indexOf(row)
+    const tab = card.querySelectorAll('.lmf-set-tab')[index]
+    if (tab instanceof HTMLButtonElement) tab.click()
+    row.classList.add('lmf-set-active')
+    card.classList.add('lmf-logging-compact')
+    row.scrollIntoView({ block:'center', inline:'nearest' })
+    return { ok:true, index, tab:Boolean(tab) }
+  }, setId)
+  if (!result.ok) throw new Error(`Unable to reveal set ${setId}: ${result.reason}`)
+  await page.waitForTimeout(250)
+}
+
 async function findUnprescribedCarryCard(page) {
   return page.evaluate(() => {
     const prescribed = /(?:\b\d+(?:\.\d+)?\s*%\b|\bpercent(?:age)?\b|\btraining\s*max\b|\bTM\b|\b\d+(?:\.\d+)?\s*(?:lb|lbs|kg|kgs)\b|\bbody\s*weight\b|\bbodyweight\b|\bBW\b)/i
@@ -231,7 +249,9 @@ try {
 
   const rowReload = page.locator(`[data-set-id="${setId}"]`)
   if (await rowReload.count()) {
-    await rowReload.locator('.set-check[data-action="toggle-set"]').click()
+    await revealSet(page, setId)
+    const reopenCheck = rowReload.locator('.set-check[data-action="toggle-set"]')
+    await reopenCheck.click({ timeout:5000 })
     await waitDone(page, setId, false)
     await page.waitForTimeout(900)
     const stored2 = await dbSet(page, setId)
@@ -248,13 +268,13 @@ try {
   if (!carry) {
     fail('Unprescribed load carry target', 'no unprescribed multi-set exercise found in current QA workout')
   } else {
+    await revealSet(page, carry.firstId)
     const firstCarryRow = page.locator(`[data-set-id="${carry.firstId}"]`)
-    const secondCarryRow = page.locator(`[data-set-id="${carry.secondId}"]`)
     await firstCarryRow.locator('.load-input').fill('40')
-    await firstCarryRow.locator('.set-check[data-action="toggle-set"]').click()
+    await firstCarryRow.locator('.set-check[data-action="toggle-set"]').click({ timeout:5000 })
     await waitDone(page, carry.firstId, true)
     await page.waitForTimeout(1200)
-    const nextLoad = await secondCarryRow.locator('.load-input').inputValue()
+    const nextLoad = await page.locator(`[data-set-id="${carry.secondId}"] .load-input`).inputValue()
     report.observations.unprescribedCarry = { exercise: carry.name, value: nextLoad }
     if (nextLoad === '40') pass('Unprescribed load carries Set 1 → Set 2', `${carry.name}: 40 lb`)
     else fail('Unprescribed load carries Set 1 → Set 2', `${carry.name}: expected 40, saw ${nextLoad || 'blank'}`)
