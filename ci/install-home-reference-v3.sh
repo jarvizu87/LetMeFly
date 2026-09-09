@@ -91,12 +91,28 @@ index.write_text(text)
 
 sw = sw_path.read_text()
 sw = re.sub(r"const CACHE_NAME = '[^']+'", "const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-10-brand-v7-home-v4'", sw, count=1)
-sw = re.sub(
-    r"const PRECACHE = \[[^\n]+\]",
-    "const PRECACHE = ['/', '/manifest.webmanifest?v=brand-v7', '/app-icon-v4.svg?v=4', '/app-icon-official-v6.svg?v=6']",
-    sw,
-    count=1,
-)
+
+# Branding is additive to the public shell. Preserve every asset installed by
+# earlier feature layers (Exercise Intelligence, Coach, etc.) and merge the
+# current Home/PWA identity instead of replacing the whole PRECACHE contract.
+precache_match = re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]", sw)
+if not precache_match:
+    raise SystemExit('service-worker.js PRECACHE declaration not found')
+existing_precache = re.findall(r"['\"]([^'\"]+)['\"]", precache_match.group(1))
+required_brand_assets = [
+    '/',
+    '/manifest.webmanifest?v=brand-v7',
+    '/app-icon-v4.svg?v=4',
+    '/app-icon-official-v6.svg?v=6',
+]
+merged_precache = []
+for asset in [*existing_precache, *required_brand_assets]:
+    if asset not in merged_precache:
+        merged_precache.append(asset)
+if any(asset not in merged_precache for asset in existing_precache):
+    raise SystemExit('Home branding update dropped an existing service-worker PRECACHE asset')
+replacement = 'const PRECACHE = [' + ', '.join(repr(asset) for asset in merged_precache) + ']'
+sw = sw[:precache_match.start()] + replacement + sw[precache_match.end():]
 sw_path.write_text(sw)
 PY
 
