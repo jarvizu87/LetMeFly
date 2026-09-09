@@ -36,7 +36,9 @@ cp "$POLISH_SRC" "$DIST_DIR/ui/home-reference-v3-mobile-polish.css"
 cp "$GUARD_SRC" "$DIST_DIR/ui/home-reference-v3-route-guard.css"
 cp "$JS_SRC" "$DIST_DIR/ui/home-reference-v3.js"
 
-# Keep the official LetMeFly shell/PWA mark unchanged.
+# Keep the official LetMeFly shell mark unchanged. Launcher/install icons use
+# rasterized Cloudinary derivatives of the exact same official logo with a
+# full-bleed #090b10 background so Android/Samsung never supplies a white tile.
 cp "$ICON_SRC" "$DIST_DIR/app-icon-v4.svg"
 cp "$ICON_SRC" "$DIST_DIR/app-icon-official-v6.svg"
 cp "$MASK_SRC" "$DIST_DIR/app-icon-official-maskable-v6.svg"
@@ -50,14 +52,19 @@ index = root / 'index.html'
 manifest_path = root / 'manifest.webmanifest'
 sw_path = root / 'service-worker.js'
 
+icon_192 = 'https://res.cloudinary.com/extor5az/image/upload/e_trim/c_fit,h_172,w_172/b_rgb:090b10,c_pad,h_192,w_192/f_png/v1788815215/letmefly/app-brand/letmefly-app-icon-512-v2.png'
+icon_512 = 'https://res.cloudinary.com/extor5az/image/upload/e_trim/c_fit,h_460,w_460/b_rgb:090b10,c_pad,h_512,w_512/f_png/v1788815215/letmefly/app-brand/letmefly-app-icon-512-v2.png'
+icon_512_maskable = 'https://res.cloudinary.com/extor5az/image/upload/e_trim/c_fit,h_390,w_390/b_rgb:090b10,c_pad,h_512,w_512/f_png/v1788815215/letmefly/app-brand/letmefly-app-icon-512-v2.png'
+
 manifest = json.loads(manifest_path.read_text())
 manifest['name'] = 'LetMeFly'
 manifest['short_name'] = 'LetMeFly'
 manifest['background_color'] = '#090b10'
 manifest['theme_color'] = '#090b10'
 manifest['icons'] = [
-    {'src':'/app-icon-official-v6.svg?v=6','sizes':'any','type':'image/svg+xml','purpose':'any'},
-    {'src':'/app-icon-official-maskable-v6.svg?v=6','sizes':'any','type':'image/svg+xml','purpose':'maskable'},
+    {'src':icon_192,'sizes':'192x192','type':'image/png','purpose':'any'},
+    {'src':icon_512,'sizes':'512x512','type':'image/png','purpose':'any'},
+    {'src':icon_512_maskable,'sizes':'512x512','type':'image/png','purpose':'maskable'},
 ]
 manifest_path.write_text(json.dumps(manifest, indent=2) + '\n')
 
@@ -70,11 +77,11 @@ css = '<link rel="stylesheet" href="/ui/home-reference-v3.css?v=4">'
 polish = '<link rel="stylesheet" href="/ui/home-reference-v3-mobile-polish.css?v=2">'
 guard = '<link rel="stylesheet" href="/ui/home-reference-v3-route-guard.css?v=4">'
 js = '<script defer src="/ui/home-reference-v3.js?v=4"></script>'
-text = re.sub(r'<link rel="manifest" href="[^"]+"\s*/?>', '<link rel="manifest" href="/manifest.webmanifest?v=brand-v6" />', text, count=1)
+text = re.sub(r'<link rel="manifest" href="[^"]+"\s*/?>', '<link rel="manifest" href="/manifest.webmanifest?v=brand-v7" />', text, count=1)
 text = re.sub(r'<link rel="icon" href="[^"]+"(?: type="[^"]+")?\s*/?>', '<link rel="icon" href="/app-icon-official-v6.svg?v=6" type="image/svg+xml" />', text, count=1)
-text = re.sub(r'<link rel="apple-touch-icon" href="[^"]+"\s*/?>', '<link rel="apple-touch-icon" href="/app-icon-official-v6.svg?v=6" />', text)
+text = re.sub(r'<link rel="apple-touch-icon" href="[^"]+"\s*/?>', f'<link rel="apple-touch-icon" href="{icon_192}" />', text)
 if 'rel="apple-touch-icon"' not in text:
-    text = text.replace('</head>', '  <link rel="apple-touch-icon" href="/app-icon-official-v6.svg?v=6" />\n</head>', 1)
+    text = text.replace('</head>', f'  <link rel="apple-touch-icon" href="{icon_192}" />\n</head>', 1)
 for marker in (css, polish, guard):
     text = text.replace('</head>', f'  {marker}\n</head>', 1)
 text = text.replace('</body>', f'  {js}\n</body>', 1)
@@ -83,10 +90,10 @@ if text.lower().count('<!doctype html>') != 1:
 index.write_text(text)
 
 sw = sw_path.read_text()
-sw = re.sub(r"const CACHE_NAME = '[^']+'", "const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-9-brand-v6-home-v4'", sw, count=1)
+sw = re.sub(r"const CACHE_NAME = '[^']+'", "const CACHE_NAME = 'letmefly-shell-v5-4-command-v2-10-brand-v7-home-v4'", sw, count=1)
 sw = re.sub(
     r"const PRECACHE = \[[^\n]+\]",
-    "const PRECACHE = ['/', '/manifest.webmanifest?v=brand-v6', '/app-icon-v4.svg?v=4', '/app-icon-official-v6.svg?v=6', '/app-icon-official-maskable-v6.svg?v=6']",
+    "const PRECACHE = ['/', '/manifest.webmanifest?v=brand-v7', '/app-icon-v4.svg?v=4', '/app-icon-official-v6.svg?v=6']",
     sw,
     count=1,
 )
@@ -104,12 +111,15 @@ grep -Fq '/ui/home-reference-v3-mobile-polish.css?v=2' "$INDEX"
 grep -Fq '/ui/home-reference-v3-route-guard.css?v=4' "$INDEX"
 grep -Fq '/ui/home-reference-v3.js?v=4' "$INDEX"
 ! grep -Fq '/ui/home-reference-v3.js?v=3' "$INDEX"
-grep -Fq '/manifest.webmanifest?v=brand-v6' "$INDEX"
+grep -Fq '/manifest.webmanifest?v=brand-v7' "$INDEX"
 grep -Fq '/app-icon-official-v6.svg?v=6' "$INDEX"
-grep -Fq 'app-icon-official-v6.svg?v=6' "$MANIFEST"
-grep -Fq 'app-icon-official-maskable-v6.svg?v=6' "$MANIFEST"
+grep -Fq 'e_trim/c_fit,h_172,w_172/b_rgb:090b10,c_pad,h_192,w_192/f_png' "$MANIFEST"
+grep -Fq 'e_trim/c_fit,h_460,w_460/b_rgb:090b10,c_pad,h_512,w_512/f_png' "$MANIFEST"
+grep -Fq 'e_trim/c_fit,h_390,w_390/b_rgb:090b10,c_pad,h_512,w_512/f_png' "$MANIFEST"
+grep -Fq '"sizes": "192x192"' "$MANIFEST"
+grep -Fq '"sizes": "512x512"' "$MANIFEST"
 grep -Fq '"purpose": "maskable"' "$MANIFEST"
-grep -Fq 'letmefly-shell-v5-4-command-v2-9-brand-v6-home-v4' "$SW"
-grep -Fq '/app-icon-official-v6.svg?v=6' "$SW"
+grep -Fq 'letmefly-shell-v5-4-command-v2-10-brand-v7-home-v4' "$SW"
+grep -Fq '/manifest.webmanifest?v=brand-v7' "$SW"
 
-echo "LetMeFly structural Home v4 + official logo PWA icon brand v6: PASS"
+echo "LetMeFly structural Home v4 + Android-safe raster PWA icon brand v7: PASS"
