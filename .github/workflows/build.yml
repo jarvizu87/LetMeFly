@@ -105,7 +105,12 @@ jobs:
           CHROME_BIN="$CHROME_BIN" node ci/audit-browser-smoke.mjs
 
       - name: Audit final Exercise Intelligence production dist
-        run: bash ci/audit-exercise-intelligence-production-v1.sh
+        run: |
+          # This legacy audit was removed from source. Purge any stale generated
+          # workspace copy before the authoritative production-dist audit runs.
+          rm -f ci/audit-exercise-intelligence.mjs
+          test ! -e ci/audit-exercise-intelligence.mjs
+          bash ci/audit-exercise-intelligence-production-v1.sh
 
       - name: Audit final full Exercise Intelligence catalog
         run: bash ci/audit-exercise-intelligence-library-production-v1.sh
