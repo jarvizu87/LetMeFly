@@ -26,10 +26,19 @@ text = text.replace(
     "    prescribedName,",
     1,
 )
+
+old_unit = "input.manualLoadUnit ?? preview.currentUnit ?? null"
+new_unit = "input.manualLoadUnit ?? (preview.currentUnit === 'kg' ? 'kg' : preview.currentUnit === 'lb' ? 'lb' : null)"
+if old_unit in text:
+    text = text.replace(old_unit, new_unit, 1)
+elif new_unit not in text:
+    raise SystemExit('Issue #54 manual load-unit narrowing patch point missing')
+
 path.write_text(text)
 PY
 
 grep -Fq 'const governedPrimary = intelligence?.getExercise?.(prescribedKey) ?? intelligence?.getExercise?.(prescribedName)' "$MAIN"
 grep -Fq 'getSubstitutions?.(governedPrimaryKey, { includeBlocked: true })' "$MAIN"
+grep -Fq "preview.currentUnit === 'kg' ? 'kg' : preview.currentUnit === 'lb' ? 'lb' : null" "$MAIN"
 
-echo "Issue #54 governed substitution program-key/name resolution: PASS"
+echo "Issue #54 governed substitution resolution + load-unit narrowing: PASS"
