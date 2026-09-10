@@ -26,9 +26,12 @@ async function bootstrapAthlete() {
     if (await create.isVisible().catch(() => false)) {
       const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
       const input = modal.locator('input[type="text"],input:not([type])').first()
-      if (await input.isVisible().catch(() => false)) await input.fill('QA Athlete')
-      await create.click()
-      await page.waitForTimeout(500)
+      await input.waitFor({ state:'visible', timeout:5000 })
+      await input.fill('QA Athlete')
+      await dismissOptionalInstall()
+      await create.click({ timeout:5000 })
+      await create.waitFor({ state:'hidden', timeout:8000 })
+      await page.waitForTimeout(250)
       return
     }
     await page.waitForTimeout(180)
