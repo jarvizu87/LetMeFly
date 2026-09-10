@@ -1,0 +1,122 @@
+--- src/auth/auth-service.ts
++++ src/auth/auth-service.ts
+@@ -27,12 +27,55 @@
+       options: {
+         shouldCreateUser: purpose === 'enable-sync',
+         captchaToken,
++        emailRedirectTo: authReturnUrl(),
+       },
+     })
+ 
+     if (error) throw error
+   }
+ 
++  async completeEmailLinkFromUrl(
++    url: string,
++  ): Promise<VerifiedAuth | null> {
++    const callbackUrl = new URL(url)
++    const code = callbackUrl.searchParams.get('code')
++    const callbackError = callbackUrl.searchParams.get('error')
++
++    if (!code && !callbackError) return null
++
++    try {
++      if (!code) {
++        throw new Error(
++          'The sign-in link could not be completed. Request a fresh email and try again.',
++        )
++      }
++
++      const { data, error } =
++        await supabase.auth.exchangeCodeForSession(code)
++
++      if (error) throw error
++      if (!data.user || !data.session) {
++        throw new Error('Email link did not create a valid session')
++      }
++
++      const verified = await supabase.auth.getUser()
++      if (verified.error || !verified.data.user) {
++        throw verified.error ?? new Error('Unable to verify authenticated user')
++      }
++
++      if (verified.data.user.id !== data.user.id) {
++        throw new Error('Authenticated identity mismatch')
++      }
++
++      return {
++        user: verified.data.user,
++        session: data.session,
++      }
++    } finally {
++      clearAuthCallbackFromUrl(callbackUrl)
++    }
++  }
++
+   async verifyEmailOtp(
+     email: string,
+     token: string,
+@@ -104,3 +147,20 @@
+     if (error) throw error
+   }
+ }
++
++function authReturnUrl(): string | undefined {
++  if (typeof window === 'undefined') return undefined
++  return `${window.location.origin}${window.location.pathname}`
++}
++
++function clearAuthCallbackFromUrl(callbackUrl: URL): void {
++  if (typeof window === 'undefined') return
++
++  for (const key of ['code', 'error', 'error_code', 'error_description']) {
++    callbackUrl.searchParams.delete(key)
++  }
++
++  const cleanUrl =
++    `${callbackUrl.pathname}${callbackUrl.search}${callbackUrl.hash}`
++  window.history.replaceState(window.history.state, document.title, cleanUrl)
++}
+--- src/auth/private-vault-controller.ts
++++ src/auth/private-vault-controller.ts
+@@ -68,7 +68,10 @@
+       },
+     )
+ 
+-    const session = await this.auth.getLocalSession()
++    const callbackAuth = await this.auth.completeEmailLinkFromUrl(
++      window.location.href,
++    )
++    const session = callbackAuth?.session ?? await this.auth.getLocalSession()
+     if (!session) {
+       this.patch({
+         mode: local ? 'LOCAL_ONLY' : 'LOCAL_ONLY',
+@@ -79,7 +82,7 @@
+       return
+     }
+ 
+-    const user = await this.auth.getTrustedCurrentUser()
++    const user = callbackAuth?.user ?? await this.auth.getTrustedCurrentUser()
+     if (!user) {
+       this.patch({
+         mode: local ? 'REAUTH_REQUIRED' : 'LOCAL_ONLY',
+--- src/main.ts
++++ src/main.ts
+@@ -383,7 +383,7 @@
+     <section class="card profile-card"><div class="card-head"><div><div class="page-kicker">Identity</div><h2>Athlete Profile</h2></div><span class="badge mandatory">Private</span></div><div class="field"><label>Display name</label><input id="profile-name" class="input" value="${esc(name)}"></div><button class="btn primary" data-action="save-profile">SAVE PROFILE</button></section>
+     <section class="card vault-card"><div class="page-kicker">Private Vault — ${esc(vm?.vaultLabel ?? 'READY')}</div><h2>${esc(vm?.accountLabel ?? name)}</h2><div class="vault-status"><span>CLOUD</span><strong>${esc(vm?.cloudLabel ?? (state.cloud.configured ? 'NOT SIGNED IN' : 'NOT CONFIGURED'))}</strong></div>${vm?.pendingLabel ? `<p class="muted">${esc(vm.pendingLabel)}</p>` : ''}${vm?.conflictLabel ? `<div class="callout danger">${esc(vm.conflictLabel)}</div>` : ''}<div class="btn-row"><button class="btn ghost" data-action="sync-now" ${!state.cloud.configured ? 'disabled' : ''}>SYNC NOW</button>${snapshot?.session ? `<button class="btn ghost" data-action="signout-keep">SIGN OUT — KEEP DATA</button>` : ''}</div></section>
+   </div>
+-  ${state.cloud.configured && !snapshot?.session ? `<section class="card"><div class="page-kicker">Optional cloud</div><h2>Enable Sync / Sign In</h2><div class="form-grid"><div class="field"><label>Email</label><input id="cloud-email" class="input" type="email" placeholder="you@example.com"></div><div class="field"><label>Code</label><input id="cloud-code" class="input" inputmode="numeric" placeholder="6-digit code"></div></div><div class="btn-row"><button class="btn purple" data-action="send-otp-enable">ENABLE SYNC — SEND CODE</button><button class="btn ghost" data-action="send-otp-signin">SIGN IN — SEND CODE</button><button class="btn primary" data-action="verify-otp">VERIFY CODE</button></div></section>` : ''}
++  ${state.cloud.configured && !snapshot?.session ? `<section class="card"><div class="page-kicker">Optional cloud</div><h2>Enable Sync / Sign In</h2><div class="form-grid"><div class="field"><label>Email</label><input id="cloud-email" class="input" type="email" placeholder="you@example.com"></div><div class="field"><label>Verification code (if shown)</label><input id="cloud-code" class="input" inputmode="numeric" placeholder="6-digit code"></div></div><div class="btn-row"><button class="btn purple" data-action="send-otp-enable">ENABLE SYNC — SEND EMAIL</button><button class="btn ghost" data-action="send-otp-signin">SIGN IN — SEND EMAIL</button><button class="btn primary" data-action="verify-otp">VERIFY CODE</button></div></section>` : ''}
+   <div class="section-title"><div><div class="page-kicker">Ownership</div><h2>Data & Backups</h2></div></div><section class="card data-card"><p class="muted">JSON is the authoritative restore format. CSV and PDF remain portable convenience exports.</p><div class="data-actions"><button class="action-tile" data-action="backup-json"><span>⇩</span><strong>Full Backup</strong><small>Verified JSON</small></button><button class="action-tile" data-action="export-csv"><span>▦</span><strong>Export CSV</strong><small>Workout history</small></button><button class="action-tile" data-action="export-pdf"><span>▤</span><strong>Print / PDF</strong><small>Portable report</small></button><label class="action-tile" for="restore-file"><span>↥</span><strong>Restore</strong><small>Verified backup</small></label><input id="restore-file" type="file" accept=".json,application/json" hidden></div></section>
+   <div class="section-title"><div><div class="page-kicker">Migration</div><h2>Legacy LetMeFly</h2></div></div><section class="card"><p class="muted">Old LetMeFly localStorage is never deleted automatically.</p>${state.legacy ? `<div class="callout warning">Legacy state detected: ${state.legacy.snapshot.candidates.length} candidate key(s), ${state.legacy.plan.unmappedPaths.length} unmapped paths preserved.</div><div class="btn-row"><button class="btn ghost" data-action="download-legacy">DOWNLOAD RAW SNAPSHOT</button><button class="btn primary" data-action="migrate-legacy">MIGRATE SAFELY</button></div>` : '<div class="vault-status"><span>STATUS</span><strong>No legacy migration pending</strong></div>'}</section>
+   <div class="section-title"><div><div class="page-kicker">Device Privacy</div><h2>Local Data</h2></div></div><section class="card danger-zone"><div><strong>Remove private data from this device</strong><p>A verified backup is prepared first.</p></div><button class="btn danger" data-action="wipe-device">REMOVE DEVICE DATA</button></section>`
+@@ -753,7 +753,7 @@
+   const email = document.querySelector<HTMLInputElement>('#cloud-email')?.value ?? ''
+   if (!email.trim()) return showToast('Enter your email')
+   await state.cloud.vault.requestCode(email, purpose)
+-  showToast('Sign-in code sent')
++  showToast('Sign-in email sent — use its link or code')
+ }
+ 
+ async function verifyOtp(): Promise<void> {
