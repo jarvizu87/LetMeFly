@@ -87,13 +87,21 @@
   function sourceActions(card) {
     if (!(card instanceof Element)) return []
 
-    const primary = [...card.querySelectorAll('.exercise-actions button, .exercise-actions .btn, .exercise-actions [role="button"]')]
-      .filter((node, index, all) => node instanceof HTMLElement && all.indexOf(node) === index && (text(node) || node.getAttribute('aria-label')))
-
-    if (primary.length) return primary.slice(0, 8)
-
-    return [...card.querySelectorAll('button[data-watch],button[data-exercise-info],button[data-substitute],button[data-action="go-coach"]')]
-      .filter((node, index, all) => node instanceof HTMLElement && all.indexOf(node) === index)
+    // Collect the four governed exercise actions explicitly first, then include
+    // any additional card actions. A partial .exercise-actions group must not
+    // hide Substitute or Ask Coach when those controls are mounted elsewhere.
+    const selectors = [
+      'button[data-watch]',
+      'button[data-exercise-info]',
+      'button[data-substitute]',
+      'button[data-action="go-coach"]',
+      '.exercise-actions button',
+      '.exercise-actions .btn',
+      '.exercise-actions [role="button"]',
+    ]
+    const actions = selectors.flatMap((selector) => [...card.querySelectorAll(selector)])
+    return [...new Set(actions)]
+      .filter((node) => node instanceof HTMLElement && (text(node) || node.getAttribute('aria-label')))
       .slice(0, 8)
   }
 
