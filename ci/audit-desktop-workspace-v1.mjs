@@ -80,7 +80,27 @@ async function enterTrain(page) {
   await page.waitForSelector('#swipe-viewport', { timeout: 8000 })
 }
 
+async function startSyntheticWorkout(page) {
+  if (await page.locator('.exercise-stack > .active-exercise').count()) return true
+
+  const readiness = page.locator('.readiness-panel input[type="radio"][value="3"]')
+  const readinessCount = await readiness.count()
+  for (let i = 0; i < readinessCount; i += 1) {
+    await readiness.nth(i).check({ force: true }).catch(() => null)
+  }
+
+  const start = await firstVisible(page.locator('button[data-action="start-workout"]'))
+  if (!start) return false
+  await start.click({ timeout: 5000 }).catch(() => null)
+  await page.waitForTimeout(900)
+  return (await page.locator('.exercise-stack > .active-exercise').count()) > 0
+}
+
 async function probeExerciseSection(page) {
+  if (!(await page.locator('.exercise-stack > .active-exercise').count())) {
+    await startSyntheticWorkout(page)
+  }
+
   if (await page.locator('.lmf-desktop-flow-item').count()) return true
   const sectionButtons = page.locator('[data-session-step]')
   for (let i = 0; i < await sectionButtons.count(); i += 1) {
@@ -171,20 +191,27 @@ try {
 
   const foundExercises = await probeExerciseSection(desktop)
   if (foundExercises) {
+    await desktop.waitForTimeout(250)
     const liveReuse = await desktop.evaluate(() => {
       const item = document.querySelector('.lmf-desktop-flow-item')
       const thumb = item?.querySelector('.lmf-desktop-flow-thumb')
       const shell = document.querySelector('[data-lmf-desktop-workspace="true"]')
       const card = shell?.querySelector('#swipe-viewport .active-exercise')
       const input = card?.querySelector('.load-input,.reps-input,.rpe-input')
+      const media = card?.querySelector('.lmf-exercise-media')
       const art = card?.getAttribute('data-exercise-art') || thumb?.getAttribute('data-exercise-art') || ''
       const image = thumb instanceof HTMLElement ? getComputedStyle(thumb).backgroundImage : ''
+      const toolLabels = [...document.querySelectorAll('.lmf-desktop-v2-tool')].map((node) => (node.textContent || '').replace(/\s+/g, ' ').trim())
       return {
         itemPresent: !!item,
         originalCardInsideCenter: !!card && !!card.closest('#swipe-viewport'),
         originalSetControlInsideCenter: !!input && !!input.closest('#swipe-viewport'),
         art,
         image,
+        mediaHeight: media instanceof HTMLElement ? media.getBoundingClientRect().height : 0,
+        v2Panel: !!document.querySelector('.lmf-desktop-context-panel-v2'),
+        tabsVisible: !!document.querySelector('.lmf-desktop-context-tabs') && getComputedStyle(document.querySelector('.lmf-desktop-context-tabs')).display !== 'none',
+        toolLabels,
       }
     })
     report.observations.liveReuse = liveReuse
@@ -194,8 +221,17 @@ try {
     else fail('Original live set controls remain in center column', JSON.stringify(liveReuse))
     if (liveReuse.art || (liveReuse.image && liveReuse.image !== 'none')) pass('Desktop workspace reuses exercise artwork hook', liveReuse.art || 'resolved background image')
     else fail('Desktop workspace reuses exercise artwork hook', JSON.stringify(liveReuse))
+
+    if (liveReuse.mediaHeight >= 120 && liveReuse.mediaHeight <= 195) pass('Desktop exercise artwork is compact', `${Math.round(liveReuse.mediaHeight)}px tall`)
+    else fail('Desktop exercise artwork is compact', JSON.stringify(liveReuse))
+
+    const toolText = liveReuse.toolLabels.join(' | ').toUpperCase()
+    const requiredTools = ['WATCH EXERCISE', 'EXERCISE INFO', 'SUBSTITUTE', 'ASK COACH']
+    const missingTools = requiredTools.filter((label) => !toolText.includes(label))
+    if (liveReuse.v2Panel && !liveReuse.tabsVisible && !missingTools.length) pass('Option 3 live tool rail is populated', liveReuse.toolLabels.join(' | '))
+    else fail('Option 3 live tool rail is populated', JSON.stringify({ v2Panel: liveReuse.v2Panel, tabsVisible: liveReuse.tabsVisible, toolLabels: liveReuse.toolLabels, missingTools }))
   } else {
-    pass('Exercise-card desktop reuse probe', 'Current QA program surface exposed no exercise section; workspace contract still verified')
+    fail('Exercise-card desktop reuse probe', 'Synthetic workout could not reach an exercise section')
   }
 
   await desktop.screenshot({ path: path.join(outDir, 'desktop-train.png'), fullPage: true })
@@ -208,10 +244,11 @@ try {
     desktopFlag: document.documentElement.getAttribute('data-lmf-desktop-ui'),
     workspace: !!document.querySelector('[data-lmf-desktop-workspace="true"]'),
     railBrand: !!document.querySelector('.lmf-desktop-brand'),
+    v2Panel: !!document.querySelector('.lmf-desktop-context-panel-v2'),
     width: window.innerWidth,
   }))
   report.observations.mobileIsolation = mobileState
-  if (!mobileState.desktopFlag && !mobileState.workspace && !mobileState.railBrand) pass('Mobile UI remains isolated from desktop layer', `${mobileState.width}px viewport`)
+  if (!mobileState.desktopFlag && !mobileState.workspace && !mobileState.railBrand && !mobileState.v2Panel) pass('Mobile UI remains isolated from desktop layer', `${mobileState.width}px viewport`)
   else fail('Mobile UI remains isolated from desktop layer', JSON.stringify(mobileState))
   await mobileContext.close()
 } catch (error) {
