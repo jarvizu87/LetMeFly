@@ -38,6 +38,16 @@ async function dismissOptionalInstall() {
   }
 }
 
+async function settleOptionalInstallForScreenshot() {
+  // The app's global PWA helper can schedule its banner after page boot. Keep
+  // QA screenshots deterministic by clearing any delayed prompt after that
+  // timer has had a chance to fire; this does not alter production behavior.
+  for (const delay of [500, 500, 500, 250]) {
+    await page.waitForTimeout(delay).catch(() => null)
+    await dismissOptionalInstall().catch(() => null)
+  }
+}
+
 async function bootstrapAthlete() {
   for (let i=0;i<20;i+=1) {
     await dismissOptionalInstall()
@@ -134,8 +144,7 @@ try {
   report.failures.push({ label:'Option 1 Home browser audit execution', detail:report.error })
   console.log(`FAIL  Option 1 Home browser audit execution — ${report.error}`)
 } finally {
-  await dismissOptionalInstall().catch(() => null)
-  await page.waitForTimeout(250).catch(() => null)
+  await settleOptionalInstallForScreenshot().catch(() => null)
   await page.screenshot({ path:path.join(outDir, 'home-option1.png'), fullPage:true }).catch(() => null)
   fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)
   await browser.close()
