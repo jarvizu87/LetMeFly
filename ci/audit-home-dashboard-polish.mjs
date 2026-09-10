@@ -30,30 +30,48 @@ const browser = await chromium.launch({ headless:true, executablePath:chromeBin,
 const context = await browser.newContext({ viewport:{ width:412, height:915 }, isMobile:true, hasTouch:true })
 const page = await context.newPage()
 
+async function firstVisible(locator) {
+  const count = await locator.count()
+  for (let i=0;i<count;i+=1) {
+    const item = locator.nth(i)
+    if (await item.isVisible().catch(() => false)) return item
+  }
+  return null
+}
+
 async function dismissOptionalInstall() {
-  const button = page.getByRole('button', { name:/^Not now$/i }).first()
-  if (await button.isVisible().catch(() => false)) await button.click().catch(() => null)
+  const button = await firstVisible(page.getByRole('button', { name:/^Not now$/i }))
+    || await firstVisible(page.locator('button').filter({ hasText:/^\s*Not now\s*$/i }))
+  if (!button) return false
+  await button.click({ timeout:2500 }).catch(() => null)
+  await page.waitForTimeout(120)
+  return true
 }
 
 async function bootstrapAthlete() {
-  for (let i=0;i<18;i+=1) {
+  for (let i=0;i<24;i+=1) {
     await dismissOptionalInstall()
-    const create = page.getByRole('button', { name:/CREATE LOCAL ATHLETE/i }).first()
-    if (await create.isVisible().catch(() => false)) {
-      const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
-      const input = modal.locator('input[type="text"],input:not([type])').first()
-      if (await input.isVisible().catch(() => false)) await input.fill('Home Polish QA Athlete')
-      await create.click()
-      await page.waitForTimeout(550)
-      break
+
+    if (await page.locator('.lmf-home-command-v4').count()) return
+
+    const create = await firstVisible(page.getByRole('button', { name:/CREATE LOCAL ATHLETE/i }))
+      || await firstVisible(page.locator('button').filter({ hasText:/CREATE LOCAL ATHLETE/i }))
+
+    if (create) {
+      const input = await firstVisible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
+      if (!input) throw new Error('Athlete name input missing while local-athlete modal is visible')
+      await input.fill('Home Polish QA Athlete')
+      await dismissOptionalInstall()
+      await create.click({ timeout:5000 })
+      await page.waitForFunction(() => !/CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout:8000 }).catch(() => null)
+      await page.waitForTimeout(450)
+      if (await page.locator('.lmf-home-command-v4').count()) return
     }
-    if (await page.locator('.lmf-home-command-v4').count()) break
+
     await page.waitForTimeout(180)
   }
-  for (let i=0;i<6;i+=1) {
-    await dismissOptionalInstall()
-    await page.waitForTimeout(160)
-  }
+
+  throw new Error('Could not bootstrap local athlete before Home dashboard audit')
 }
 
 try {
@@ -63,7 +81,7 @@ try {
   await page.evaluate(() => { location.hash = '#/home' })
   await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:8000 })
   await page.waitForTimeout(700)
-  await dismissOptionalInstall()
+  for (let i=0;i<4;i+=1) await dismissOptionalInstall()
 
   const layout = await page.evaluate(() => {
     const rect = (selector) => {
