@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const target = path.resolve(process.argv[2] || '.build-src/letmefly_app')
-const root = path.resolve(process.cwd())
+const scriptDir = path.dirname(fileURLToPath(import.meta.url))
+const root = path.resolve(scriptDir, '..')
+const target = path.resolve(process.argv[2] || path.join(root, '.build-src/letmefly_app'))
 const sourceMain = path.join(target, 'src/main.ts')
 const sourceService = path.join(target, 'src/services/workout-service.ts')
 const runtime = path.join(root, 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js')
