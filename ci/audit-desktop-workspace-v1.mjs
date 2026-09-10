@@ -135,6 +135,11 @@ try {
       display: style.display,
       columns: style.gridTemplateColumns,
       width: shellRect.width,
+      left: shellRect.left,
+      right: shellRect.right,
+      flowWidth: flowRect?.width || 0,
+      viewportWidth: viewportRect.width,
+      contextWidth: contextRect?.width || 0,
       viewportDirectChild: viewport.parentElement === shell,
       order: flowRect && contextRect ? [flowRect.left, viewportRect.left, contextRect.left] : null,
       scrollWidth: document.documentElement.scrollWidth,
@@ -147,6 +152,20 @@ try {
   } else {
     fail('Option 3 three-column Train workspace', JSON.stringify(workspace))
   }
+
+  const usableWidth = workspace ? workspace.innerWidth - (rail?.width || 0) : 0
+  if (workspace && usableWidth > 0 && workspace.width >= usableWidth * .82) {
+    pass('Desktop Train uses the browser work area', `${Math.round(workspace.width)}px / ${Math.round(usableWidth)}px usable`)
+  } else {
+    fail('Desktop Train uses the browser work area', JSON.stringify({ workspaceWidth: workspace?.width, usableWidth, railWidth: rail?.width, innerWidth: workspace?.innerWidth }))
+  }
+
+  if (workspace && workspace.flowWidth >= 220 && workspace.viewportWidth >= 500 && workspace.contextWidth >= 250) {
+    pass('Desktop Train columns are materially desktop-sized', `${Math.round(workspace.flowWidth)} / ${Math.round(workspace.viewportWidth)} / ${Math.round(workspace.contextWidth)}px`)
+  } else {
+    fail('Desktop Train columns are materially desktop-sized', JSON.stringify(workspace))
+  }
+
   if (workspace && workspace.scrollWidth <= workspace.innerWidth + 3) pass('Desktop page has no horizontal overflow', `${workspace.scrollWidth}/${workspace.innerWidth}px`)
   else fail('Desktop page has no horizontal overflow', JSON.stringify(workspace))
 
