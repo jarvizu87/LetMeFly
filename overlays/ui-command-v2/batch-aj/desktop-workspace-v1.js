@@ -472,6 +472,13 @@
       return
     }
 
+    const navItem = target.closest('.navbar .nav-item')
+    if (navItem instanceof HTMLElement) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+      scheduleRefresh(30)
+      return
+    }
+
     if (!target.closest('.lmf-desktop-only')) scheduleRefresh(30)
   }, true)
 
