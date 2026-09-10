@@ -8,24 +8,28 @@ on:
     paths:
       - '.github/workflows/workout-substitution-today-audit.yml'
       - 'ci/apply-workout-substitution-today-v1.sh'
+      - 'ci/apply-workout-substitution-today-v2.sh'
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser.mjs'
       - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.css'
   pull_request:
     branches: [main]
     paths:
       - 'ci/apply-workout-substitution-today-v1.sh'
+      - 'ci/apply-workout-substitution-today-v2.sh'
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser.mjs'
       - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.css'
 
@@ -51,10 +55,12 @@ jobs:
       - name: Syntax-check feature harness
         run: |
           bash -n ci/apply-workout-substitution-today-v1.sh
+          bash -n ci/apply-workout-substitution-today-v2.sh
           bash -n ci/normalize-workout-substitution-governance-v1.sh
           node --check ci/audit-workout-substitution-today-v1.mjs
           node --check ci/audit-workout-substitution-today-browser.mjs
           node --check ci/report-issue54-history-progress-surface.mjs
+          node --check overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
           node --check overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js
 
       - name: Build production source with Issue 54
