@@ -26,8 +26,11 @@ node "$ROOT_DIR/ci/audit-workout-prescription-fidelity-v1.mjs" "$TARGET"
 
 # Issue #54: governed "Use This Substitute for Today" behavior. This patch may
 # mutate only the active workout instance. Crownforge, Crown Maintenance, and
-# Black Crown program definitions remain authoritative and unchanged.
+# Black Crown program definitions remain authoritative and unchanged. Program
+# exercise IDs do not always equal Exercise Intelligence IDs, so normalize the
+# governance lookup through the prescribed name/alias before auditing.
 bash "$ROOT_DIR/ci/apply-workout-substitution-today-v1.sh" "$TARGET"
+bash "$ROOT_DIR/ci/normalize-workout-substitution-governance-v1.sh" "$TARGET"
 node "$ROOT_DIR/ci/audit-workout-substitution-today-v1.mjs" "$TARGET"
 
 # Supabase's hosted default email sends a magic link unless custom SMTP allows
@@ -52,6 +55,7 @@ grep -Fq "const refreshedStats = state.workout ? completionStats(state.workout) 
 grep -Fq "Set saved locally\${refreshedStats ? \` • \${refreshedStats.done}/\${refreshedStats.total}\` : ''}" "$TARGET/src/main.ts"
 grep -Fq "await supabase.auth.exchangeCodeForSession(code)" "$TARGET/src/auth/auth-service.ts"
 grep -Fq "LetMeFlyWorkoutSubstitutionBridge" "$TARGET/src/main.ts"
+grep -Fq "getSubstitutions?.(governedPrimaryKey, { includeBlocked: true })" "$TARGET/src/main.ts"
 grep -Fq "substituted_from_exercise_key: prescribedKey" "$TARGET/src/services/workout-service.ts"
 
 cd "$TARGET"
