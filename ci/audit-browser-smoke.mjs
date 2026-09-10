@@ -118,10 +118,15 @@ async function bootstrapEphemeralAthlete(page) {
   }
 
   const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
-  const displayInput = await firstVisible(modal.locator('input[type="text"],input:not([type])'))
-    || await firstVisible(page.locator('input[type="text"],input:not([type])'))
+  let displayInput = null
+  for (let i = 0; i < 16; i += 1) {
+    displayInput = await firstVisible(modal.locator('input[type="text"],input:not([type])'))
+      || await firstVisible(page.locator('input[type="text"],input:not([type])'))
+    if (displayInput) break
+    await page.waitForTimeout(180)
+  }
   if (!displayInput) {
-    fail('Browser athlete bootstrap', 'display-name input not found')
+    fail('Browser athlete bootstrap', 'display-name input not found after first-run modal settled')
     return
   }
 
@@ -286,11 +291,11 @@ page.on('response', (response) => {
 try {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForSelector('body', { timeout: 10000 })
-  await page.waitForFunction(() => /LETMEFLY/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
+  await page.waitForFunction(() => /LETMEFLY|BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
   await page.waitForTimeout(350)
   await optionalInstallDismiss(page)
   const bodyText = await page.locator('body').innerText()
-  if (!/LETMEFLY/i.test(bodyText)) fail('Browser app boot', 'LetMeFly shell text not found after startup window')
+  if (!/LETMEFLY|BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(bodyText)) fail('Browser app boot', 'LetMeFly shell or valid first-run athlete UI not found after startup window')
   else pass('Browser app boot')
 
   await bootstrapEphemeralAthlete(page)
