@@ -32,7 +32,10 @@ const page = await context.newPage()
 
 async function dismissOptionalInstall() {
   const button = page.getByRole('button', { name:/^Not now$/i }).first()
-  if (await button.isVisible().catch(() => false)) await button.click().catch(() => null)
+  if (await button.isVisible().catch(() => false)) {
+    await button.click().catch(() => null)
+    await page.waitForTimeout(180).catch(() => null)
+  }
 }
 
 async function bootstrapAthlete() {
@@ -42,7 +45,7 @@ async function bootstrapAthlete() {
     if (await create.isVisible().catch(() => false)) {
       const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
       const input = modal.locator('input[type="text"],input:not([type])').first()
-      if (await input.isVisible().catch(() => false)) await input.fill('Option One QA Athlete')
+      if (await input.isVisible().catch(() => false)) await input.fill('JP')
       await create.click()
       await page.waitForTimeout(500)
       break
@@ -75,9 +78,16 @@ try {
       const s = getComputedStyle(el)
       return { backgroundImage:s.backgroundImage, gridTemplateColumns:s.gridTemplateColumns, display:s.display }
     }
+    const pseudoStyle = (selector, pseudo) => {
+      const el = document.querySelector(selector)
+      if (!(el instanceof HTMLElement)) return null
+      const s = getComputedStyle(el, pseudo)
+      return { backgroundImage:s.backgroundImage, opacity:s.opacity, filter:s.filter }
+    }
     return {
       command:rect('.lmf-home-v4-command'),
       commandStyle:style('.lmf-home-v4-command'),
+      fenrirStyle:pseudoStyle('.lmf-home-v4-command-mark','::before'),
       start:rect('.lmf-home-v4-start'),
       progress:rect('.lmf-home-option1-progress'),
       alert:rect('.lmf-home-option1-alert'),
@@ -89,7 +99,7 @@ try {
       progressMounts:document.querySelectorAll('#lmf-progress-dashboard-v1').length,
       bodyWidth:document.documentElement.scrollWidth,
       viewportWidth:window.innerWidth,
-      hasLogoWatermark:Boolean(document.querySelector('.lmf-home-v4-command-mark')),
+      hasCommandMark:Boolean(document.querySelector('.lmf-home-v4-command-mark')),
       hasStats:document.querySelectorAll('.lmf-home-v4-stats > div').length,
     }
   })
@@ -98,10 +108,12 @@ try {
   check(Boolean(layout.command), 'Cinematic command hero is present')
   check((layout.command?.height || 0) >= 380, 'Command hero has premium mobile depth', `${Math.round(layout.command?.height || 0)}px`)
   check(layout.commandStyle?.backgroundImage?.includes('home-mountain-foundation-v1.svg'), 'Command hero uses approved mountain artwork', layout.commandStyle?.backgroundImage || 'missing')
+  check(layout.hasCommandMark, 'Command hero preserves wolf/brand identity layer')
+  check(layout.fenrirStyle?.backgroundImage?.includes('fenrir.webp'), 'Command hero uses clean Fenrir artwork', layout.fenrirStyle?.backgroundImage || 'missing')
+  check(Number(layout.fenrirStyle?.opacity || 0) >= .5, 'Fenrir art remains visibly weighted on mobile', `opacity=${layout.fenrirStyle?.opacity || 'missing'}`)
   check(Boolean(layout.progress), 'Workout progress bar is present')
   check(Boolean(layout.start) && (layout.start?.width || 0) >= 300, 'Start Workout remains a dominant mobile action', `${Math.round(layout.start?.width || 0)}px`)
   check(Boolean(layout.alert), 'Compact header utility control is present')
-  check(layout.hasLogoWatermark, 'Command hero preserves wolf/brand identity layer')
 
   const { readiness, performance, milestone, coach } = layout
   const four = [readiness,performance,milestone,coach].every(Boolean)
@@ -122,6 +134,8 @@ try {
   report.failures.push({ label:'Option 1 Home browser audit execution', detail:report.error })
   console.log(`FAIL  Option 1 Home browser audit execution — ${report.error}`)
 } finally {
+  await dismissOptionalInstall().catch(() => null)
+  await page.waitForTimeout(250).catch(() => null)
   await page.screenshot({ path:path.join(outDir, 'home-option1.png'), fullPage:true }).catch(() => null)
   fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)
   await browser.close()
