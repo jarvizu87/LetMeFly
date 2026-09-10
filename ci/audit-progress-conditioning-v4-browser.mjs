@@ -26,10 +26,35 @@ async function dismissInstall(page) {
   const button=await firstVisible(page.locator('button,a,[role="button"]').filter({hasText:/^\s*Not now\s*$/i}))
   if(button)await button.click({timeout:1500}).catch(()=>null)
 }
+async function waitForAthleteNameInput(page, modal) {
+  for (let i=0;i<20;i+=1) {
+    const input=await firstVisible(modal.locator('#onboard-name,input[type="text"],input:not([type])'))
+      || await firstVisible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
+    if(input)return input
+    await dismissInstall(page)
+    await page.waitForTimeout(120)
+  }
+  return null
+}
 async function bootstrap(page) {
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:20000})
   await page.waitForSelector('body',{timeout:10000})
-  for(let i=0;i<12;i+=1){await dismissInstall(page);const create=await firstVisible(page.locator('button,a,[role="button"]').filter({hasText:/CREATE LOCAL ATHLETE/i}));if(create){const modal=create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]');const input=await firstVisible(modal.locator('input[type="text"],input:not([type])'))||await firstVisible(page.locator('input[type="text"],input:not([type])'));if(!input)throw new Error('Athlete display-name input missing');await input.fill('Conditioning QA Athlete');await create.click({timeout:4000});await page.waitForTimeout(500);break}await page.waitForTimeout(160)}
+  for(let i=0;i<16;i+=1){
+    await dismissInstall(page)
+    const create=await firstVisible(page.locator('button,a,[role="button"]').filter({hasText:/CREATE LOCAL ATHLETE/i}))
+    if(create){
+      const modal=create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
+      const input=await waitForAthleteNameInput(page,modal)
+      if(!input)throw new Error('Athlete display-name input missing after setup modal settled')
+      await input.fill('Conditioning QA Athlete')
+      await dismissInstall(page)
+      await create.click({timeout:4000})
+      await page.waitForFunction(()=>!/CREATE LOCAL ATHLETE/i.test(document.body.innerText),null,{timeout:8000}).catch(()=>null)
+      await page.waitForTimeout(500)
+      break
+    }
+    await page.waitForTimeout(180)
+  }
   for(let i=0;i<5;i+=1){await dismissInstall(page);await page.waitForTimeout(100)}
 }
 async function seedConditioning(page) {

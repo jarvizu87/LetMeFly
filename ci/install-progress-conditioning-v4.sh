@@ -46,6 +46,25 @@ cp "$CSS_SOURCE" "$DIST_DIR/ui/progress-conditioning-v4.css"
 cp "$FINAL_JS_SOURCE" "$DIST_DIR/ui/progress-finalize-v4.js"
 cp "$FINAL_CSS_SOURCE" "$DIST_DIR/ui/progress-finalize-v4.css"
 
+# The v4 finalizer observes the Progress dashboard while multiple additive
+# analytics layers are settling. Resetting its timer on every child mutation can
+# starve a legitimate tab enhancement indefinitely. Keep one pending callback and
+# reschedule only when an enhancement is actively reading private data. This does
+# not change analytics or program data; it only guarantees the current tab gets
+# its already-governed v4 presentation layer promptly.
+FINAL_JS_OUT="$DIST_DIR/ui/progress-finalize-v4.js" python3 - <<'PY'
+from pathlib import Path
+import os
+
+p = Path(os.environ['FINAL_JS_OUT'])
+text = p.read_text()
+old = "  function schedule(delay=90){clearTimeout(timer);timer=setTimeout(()=>void enhance(),delay)}"
+new = "  function schedule(delay=90){if(timer)return;timer=setTimeout(()=>{timer=0;if(busy){schedule(40);return}void enhance()},delay)}"
+if text.count(old) != 1:
+    raise SystemExit(f'Progress v4 non-starving scheduler expected one block, found {text.count(old)}')
+p.write_text(text.replace(old, new, 1))
+PY
+
 DIST_DIR="$DIST_DIR" python - <<'PY'
 from pathlib import Path
 import os, re
@@ -82,5 +101,6 @@ grep -Fq 'NEXT MEASURABLE MILESTONE' "$DIST_DIR/ui/progress-conditioning-v4.js"
 grep -Fq '__LMF_PROGRESS_CONDITIONING__' "$DIST_DIR/ui/progress-conditioning-v4.js"
 grep -Fq 'PROGRESS SIGNALS' "$DIST_DIR/ui/progress-finalize-v4.js"
 grep -Fq '__LMF_PROGRESS_FINALIZE__' "$DIST_DIR/ui/progress-finalize-v4.js"
+grep -Fq 'if(timer)return;timer=setTimeout(()=>{timer=0;if(busy){schedule(40);return}void enhance()},delay)' "$DIST_DIR/ui/progress-finalize-v4.js"
 
 echo "LetMeFly Progress v4 Conditioning + final analytics: PASS"

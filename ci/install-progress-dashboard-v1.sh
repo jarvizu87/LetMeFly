@@ -71,7 +71,7 @@ import os
 p = Path(os.environ['PROGRESS_JS'])
 text = p.read_text()
 old_queue = "function queueRender(force=false){if(force)vaultCache.at=0;clearTimeout(timer);timer=setTimeout(()=>void render(force),force?30:160)}"
-new_queue = "function queueRender(force=false){if(force)vaultCache.at=0;if(timer&&!force)return;clearTimeout(timer);timer=setTimeout(()=>{timer=0;void render(force)},force?30:160)}"
+new_queue = "function queueRender(force=false){if(!force&&document.getElementById(ROOT_ID)?.dataset.loaded==='1')return;if(force)vaultCache.at=0;if(timer&&!force)return;clearTimeout(timer);timer=setTimeout(()=>{timer=0;void render(force)},force?30:160)}"
 if text.count(old_queue) != 1:
     raise SystemExit(f'Progress queueRender starvation patch expected one source block, found {text.count(old_queue)}')
 text = text.replace(old_queue, new_queue, 1)
@@ -89,7 +89,7 @@ if text.count(old_heading) != 1:
 text = text.replace(old_heading, new_heading, 1)
 
 old_boot = "  function boot(){\n    queueScan()"
-new_boot = "  function boot(){\n    window.__LMF_PROGRESS_BOOT__={version:3,refresh:()=>queueRender(true),scan:()=>queueScan()}\n    const routePulse=()=>{queueRender(true);window.setTimeout(()=>queueRender(true),180);window.setTimeout(()=>queueRender(true),650)}\n    window.addEventListener('hashchange',routePulse)\n    window.addEventListener('popstate',routePulse)\n    queueScan()"
+new_boot = "  function boot(){\n    window.__LMF_PROGRESS_BOOT__={version:3,refresh:()=>queueRender(true),scan:()=>queueScan()}\n    const retryRouteRender=()=>{const current=document.getElementById(ROOT_ID);if(!current||current.dataset.loaded!=='1')queueRender(true)}\n    const routePulse=()=>{queueRender(true);window.setTimeout(retryRouteRender,180);window.setTimeout(retryRouteRender,650)}\n    window.addEventListener('hashchange',routePulse)\n    window.addEventListener('popstate',routePulse)\n    queueScan()"
 if text.count(old_boot) != 1:
     raise SystemExit(f'Progress deterministic route boot patch expected one source block, found {text.count(old_boot)}')
 text = text.replace(old_boot, new_boot, 1)
@@ -140,7 +140,8 @@ grep -Fq '/ui/progress-dashboard-mount-guard.js?v=8' "$DIST_DIR/index.html"
 grep -Fq 'PROGRESS DASHBOARD' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'Private vault data' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'never rewrite programming' "$DIST_DIR/ui/progress-dashboard-v1.js"
-grep -Fq 'if(timer&&!force)return' "$DIST_DIR/ui/progress-dashboard-v1.js"
+grep -Fq "if(!force&&document.getElementById(ROOT_ID)?.dataset.loaded==='1')return" "$DIST_DIR/ui/progress-dashboard-v1.js"
+grep -Fq 'retryRouteRender' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'activeTab=next;writeSetting(TAB_KEY,next);queueRender(true)' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq 'main *,[role="main"] *,#app *' "$DIST_DIR/ui/progress-dashboard-v1.js"
 grep -Fq '.progress-score-grid,.strength-progress-card,.tm-board,.history-list' "$DIST_DIR/ui/progress-dashboard-v1.js"

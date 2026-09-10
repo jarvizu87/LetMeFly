@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 JS_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-aj/desktop-workspace-v1.js"
 CSS_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-aj/desktop-workspace-v1.css"
+RAIL_GUARD_SOURCE="$ROOT_DIR/overlays/ui-command-v2/batch-aj/desktop-nav-fixed-guard-v1.js"
 
 if [[ ! -f "$DIST_DIR/index.html" ]]; then
   echo "LetMeFly production dist is missing: $DIST_DIR" >&2
@@ -13,7 +14,9 @@ fi
 
 test -s "$JS_SOURCE"
 test -s "$CSS_SOURCE"
+test -s "$RAIL_GUARD_SOURCE"
 node --check "$JS_SOURCE"
+node --check "$RAIL_GUARD_SOURCE"
 
 grep -Fq "Presentation only" "$JS_SOURCE"
 grep -Fq "never writes athlete data" "$JS_SOURCE"
@@ -27,9 +30,12 @@ grep -Fq 'grid-template-columns: minmax(230px, .78fr) minmax(500px, 1.55fr) minm
 grep -Fq '.lmf-desktop-flow-panel' "$CSS_SOURCE"
 grep -Fq '.lmf-desktop-context-panel' "$CSS_SOURCE"
 grep -Fq 'html[data-lmf-desktop-ui="true"] .navbar' "$CSS_SOURCE"
+grep -Fq "style.setProperty('position', 'fixed', 'important')" "$RAIL_GUARD_SOURCE"
+grep -Fq "style.removeProperty('position')" "$RAIL_GUARD_SOURCE"
+grep -Fq "data-lmf-desktop-ui" "$RAIL_GUARD_SOURCE"
 
 # Desktop v1 must not become a second program/workout engine.
-if grep -Eq 'indexedDB\.put|localStorage\.setItem|sessionStorage\.setItem|supabase\.(from|rpc)|fetch\([^)]*(workout|program)|data-action="toggle-set"' "$JS_SOURCE"; then
+if grep -Eq 'indexedDB\.put|localStorage\.setItem|sessionStorage\.setItem|supabase\.(from|rpc)|fetch\([^)]*(workout|program)|data-action="toggle-set"' "$JS_SOURCE" "$RAIL_GUARD_SOURCE"; then
   echo "Desktop workspace runtime contains a forbidden persistence/program-write boundary" >&2
   exit 1
 fi
@@ -37,6 +43,7 @@ fi
 mkdir -p "$DIST_DIR/ui"
 cp "$JS_SOURCE" "$DIST_DIR/ui/desktop-workspace-v1.js"
 cp "$CSS_SOURCE" "$DIST_DIR/ui/desktop-workspace-v1.css"
+cp "$RAIL_GUARD_SOURCE" "$DIST_DIR/ui/desktop-nav-fixed-guard-v1.js"
 
 DIST_DIR="$DIST_DIR" python3 - <<'PY'
 from pathlib import Path
@@ -47,6 +54,7 @@ p = Path(os.environ['DIST_DIR']) / 'index.html'
 text = p.read_text()
 css = '<link rel="stylesheet" href="/ui/desktop-workspace-v1.css">'
 js = '<script defer src="/ui/desktop-workspace-v1.js"></script>'
+rail_guard = '<script defer src="/ui/desktop-nav-fixed-guard-v1.js"></script>'
 
 if css not in text:
     if not re.search(r'</head>', text, re.I):
@@ -58,9 +66,15 @@ if js not in text:
         raise SystemExit('index.html is missing </body>')
     text = re.sub(r'</body>', f'  {js}\n</body>', text, count=1, flags=re.I)
 
+if rail_guard not in text:
+    if not re.search(r'</body>', text, re.I):
+        raise SystemExit('index.html is missing </body>')
+    text = re.sub(r'</body>', f'  {rail_guard}\n</body>', text, count=1, flags=re.I)
+
 checks = {
     'single desktop stylesheet': text.count('/ui/desktop-workspace-v1.css') == 1,
     'single desktop runtime': text.count('/ui/desktop-workspace-v1.js') == 1,
+    'single desktop rail guard': text.count('/ui/desktop-nav-fixed-guard-v1.js') == 1,
     'single doctype': len(re.findall(r'<!doctype\s+html[^>]*>', text, re.I)) == 1,
     'single body close': len(re.findall(r'</body>', text, re.I)) == 1,
     'single html close': len(re.findall(r'</html>', text, re.I)) == 1,
@@ -73,8 +87,10 @@ p.write_text(text.rstrip() + '\n')
 PY
 
 node --check "$DIST_DIR/ui/desktop-workspace-v1.js"
+node --check "$DIST_DIR/ui/desktop-nav-fixed-guard-v1.js"
 test -s "$DIST_DIR/ui/desktop-workspace-v1.css"
 grep -Fq '/ui/desktop-workspace-v1.css' "$DIST_DIR/index.html"
 grep -Fq '/ui/desktop-workspace-v1.js' "$DIST_DIR/index.html"
+grep -Fq '/ui/desktop-nav-fixed-guard-v1.js' "$DIST_DIR/index.html"
 
 echo "LetMeFly Desktop Workspace v1 install: PASS"

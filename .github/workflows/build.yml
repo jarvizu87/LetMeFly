@@ -97,8 +97,8 @@ jobs:
       - name: Isolate Home and Progress route lifecycles
         run: bash ci/install-home-progress-route-isolation-v1.sh
 
-      - name: Install Home dashboard polish
-        run: bash ci/install-home-dashboard-polish-v1.sh
+      - name: Install approved Option 1 Home
+        run: bash ci/install-home-main-option1-v1.sh
 
       - name: Install private athlete Profile v2
         run: bash ci/install-profile-v2.sh
@@ -133,39 +133,43 @@ jobs:
           CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$CHROME_BIN"
 
-          set +e
-          CHROME_BIN="$CHROME_BIN" node ci/audit-browser-smoke.mjs
-          BROWSER_RC=$?
-          set -e
+          mkdir -p .build-src/letmefly_app/BROWSER_SMOKE_AUDIT
+          STATUS_LOG=.build-src/letmefly_app/BROWSER_SMOKE_AUDIT/subaudit-status.txt
+          : > "$STATUS_LOG"
+          BROWSER_AUDIT_FAILURES=0
 
-          if [[ "$BROWSER_RC" -ne 0 ]]; then
-            if node - <<'NODE'
-          const fs = require('fs')
-          const file = '.build-src/letmefly_app/BROWSER_SMOKE_AUDIT/browser-smoke-audit.json'
-          if (!fs.existsSync(file)) process.exit(1)
-          const report = JSON.parse(fs.readFileSync(file, 'utf8'))
-          const failures = Array.isArray(report.failures) ? report.failures : []
-          const errors = Array.isArray(report.errors) ? report.errors : []
-          const bootOnly = failures.length === 1 && failures[0]?.label === 'Browser app boot' && errors.length === 0
-          process.exit(bootOnly ? 0 : 1)
-          NODE
-            then
-              echo "Retrying browser smoke once after isolated app-boot timing miss"
-              rm -rf .build-src/letmefly_app/BROWSER_SMOKE_AUDIT
-              CHROME_BIN="$CHROME_BIN" node ci/audit-browser-smoke.mjs
+          run_browser_audit() {
+            local label="$1"
+            shift
+            local audit_log=".build-src/letmefly_app/BROWSER_SMOKE_AUDIT/${label}.log"
+            echo "START ${label}" | tee -a "$STATUS_LOG"
+            set +e
+            CHROME_BIN="$CHROME_BIN" "$@" 2>&1 | tee "$audit_log"
+            local rc=${PIPESTATUS[0]}
+            set -e
+            if [[ "$rc" -ne 0 ]]; then
+              echo "FAIL ${label} rc=${rc}" | tee -a "$STATUS_LOG"
+              BROWSER_AUDIT_FAILURES=$((BROWSER_AUDIT_FAILURES + 1))
             else
-              exit "$BROWSER_RC"
+              echo "PASS ${label}" | tee -a "$STATUS_LOG"
             fi
-          fi
+          }
 
-          CHROME_BIN="$CHROME_BIN" node ci/audit-home-progress-route-isolation.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-progress-tab-scroll-browser.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-progress-conditioning-v4-browser.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-progress-final-v4-browser.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-home-dashboard-polish.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-workout-mobile-scroll-browser.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-official-brand-browser-v2.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-desktop-workspace-v1.mjs
+          run_browser_audit browser-smoke node ci/audit-browser-smoke.mjs
+          run_browser_audit home-progress-route-isolation node ci/audit-home-progress-route-isolation.mjs
+          run_browser_audit progress-tab-scroll node ci/audit-progress-tab-scroll-browser.mjs
+          run_browser_audit progress-conditioning-v4 node ci/audit-progress-conditioning-v4-browser.mjs
+          run_browser_audit progress-final-v4 node ci/audit-progress-final-v4-browser.mjs
+          run_browser_audit home-main-option1 node ci/audit-home-main-option1.mjs
+          run_browser_audit workout-mobile-scroll node ci/audit-workout-mobile-scroll-browser.mjs
+          run_browser_audit official-brand-browser-v2 node ci/audit-official-brand-browser-v2.mjs
+          run_browser_audit desktop-workspace-v1 node ci/audit-desktop-workspace-v1.mjs
+
+          if [[ "$BROWSER_AUDIT_FAILURES" -ne 0 ]]; then
+            echo "Browser sub-audit failures: $BROWSER_AUDIT_FAILURES"
+            cat "$STATUS_LOG"
+            exit 1
+          fi
 
       - name: Audit final Exercise Intelligence production dist
         run: |

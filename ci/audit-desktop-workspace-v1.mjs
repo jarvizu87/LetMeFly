@@ -8,14 +8,43 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const target = path.join(root, '.build-src', 'letmefly_app')
 const outDir = path.join(target, 'DESKTOP_WORKSPACE_AUDIT')
 fs.mkdirSync(outDir, { recursive: true })
+
 const requireFromTarget = createRequire(path.join(target, 'package.json'))
 const { chromium } = requireFromTarget('playwright-core')
 const chromeBin = process.env.CHROME_BIN
 if (!chromeBin) throw new Error('CHROME_BIN is required')
 
 const report = { result: 'PASS', failures: [], passes: [], observations: {} }
-const pass = (label, detail = '') => { report.passes.push({ label, detail }); console.log(`PASS  ${label}${detail ? ` — ${detail}` : ''}`) }
-const fail = (label, detail = '') => { report.result = 'FAIL'; report.failures.push({ label, detail }); console.log(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`) }
+const pass = (label, detail = '') => {
+  report.passes.push({ label, detail })
+  console.log(`PASS  ${label}${detail ? ` — ${detail}` : ''}`)
+}
+const fail = (label, detail = '') => {
+  report.result = 'FAIL'
+  report.failures.push({ label, detail })
+  console.log(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`)
+}
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+async function launchBrowser() {
+  let lastError = null
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const browser = await chromium.launch({
+        headless: true,
+        executablePath: chromeBin,
+        args: ['--no-sandbox', '--disable-dev-shm-usage'],
+      })
+      report.observations.browserLaunchAttempt = attempt
+      return browser
+    } catch (error) {
+      lastError = error
+      console.warn(`Desktop audit Chromium launch attempt ${attempt} failed: ${error instanceof Error ? error.message : String(error)}`)
+      if (attempt < 3) await sleep(attempt * 900)
+    }
+  }
+  throw lastError || new Error('Desktop audit Chromium launch failed')
+}
 
 async function firstVisible(locator) {
   const count = await locator.count()
@@ -29,7 +58,7 @@ async function firstVisible(locator) {
 async function dismissInstall(page) {
   const candidate = await firstVisible(page.locator('button,a,[role="button"]').filter({ hasText: /^\s*Not now\s*$/i }))
   if (!candidate) return false
-  return await candidate.click({ timeout: 2500 }).then(async () => {
+  return candidate.click({ timeout: 2500 }).then(async () => {
     await page.waitForTimeout(140)
     return true
   }).catch(() => false)
@@ -39,6 +68,16 @@ async function clickable(page, pattern) {
   return await firstVisible(page.locator('nav button,nav a,nav [role="button"]').filter({ hasText: pattern }))
     || await firstVisible(page.locator('button,a,[role="button"]').filter({ hasText: pattern }))
     || await firstVisible(page.getByText(pattern))
+}
+
+async function waitForAthleteNameInput(page) {
+  for (let i = 0; i < 24; i += 1) {
+    const input = await firstVisible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
+    if (input) return input
+    await dismissInstall(page)
+    await page.waitForTimeout(120)
+  }
+  return null
 }
 
 async function bootstrap(page, name) {
@@ -56,8 +95,8 @@ async function bootstrap(page, name) {
   }
 
   if (create) {
-    const input = await firstVisible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
-    if (!input) throw new Error('Athlete name input missing')
+    const input = await waitForAthleteNameInput(page)
+    if (!input) throw new Error('Athlete name input missing after setup modal settled')
     await input.fill(name)
     await dismissInstall(page)
     await create.click({ timeout: 5000 })
@@ -83,7 +122,8 @@ async function enterTrain(page) {
 async function probeExerciseSection(page) {
   if (await page.locator('.lmf-desktop-flow-item').count()) return true
   const sectionButtons = page.locator('[data-session-step]')
-  for (let i = 0; i < await sectionButtons.count(); i += 1) {
+  const count = await sectionButtons.count()
+  for (let i = 0; i < count; i += 1) {
     const button = sectionButtons.nth(i)
     if (!(await button.isVisible().catch(() => false))) continue
     await button.click({ timeout: 3500 }).catch(() => null)
@@ -93,9 +133,10 @@ async function probeExerciseSection(page) {
   return false
 }
 
-const browser = await chromium.launch({ headless: true, executablePath: chromeBin, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
-
+let browser = null
 try {
+  browser = await launchBrowser()
+
   const desktopContext = await browser.newContext({ viewport: { width: 1536, height: 960 }, deviceScaleFactor: 1 })
   const desktop = await desktopContext.newPage()
   await bootstrap(desktop, 'Desktop QA Athlete')
@@ -108,11 +149,15 @@ try {
     const nav = document.querySelector('.navbar')
     if (!(nav instanceof HTMLElement)) return null
     const style = getComputedStyle(nav)
-    return { position: style.position, left: style.left, width: nav.getBoundingClientRect().width, height: nav.getBoundingClientRect().height }
+    const rect = nav.getBoundingClientRect()
+    return { position: style.position, left: style.left, width: rect.width, height: rect.height }
   })
   report.observations.desktopRail = rail
-  if (rail && rail.position === 'fixed' && rail.width >= 155 && rail.width <= 205 && rail.height >= 850) pass('Desktop navigation rail', `${Math.round(rail.width)}×${Math.round(rail.height)}px fixed rail`)
-  else fail('Desktop navigation rail', JSON.stringify(rail))
+  if (rail && rail.position === 'fixed' && rail.width >= 155 && rail.width <= 205 && rail.height >= 850) {
+    pass('Desktop navigation rail', `${Math.round(rail.width)}×${Math.round(rail.height)}px fixed rail`)
+  } else {
+    fail('Desktop navigation rail', JSON.stringify(rail))
+  }
 
   if (await desktop.locator('.lmf-desktop-brand').isVisible().catch(() => false)) pass('Desktop LetMeFly brand reuse')
   else fail('Desktop LetMeFly brand reuse', 'desktop rail brand missing')
@@ -147,6 +192,7 @@ try {
     }
   })
   report.observations.workspace = workspace
+
   if (workspace?.display === 'grid' && workspace.viewportDirectChild && workspace.order && workspace.order[0] < workspace.order[1] && workspace.order[1] < workspace.order[2]) {
     pass('Option 3 three-column Train workspace', workspace.columns)
   } else {
@@ -217,8 +263,8 @@ try {
 } catch (error) {
   fail('Desktop workspace audit execution', error instanceof Error ? error.message : String(error))
 } finally {
-  await browser.close()
+  if (browser) await browser.close().catch(() => null)
+  fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)
 }
 
-fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)
 if (report.failures.length) process.exit(1)
