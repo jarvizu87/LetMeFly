@@ -1,0 +1,69 @@
+name: LetMeFly Full Lifecycle Soak
+
+on:
+  workflow_dispatch:
+    inputs:
+      passes:
+        description: Complete Crownforge -> Crown Maintenance -> Black Crown lifecycles
+        required: false
+        default: '5'
+  push:
+    branches:
+      - qa/full-lifecycle-soak
+    paths:
+      - '.github/workflows/full-lifecycle-soak.yml'
+      - 'ci/audit-full-lifecycle-soak-v2.mjs'
+      - 'ci/build-command-v2-v2-1.sh'
+      - 'ci/apply-athlete-program-progression-v1.sh'
+      - 'ci/apply-workout-prescription-fidelity-v1.sh'
+      - 'ci/normalize-workout-prescription-fidelity-source-v1.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - name: Checkout isolated QA branch
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Syntax-check soak harness
+        run: node --check ci/audit-full-lifecycle-soak-v2.mjs
+
+      - name: Reconstruct exact production source
+        run: bash ci/build-command-v2-v2-1.sh
+
+      - name: Run baseline full app cycle audit
+        run: node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
+
+      - name: Verify real progression contract
+        run: node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+
+      - name: Run repeated full athlete lifecycle soak
+        run: |
+          PASSES="${{ github.event.inputs.passes }}"
+          if [[ -z "$PASSES" ]]; then PASSES=5; fi
+          node ci/audit-full-lifecycle-soak-v2.mjs .build-src/letmefly_app "$PASSES"
+
+      - name: Publish lifecycle soak report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: letmefly-full-lifecycle-soak
+          path: |
+            .build-src/letmefly_app/FULL_LIFECYCLE_SOAK_AUDIT.json
+            .build-src/letmefly_app/FULL_LIFECYCLE_SOAK_AUDIT.md
+            .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.json
+            .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
+          if-no-files-found: warn
+          retention-days: 14
