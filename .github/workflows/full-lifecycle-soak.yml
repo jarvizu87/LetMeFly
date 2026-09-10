@@ -13,6 +13,7 @@ on:
     paths:
       - '.github/workflows/full-lifecycle-soak.yml'
       - 'ci/audit-full-lifecycle-soak-v2.mjs'
+      - 'ci/audit-lifecycle-load-carry-v1.mjs'
       - 'ci/report-lifecycle-api-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/apply-athlete-program-progression-v1.sh'
@@ -41,6 +42,7 @@ jobs:
       - name: Syntax-check soak harness
         run: |
           node --check ci/audit-full-lifecycle-soak-v2.mjs
+          node --check ci/audit-lifecycle-load-carry-v1.mjs
           node --check ci/report-lifecycle-api-surface.mjs
 
       - name: Audit real-program workout flow edge cases
@@ -85,6 +87,7 @@ jobs:
           node ci/audit-official-brand-v2.mjs .build-src/letmefly_app
           node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
           node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+          node ci/audit-workout-prescription-fidelity-v1.mjs .build-src/letmefly_app
 
       - name: Report real lifecycle service API surface
         run: node ci/report-lifecycle-api-surface.mjs .build-src/letmefly_app
@@ -94,6 +97,9 @@ jobs:
           PASSES="${{ github.event.inputs.passes }}"
           if [[ -z "$PASSES" ]]; then PASSES=5; fi
           node ci/audit-full-lifecycle-soak-v2.mjs .build-src/letmefly_app "$PASSES"
+
+      - name: Audit long-horizon load carry matrix
+        run: node ci/audit-lifecycle-load-carry-v1.mjs .build-src/letmefly_app
 
       - name: Publish lifecycle soak report
         if: always()
@@ -105,7 +111,10 @@ jobs:
             .build-src/letmefly_app/FULL_LIFECYCLE_SOAK_AUDIT.md
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.json
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
+            .build-src/letmefly_app/LIFECYCLE_LOAD_CARRY_AUDIT.json
+            .build-src/letmefly_app/LIFECYCLE_LOAD_CARRY_AUDIT.md
             .build-src/letmefly_app/LIFECYCLE_API_SURFACE.json
             .build-src/letmefly_app/LIFECYCLE_API_SURFACE.md
+            .build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
           if-no-files-found: warn
           retention-days: 14
