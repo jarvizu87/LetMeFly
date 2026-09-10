@@ -40,7 +40,9 @@ async function dismissInstall() {
 }
 
 async function bootstrapAthlete() {
-  for (let i=0;i<24;i+=1) {
+  // The desktop shell shares the same asynchronous local-vault bootstrap as
+  // mobile. Give the real first-run control a deterministic CI window.
+  for (let i=0;i<80;i+=1) {
     await dismissInstall()
     const create = page.getByRole('button', { name:/CREATE LOCAL ATHLETE/i }).first()
     if (await create.isVisible().catch(() => false)) {
@@ -61,9 +63,9 @@ try {
   await page.waitForSelector('body', { timeout:10000 })
   await bootstrapAthlete()
   await page.evaluate(() => { location.hash = '#/home' })
-  await page.waitForFunction(() => document.documentElement.getAttribute('data-lmf-desktop-ui') === 'true', null, { timeout:8000 })
-  await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:8000 })
-  await page.waitForSelector('.lmf-home-option1-performance-summary', { state:'visible', timeout:8000 })
+  await page.waitForFunction(() => document.documentElement.getAttribute('data-lmf-desktop-ui') === 'true', null, { timeout:15000 })
+  await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:15000 })
+  await page.waitForSelector('.lmf-home-option1-performance-summary', { state:'visible', timeout:15000 })
   await page.waitForTimeout(700)
   await dismissInstall()
 
