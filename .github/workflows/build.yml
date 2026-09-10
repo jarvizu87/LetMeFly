@@ -76,6 +76,9 @@ jobs:
       - name: Install Progress dashboard
         run: bash ci/install-progress-dashboard-v1.sh
 
+      - name: Install Progress tab scroll safety
+        run: bash ci/install-progress-tab-scroll-safety-v1.sh
+
       - name: Install and validate safe refresh utility
         run: bash ci/install-command-refresh.sh
 
