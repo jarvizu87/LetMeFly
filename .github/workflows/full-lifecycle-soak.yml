@@ -13,6 +13,7 @@ on:
     paths:
       - '.github/workflows/full-lifecycle-soak.yml'
       - 'ci/audit-full-lifecycle-soak-v2.mjs'
+      - 'ci/report-lifecycle-api-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/apply-athlete-program-progression-v1.sh'
       - 'ci/apply-workout-prescription-fidelity-v1.sh'
@@ -24,7 +25,7 @@ permissions:
 jobs:
   soak:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
@@ -38,16 +39,55 @@ jobs:
           node-version: '22.12.0'
 
       - name: Syntax-check soak harness
-        run: node --check ci/audit-full-lifecycle-soak-v2.mjs
+        run: |
+          node --check ci/audit-full-lifecycle-soak-v2.mjs
+          node --check ci/report-lifecycle-api-surface.mjs
+
+      - name: Audit real-program workout flow edge cases
+        run: node ci/audit-workout-flow-edge-cases.mjs
 
       - name: Reconstruct exact production source
         run: bash ci/build-command-v2-v2-1.sh
 
-      - name: Run baseline full app cycle audit
-        run: node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
+      - name: Audit reconstructed workout persistence source
+        run: node ci/audit-workout-persistence-source.mjs .build-src/letmefly_app
 
-      - name: Verify real progression contract
-        run: node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+      - name: Install production post-build runtime layers
+        run: |
+          bash ci/install-smart-names-bar-loader.sh
+          bash ci/install-exercise-intelligence-v1.sh
+          bash ci/install-exercise-intelligence-v2-supplement.sh
+          bash ci/install-exercise-intelligence-active-program-coverage-v1.sh
+          bash ci/install-exercise-intelligence-program-name-coverage-v1.sh
+          node ci/audit-exercise-intelligence-program-name-resolution.mjs .build-src/letmefly_app
+          bash ci/install-exercise-intelligence-library-v1.sh
+          bash ci/install-exercise-intelligence-coach-v1.sh
+          bash ci/install-exercise-intelligence-coach-substitutions-v1.sh
+          bash ci/install-exercise-intelligence-substitutions-v1.sh
+          bash ci/install-voice-notes-v2.sh
+          bash ci/install-strength-maxes-v1.sh
+          bash ci/install-progress-dashboard-v1.sh
+          bash ci/install-progress-tab-scroll-safety-v1.sh
+          bash ci/install-progress-conditioning-v4.sh
+          bash ci/install-command-refresh.sh
+          bash ci/install-mobile-recording-regression-v1.sh
+          bash ci/install-home-command-hero-v1.sh
+          bash ci/install-home-reference-v3.sh
+          bash ci/install-home-progress-route-isolation-v1.sh
+          bash ci/install-home-main-option1-v1.sh
+          bash ci/install-profile-v2.sh
+          bash ci/install-workout-logging-v2.sh
+          bash ci/install-official-brand-v2.sh
+          bash ci/install-desktop-workspace-v1.sh
+
+      - name: Audit finished production assembly baseline
+        run: |
+          node ci/audit-official-brand-v2.mjs .build-src/letmefly_app
+          node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
+          node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+
+      - name: Report real lifecycle service API surface
+        run: node ci/report-lifecycle-api-surface.mjs .build-src/letmefly_app
 
       - name: Run repeated full athlete lifecycle soak
         run: |
@@ -65,5 +105,7 @@ jobs:
             .build-src/letmefly_app/FULL_LIFECYCLE_SOAK_AUDIT.md
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.json
             .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
+            .build-src/letmefly_app/LIFECYCLE_API_SURFACE.json
+            .build-src/letmefly_app/LIFECYCLE_API_SURFACE.md
           if-no-files-found: warn
           retention-days: 14
