@@ -37,7 +37,7 @@ check(service.includes("session.status !== 'in_progress'"), 'Completed workout h
 check(service.includes('Reopen completed sets before changing this exercise so history stays accurate'), 'Mixed original/substitute sets cannot be mislabeled')
 check(service.includes('substituted_from_exercise_key: prescribedKey'), 'Performed exercise retains prescribed exercise provenance')
 check(service.includes('substitutionOriginalLoadValue') && service.includes('substitutionOriginalLoadUnit'), 'Original set load is retained for exact revert')
-check(service.includes("loadMode === 'factor'") && service.includes("loadMode === 'manual'") && service.includes("loadMode === 'none'"), 'Substitute loading supports deterministic, explicit, and unloaded modes')
+check(service.includes("mode === 'factor'") && service.includes("mode === 'manual'") && service.includes("mode === 'none'") && service.includes("mode === 'same'"), 'Substitute loading supports deterministic, explicit, unloaded, and same-load modes')
 check(service.includes('delete perf.substitutionPerformedExerciseKey') && service.includes('load_value: baseline.value'), 'Undo restores programmed load baseline and removes transient substitute set metadata')
 
 check(main.includes('LetMeFlyWorkoutSubstitutionBridge'), 'Workout Mode exposes a narrow substitution bridge')
