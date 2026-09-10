@@ -156,6 +156,7 @@ jobs:
           fi
 
           CHROME_BIN="$CHROME_BIN" node ci/audit-home-progress-route-isolation.mjs
+          CHROME_BIN="$CHROME_BIN" node ci/audit-progress-tab-scroll-browser.mjs
           CHROME_BIN="$CHROME_BIN" node ci/audit-home-dashboard-polish.mjs
           CHROME_BIN="$CHROME_BIN" node ci/audit-workout-mobile-scroll-browser.mjs
           CHROME_BIN="$CHROME_BIN" node ci/audit-official-brand-browser-v2.mjs
