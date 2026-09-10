@@ -41,7 +41,8 @@ check(service.includes("loadMode === 'factor'") && service.includes("loadMode ==
 check(service.includes('delete perf.substitutionPerformedExerciseKey') && service.includes('load_value: baseline.value'), 'Undo restores programmed load baseline and removes transient substitute set metadata')
 
 check(main.includes('LetMeFlyWorkoutSubstitutionBridge'), 'Workout Mode exposes a narrow substitution bridge')
-check(main.includes('getSubstitutions?.(prescribedKey, { includeBlocked: true })'), 'Bridge revalidates the governed rule instead of trusting button payload')
+check(main.includes('const governedPrimary = intelligence?.getExercise?.(prescribedKey) ?? intelligence?.getExercise?.(prescribedName)'), 'Bridge resolves program exercise keys through governed name/alias fallback')
+check(main.includes('getSubstitutions?.(governedPrimaryKey, { includeBlocked: true })'), 'Bridge revalidates the governed rule instead of trusting button payload')
 check(main.includes("promotion.startsWith('DO NOT')"), 'DO NOT DEFAULT relationships are rejected by the mutation bridge')
 check(main.includes('TODAY\'S SUBSTITUTE') && main.includes('Programmed: ${esc(prescribedName)}'), 'Workout card distinguishes performed substitute from programmed exercise')
 check(main.includes('data-workout-exercise-id=') && main.includes('UNDO SUBSTITUTE'), 'Workout card exposes apply context and revert control')
