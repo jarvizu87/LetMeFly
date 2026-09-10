@@ -91,8 +91,8 @@ jobs:
       - name: Isolate Home and Progress route lifecycles
         run: bash ci/install-home-progress-route-isolation-v1.sh
 
-      - name: Install Home dashboard polish
-        run: bash ci/install-home-dashboard-polish-v1.sh
+      - name: Install approved Option 1 Home
+        run: bash ci/install-home-main-option1-v1.sh
 
       - name: Install private athlete Profile v2
         run: bash ci/install-profile-v2.sh
@@ -150,7 +150,7 @@ jobs:
           fi
 
           CHROME_BIN="$CHROME_BIN" node ci/audit-home-progress-route-isolation.mjs
-          CHROME_BIN="$CHROME_BIN" node ci/audit-home-dashboard-polish.mjs
+          CHROME_BIN="$CHROME_BIN" node ci/audit-home-main-option1.mjs
           CHROME_BIN="$CHROME_BIN" node ci/audit-workout-mobile-scroll-browser.mjs
           CHROME_BIN="$CHROME_BIN" node ci/audit-official-brand-browser-v2.mjs
 
