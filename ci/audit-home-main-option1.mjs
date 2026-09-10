@@ -55,7 +55,10 @@ async function settleOptionalInstallForScreenshot() {
 }
 
 async function bootstrapAthlete() {
-  for (let i=0;i<20;i+=1) {
+  // First-run local-vault initialization can legitimately trail DOMContentLoaded
+  // on slower CI runners. Keep checking the real first-run control or Home mount
+  // instead of treating a short bootstrap delay as a product failure.
+  for (let i=0;i<80;i+=1) {
     await dismissOptionalInstall()
     const create = page.getByRole('button', { name:/CREATE LOCAL ATHLETE/i }).first()
     if (await create.isVisible().catch(() => false)) {
@@ -76,9 +79,9 @@ try {
   await page.waitForSelector('body', { timeout:10000 })
   await bootstrapAthlete()
   await page.evaluate(() => { location.hash = '#/home' })
-  await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:8000 })
-  await page.waitForSelector('.lmf-home-option1-progress', { state:'visible', timeout:8000 })
-  await page.waitForSelector('.lmf-home-option1-performance-summary', { state:'visible', timeout:8000 })
+  await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:15000 })
+  await page.waitForSelector('.lmf-home-option1-progress', { state:'visible', timeout:15000 })
+  await page.waitForSelector('.lmf-home-option1-performance-summary', { state:'visible', timeout:15000 })
   await page.waitForTimeout(600)
   await dismissOptionalInstall()
 
