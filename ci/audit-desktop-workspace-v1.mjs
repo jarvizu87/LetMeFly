@@ -83,16 +83,36 @@ async function enterTrain(page) {
 async function startSyntheticWorkout(page) {
   if (await page.locator('.exercise-stack > .active-exercise').count()) return true
 
+  // A fresh local QA athlete may open Train on a preview day instead of the
+  // program instance's current position. Starting from preview is correctly
+  // blocked by LetMeFly. Follow the real intentional repositioning path first.
+  const makeCurrent = await firstVisible(page.locator('[data-action="make-current-position"]'))
+  if (makeCurrent) {
+    page.once('dialog', async (dialog) => {
+      await dialog.accept().catch(() => null)
+    })
+    await makeCurrent.click({ timeout: 5000 }).catch(() => null)
+    await page.waitForFunction(() => !document.querySelector('[data-action="make-current-position"]'), null, { timeout: 7000 }).catch(() => null)
+    await page.waitForTimeout(500)
+  }
+
   const readiness = page.locator('.readiness-panel input[type="radio"][value="3"]')
   const readinessCount = await readiness.count()
   for (let i = 0; i < readinessCount; i += 1) {
     await readiness.nth(i).check({ force: true }).catch(() => null)
   }
+  if (readinessCount < 4) return false
 
   const start = await firstVisible(page.locator('button[data-action="start-workout"]'))
   if (!start) return false
   await start.click({ timeout: 5000 }).catch(() => null)
-  await page.waitForTimeout(900)
+
+  await page.waitForFunction(
+    () => document.querySelectorAll('.exercise-stack > .active-exercise').length > 0,
+    null,
+    { timeout: 9000 },
+  ).catch(() => null)
+  await page.waitForTimeout(500)
   return (await page.locator('.exercise-stack > .active-exercise').count()) > 0
 }
 
