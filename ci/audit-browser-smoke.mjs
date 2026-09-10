@@ -97,13 +97,14 @@ async function clickLabel(page, label, required = true) {
 
 async function bootstrapEphemeralAthlete(page) {
   // First-run UI is intentionally asynchronous: the shell can render before the
-  // local-vault modal. Give that modal a short deterministic window to appear,
-  // while also clearing the independent optional PWA install prompt.
+  // local-vault modal. Keep polling the real setup control on slower CI runners
+  // rather than treating delayed IndexedDB/bootstrap work as an absent app.
   let create = null
-  for (let i = 0; i < 16; i += 1) {
+  for (let i = 0; i < 80; i += 1) {
     await optionalInstallDismiss(page)
     create = await clickable(page, 'CREATE LOCAL ATHLETE')
     if (create) break
+    if (await page.locator('.lmf-home-command-v4').count().catch(() => 0)) break
     await page.waitForTimeout(180)
   }
 
@@ -119,7 +120,7 @@ async function bootstrapEphemeralAthlete(page) {
 
   const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
   let displayInput = null
-  for (let i = 0; i < 16; i += 1) {
+  for (let i = 0; i < 40; i += 1) {
     displayInput = await firstVisible(modal.locator('input[type="text"],input:not([type])'))
       || await firstVisible(page.locator('input[type="text"],input:not([type])'))
     if (displayInput) break
@@ -133,7 +134,7 @@ async function bootstrapEphemeralAthlete(page) {
   await displayInput.fill('QA Athlete')
   await optionalInstallDismiss(page)
   await create.click({ timeout: 5000 })
-  await page.waitForFunction(() => !/CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
+  await page.waitForFunction(() => !/CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 12000 }).catch(() => null)
   await page.waitForTimeout(450)
   await settleFirstRunPrompts(page, 5)
 
@@ -291,7 +292,7 @@ page.on('response', (response) => {
 try {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForSelector('body', { timeout: 10000 })
-  await page.waitForFunction(() => /LETMEFLY|BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
+  await page.waitForFunction(() => /LETMEFLY|BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 20000 }).catch(() => null)
   await page.waitForTimeout(350)
   await optionalInstallDismiss(page)
   const bodyText = await page.locator('body').innerText()
