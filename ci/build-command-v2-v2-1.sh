@@ -12,6 +12,18 @@ bash "$ROOT_DIR/ci/apply-black-crown-v2-1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-black-crown-v2-1-ui.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-crownforge-v2-2.sh" "$TARGET"
 
+# Issue #50: preserve structured round execution, immutable prescription display,
+# metric-aware logging targets, and per-set load prescription signatures after
+# the final governed program layers have landed. This does not migrate or rewrite
+# completed athlete history.
+bash "$ROOT_DIR/ci/apply-workout-prescription-fidelity-v1.sh" "$TARGET"
+# Normalize the generated TypeScript block before any downstream overlays/typecheck.
+# This companion step keeps regex/newline escaping deterministic across the legacy
+# source-reconstruction patch mechanism without changing the governed behavior.
+bash "$ROOT_DIR/ci/normalize-workout-prescription-fidelity-source-v1.sh" "$TARGET"
+bash "$ROOT_DIR/ci/apply-workout-metric-layout-v1.sh" "$TARGET"
+node "$ROOT_DIR/ci/audit-workout-prescription-fidelity-v1.mjs" "$TARGET"
+
 # Supabase's hosted default email sends a magic link unless custom SMTP allows
 # the project template to be changed to a numeric OTP. Consume the PKCE callback
 # in-app so authenticated private sync works with either supported email mode.
@@ -58,4 +70,4 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" di
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + live workout Review persistence refresh + vertical-scroll isolation: PASS"
+echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Issue #50 workout prescription fidelity + live workout Review persistence refresh + vertical-scroll isolation: PASS"

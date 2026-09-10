@@ -40,20 +40,50 @@ async function dismissInstall() {
 }
 
 async function bootstrapAthlete() {
-  for (let i=0;i<24;i+=1) {
+  // Desktop shares the same private-vault first-run path as mobile. Verify the
+  // display name is actually accepted before allowing the Home audit to begin.
+  for (let i=0;i<80;i+=1) {
     await dismissInstall()
+    if (await page.locator('.lmf-home-command-v4').count()) return
+
     const create = page.getByRole('button', { name:/CREATE LOCAL ATHLETE/i }).first()
-    if (await create.isVisible().catch(() => false)) {
-      const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
-      const input = modal.locator('input[type="text"],input:not([type])').first()
-      if (await input.isVisible().catch(() => false)) await input.fill('JP')
-      await create.click()
-      await page.waitForTimeout(500)
-      break
+    if (!(await create.isVisible().catch(() => false))) {
+      await page.waitForTimeout(160)
+      continue
     }
-    if (await page.locator('.lmf-home-command-v4').count()) break
-    await page.waitForTimeout(160)
+
+    const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
+    let input = null
+    for (let attempt=0;attempt<40;attempt+=1) {
+      const modalInput = modal.locator('input[placeholder="Athlete name"],input[type="text"],input:not([type])').first()
+      const pageInput = page.locator('input[placeholder="Athlete name"],input[type="text"],input:not([type])').first()
+      if (await modalInput.isVisible().catch(() => false)) input = modalInput
+      else if (await pageInput.isVisible().catch(() => false)) input = pageInput
+      if (input) break
+      await page.waitForTimeout(180)
+    }
+    if (!input) throw new Error('Desktop Athlete Vault rendered but Display Name input never became usable')
+
+    await input.fill('QA Athlete')
+    const filled = await input.inputValue().catch(() => '')
+    if (filled !== 'QA Athlete') throw new Error(`Desktop Athlete Vault Display Name did not retain QA value: ${filled || 'empty'}`)
+
+    await create.waitFor({ state:'visible', timeout:5000 })
+    for (let attempt=0;attempt<20 && !(await create.isEnabled().catch(() => false));attempt+=1) {
+      await page.waitForTimeout(120)
+    }
+    if (!(await create.isEnabled().catch(() => false))) throw new Error('Desktop Athlete Vault Create Local Athlete remained disabled after valid Display Name')
+
+    await create.click({ timeout:5000 })
+    const completed = await page.waitForFunction(() => (
+      Boolean(document.querySelector('.lmf-home-command-v4')) ||
+      !/CREATE LOCAL ATHLETE/i.test(document.body.innerText)
+    ), null, { timeout:12000 }).then(() => true).catch(() => false)
+    if (!completed) throw new Error('Desktop Athlete Vault did not complete after valid QA athlete creation')
+    await page.waitForTimeout(500)
+    return
   }
+  throw new Error('Desktop Athlete Vault or Home did not become available during bootstrap window')
 }
 
 try {
@@ -61,9 +91,9 @@ try {
   await page.waitForSelector('body', { timeout:10000 })
   await bootstrapAthlete()
   await page.evaluate(() => { location.hash = '#/home' })
-  await page.waitForFunction(() => document.documentElement.getAttribute('data-lmf-desktop-ui') === 'true', null, { timeout:8000 })
-  await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:8000 })
-  await page.waitForSelector('.lmf-home-option1-performance-summary', { state:'visible', timeout:8000 })
+  await page.waitForFunction(() => document.documentElement.getAttribute('data-lmf-desktop-ui') === 'true', null, { timeout:15000 })
+  await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:15000 })
+  await page.waitForSelector('.lmf-home-option1-performance-summary', { state:'visible', timeout:15000 })
   await page.waitForTimeout(700)
   await dismissInstall()
 
