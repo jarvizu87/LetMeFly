@@ -78,6 +78,7 @@ try {
   await page.evaluate(() => { location.hash = '#/home' })
   await page.waitForSelector('.lmf-home-command-v4', { state:'visible', timeout:8000 })
   await page.waitForSelector('.lmf-home-option1-progress', { state:'visible', timeout:8000 })
+  await page.waitForSelector('.lmf-home-option1-performance-summary', { state:'visible', timeout:8000 })
   await page.waitForTimeout(600)
   await dismissOptionalInstall()
 
@@ -100,6 +101,8 @@ try {
       const s = getComputedStyle(el, pseudo)
       return { backgroundImage:s.backgroundImage, opacity:s.opacity, filter:s.filter }
     }
+    const performanceSummaryEl = document.querySelector('.lmf-home-option1-performance-summary')
+    const performanceSourceEl = document.querySelector('[data-lmf-performance]')
     return {
       command:rect('.lmf-home-v4-command'),
       commandMark:rect('.lmf-home-v4-command-mark'),
@@ -110,6 +113,9 @@ try {
       alert:rect('.lmf-home-option1-alert'),
       readiness:rect('.lmf-home-v4-readiness'),
       performance:rect('.lmf-home-v4-performance'),
+      performanceSummary:rect('.lmf-home-option1-performance-summary'),
+      performanceSummaryText:performanceSummaryEl?.textContent?.replace(/\s+/g,' ').trim() || '',
+      performanceSourceDisplay:performanceSourceEl instanceof HTMLElement ? getComputedStyle(performanceSourceEl).display : null,
       milestone:rect('.lmf-home-v4-milestone'),
       coach:rect('.lmf-home-v4-coach'),
       gridStyle:style('.lmf-home-v4-grid'),
@@ -143,6 +149,9 @@ try {
     check(coach.x > milestone.x + 20, 'Row two is two columns')
     check(milestone.y > readiness.y + readiness.height - 2, 'Intelligence grid has two stacked rows')
   }
+  check(Boolean(layout.performanceSummary), 'Recent Performance uses compact presentation')
+  check(layout.performanceSourceDisplay === 'none', 'Raw Recent Performance source is presentation-hidden', `display=${layout.performanceSourceDisplay || 'missing'}`)
+  check(Boolean(layout.performanceSummaryText) && !/(ProgramCrownforge|PositionW\d|WorkoutNot)/i.test(layout.performanceSummaryText), 'Recent Performance avoids raw field collisions', layout.performanceSummaryText || 'missing')
   check(layout.hasStats === 4, 'Athlete metrics rail keeps four metrics', `count=${layout.hasStats}`)
   check(layout.progressMounts === 0, 'Home remains isolated from Progress dashboard', `progress mounts=${layout.progressMounts}`)
   check(layout.bodyWidth <= layout.viewportWidth + 1, 'Option 1 Home has no horizontal overflow', `${layout.bodyWidth}px / ${layout.viewportWidth}px`)
