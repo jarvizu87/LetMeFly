@@ -55,7 +55,11 @@ const main = read(mainPath)
 const service = read(servicePath)
 const flow = read(flowPath)
 const css = read(cssPath)
-const programSource = readTree(path.join(root, 'src/data'))
+// Crownforge/Black Crown use modular packages under src/programs in the current
+// reconstructed build, while compatibility data still exists under src/data.
+// Scan the whole source tree so the audit validates the actual governed source
+// regardless of which program package owns a fixture.
+const programSource = readTree(path.join(root, 'src'))
 
 // Source contract: structured grouping is persisted and rendered into runtime DOM.
 assert.match(service, /group_type:\s*section\.exercises\.length\s*>\s*1/)
