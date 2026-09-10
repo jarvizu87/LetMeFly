@@ -17,6 +17,10 @@ bash "$ROOT_DIR/ci/apply-crownforge-v2-2.sh" "$TARGET"
 # the final governed program layers have landed. This does not migrate or rewrite
 # completed athlete history.
 bash "$ROOT_DIR/ci/apply-workout-prescription-fidelity-v1.sh" "$TARGET"
+# Normalize the generated TypeScript block before any downstream overlays/typecheck.
+# This companion step keeps regex/newline escaping deterministic across the legacy
+# source-reconstruction patch mechanism without changing the governed behavior.
+bash "$ROOT_DIR/ci/normalize-workout-prescription-fidelity-source-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-metric-layout-v1.sh" "$TARGET"
 node "$ROOT_DIR/ci/audit-workout-prescription-fidelity-v1.mjs" "$TARGET"
 
