@@ -5,17 +5,19 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 CSS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-v1.css"
 FIDELITY_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-fidelity-v1.css"
+CARD_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-card-polish-v1.css"
 JS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-v1.js"
 MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-foundation.svg"
 CSS_OUT="$DIST/ui/home-main-option1-v1.css"
 FIDELITY_OUT="$DIST/ui/home-main-option1-fidelity-v1.css"
+CARD_OUT="$DIST/ui/home-main-option1-card-polish-v1.css"
 JS_OUT="$DIST/ui/home-main-option1-v1.js"
 MOUNTAIN_OUT="$DIST/ui/home-mountain-foundation-v1.svg"
 FENRIR_OUT="$DIST/ui/fenrir.webp"
 INDEX="$DIST/index.html"
 SW="$DIST/service-worker.js"
 
-for required in "$CSS_SRC" "$FIDELITY_SRC" "$JS_SRC" "$MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
+for required in "$CSS_SRC" "$FIDELITY_SRC" "$CARD_SRC" "$JS_SRC" "$MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
   test -s "$required" || { echo "Missing Option 1 Home dependency: $required" >&2; exit 1; }
 done
 
@@ -26,13 +28,17 @@ grep -Fq "grid-template-areas:'readiness performance' 'milestone coach'" "$CSS_S
 grep -Fq 'home-mountain-foundation-v1.svg' "$CSS_SRC"
 grep -Fq "url('/ui/fenrir.webp')" "$FIDELITY_SRC"
 grep -Fq '.lmf-home-v4-command-mark::before' "$FIDELITY_SRC"
+grep -Fq '.lmf-home-option1-performance-summary' "$CARD_SRC"
+grep -Fq '.lmf-home-option1-copy-dense' "$CARD_SRC"
 grep -Fq "const HOME_CLASS = 'lmf-home-ref3-active'" "$JS_SRC"
 grep -Fq 'ensureProgress' "$JS_SRC"
+grep -Fq 'ensurePerformancePresentation' "$JS_SRC"
 ! grep -Eq 'localStorage\.setItem|indexedDB\.(open|deleteDatabase)|workoutSessions.*put|programInstances.*put|fetch\(' "$JS_SRC"
 
 mkdir -p "$DIST/ui"
 cp "$CSS_SRC" "$CSS_OUT"
 cp "$FIDELITY_SRC" "$FIDELITY_OUT"
+cp "$CARD_SRC" "$CARD_OUT"
 cp "$JS_SRC" "$JS_OUT"
 cp "$MOUNTAIN_SRC" "$MOUNTAIN_OUT"
 
@@ -43,13 +49,15 @@ p = Path(os.environ['INDEX'])
 text = p.read_text()
 text = re.sub(r'\s*<link rel="stylesheet" href="/ui/home-main-option1-v1\.css(?:\?v=\d+)?">\s*', '\n', text)
 text = re.sub(r'\s*<link rel="stylesheet" href="/ui/home-main-option1-fidelity-v1\.css(?:\?v=\d+)?">\s*', '\n', text)
+text = re.sub(r'\s*<link rel="stylesheet" href="/ui/home-main-option1-card-polish-v1\.css(?:\?v=\d+)?">\s*', '\n', text)
 text = re.sub(r'\s*<script defer src="/ui/home-main-option1-v1\.js(?:\?v=\d+)?"></script>\s*', '\n', text)
 css = '<link rel="stylesheet" href="/ui/home-main-option1-v1.css?v=1">'
 fidelity = '<link rel="stylesheet" href="/ui/home-main-option1-fidelity-v1.css?v=1">'
+card = '<link rel="stylesheet" href="/ui/home-main-option1-card-polish-v1.css?v=1">'
 js = '<script defer src="/ui/home-main-option1-v1.js?v=1"></script>'
 if '</head>' not in text or '</body>' not in text:
     raise SystemExit('production index missing document anchors')
-text = text.replace('</head>', f'  {css}\n  {fidelity}\n</head>', 1)
+text = text.replace('</head>', f'  {css}\n  {fidelity}\n  {card}\n</head>', 1)
 text = text.replace('</body>', f'  {js}\n</body>', 1)
 p.write_text(text)
 PY
@@ -66,6 +74,7 @@ existing = re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
 required = [
     '/ui/home-main-option1-v1.css',
     '/ui/home-main-option1-fidelity-v1.css',
+    '/ui/home-main-option1-card-polish-v1.css',
     '/ui/home-main-option1-v1.js',
     '/ui/home-mountain-foundation-v1.svg',
     '/ui/fenrir.webp',
@@ -82,13 +91,16 @@ PY
 node --check "$JS_OUT"
 test -s "$CSS_OUT"
 test -s "$FIDELITY_OUT"
+test -s "$CARD_OUT"
 test -s "$MOUNTAIN_OUT"
 test -s "$FENRIR_OUT"
 grep -Fq '/ui/home-main-option1-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-fidelity-v1.css?v=1' "$INDEX"
+grep -Fq '/ui/home-main-option1-card-polish-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-v1.js?v=1' "$INDEX"
 grep -Fq "'/ui/home-main-option1-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-fidelity-v1.css'" "$SW"
+grep -Fq "'/ui/home-main-option1-card-polish-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-v1.js'" "$SW"
 grep -Fq "'/ui/home-mountain-foundation-v1.svg'" "$SW"
 grep -Fq "'/ui/fenrir.webp'" "$SW"
