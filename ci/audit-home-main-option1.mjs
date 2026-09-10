@@ -55,23 +55,51 @@ async function settleOptionalInstallForScreenshot() {
 }
 
 async function bootstrapAthlete() {
-  // First-run local-vault initialization can legitimately trail DOMContentLoaded
-  // on slower CI runners. Keep checking the real first-run control or Home mount
-  // instead of treating a short bootstrap delay as a product failure.
+  // First-run local-vault initialization can trail DOMContentLoaded on CI.
+  // Do not click Create until the real display-name field is visible, filled,
+  // and the setup action is enabled; otherwise the modal simply remains open.
   for (let i=0;i<80;i+=1) {
     await dismissOptionalInstall()
+    if (await page.locator('.lmf-home-command-v4').count()) return
+
     const create = page.getByRole('button', { name:/CREATE LOCAL ATHLETE/i }).first()
-    if (await create.isVisible().catch(() => false)) {
-      const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
-      const input = modal.locator('input[type="text"],input:not([type])').first()
-      if (await input.isVisible().catch(() => false)) await input.fill('JP')
-      await create.click()
-      await page.waitForTimeout(500)
-      break
+    if (!(await create.isVisible().catch(() => false))) {
+      await page.waitForTimeout(180)
+      continue
     }
-    if (await page.locator('.lmf-home-command-v4').count()) break
-    await page.waitForTimeout(180)
+
+    const modal = create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
+    let input = null
+    for (let attempt=0;attempt<40;attempt+=1) {
+      const modalInput = modal.locator('input[placeholder="Athlete name"],input[type="text"],input:not([type])').first()
+      const pageInput = page.locator('input[placeholder="Athlete name"],input[type="text"],input:not([type])').first()
+      if (await modalInput.isVisible().catch(() => false)) input = modalInput
+      else if (await pageInput.isVisible().catch(() => false)) input = pageInput
+      if (input) break
+      await page.waitForTimeout(180)
+    }
+    if (!input) throw new Error('First-run Athlete Vault rendered but Display Name input never became usable')
+
+    await input.fill('QA Athlete')
+    const filled = await input.inputValue().catch(() => '')
+    if (filled !== 'QA Athlete') throw new Error(`First-run Athlete Vault Display Name did not retain QA value: ${filled || 'empty'}`)
+
+    await create.waitFor({ state:'visible', timeout:5000 })
+    for (let attempt=0;attempt<20 && !(await create.isEnabled().catch(() => false));attempt+=1) {
+      await page.waitForTimeout(120)
+    }
+    if (!(await create.isEnabled().catch(() => false))) throw new Error('First-run Athlete Vault Create Local Athlete remained disabled after valid Display Name')
+
+    await create.click({ timeout:5000 })
+    const completed = await page.waitForFunction(() => (
+      Boolean(document.querySelector('.lmf-home-command-v4')) ||
+      !/CREATE LOCAL ATHLETE/i.test(document.body.innerText)
+    ), null, { timeout:12000 }).then(() => true).catch(() => false)
+    if (!completed) throw new Error('First-run Athlete Vault did not complete after valid QA athlete creation')
+    await page.waitForTimeout(500)
+    return
   }
+  throw new Error('First-run Athlete Vault or Home did not become available during bootstrap window')
 }
 
 try {
