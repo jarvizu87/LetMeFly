@@ -33,6 +33,11 @@ mkdir -p "$DIST/ui"
 cp "$JS_SRC" "$DIST/ui/workout-logging-v2.js"
 cp "$CSS_SRC" "$DIST/ui/workout-logging-v2.css"
 
+# Issue #50: once the standard logging overlay is copied into the exact production
+# dist, narrow load carry-forward to same-prescription sets and preserve intentional
+# load changes. The runtime patch remains presentation-only and uses native set save.
+bash "$ROOT_DIR/ci/apply-workout-logging-fidelity-v1.sh" "$DIST"
+
 INDEX="$INDEX" python - <<'PY'
 from pathlib import Path
 import os, re
@@ -53,8 +58,10 @@ PY
 grep -Fq '/ui/workout-logging-v2.css?v=2' "$INDEX"
 grep -Fq '/ui/workout-logging-v2.js?v=2' "$INDEX"
 node --check "$DIST/ui/workout-logging-v2.js"
+grep -Fq 'programmedLoadSignature' "$DIST/ui/workout-logging-v2.js"
+grep -Fq 'targetStillAtProgramDefault' "$DIST/ui/workout-logging-v2.js"
 
-echo "LetMeFly Workout Logging v2 auto-advance + governed load carry + compact mobile logging: PASS"
+echo "LetMeFly Workout Logging v2 auto-advance + Issue #50 governed load carry + compact mobile logging: PASS"
 
 # Saved-set recovery is an additive ergonomics layer. It never bypasses the
 # native set toggle or changes program prescriptions.
