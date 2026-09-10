@@ -39,13 +39,16 @@ jobs:
           bash ci/install-home-main-option1-v1.sh
           bash ci/install-profile-v2.sh
           bash ci/install-official-brand-v2.sh
+          # The approved desktop shell is production reality now. Install it in
+          # Home QA too so Option 1 is checked inside Option 3, not in isolation.
+          bash ci/install-desktop-workspace-v1.sh
 
       - name: Install browser audit dependency
         run: |
           cd .build-src/letmefly_app
           npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
 
-      - name: Audit approved Option 1 Home on mobile
+      - name: Audit approved Option 1 Home on mobile and desktop
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >/tmp/letmefly-home-option1-http.log 2>&1 &
           SERVER_PID=$!
@@ -57,6 +60,7 @@ jobs:
           CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$CHROME_BIN"
           CHROME_BIN="$CHROME_BIN" node ci/audit-home-main-option1.mjs
+          CHROME_BIN="$CHROME_BIN" node ci/audit-home-main-option1-desktop.mjs
 
       - name: Publish Home Option 1 QA
         if: always()
