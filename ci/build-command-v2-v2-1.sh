@@ -12,6 +12,11 @@ bash "$ROOT_DIR/ci/apply-black-crown-v2-1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-black-crown-v2-1-ui.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-crownforge-v2-2.sh" "$TARGET"
 
+# Supabase's hosted default email sends a magic link unless custom SMTP allows
+# the project template to be changed to a numeric OTP. Consume the PKCE callback
+# in-app so authenticated private sync works with either supported email mode.
+bash "$ROOT_DIR/ci/apply-magic-link-auth-v1.sh" "$TARGET"
+
 # The foundational mobile build must already have isolated set-tab centering
 # from page-level vertical scroll. Program overlays may not regress that runtime.
 grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" "$TARGET/public/ui/workout-flow-v1.js"
@@ -26,6 +31,7 @@ bash "$ROOT_DIR/ci/apply-workout-review-live-count-v1.sh" "$TARGET"
 # allowed to rename local identifiers such as refreshedStats in the final bundle.
 grep -Fq "const refreshedStats = state.workout ? completionStats(state.workout) : null" "$TARGET/src/main.ts"
 grep -Fq "Set saved locally\${refreshedStats ? \` • \${refreshedStats.done}/\${refreshedStats.total}\` : ''}" "$TARGET/src/main.ts"
+grep -Fq "await supabase.auth.exchangeCodeForSession(code)" "$TARGET/src/auth/auth-service.ts"
 
 cd "$TARGET"
 npm run audit:source
