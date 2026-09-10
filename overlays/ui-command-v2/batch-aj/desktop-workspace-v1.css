@@ -165,6 +165,17 @@
     font-size: clamp(40px, 4.2vw, 68px) !important;
   }
 
+  /* The mobile-first Train surface is intentionally capped at 760px in the base UI.
+     Desktop owns the full work area instead of inheriting that phone/tablet cap. */
+  html[data-lmf-desktop-ui="true"] .train-shell {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: visible !important;
+  }
+
   /* Option 3 desktop Train workspace. The original #swipe-viewport remains the center column. */
   .lmf-desktop-workspace {
     width: 100%;
