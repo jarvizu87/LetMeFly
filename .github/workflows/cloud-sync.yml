@@ -1,0 +1,27 @@
+name: Cloud Sync Bootstrap Regression
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cloud-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - run: bash ci/build-command-v2-v2-1.sh
+      - run: npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts fake-indexeddb@6.2.5
+      - run: node ci/audit-cloud-bootstrap-v2.mjs .build-src/letmefly_app

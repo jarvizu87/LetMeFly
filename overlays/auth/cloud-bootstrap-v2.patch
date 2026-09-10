@@ -1,0 +1,242 @@
+--- src/auth/bootstrap-service.ts
++++ src/auth/bootstrap-service.ts
+@@ -135,17 +135,7 @@
+       athleteId,
+       device.deviceId,
+     )
+-    const result = await engine.syncNow()
+-
+-    if (!result.authenticated) {
+-      throw new Error('Authentication ended during cloud bootstrap')
+-    }
+-    if (result.conflicts > 0 || result.rejected > 0 || result.pending > 0) {
+-      throw new Error(
+-        `Cloud bootstrap incomplete: ${result.pending} pending, ` +
+-          `${result.conflicts} conflicts, ${result.rejected} rejected`,
+-      )
+-    }
++    await this.flushBootstrapOutbox(engine)
+ 
+     const cloud = await this.getCloudAthlete()
+     if (!cloud || cloud.id !== athleteId || cloud.owner_user_id !== user.id) {
+@@ -153,7 +143,7 @@
+     }
+ 
+     await this.registerCurrentDevice(athleteId, appVersion)
+-    await engine.syncNow()
++    await this.flushBootstrapOutbox(engine)
+     await this.setBootstrapComplete(athleteId)
+   }
+ 
+@@ -172,7 +162,7 @@
+       lastSuccessfulSyncAt: null,
+       lastChangeSeq: 0,
+       cloudSchemaVersion: 1,
+-      bootstrapStatus: 'complete',
++      bootstrapStatus: 'pending',
+     })
+ 
+     const engine = new LetMeFlySyncEngine(
+@@ -180,9 +170,11 @@
+       athleteId,
+       device.deviceId,
+     )
+-    await engine.syncNow()
++    await this.ensureAllDirtyDomainRecordsQueued(athleteId)
++    await this.flushBootstrapOutbox(engine)
+     await this.registerCurrentDevice(athleteId, appVersion)
+-    await engine.syncNow()
++    await this.flushBootstrapOutbox(engine)
++    await this.setBootstrapComplete(athleteId)
+   }
+ 
+   async hydrateEmptyDevice(
+@@ -233,6 +225,10 @@
+   async ensureAllDirtyDomainRecordsQueued(
+     athleteId: string,
+   ): Promise<number> {
++    // Finish the independent device transaction before opening the outbox
++    // transaction. Awaiting it inside the transaction lets IndexedDB commit
++    // the outbox transaction early, before the domain records can be read.
++    const device = await getOrCreateDeviceState()
+     const db = await openLetMeFlyDb()
+     try {
+       const tx = db.transaction(
+@@ -253,7 +249,6 @@
+         )
+       }
+ 
+-      const device = await getOrCreateDeviceState()
+       const context: LocalMutationContext = {
+         athleteId,
+         deviceId: device.deviceId,
+@@ -298,6 +293,24 @@
+     }
+   }
+ 
++  private async flushBootstrapOutbox(engine: LetMeFlySyncEngine): Promise<void> {
++    // A first sync can contain years of offline records, not just one 50-row
++    // batch. Drain successful batches, but stop on errors or lack of progress.
++    for (let batch = 0; batch < 100; batch += 1) {
++      const result = await engine.syncNow()
++      if (result.offline) throw new Error('Cloud sync paused while offline. Your local data is safe.')
++      if (!result.authenticated) throw new Error('Sign in again to finish cloud sync. Your local data is safe.')
++      if (result.conflicts > 0 || result.rejected > 0) {
++        throw new Error(`Cloud sync needs review: ${result.conflicts} conflicts, ${result.rejected} rejected. Your local data is safe.`)
++      }
++      if (result.pending === 0) return
++      if (result.pushed === 0) {
++        throw new Error(`Cloud sync paused with ${result.pending} pending changes. Retry Sync Now when connected.`)
++      }
++    }
++    throw new Error('Cloud sync has more pending changes. Tap Sync Now to continue safely.')
++  }
++
+   private async registerCurrentDevice(
+     athleteId: string,
+     appVersion?: string,
+--- src/auth/auth-types.ts
++++ src/auth/auth-types.ts
+@@ -7,6 +7,7 @@
+   | 'AUTHENTICATED_UNLINKED'
+   | 'CLOUD_BOOTSTRAP'
+   | 'SYNC_ENABLED'
++  | 'SYNC_ERROR'
+   | 'SYNC_PAUSED_OFFLINE'
+   | 'REAUTH_REQUIRED'
+   | 'SIGNED_OUT_LOCAL_DATA'
+--- src/auth/private-vault-controller.ts
++++ src/auth/private-vault-controller.ts
+@@ -100,7 +100,12 @@
+       email: user.email ?? null,
+     })
+ 
+-    await this.reconcileAuthenticatedUser(user.id)
++    try {
++      await this.reconcileAuthenticatedUser(user.id)
++    } catch (error) {
++      this.patch({ mode: 'SYNC_ERROR', lastError: errorMessage(error) })
++      throw error
++    }
+   }
+ 
+   dispose(): void {
+@@ -152,6 +157,15 @@
+   }
+ 
+   async syncNow(): Promise<void> {
++    try {
++      await this.syncOrResume()
++    } catch (error) {
++      this.patch({ mode: 'SYNC_ERROR', lastError: errorMessage(error) })
++      throw error
++    }
++  }
++
++  private async syncOrResume(): Promise<void> {
+     const athleteId =
+       this.state.cloudAthleteId ?? this.state.localAthleteId
+ 
+@@ -159,7 +173,15 @@
+ 
+     const states = await getAll<SyncState>('syncState')
+     const syncState = states.find((row) => row.athleteId === athleteId)
+-    if (!syncState) return
++    if (!syncState || syncState.bootstrapStatus !== 'complete' || !this.state.cloudAthleteId) {
++      // A failed first upload must be resumable without another email link.
++      if (!this.state.user || !this.state.session) {
++        this.patch({ mode: 'REAUTH_REQUIRED', lastError: 'Sign in to enable cloud sync.' })
++        return
++      }
++      await this.reconcileAuthenticatedUser(this.state.user.id)
++      return
++    }
+ 
+     this.patch({ lastError: null })
+ 
+@@ -172,7 +194,7 @@
+     const result = await engine.syncNow()
+     const conflicts = await this.countConflicts(athleteId)
+ 
+-    let mode: LetMeFlyAuthMode = 'SYNC_ENABLED'
++    let mode: LetMeFlyAuthMode = result.pending > 0 || conflicts > 0 || result.rejected > 0 ? 'SYNC_ERROR' : 'SYNC_ENABLED'
+     if (result.offline) mode = 'SYNC_PAUSED_OFFLINE'
+     else if (!result.authenticated) mode = 'REAUTH_REQUIRED'
+ 
+@@ -180,8 +202,9 @@
+       mode,
+       pending: result.pending,
+       conflicts,
++      lastError: mode === 'SYNC_ERROR' ? `Cloud sync has ${result.pending} pending changes and ${conflicts} conflicts. Your local data is safe.` : null,
+       lastSyncAt:
+-        result.authenticated && !result.offline
++        mode === 'SYNC_ENABLED'
+           ? new Date().toISOString()
+           : this.state.lastSyncAt,
+     })
+--- src/auth/private-vault-view-model.ts
++++ src/auth/private-vault-view-model.ts
+@@ -6,6 +6,7 @@
+   cloudLabel:
+     | 'OFF'
+     | 'SYNCED'
++    | 'SYNC PAUSED'
+     | 'OFFLINE'
+     | 'SIGN-IN REQUIRED'
+     | 'LINK REQUIRED'
+@@ -83,6 +84,17 @@
+         lastSyncLabel: formatLastSync(state.lastSyncAt),
+         workoutAvailable: Boolean(state.localAthleteId),
+       }
++
++    case 'SYNC_ERROR':
++      return {
++        vaultLabel: state.localAthleteId ? 'SAVED' : 'EMPTY',
++        accountLabel,
++        cloudLabel: 'SYNC PAUSED',
++        pendingLabel: state.pending > 0 ? `${state.pending} pending` : null,
++        conflictLabel: state.lastError,
++        lastSyncLabel: formatLastSync(state.lastSyncAt),
++        workoutAvailable: Boolean(state.localAthleteId),
++      }
+ 
+     case 'SYNC_PAUSED_OFFLINE':
+       return {
+--- src/sync/local-sync.ts
++++ src/sync/local-sync.ts
+@@ -135,6 +135,9 @@
+ ): LocalDomainRecord {
+   const revision = Number(payload.revision ?? 0)
+   return {
++    // Preserve extension fields kept only in this device's private vault.
++    // The canonical cloud columns remain authoritative when present.
++    ...(previous ?? {}),
+     ...payload,
+     id: String(payload.id),
+     created_at: String(
+--- src/main.ts
++++ src/main.ts
+@@ -1149,6 +1149,23 @@
+     return
+   }
+   const vm = toPrivateVaultViewModel(state.cloudSnapshot, String(state.athlete?.display_name ?? 'Athlete'))
++  const vaultCard = document.querySelector<HTMLElement>('.vault-card')
++  if (vaultCard) {
++    const status = vaultCard.querySelector('.vault-status strong')
++    if (status) status.textContent = vm.cloudLabel
++    const account = vaultCard.querySelector('h2')
++    if (account) account.textContent = vm.accountLabel
++    let feedback = vaultCard.querySelector<HTMLElement>('[data-cloud-feedback]')
++    if (!feedback) {
++      feedback = document.createElement('p')
++      feedback.dataset.cloudFeedback = ''
++      feedback.className = 'muted'
++      feedback.setAttribute('role', 'status')
++      vaultCard.append(feedback)
++    }
++    feedback.textContent = state.cloudSnapshot.lastError ?? vm.pendingLabel ?? vm.lastSyncLabel ?? ''
++    feedback.hidden = !feedback.textContent
++  }
+   const cls = vm.cloudLabel === 'SYNCED' ? 'green' : vm.cloudLabel === 'OFFLINE' ? 'yellow' : vm.cloudLabel.includes('REQUIRED') || vm.cloudLabel.includes('CONFLICT') ? 'red' : 'purple'
+   pill.innerHTML = `<i class="dot ${cls}"></i>${esc(vm.cloudLabel)}`
+ }
