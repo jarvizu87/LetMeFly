@@ -1,0 +1,543 @@
+/* LetMeFly Desktop Workspace v1
+   Desktop-only presentation layer for the existing LetMeFly app shell.
+   Program logic, workout persistence, athlete data, and mobile presentation remain authoritative.
+*/
+
+@media (min-width: 1100px) {
+  html[data-lmf-desktop-ui="true"] {
+    --lmf-desktop-rail: 188px;
+    --lmf-desktop-gap: 14px;
+    --lmf-desktop-panel: #071016;
+    --lmf-desktop-panel-2: #0a131b;
+    --lmf-desktop-line: #27343e;
+    --lmf-desktop-muted: #92a0ad;
+    --lmf-desktop-red: #ff1731;
+    background: #030609;
+  }
+
+  html[data-lmf-desktop-ui="true"] body {
+    min-width: 0 !important;
+    padding-left: var(--lmf-desktop-rail) !important;
+    background:
+      radial-gradient(circle at 82% 5%, rgba(255, 23, 49, .055), transparent 25%),
+      radial-gradient(circle at 38% 100%, rgba(105, 33, 175, .04), transparent 30%),
+      #030609 !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 80 !important;
+    min-height: 68px !important;
+    padding: 10px 22px !important;
+    border-bottom: 1px solid #1e2a33 !important;
+    background: rgba(3, 7, 10, .965) !important;
+    backdrop-filter: blur(16px);
+  }
+
+  html[data-lmf-desktop-ui="true"] .topbar .brand {
+    display: none !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar {
+    position: fixed !important;
+    z-index: 100 !important;
+    inset: 0 auto 0 0 !important;
+    width: var(--lmf-desktop-rail) !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    padding: 0 10px 16px !important;
+    overflow-y: auto !important;
+    border: 0 !important;
+    border-right: 1px solid #202d37 !important;
+    background:
+      linear-gradient(180deg, rgba(11, 17, 22, .99), rgba(3, 7, 10, .99)),
+      #05090d !important;
+    box-shadow: 14px 0 40px rgba(0, 0, 0, .26) !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item {
+    width: 100% !important;
+    min-height: 50px !important;
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    padding: 0 13px !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    color: #9aa6b1 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+    letter-spacing: .045em !important;
+    text-align: left !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item span {
+    width: 22px !important;
+    margin: 0 !important;
+    color: #aeb8c2 !important;
+    font-size: 18px !important;
+    text-align: center !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item:hover {
+    border-color: #2d3b46 !important;
+    color: #fff !important;
+    background: #0b141c !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item.active {
+    border-color: rgba(255, 23, 49, .44) !important;
+    color: #fff !important;
+    background: linear-gradient(90deg, rgba(255, 23, 49, .20), rgba(255, 23, 49, .04)) !important;
+    box-shadow: inset 3px 0 0 var(--lmf-desktop-red), 0 8px 22px rgba(0, 0, 0, .18) !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item.active span {
+    color: #ff4051 !important;
+  }
+
+  .lmf-desktop-brand {
+    flex: 0 0 auto;
+    min-height: 88px;
+    display: flex;
+    align-items: center;
+    padding: 14px 8px 12px;
+    margin: 0 0 8px;
+    border-bottom: 1px solid #202b34;
+  }
+
+  .lmf-desktop-brand .brand {
+    width: 100%;
+    display: flex !important;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .lmf-desktop-brand .brand-mark {
+    flex: 0 0 auto;
+  }
+
+  .lmf-desktop-brand .brand-word {
+    font-size: 14px !important;
+    letter-spacing: .14em !important;
+  }
+
+  .lmf-desktop-brand .brand small {
+    display: block !important;
+    margin-top: 3px;
+    color: #7d8994 !important;
+    font-size: 6px !important;
+    letter-spacing: .18em !important;
+  }
+
+  .lmf-desktop-rail-footer {
+    margin-top: auto;
+    padding: 18px 12px 4px;
+    color: #6f7c87;
+    font-size: 7px;
+    font-weight: 850;
+    line-height: 1.65;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+  }
+
+  html[data-lmf-desktop-ui="true"] main {
+    width: 100% !important;
+    max-width: 1800px !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding-left: clamp(18px, 2vw, 34px) !important;
+    padding-right: clamp(18px, 2vw, 34px) !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .cinematic-head h1 {
+    font-size: clamp(40px, 4.2vw, 68px) !important;
+  }
+
+  /* The mobile-first Train surface is intentionally capped at 760px in the base UI.
+     Desktop owns the full work area instead of inheriting that phone/tablet cap. */
+  html[data-lmf-desktop-ui="true"] .train-shell {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Option 3 desktop Train workspace. The original #swipe-viewport remains the center column. */
+  .lmf-desktop-workspace {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(230px, .78fr) minmax(500px, 1.55fr) minmax(260px, .88fr);
+    gap: var(--lmf-desktop-gap);
+    align-items: start;
+    margin: 12px 0 24px;
+  }
+
+  .lmf-desktop-workspace > #swipe-viewport {
+    grid-column: 2;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    border: 1px solid var(--lmf-desktop-line);
+    border-radius: 13px;
+    background: #050b10;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .24);
+  }
+
+  .lmf-desktop-workspace > #swipe-viewport > .swipe-page {
+    min-width: 100% !important;
+  }
+
+  .lmf-desktop-panel {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--lmf-desktop-line);
+    border-radius: 13px;
+    background: linear-gradient(150deg, rgba(11, 20, 28, .985), rgba(5, 10, 14, .995));
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .22);
+  }
+
+  .lmf-desktop-flow-panel {
+    grid-column: 1;
+    position: sticky;
+    top: 82px;
+    max-height: calc(100dvh - 104px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lmf-desktop-context-panel {
+    grid-column: 3;
+    position: sticky;
+    top: 82px;
+    max-height: calc(100dvh - 104px);
+    overflow-y: auto;
+  }
+
+  .lmf-desktop-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 54px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #283640;
+    background: rgba(10, 17, 23, .92);
+  }
+
+  .lmf-desktop-panel-head > div {
+    min-width: 0;
+  }
+
+  .lmf-desktop-panel-head strong {
+    display: block;
+    color: #f4f7f9;
+    font-family: var(--condensed, inherit);
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: .02em;
+  }
+
+  .lmf-desktop-panel-head small {
+    display: block;
+    margin-top: 3px;
+    overflow: hidden;
+    color: #8794a0;
+    font-size: 8px;
+    letter-spacing: .08em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lmf-desktop-progress-pill {
+    flex: 0 0 auto;
+    padding: 6px 8px;
+    border: 1px solid #35434f;
+    border-radius: 999px;
+    color: #cbd3da;
+    background: #0a1219;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .08em;
+  }
+
+  .lmf-desktop-flow-list {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px;
+    scrollbar-width: thin;
+  }
+
+  .lmf-desktop-flow-item {
+    width: 100%;
+    min-width: 0;
+    min-height: 68px;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 16px;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    margin: 0 0 6px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: #dde3e8;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .lmf-desktop-flow-item:hover {
+    border-color: #2e3b46;
+    background: #0b151d;
+  }
+
+  .lmf-desktop-flow-item.is-active {
+    border-color: rgba(255, 23, 49, .58);
+    background: linear-gradient(90deg, rgba(255, 23, 49, .20), rgba(255, 23, 49, .035));
+    box-shadow: inset 3px 0 0 var(--lmf-desktop-red);
+  }
+
+  .lmf-desktop-flow-item.is-complete {
+    opacity: .68;
+  }
+
+  .lmf-desktop-flow-thumb {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #34434f;
+    border-radius: 8px;
+    background-image: var(--exercise-art, var(--v2-mountain));
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .lmf-desktop-flow-copy {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .lmf-desktop-flow-copy b,
+  .lmf-desktop-flow-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lmf-desktop-flow-copy b {
+    font-family: var(--condensed, inherit);
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  .lmf-desktop-flow-copy small {
+    color: #8896a2;
+    font-size: 8px;
+  }
+
+  .lmf-desktop-flow-item.is-active .lmf-desktop-flow-copy small {
+    color: #ff7b88;
+  }
+
+  .lmf-desktop-flow-arrow {
+    color: #7b8995;
+    font-size: 19px;
+    font-style: normal;
+  }
+
+  .lmf-desktop-empty {
+    padding: 18px 14px;
+    color: #7e8b96;
+    font-size: 10px;
+    line-height: 1.55;
+  }
+
+  .lmf-desktop-context-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    border-bottom: 1px solid #2a3741;
+  }
+
+  .lmf-desktop-context-tabs button {
+    min-height: 42px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: #8e9aa6;
+    background: transparent;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .055em;
+  }
+
+  .lmf-desktop-context-tabs button.is-active {
+    border-bottom-color: var(--lmf-desktop-red);
+    color: #fff;
+    background: rgba(255, 23, 49, .045);
+  }
+
+  .lmf-desktop-context-body {
+    padding: 12px;
+  }
+
+  .lmf-desktop-context-card {
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #2b3944;
+    border-radius: 10px;
+    background: #081119;
+  }
+
+  .lmf-desktop-context-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .lmf-desktop-context-card > small {
+    display: block;
+    margin-bottom: 5px;
+    color: #83909c;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .lmf-desktop-context-card > strong {
+    display: block;
+    color: #f4f7f9;
+    font-family: var(--condensed, inherit);
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .lmf-desktop-context-card > p {
+    margin: 7px 0 0;
+    color: #a2adb7;
+    font-size: 9px;
+    line-height: 1.5;
+  }
+
+  .lmf-desktop-plate-readout {
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid #26333d;
+    color: #dce2e7;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.45;
+  }
+
+  .lmf-desktop-tool-list {
+    display: grid;
+    gap: 7px;
+  }
+
+  .lmf-desktop-tool-button {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 11px;
+    border: 1px solid #33424e;
+    border-radius: 8px;
+    color: #e5e9ed;
+    background: #0b151d;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .045em;
+    text-align: left;
+  }
+
+  .lmf-desktop-tool-button:hover {
+    border-color: #5a6a77;
+    background: #101c25;
+  }
+
+  .lmf-desktop-tool-button.is-primary {
+    border-color: rgba(255, 23, 49, .6);
+    background: linear-gradient(180deg, #351018, #1d0c11);
+  }
+
+  .lmf-desktop-section-copy {
+    color: #9aa7b2;
+    font-size: 9px;
+    line-height: 1.55;
+  }
+
+  /* Desktop exercise card: same live controls, denser use of horizontal space. */
+  .lmf-desktop-workspace .lmf-workout-flow-card > .lmf-exercise-media {
+    aspect-ratio: 16 / 9 !important;
+    max-height: 360px !important;
+    min-height: 260px !important;
+    background-size: contain !important;
+  }
+
+  .lmf-desktop-workspace .lmf-workout-flow-card .exercise-title {
+    padding: 16px 18px 12px !important;
+  }
+
+  .lmf-desktop-workspace .lmf-workout-flow-card .exercise-title h3 {
+    font-size: 32px !important;
+  }
+
+  .lmf-desktop-workspace .lmf-workout-flow-card .exercise-actions {
+    padding: 0 18px 14px !important;
+  }
+
+  .lmf-desktop-workspace .lmf-workout-flow-card .set-table {
+    padding: 16px 18px 18px !important;
+  }
+
+  .lmf-desktop-workspace .lmf-workout-flow-card .set-row.lmf-set-active {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) 76px !important;
+    padding: 16px !important;
+  }
+
+  .lmf-desktop-workspace .lmf-stepper .set-input {
+    font-size: 24px !important;
+  }
+
+  /* Do not let the mobile bottom safe-area treatment reserve desktop space. */
+  html[data-lmf-desktop-ui="true"] body,
+  html[data-lmf-desktop-ui="true"] main {
+    padding-bottom: 0 !important;
+  }
+}
+
+@media (min-width: 1100px) and (max-width: 1320px) {
+  html[data-lmf-desktop-ui="true"] {
+    --lmf-desktop-rail: 166px;
+    --lmf-desktop-gap: 10px;
+  }
+
+  .lmf-desktop-workspace {
+    grid-template-columns: minmax(205px, .72fr) minmax(440px, 1.5fr) minmax(235px, .78fr);
+  }
+
+  .lmf-desktop-flow-thumb {
+    width: 42px;
+    height: 42px;
+  }
+
+  .lmf-desktop-flow-item {
+    grid-template-columns: 42px minmax(0, 1fr) 14px;
+    gap: 8px;
+  }
+}
