@@ -27,10 +27,12 @@ node "$ROOT_DIR/ci/audit-workout-prescription-fidelity-v1.mjs" "$TARGET"
 # Issue #54: governed "Use This Substitute for Today" behavior. The first layer
 # installs workout-only apply/revert persistence; the second completes structured
 # load governance, reason/safety context, previous-performance lookup, and the
-# equipment-aware profile-enrichment path. Neither layer owns program packages.
+# equipment-aware profile-enrichment path. The history-lock layer makes performed
+# substitute identity immutable once a set has actually been logged.
 bash "$ROOT_DIR/ci/apply-workout-substitution-today-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/normalize-workout-substitution-governance-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-substitution-today-v2.sh" "$TARGET"
+bash "$ROOT_DIR/ci/apply-workout-substitution-history-lock-v1.sh" "$TARGET"
 node "$ROOT_DIR/ci/audit-workout-substitution-today-v1.mjs" "$TARGET"
 
 # Supabase's hosted default email sends a magic link unless custom SMTP allows
@@ -59,6 +61,7 @@ grep -Fq "getSubstitutions?.(governedPrimaryKey, { includeBlocked: true })" "$TA
 grep -Fq "substituted_from_exercise_key: prescribedKey" "$TARGET/src/services/workout-service.ts"
 grep -Fq "updateSubstitutionEquipmentProfile" "$TARGET/src/services/athlete-service.ts"
 grep -Fq "previousExercisePerformance" "$TARGET/src/services/workout-service.ts"
+grep -Fq "substitutionPerformanceLoggedAt" "$TARGET/src/services/workout-service.ts"
 
 cd "$TARGET"
 npm run audit:source
