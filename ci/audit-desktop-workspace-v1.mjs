@@ -70,6 +70,16 @@ async function clickable(page, pattern) {
     || await firstVisible(page.getByText(pattern))
 }
 
+async function waitForAthleteNameInput(page) {
+  for (let i = 0; i < 24; i += 1) {
+    const input = await firstVisible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
+    if (input) return input
+    await dismissInstall(page)
+    await page.waitForTimeout(120)
+  }
+  return null
+}
+
 async function bootstrap(page, name) {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForSelector('body', { timeout: 10000 })
@@ -85,8 +95,8 @@ async function bootstrap(page, name) {
   }
 
   if (create) {
-    const input = await firstVisible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
-    if (!input) throw new Error('Athlete name input missing')
+    const input = await waitForAthleteNameInput(page)
+    if (!input) throw new Error('Athlete name input missing after setup modal settled')
     await input.fill(name)
     await dismissInstall(page)
     await create.click({ timeout: 5000 })
