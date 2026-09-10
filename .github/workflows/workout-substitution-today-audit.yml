@@ -11,6 +11,7 @@ on:
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser.mjs'
+      - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/install-exercise-intelligence-substitutions-v1.sh'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
@@ -22,6 +23,7 @@ on:
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser.mjs'
+      - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/install-exercise-intelligence-substitutions-v1.sh'
       - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
@@ -52,10 +54,14 @@ jobs:
           bash -n ci/normalize-workout-substitution-governance-v1.sh
           node --check ci/audit-workout-substitution-today-v1.mjs
           node --check ci/audit-workout-substitution-today-browser.mjs
+          node --check ci/report-issue54-history-progress-surface.mjs
           node --check overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js
 
       - name: Build production source with Issue 54
         run: bash ci/build-command-v2-v2-1.sh
+
+      - name: Report history and progress integration surfaces
+        run: node ci/report-issue54-history-progress-surface.mjs .build-src/letmefly_app
 
       - name: Install production runtime layers
         run: |
@@ -118,5 +124,6 @@ jobs:
           path: |
             .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_AUDIT.json
             .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT
+            .build-src/letmefly_app/ISSUE54_HISTORY_PROGRESS_SURFACE.md
           if-no-files-found: warn
           retention-days: 14
