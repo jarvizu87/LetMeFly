@@ -207,12 +207,17 @@
     }
     ensureAnchor(surface)
     const dashboard = ensureBootstrapShell(surface)
-    requestBaseRender()
 
+    // Once the real dashboard is healthy, delayed mount pulses are verification
+    // only. Do not request another base render: that would replace the tab rail,
+    // steal focus, and let the browser recalculate vertical scroll during a tab
+    // switch. Rendering is requested only while the bootstrap shell is incomplete.
     if (baseDashboardReady() && dashboard.dataset.loaded === '1') {
       dashboard.removeAttribute(BOOTSTRAP_ATTR)
       return
     }
+
+    requestBaseRender()
 
     window.setTimeout(() => {
       const current = document.getElementById(DASHBOARD_ID)
