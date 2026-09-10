@@ -1,0 +1,381 @@
+/* LetMeFly Home — Approved Option 1 Command layout
+   Presentation only. Home/Main tab only. No program, workout, persistence,
+   cloud-sync, or private-athlete writes. */
+
+body.lmf-home-ref3-active{
+  --hm1-red:#ff263e;
+  --hm1-panel:rgba(8,13,17,.92);
+  --hm1-panel-hi:rgba(14,22,28,.94);
+  --hm1-line:rgba(147,164,174,.20);
+  --hm1-soft:#98a5ad;
+}
+
+body.lmf-home-ref3-active .lmf-home-reference-v3{
+  width:min(100%,1080px)!important;
+  padding:0 18px 108px!important;
+}
+
+/* Approved compact branded header: brand + utility + athlete identity. */
+body.lmf-home-ref3-active .topbar{
+  min-height:76px!important;
+  padding:10px 18px!important;
+  background:linear-gradient(180deg,#05080b 0%,rgba(5,8,11,.96) 100%)!important;
+  border-bottom:1px solid rgba(255,255,255,.045)!important;
+}
+body.lmf-home-ref3-active .lmf-home-topbar-shell{
+  align-items:center!important;
+  gap:12px!important;
+}
+body.lmf-home-ref3-active .lmf-home-brand-lockup>img{
+  width:52px!important;
+  height:52px!important;
+}
+body.lmf-home-ref3-active .lmf-home-brand-lockup strong{
+  font-size:27px!important;
+}
+body.lmf-home-ref3-active .lmf-home-brand-lockup small{
+  font-size:6px!important;
+  letter-spacing:.24em!important;
+}
+.lmf-home-option1-tools{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.lmf-home-option1-alert{
+  width:38px;
+  height:38px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:50%;
+  background:#0c1217;
+  color:#cfd5d8;
+  display:grid;
+  place-items:center;
+  padding:0;
+  font-size:15px;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.lmf-home-option1-alert:hover{border-color:rgba(255,38,62,.42);color:#fff}
+.lmf-home-option1-alert:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* Open greeting, then one cinematic command surface. */
+body.lmf-home-ref3-active .lmf-home-command-v4{
+  gap:17px!important;
+  padding-top:12px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-greeting{
+  align-items:center!important;
+  padding:15px 5px 7px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-eyebrow{
+  font-size:9px!important;
+  letter-spacing:.17em!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-greeting h1{
+  font-size:clamp(34px,5.5vw,52px)!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-greeting>div:first-child>p:last-child{
+  margin-top:9px!important;
+  color:#a9b3b9!important;
+  font-size:12px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-avatar{
+  width:46px!important;
+  height:46px!important;
+  flex:0 0 46px!important;
+  border-color:#46535b!important;
+  background:linear-gradient(145deg,#141c22,#0a1014)!important;
+  font-size:13px!important;
+}
+
+body.lmf-home-ref3-active .lmf-home-v4-command{
+  isolation:isolate;
+  min-height:430px!important;
+  grid-template-columns:1fr!important;
+  border-color:rgba(134,151,162,.34)!important;
+  border-radius:18px!important;
+  background:
+    linear-gradient(90deg,rgba(3,6,9,.97) 0%,rgba(3,6,9,.92) 42%,rgba(3,6,9,.61) 69%,rgba(3,6,9,.36) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.04) 35%,rgba(2,5,8,.88) 100%),
+    url('/ui/home-mountain-foundation-v1.svg') center 48% / cover no-repeat!important;
+  box-shadow:0 26px 65px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-command::before{
+  background:
+    radial-gradient(circle at 84% 22%,rgba(255,38,62,.15),transparent 25%),
+    linear-gradient(125deg,transparent 0 58%,rgba(255,255,255,.035) 58.2% 58.5%,transparent 58.7%)!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-command-main{
+  width:min(72%,760px)!important;
+  min-width:0!important;
+  padding:31px 34px 29px!important;
+  z-index:3!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-kicker{
+  margin-bottom:10px!important;
+  font-size:9px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-program-row h2{
+  font-size:clamp(40px,6.5vw,64px)!important;
+  text-shadow:0 5px 24px rgba(0,0,0,.72)!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-live{
+  padding:6px 8px 5px!important;
+  font-size:8px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-tagline{
+  margin-top:9px!important;
+  color:#a6b0b6!important;
+  font-size:8px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-position{
+  margin-top:27px!important;
+  font-size:13px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-command-main h3{
+  margin-top:7px!important;
+  font-size:clamp(28px,4.6vw,46px)!important;
+  line-height:1.02!important;
+  text-shadow:0 5px 22px rgba(0,0,0,.66)!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-meta{
+  margin-top:26px!important;
+  background:rgba(2,6,8,.34)!important;
+  backdrop-filter:blur(4px);
+}
+body.lmf-home-ref3-active .lmf-home-v4-meta span{
+  font-size:7px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-meta strong{
+  font-size:10px!important;
+  line-height:1.25!important;
+}
+
+/* Actual workout progress — missing from the simplified live Home. */
+.lmf-home-option1-progress{
+  width:100%;
+  margin:18px 0 19px;
+  display:grid;
+  gap:7px;
+}
+.lmf-home-option1-progress-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color:#9ca8ae;
+  font:800 8px/1 system-ui,sans-serif;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.lmf-home-option1-progress-head strong{color:#e4e8ea;font-size:9px}
+.lmf-home-option1-track{
+  height:6px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.09);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.42);
+}
+.lmf-home-option1-fill{
+  display:block;
+  height:100%;
+  width:0;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#d7162e,#ff3048);
+  box-shadow:0 0 16px rgba(255,38,62,.34);
+  transition:width .22s ease;
+}
+body.lmf-home-ref3-active .lmf-home-v4-start{
+  margin-top:0!important;
+  min-width:245px!important;
+  min-height:53px!important;
+  border-radius:9px!important;
+  font-size:10px!important;
+}
+
+/* Image-driven right side: approved wolf identity, not the placeholder crown glyph. */
+body.lmf-home-ref3-active .lmf-home-v4-command-mark{
+  position:absolute!important;
+  inset:0 0 0 auto!important;
+  width:44%!important;
+  min-height:0!important;
+  border-left:0!important;
+  pointer-events:none!important;
+  z-index:1!important;
+  background:radial-gradient(circle at 64% 43%,rgba(255,38,62,.12),transparent 40%)!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{
+  content:'';
+  position:absolute;
+  right:3%;
+  top:50%;
+  width:min(31vw,285px);
+  aspect-ratio:1;
+  transform:translateY(-50%);
+  background:url('/brand/letmefly-logo-display-512.png') center / contain no-repeat;
+  opacity:.16;
+  filter:grayscale(.18) contrast(1.08) drop-shadow(0 14px 34px rgba(0,0,0,.58));
+}
+body.lmf-home-ref3-active .lmf-home-v4-crown{display:none!important}
+body.lmf-home-ref3-active .lmf-home-v4-command-mark span{
+  right:16px!important;
+  bottom:22px!important;
+  font-size:8px!important;
+  color:#929da3!important;
+}
+
+/* Approved 2 × 2 coaching-intelligence grid. */
+body.lmf-home-ref3-active .lmf-home-v4-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-areas:'readiness performance' 'milestone coach'!important;
+  gap:13px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-panel{
+  min-height:178px!important;
+  padding:19px 19px 17px!important;
+  border-color:var(--hm1-line)!important;
+  border-radius:14px!important;
+  background:linear-gradient(145deg,var(--hm1-panel-hi),var(--hm1-panel))!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-panel-head span{
+  font-size:9px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-panel-head b{
+  font-size:8px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-readiness p,
+body.lmf-home-ref3-active .lmf-home-v4-milestone p{
+  font-size:10px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-performance li{
+  font-size:9px!important;
+  line-height:1.42!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-panel-link{
+  font-size:8px!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-coach blockquote{
+  font-size:18px!important;
+  line-height:1.28!important;
+}
+
+/* Quiet metrics rail below the intelligence layer. */
+body.lmf-home-ref3-active .lmf-home-v4-stats{
+  border-color:#28343b!important;
+  background:linear-gradient(180deg,rgba(10,16,20,.72),rgba(6,10,13,.56))!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-stats span{font-size:7px!important}
+body.lmf-home-ref3-active .lmf-home-v4-stats strong{font-size:13px!important}
+
+@media (max-width:700px){
+  body.lmf-home-ref3-active .lmf-home-reference-v3{padding:0 13px 102px!important}
+  body.lmf-home-ref3-active .topbar{min-height:68px!important;padding:8px 13px!important}
+  body.lmf-home-ref3-active .lmf-home-brand-lockup>img{width:46px!important;height:46px!important}
+  body.lmf-home-ref3-active .lmf-home-brand-lockup strong{font-size:23px!important}
+  body.lmf-home-ref3-active .lmf-home-brand-lockup small{font-size:5.5px!important}
+  .lmf-home-option1-alert{width:35px;height:35px}
+
+  body.lmf-home-ref3-active .lmf-home-v4-greeting{padding:12px 3px 5px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-greeting h1{font-size:34px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-greeting>div:first-child>p:last-child{font-size:11px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-avatar{width:42px!important;height:42px!important;flex-basis:42px!important}
+
+  body.lmf-home-ref3-active .lmf-home-v4-command{
+    min-height:405px!important;
+    background:
+      linear-gradient(90deg,rgba(3,6,9,.96) 0%,rgba(3,6,9,.87) 54%,rgba(3,6,9,.55) 100%),
+      linear-gradient(180deg,rgba(0,0,0,.02) 25%,rgba(2,5,8,.91) 100%),
+      url('/ui/home-mountain-foundation-v1.svg') 58% center / cover no-repeat!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-command-main{
+    width:100%!important;
+    padding:25px 22px 23px!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-program-row h2{font-size:39px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-position{margin-top:21px!important;font-size:11px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-command-main h3{font-size:28px!important;max-width:88%!important}
+  body.lmf-home-ref3-active .lmf-home-v4-meta{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    margin-top:20px!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-meta>div,
+  body.lmf-home-ref3-active .lmf-home-v4-meta>div:nth-child(3){
+    grid-column:auto!important;
+    border-top:0!important;
+    border-right:1px solid rgba(155,169,177,.11)!important;
+    padding:10px 9px!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-meta>div:first-child{padding-left:0!important}
+  body.lmf-home-ref3-active .lmf-home-v4-meta>div:last-child,
+  body.lmf-home-ref3-active .lmf-home-v4-meta>div:nth-child(3){border-right:0!important}
+  body.lmf-home-ref3-active .lmf-home-v4-meta strong,
+  body.lmf-home-ref3-active .lmf-home-v4-meta>div:nth-child(3) strong{
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    overflow-wrap:anywhere!important;
+    font-size:9px!important;
+  }
+  .lmf-home-option1-progress{margin:15px 0 17px}
+  body.lmf-home-ref3-active .lmf-home-v4-start{width:100%!important;min-width:0!important;min-height:50px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-command-mark{width:54%!important;opacity:.8}
+  body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{width:210px!important;right:-22px!important;opacity:.11!important}
+  body.lmf-home-ref3-active .lmf-home-v4-command-mark span{display:none!important}
+
+  /* Keep the approved two-by-two intelligence composition on phones. */
+  body.lmf-home-ref3-active .lmf-home-v4-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-areas:'readiness performance' 'milestone coach'!important;
+    gap:10px!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-panel{
+    min-height:190px!important;
+    padding:15px 14px 14px!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-panel-head{margin-bottom:11px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-panel-head span{font-size:8px!important;letter-spacing:.07em!important}
+  body.lmf-home-ref3-active .lmf-home-v4-panel-head b{font-size:7px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-panel-link{left:14px!important;right:14px!important;bottom:12px!important;font-size:7px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-readiness-body{display:grid!important;gap:9px!important;padding-right:0!important}
+  body.lmf-home-ref3-active .lmf-home-v4-score{width:57px!important;height:57px!important;flex-basis:57px!important;border-width:4px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-score strong{font-size:17px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-readiness h3,
+  body.lmf-home-ref3-active .lmf-home-v4-milestone h3{font-size:15px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-readiness p,
+  body.lmf-home-ref3-active .lmf-home-v4-milestone p{font-size:8.5px!important;line-height:1.4!important}
+  body.lmf-home-ref3-active .lmf-home-v4-spark{height:33px!important;gap:4px!important;margin-bottom:6px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-spark i{width:7px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-performance{min-height:190px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-performance ul{gap:4px!important;margin:0 0 27px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-performance li{
+    font-size:8px!important;
+    line-height:1.35!important;
+    display:-webkit-box!important;
+    -webkit-box-orient:vertical!important;
+    -webkit-line-clamp:2!important;
+    overflow:hidden!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-milestone{min-height:190px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-milestone p{-webkit-line-clamp:4!important;margin-bottom:26px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-coach{min-height:190px!important}
+  body.lmf-home-ref3-active .lmf-home-v4-coach blockquote{
+    margin:16px 3px 28px 0!important;
+    font-size:14px!important;
+    line-height:1.3!important;
+    -webkit-line-clamp:5!important;
+  }
+
+  body.lmf-home-ref3-active .lmf-home-v4-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.lmf-home-ref3-active .lmf-home-v4-stats>div{min-height:72px!important;padding:13px 14px!important}
+}
+
+@media (max-width:370px){
+  body.lmf-home-ref3-active .lmf-home-v4-grid{grid-template-columns:1fr!important;grid-template-areas:'readiness' 'performance' 'milestone' 'coach'!important}
+  body.lmf-home-ref3-active .lmf-home-v4-panel{min-height:170px!important}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .lmf-home-option1-fill{transition:none}
+}
