@@ -46,6 +46,12 @@ async function settleOptionalInstallForScreenshot() {
     await page.waitForTimeout(delay).catch(() => null)
     await dismissOptionalInstall().catch(() => null)
   }
+  // A later browser installability event can legally re-render the global
+  // prompt. Suppress only the QA capture surface so the Home screenshot audits
+  // Home instead of unrelated PWA chrome.
+  await page.addStyleTag({ content:'#lmf-install-banner{display:none!important}' }).catch(() => null)
+  await page.locator('#lmf-install-banner').evaluateAll((nodes) => nodes.forEach((node) => node.remove())).catch(() => null)
+  await page.waitForTimeout(120).catch(() => null)
 }
 
 async function bootstrapAthlete() {
@@ -96,6 +102,7 @@ try {
     }
     return {
       command:rect('.lmf-home-v4-command'),
+      commandMark:rect('.lmf-home-v4-command-mark'),
       commandStyle:style('.lmf-home-v4-command'),
       fenrirStyle:pseudoStyle('.lmf-home-v4-command-mark','::before'),
       start:rect('.lmf-home-v4-start'),
@@ -119,8 +126,9 @@ try {
   check((layout.command?.height || 0) >= 380, 'Command hero has premium mobile depth', `${Math.round(layout.command?.height || 0)}px`)
   check(layout.commandStyle?.backgroundImage?.includes('home-mountain-foundation-v1.svg'), 'Command hero uses approved mountain artwork', layout.commandStyle?.backgroundImage || 'missing')
   check(layout.hasCommandMark, 'Command hero preserves wolf/brand identity layer')
+  check((layout.commandMark?.width || 0) >= 285, 'Fenrir mobile stage keeps the face inside the hero', `${Math.round(layout.commandMark?.width || 0)}px`)
   check(layout.fenrirStyle?.backgroundImage?.includes('fenrir.webp'), 'Command hero uses clean Fenrir artwork', layout.fenrirStyle?.backgroundImage || 'missing')
-  check(Number(layout.fenrirStyle?.opacity || 0) >= .5, 'Fenrir art remains visibly weighted on mobile', `opacity=${layout.fenrirStyle?.opacity || 'missing'}`)
+  check(Number(layout.fenrirStyle?.opacity || 0) >= .75, 'Fenrir art remains visibly weighted on mobile', `opacity=${layout.fenrirStyle?.opacity || 'missing'}`)
   check(Boolean(layout.progress), 'Workout progress bar is present')
   check(Boolean(layout.start) && (layout.start?.width || 0) >= 300, 'Start Workout remains a dominant mobile action', `${Math.round(layout.start?.width || 0)}px`)
   check(Boolean(layout.alert), 'Compact header utility control is present')
