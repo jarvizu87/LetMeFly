@@ -25,3 +25,4 @@ jobs:
       - run: bash ci/build-command-v2-v2-1.sh
       - run: npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts fake-indexeddb@6.2.5
       - run: node ci/audit-cloud-bootstrap-v2.mjs .build-src/letmefly_app
+      - run: node ci/audit-conflict-recovery-v1.mjs .build-src/letmefly_app

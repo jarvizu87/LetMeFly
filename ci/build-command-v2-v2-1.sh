@@ -29,6 +29,7 @@ node "$ROOT_DIR/ci/audit-workout-prescription-fidelity-v1.mjs" "$TARGET"
 # in-app so authenticated private sync works with either supported email mode.
 bash "$ROOT_DIR/ci/apply-magic-link-auth-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-cloud-bootstrap-v2.sh" "$TARGET"
+bash "$ROOT_DIR/ci/apply-conflict-recovery-v1.sh" "$TARGET"
 
 # The foundational mobile build must already have isolated set-tab centering
 # from page-level vertical scroll. Program overlays may not regress that runtime.
