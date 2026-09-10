@@ -1,0 +1,122 @@
+name: Workout Substitute Today Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/issue-54-substitute-today
+    paths:
+      - '.github/workflows/workout-substitution-today-audit.yml'
+      - 'ci/apply-workout-substitution-today-v1.sh'
+      - 'ci/normalize-workout-substitution-governance-v1.sh'
+      - 'ci/audit-workout-substitution-today-v1.mjs'
+      - 'ci/audit-workout-substitution-today-browser.mjs'
+      - 'ci/build-command-v2-v2-1.sh'
+      - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.css'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ci/apply-workout-substitution-today-v1.sh'
+      - 'ci/normalize-workout-substitution-governance-v1.sh'
+      - 'ci/audit-workout-substitution-today-v1.mjs'
+      - 'ci/audit-workout-substitution-today-browser.mjs'
+      - 'ci/build-command-v2-v2-1.sh'
+      - 'ci/install-exercise-intelligence-substitutions-v1.sh'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js'
+      - 'overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.css'
+
+permissions:
+  contents: read
+
+jobs:
+  substitute-today:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Syntax-check feature harness
+        run: |
+          bash -n ci/apply-workout-substitution-today-v1.sh
+          bash -n ci/normalize-workout-substitution-governance-v1.sh
+          node --check ci/audit-workout-substitution-today-v1.mjs
+          node --check ci/audit-workout-substitution-today-browser.mjs
+          node --check overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js
+
+      - name: Build production source with Issue 54
+        run: bash ci/build-command-v2-v2-1.sh
+
+      - name: Install production runtime layers
+        run: |
+          bash ci/install-smart-names-bar-loader.sh
+          bash ci/install-exercise-intelligence-v1.sh
+          bash ci/install-exercise-intelligence-v2-supplement.sh
+          bash ci/install-exercise-intelligence-active-program-coverage-v1.sh
+          bash ci/install-exercise-intelligence-program-name-coverage-v1.sh
+          node ci/audit-exercise-intelligence-program-name-resolution.mjs .build-src/letmefly_app
+          bash ci/install-exercise-intelligence-library-v1.sh
+          bash ci/install-exercise-intelligence-coach-v1.sh
+          bash ci/install-exercise-intelligence-coach-substitutions-v1.sh
+          bash ci/install-exercise-intelligence-substitutions-v1.sh
+          bash ci/install-voice-notes-v2.sh
+          bash ci/install-strength-maxes-v1.sh
+          bash ci/install-progress-dashboard-v1.sh
+          bash ci/install-progress-tab-scroll-safety-v1.sh
+          bash ci/install-progress-conditioning-v4.sh
+          bash ci/install-command-refresh.sh
+          bash ci/install-mobile-recording-regression-v1.sh
+          bash ci/install-home-command-hero-v1.sh
+          bash ci/install-home-reference-v3.sh
+          bash ci/install-home-progress-route-isolation-v1.sh
+          bash ci/install-home-main-option1-v1.sh
+          bash ci/install-profile-v2.sh
+          bash ci/install-workout-logging-v2.sh
+          bash ci/install-official-brand-v2.sh
+          bash ci/install-desktop-workspace-v1.sh
+
+      - name: Re-audit finished substitution assembly
+        run: |
+          node ci/audit-workout-substitution-today-v1.mjs .build-src/letmefly_app
+          node ci/audit-workout-prescription-fidelity-v1.mjs .build-src/letmefly_app
+          node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+
+      - name: Run mobile browser substitution regression
+        run: |
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cd ../..
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >/tmp/letmefly-issue54-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..20}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 0.25
+          done
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          CHROME_BIN="$CHROME_BIN" node ci/audit-workout-substitution-today-browser.mjs
+
+      - name: Audit final Exercise Intelligence production boundary
+        run: bash ci/audit-exercise-intelligence-production-v1.sh
+
+      - name: Publish Issue 54 audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workout-substitution-today-audit
+          path: |
+            .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_AUDIT.json
+            .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT
+          if-no-files-found: warn
+          retention-days: 14
