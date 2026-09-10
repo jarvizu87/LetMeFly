@@ -37,7 +37,7 @@ if text.count(old_api) != 1:
     raise SystemExit(f'Progress scroll-safety API block expected one production block, found {text.count(old_api)}')
 
 marker = "  async function render(force=false) {"
-helper = """  function switchTabInPlace(el,root,next,vault,rows) {\n    if(!TABS.includes(next)||next===activeTab)return\n    const savedScrollY=window.scrollY\n    activeTab=next;writeSetting(TAB_KEY,next)\n    el.querySelectorAll('[data-pg-tab]').forEach(button=>button.setAttribute('aria-selected',button.dataset.pgTab===next?'true':'false'))\n    const panel=el.querySelector('.lmf-pg-tabbody')\n    if(!panel)return\n    const previousMinHeight=panel.style.minHeight\n    const previousHeight=Math.ceil(panel.getBoundingClientRect().height)\n    if(previousHeight>0)panel.style.minHeight=`${previousHeight}px`\n    panel.dataset.pgPanel=next\n    panel.innerHTML=next==='overview'?overview(vault,rows):next==='strength'?strengthView(rows):next==='body'?bodyView(vault):next==='conditioning'?conditioningView(vault):prView(vault.events)\n    el.querySelector('[data-pg-manage-tms]')?.addEventListener('click',()=>openNativeTools(root))\n    window.__LMF_PROGRESS_POLISH__?.refresh?.()\n    window.__LMF_PROGRESS_FINALIZE__?.refresh?.()\n    const restoreScroll=()=>{if(Math.abs(window.scrollY-savedScrollY)>1)window.scrollTo(0,savedScrollY)}\n    requestAnimationFrame(restoreScroll)\n    window.setTimeout(restoreScroll,90)\n    window.setTimeout(()=>{panel.style.minHeight=previousMinHeight;restoreScroll()},260)\n    window.setTimeout(restoreScroll,360)\n  }\n\n"""
+helper = """  function switchTabInPlace(el,root,next,vault,rows) {\n    if(!TABS.includes(next)||next===activeTab)return\n    const savedScrollY=window.scrollY\n    activeTab=next;writeSetting(TAB_KEY,next)\n    el.querySelectorAll('[data-pg-tab]').forEach(button=>button.setAttribute('aria-selected',button.dataset.pgTab===next?'true':'false'))\n    const panel=el.querySelector('.lmf-pg-tabbody')\n    if(!panel)return\n    const baselineMinHeight=panel.dataset.pgScrollBaselineMinHeight??panel.style.minHeight\n    panel.dataset.pgScrollBaselineMinHeight=baselineMinHeight\n    const previousHeight=Math.ceil(panel.getBoundingClientRect().height)\n    if(previousHeight>0)panel.style.minHeight=`${previousHeight}px`\n    panel.dataset.pgPanel=next\n    panel.innerHTML=next==='overview'?overview(vault,rows):next==='strength'?strengthView(rows):next==='body'?bodyView(vault):next==='conditioning'?conditioningView(vault):prView(vault.events)\n    el.querySelector('[data-pg-manage-tms]')?.addEventListener('click',()=>openNativeTools(root))\n    window.__LMF_PROGRESS_POLISH__?.refresh?.()\n    window.__LMF_PROGRESS_FINALIZE__?.refresh?.()\n    const restoreScroll=()=>{if(Math.abs(window.scrollY-savedScrollY)>1)window.scrollTo(0,savedScrollY)}\n    const releaseHeight=()=>{\n      if(!panel.isConnected||panel.dataset.pgPanel!==next)return\n      requestAnimationFrame(()=>{\n        panel.style.minHeight=baselineMinHeight\n        delete panel.dataset.pgScrollBaselineMinHeight\n        restoreScroll()\n        requestAnimationFrame(restoreScroll)\n      })\n    }\n    requestAnimationFrame(restoreScroll)\n    window.setTimeout(restoreScroll,90)\n    if(next==='conditioning'){\n      let settleChecks=0\n      const releaseWhenConditioningSettles=()=>{\n        if(!panel.isConnected||panel.dataset.pgPanel!==next)return\n        if(panel.querySelector('[data-conditioning-v4=\"4\"]')){releaseHeight();return}\n        restoreScroll()\n        settleChecks+=1\n        if(settleChecks<30)window.setTimeout(releaseWhenConditioningSettles,60)\n      }\n      window.setTimeout(releaseWhenConditioningSettles,120)\n    }else{\n      window.setTimeout(releaseHeight,260)\n    }\n    window.setTimeout(restoreScroll,420)\n  }\n\n"""
 if marker not in text:
     raise SystemExit('Progress scroll-safety render marker missing')
 if 'function switchTabInPlace(' in text:
@@ -57,7 +57,7 @@ import os, re
 
 p = Path(os.environ['INDEX_HTML'])
 text = p.read_text()
-text, count = re.subn(r'/ui/progress-dashboard-v1\.js\?v=8', '/ui/progress-dashboard-v1.js?v=9', text)
+text, count = re.subn(r'/ui/progress-dashboard-v1\.js\?v=8', '/ui/progress-dashboard-v1.js?v=10', text)
 if count != 1:
     raise SystemExit(f'Progress scroll-safety cache-bust expected one v8 base script, found {count}')
 p.write_text(text)
@@ -70,9 +70,11 @@ grep -Fq 'setTab:next=>switchTabInPlace(el,root,next,vault,rows)' "$PROGRESS_JS"
 grep -Fq 'version:3,source:vault.source' "$PROGRESS_JS"
 grep -Fq 'const savedScrollY=window.scrollY' "$PROGRESS_JS"
 grep -Fq 'panel.style.minHeight=`${previousHeight}px`' "$PROGRESS_JS"
-grep -Fq 'window.__LMF_PROGRESS_FINALIZE__?.refresh?.()' "$PROGRESS_JS"
-grep -Fq 'window.setTimeout(restoreScroll,360)' "$PROGRESS_JS"
+grep -Fq 'pgScrollBaselineMinHeight' "$PROGRESS_JS"
+grep -Fq 'releaseWhenConditioningSettles' "$PROGRESS_JS"
+grep -Fq "panel.querySelector('[data-conditioning-v4=\"4\"]')" "$PROGRESS_JS"
+grep -Fq 'window.setTimeout(restoreScroll,420)' "$PROGRESS_JS"
 ! grep -Fq "activeTab=next;writeSetting(TAB_KEY,next);queueRender(true)" "$PROGRESS_JS"
-grep -Fq '/ui/progress-dashboard-v1.js?v=9' "$INDEX_HTML"
+grep -Fq '/ui/progress-dashboard-v1.js?v=10' "$INDEX_HTML"
 
 echo "LetMeFly Progress tab scroll safety v1: PASS"
