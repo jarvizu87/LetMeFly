@@ -17,7 +17,33 @@ const pass=(label,detail='')=>{report.passes.push({label,detail});console.log(`P
 const fail=(label,detail='')=>{report.result='FAIL';report.failures.push({label,detail});console.log(`FAIL  ${label}${detail?` — ${detail}`:''}`)}
 async function firstVisible(locator){const count=await locator.count();for(let i=0;i<count;i+=1){const item=locator.nth(i);if(await item.isVisible().catch(()=>false))return item}return null}
 async function dismissInstall(page){const button=await firstVisible(page.locator('button,a,[role="button"]').filter({hasText:/^\s*Not now\s*$/i}));if(button)await button.click({timeout:1500}).catch(()=>null)}
-async function bootstrap(page){await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:20000});await page.waitForSelector('body',{timeout:10000});for(let i=0;i<12;i+=1){await dismissInstall(page);const create=await firstVisible(page.locator('button,a,[role="button"]').filter({hasText:/CREATE LOCAL ATHLETE/i}));if(create){const modal=create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]');const input=await firstVisible(modal.locator('input[type="text"],input:not([type])'))||await firstVisible(page.locator('input[type="text"],input:not([type])'));if(!input)throw new Error('Athlete display-name input missing');await input.fill('Progress Final QA Athlete');await create.click({timeout:4000});await page.waitForTimeout(500);break}await page.waitForTimeout(160)}for(let i=0;i<5;i+=1){await dismissInstall(page);await page.waitForTimeout(100)}}
+async function bootstrap(page){
+  await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:20000})
+  await page.waitForSelector('body',{timeout:10000})
+  for(let i=0;i<16;i+=1){
+    await dismissInstall(page)
+    const create=await firstVisible(page.locator('button,a,[role="button"]').filter({hasText:/CREATE LOCAL ATHLETE/i}))
+    if(create){
+      const modal=create.locator('xpath=ancestor::*[contains(@class,"modal-backdrop")][1]')
+      let input=null
+      for(let j=0;j<16;j+=1){
+        input=await firstVisible(modal.locator('input[type="text"],input:not([type])'))||await firstVisible(page.locator('input[type="text"],input:not([type])'))
+        if(input)break
+        await dismissInstall(page)
+        await page.waitForTimeout(180)
+      }
+      if(!input)throw new Error('Athlete display-name input missing after first-run modal settled')
+      await input.fill('Progress Final QA Athlete')
+      await dismissInstall(page)
+      await create.click({timeout:5000})
+      await page.waitForFunction(()=>!/CREATE LOCAL ATHLETE/i.test(document.body.innerText),null,{timeout:8000})
+      await page.waitForTimeout(250)
+      break
+    }
+    await page.waitForTimeout(180)
+  }
+  for(let i=0;i<5;i+=1){await dismissInstall(page);await page.waitForTimeout(100)}
+}
 async function seed(page){return page.evaluate(async()=>{const reqp=req=>new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}),db=await new Promise((resolve,reject)=>{const req=indexedDB.open('letmefly-private');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}),athletes=await reqp(db.transaction('athletes','readonly').objectStore('athletes').getAll()),athlete=athletes[0];if(!athlete)throw new Error('No local athlete');const put=async(storeName,value)=>{const tx=db.transaction(storeName,'readwrite'),req=tx.objectStore(storeName).put(value);await reqp(req);await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})};const today=new Date(),older=new Date(today);older.setDate(older.getDate()-2);const t1=older.toISOString(),t2=today.toISOString(),s1='qa-progress-final-session-1',s2='qa-progress-final-session-2',e1='qa-progress-final-bench-1',e2='qa-progress-final-bench-2';await put('workoutSessions',{id:s1,athlete_id:athlete.id,status:'completed',workout_name:'Bench QA 1',started_at:t1,completed_at:t1,created_at:t1,updated_at:t1});await put('workoutSessions',{id:s2,athlete_id:athlete.id,status:'completed',workout_name:'Bench QA 2',started_at:t2,completed_at:t2,created_at:t2,updated_at:t2});await put('workoutExercises',{id:e1,athlete_id:athlete.id,workout_session_id:s1,exercise_key:'bench-press',exercise_name_snapshot:'Bench Press',prescription_snapshot:{category:'strength'},created_at:t1,updated_at:t1});await put('workoutExercises',{id:e2,athlete_id:athlete.id,workout_session_id:s2,exercise_key:'bench-press',exercise_name_snapshot:'Bench Press',prescription_snapshot:{category:'strength'},created_at:t2,updated_at:t2});await put('workoutSets',{id:'qa-progress-final-set-1',athlete_id:athlete.id,workout_session_id:s1,workout_exercise_id:e1,set_number:1,completed:true,load_value:100,load_unit:'lb',reps:5,rpe:7,completed_at:t1,created_at:t1,updated_at:t1});await put('workoutSets',{id:'qa-progress-final-set-2',athlete_id:athlete.id,workout_session_id:s2,workout_exercise_id:e2,set_number:1,completed:true,load_value:110,load_unit:'lb',reps:5,rpe:8,completed_at:t2,created_at:t2,updated_at:t2});await put('workoutSets',{id:'qa-progress-final-set-3',athlete_id:athlete.id,workout_session_id:s2,workout_exercise_id:e2,set_number:2,completed:true,load_value:100,load_unit:'lb',reps:6,rpe:8,completed_at:t2,created_at:t2,updated_at:t2});if(db.objectStoreNames.contains('bodyweightEntries')){await put('bodyweightEntries',{id:'qa-progress-final-body-1',athlete_id:athlete.id,value:230,unit:'lb',measured_at:t1,created_at:t1,updated_at:t1});await put('bodyweightEntries',{id:'qa-progress-final-body-2',athlete_id:athlete.id,value:228,unit:'lb',measured_at:t2,created_at:t2,updated_at:t2})}db.close();return{athleteId:athlete.id}})}
 async function clickTab(page,name){const tab=page.locator(`[data-pg-tab="${name}"]`).first();await tab.waitFor({state:'visible',timeout:8000});await tab.focus();await tab.click();await page.waitForSelector(`[data-pg-panel="${name}"]`,{timeout:8000});await page.waitForTimeout(500)}
 
