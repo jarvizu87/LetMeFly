@@ -15,14 +15,19 @@
     const top = document.querySelector('.lmf-home-topbar-shell')
     if (!top) return
     let tools = top.querySelector('.lmf-home-option1-tools')
+    const identity = document.querySelector(`${SHELL} .lmf-home-v4-identity`)
     if (!tools) {
       tools = document.createElement('div')
       tools.className = 'lmf-home-option1-tools'
       tools.innerHTML = '<button type="button" class="lmf-home-option1-alert" aria-label="Home notifications" title="Notifications">●</button>'
-      const identity = document.querySelector(`${SHELL} .lmf-home-v4-identity`)
       top.appendChild(tools)
-      if (identity) tools.appendChild(identity.cloneNode(true))
+      if (identity) {
+        const clone = identity.cloneNode(true)
+        clone.hidden = false
+        tools.appendChild(clone)
+      }
     }
+    if (identity) identity.hidden = true
   }
 
   function parseProgress(shell) {
@@ -44,6 +49,7 @@
       block = document.createElement('div')
       block.className = 'lmf-home-option1-progress'
       block.setAttribute('aria-label', 'Workout progress')
+      block.setAttribute('role', 'progressbar')
       block.innerHTML = `
         <div class="lmf-home-option1-progress-head"><span>Workout progress</span><strong data-lmf-option1-progress-label>Session ready</strong></div>
         <div class="lmf-home-option1-track" aria-hidden="true"><span class="lmf-home-option1-fill"></span></div>`
