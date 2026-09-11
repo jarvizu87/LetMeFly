@@ -65,6 +65,15 @@ test('matching unloaded/bodyweight slots do not erase a valid measured-volume co
   assert.equal(previousComparable(s,recap(s)).sessionId,'prior')
   s.sets[3].load_value=50;assert.equal(previousComparable(s,recap(s)),null,'Different measured set-slot coverage is held')
 })
+test('matching percentages with different saved TM/load context do not compare; actual load remains free to differ',()=>{
+  const s=fixture(), prior=fixture('prior','2026-09-01T10:00:00Z','2026-09-01T11:00:00Z')
+  const context={percentage:75,loadReference:'training-max',resolvedTrainingMaxKey:'bench',resolvedTrainingMaxValue:200,resolvedTrainingMaxUnit:'lb',resolvedLoadValue:150}
+  for(const row of [...s.sets,...prior.sets])Object.assign(row.performance_data,context)
+  for(const key of ['sessions','exercises','sets'])s[key].push(...prior[key])
+  s.sets[2].load_value=50;assert.equal(previousComparable(s,recap(s)).sessionId,'prior','Actual performed load is the comparison measurement')
+  s.sets[2].performance_data.resolvedTrainingMaxValue=225;assert.equal(previousComparable(s,recap(s)),null)
+  s.sets[2].performance_data.resolvedTrainingMaxValue=200;s.sets[2].performance_data.substitutionLoadMode='manual';assert.equal(previousComparable(s,recap(s)),null)
+})
 test('saved recap independent of subsequent active program/position and elapsed excludes invented active time',()=>{
   const s=fixture(), before=recap(s);s.programs=[{program_key:'black-crown',current_week:8}];assert.deepEqual(recap(s),before)
   s.sessions[0].completed_at='invalid';assert.equal(recap(s).elapsedSeconds,null)

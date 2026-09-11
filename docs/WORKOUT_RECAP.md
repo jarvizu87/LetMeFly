@@ -6,7 +6,7 @@ The hero totals saved completed load × reps, normalizing lb/kg to the athlete's
 
 Distance and duration use actual saved metric values and units, including carries and sled work. The breakdown retains saved circuit/round labels, prescription, performed load/reps, RPE/RIR, substitutions, optional work and explicit skips. Unlogged work is never relabeled skipped or completed. Elapsed time is the recorded start-to-finish interval.
 
-Mountain summits share a linear scale from zero. Slopes are decorative. A previous peak requires an earlier completed session with matching saved program/version/phase/day, exercise order and performed identities, saved prescriptions and substitution load/equipment context. Missing or ambiguous context produces an honest single peak without a comparison. More volume is not presented as a quality, strength or effort diagnosis.
+Mountain summits share a linear scale from zero. Slopes are decorative. A previous peak requires an earlier completed session with matching saved program/version/phase/day, exercise order and performed identities, saved prescriptions, resolved training-max/load basis and substitution load/equipment context. The actual performed load is excluded from that identity so volume can differ. Missing or ambiguous context produces an honest single peak without a comparison. More volume is not presented as a quality, strength or effort diagnosis.
 
 The footer separates confirmed local persistence, session-specific pending outbox work, current cloud status and the native governed next position. No XP is awarded. Native History keeps its eight recent sessions; an additional read-only “All saved session recaps” disclosure exposes every locally saved completed session, including older workouts.
 

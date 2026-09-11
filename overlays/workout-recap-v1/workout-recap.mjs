@@ -6,6 +6,9 @@ const obj = v => v && typeof v === 'object' && !Array.isArray(v) ? v : {}
 const id = v => typeof v === 'string' && v.trim()
 const sum = values => values.some(v => v !== null) ? values.reduce((a, b) => a + (b ?? 0), 0) : null
 const stable = v => Array.isArray(v) ? v.map(stable) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, stable(v[k])])) : v
+const LOAD_CONTEXT_FIELDS = ['programmedLoadText','programmedLoadValue','programmedLoadUnit','percentage','loadReference','rounding',
+  'resolvedTrainingMaxKey','resolvedTrainingMaxValue','resolvedTrainingMaxUnit','resolvedLoadValue',
+  'substitutionOriginalLoadValue','substitutionOriginalLoadUnit','substitutionLoadingAdjustment','substitutionLoadMode','substitutionLoadFactor','substitutionLoadStrategy']
 
 function unique(rows, athleteId) {
   const out = new Map(), conflicts = new Set()
@@ -61,6 +64,7 @@ export function recapSession(snapshot, { athleteId, sessionId, unit = 'lb', now 
       const optional = prescription.priority === 'optional' || sourceSet.optional === true
       const skipped = !completed && (set.completion_state === 'skipped' || p.skipped === true || exercise.completion_state === 'skipped')
       return { id: set.id, number: set.set_number, completed, optional, skipped,
+        loadingContext: Object.fromEntries(LOAD_CONTEXT_FIELDS.map(key => [key,p[key] ?? null])),
         status: completed ? 'Logged' : skipped ? 'Skipped' : optional ? 'Optional · unlogged' : set.completed ? 'Record needs review' : 'Unlogged',
         prescribed: [p.programmedLabel ?? sourceSet.label, p.programmedReps ?? sourceSet.reps, p.programmedLoadText ?? sourceSet.loadText, sourceSet.distance ?? p.distance, sourceSet.duration ?? p.duration].filter(v => v != null && v !== '').map(String),
         ...actual(set, exercise), rawLoad: num(set.load_value), loadUnit: set.load_unit, notes: typeof set.notes === 'string' ? set.notes : '',
@@ -104,7 +108,7 @@ function comparisonKey(recap) {
   // load/equipment context. A different deload, replacement or program is held.
   return JSON.stringify(stable([s.program_key, s.program_version, s.phase_key, s.day_key, s.workout_name,
     recap.exercises.map(e => [e.prescribedKey, e.key, e.group, e.groupType, e.priority,
-      e.prescription.sourceSets, e.prescription.category, e.rows.map(r => [r.number, r.completed && r.volumeKg !== null]), e.prescription.substitution ? {
+      e.prescription.sourceSets, e.prescription.category, e.rows.map(r => [r.number, r.loadingContext, r.completed && r.volumeKg !== null]), e.prescription.substitution ? {
         loadStrategy: e.prescription.substitution.loadStrategy,
         loadingAdjustment: e.prescription.substitution.loadingAdjustment,
         equipment: e.prescription.substitution.equipment,
