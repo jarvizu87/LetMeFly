@@ -44,7 +44,7 @@ try {
     await context.route('**/art-fixture', route => route.fulfill({contentType:'text/html',headers:{'content-security-policy':policy},body:`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">${productionStyles}<style>
       :root{--v2-mountain:none;--v2-lifter:none;--v2-wolf:none}
       body{margin:12px;background:#090b10;color:white}
-      #tile{width:92px} @media(max-width:420px){#tile{width:68px}}
+      .library-card{grid-template-columns:92px minmax(0,1fr) 14px!important} @media(max-width:420px){.library-card{grid-template-columns:68px minmax(0,1fr) 10px!important}}
       #fixture{max-width:360px} .exercise-stack{display:block}
       #media{position:relative;width:360px;height:360px;max-width:100%;background-image:var(--exercise-art);background-size:contain;background-repeat:no-repeat}
       .exercise-card{max-width:360px} .small-previews{display:flex;gap:12px;align-items:center}
@@ -121,6 +121,10 @@ try {
       assert.equal(await page.locator('#media .lmf-art-part-image').count(),3)
       assert.equal(await page.locator('#preview > .lmf-art-pair').count(),0,'native media owns the entire triple')
       assert.equal(await page.locator('#tile').evaluate(el=>el.getBoundingClientRect().width),width===412?68:92,'actual small library widths are covered')
+      assert.equal(await page.locator('#tile').evaluate(tile=>{
+        const imageBox=tile.getBoundingClientRect(),copyBox=tile.parentElement.querySelector('.library-copy').getBoundingClientRect()
+        return imageBox.right<=copyBox.left
+      }),true,'intrinsic thumbnail sizing must not overlap the adjacent exercise name or controls')
       assert.equal(await page.locator('#library-name').textContent(),labels.join(' / '))
       assert.equal(await page.locator('#library-name').evaluate(label=>{
         const css=getComputedStyle(label),box=label.getBoundingClientRect()
