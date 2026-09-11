@@ -1,0 +1,159 @@
+name: LetMeFly Native Database Boundary Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/issue53-atomic-database-boundaries]
+    paths:
+      - '.github/workflows/native-database-boundary-audit.yml'
+      - 'ci/apply-native-database-boundaries-v1.sh'
+      - 'ci/build-command-v2-v2-1.sh'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-boundary-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BASELINE_PRODUCTION_SHA: a64dccd902b1c4885a9e1f59aa5808b4366191aa
+  QA_HARNESS_SHA: 1fe7d9451595012fc8418a3105f21c860eb09f8c
+  VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Build actual candidate production assembly without deploying
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > "$RUNNER_TEMP/assembly.sh"
+          import pathlib, tomllib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash "$RUNNER_TEMP/assembly.sh"
+          CONTEXT=production COMMIT_REF=HEAD bash ci/netlify-deploy-gate.sh > "$RUNNER_TEMP/release-held.log"
+          grep -Fq 'production deploy skipped' "$RUNNER_TEMP/release-held.log"
+          node ci/audit-workout-substitution-today-v1.mjs .build-src/letmefly_app
+          node ci/audit-workout-prescription-fidelity-v1.mjs .build-src/letmefly_app
+          node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+      - name: Package candidate services separately from production UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CANDIDATE_SHA="$(git rev-parse HEAD)"
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cat > .qa-lifecycle-entry.ts <<'TS'
+          import * as athlete from './src/services/athlete-service'
+          import * as workout from './src/services/workout-service'
+          import * as progression from './src/services/program-progression-service'
+          import * as readiness from './src/services/readiness-service'
+          import * as db from './src/db/local-db'
+          import * as mutations from './src/db/local-mutations'
+          import * as programs from './src/data/programs'
+          if (location.hostname !== '127.0.0.1' || new URLSearchParams(location.search).get('disposable-qa') !== '1') throw new Error('Disposable loopback QA only')
+          ;(window as any).__LMF_LIFECYCLE_QA__ = Object.freeze({ athlete, workout, progression, readiness, db, mutations, programs })
+          TS
+          node --input-type=module <<'JS'
+          import { build } from 'vite'
+          await build({configFile:false, publicDir:false, build:{outDir:'qa-runtime', emptyOutDir:true, minify:false,lib:{entry:'.qa-lifecycle-entry.ts',formats:['es'],fileName:()=> 'services.js'}}})
+          JS
+          printf '%s\n' '<!doctype html><title>Disposable candidate service test</title><script type="module" src="./services.js"></script>' > qa-runtime/index.html
+          cp "$RUNNER_TEMP/release-held.log" qa-runtime/release-held.log
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          sources={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(pathlib.Path('src').rglob('*')) if p.is_file()}
+          pathlib.Path('qa-runtime/provenance.json').write_text(json.dumps({'productionSha':os.environ['CANDIDATE_SHA'],'baselineProductionSha':os.environ['BASELINE_PRODUCTION_SHA'],'candidateOnly':True,'sourceHashes':sources,'scope':'Unmerged candidate built by exact production pipeline; not deployed; unmodified candidate services in QA bundle'},indent=2)+'\n')
+          PY
+          cd ../..
+          git diff --exit-code HEAD -- .
+          tar -czf "$RUNNER_TEMP/candidate-kit.tgz" -C .build-src/letmefly_app src dist qa-runtime node_modules package.json tsconfig.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: candidate-db-kit-${{ github.run_id }}
+          path: ${{ runner.temp }}/candidate-kit.tgz
+          if-no-files-found: error
+          retention-days: 3
+
+  verify:
+    name: Candidate ${{ matrix.scenario }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        scenario: [native-faults, adversarial, perfect, variable, restart, grouped-metrics, substitution]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read pinned QA harness without changing its separate branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.QA_HARNESS_SHA }}
+          path: qa-harness
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: candidate-db-kit-${{ github.run_id }}
+          path: test-kit
+      - name: Validate candidate provenance and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build-src/letmefly_app
+          tar -xzf test-kit/candidate-kit.tgz -C .build-src/letmefly_app
+          export CANDIDATE_SHA="$(git rev-parse HEAD)"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          app=pathlib.Path('.build-src/letmefly_app')
+          data=json.loads((app/'qa-runtime/provenance.json').read_text())
+          assert data['productionSha']==os.environ['CANDIDATE_SHA'] and data['candidateOnly']
+          for name,expected in data['sourceHashes'].items(): assert hashlib.sha256((app/name).read_bytes()).hexdigest()==expected,name
+          PY
+          node --check qa-harness/ci/audit-lifecycle-indexeddb-v1.mjs
+          node --check qa-harness/ci/audit-lifecycle-database-soak.mjs
+          node --check qa-harness/ci/lifecycle-database-scenarios.js
+      - name: Test native transactions and real persisted lifecycles
+        shell: bash
+        env:
+          QA_SCENARIO: ${{ matrix.scenario }}
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p qa-evidence
+          if [[ "$QA_SCENARIO" == 'native-faults' ]]; then
+            node qa-harness/ci/audit-lifecycle-indexeddb-v1.mjs .build-src/letmefly_app faults 2>&1 | tee qa-evidence/native-faults.log
+          else
+            node qa-harness/ci/audit-lifecycle-database-soak.mjs .build-src/letmefly_app "$QA_SCENARIO" 2>&1 | tee "qa-evidence/$QA_SCENARIO.log"
+          fi
+      - name: Preserve exact-candidate evidence including failed assertions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-db-${{ matrix.scenario }}-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/LIFECYCLE_DATABASE_faults
+            .build-src/letmefly_app/DATABASE_LIFECYCLE_AUDIT
+            .build-src/letmefly_app/qa-runtime/provenance.json
+            .build-src/letmefly_app/qa-runtime/release-held.log
+            qa-evidence
+          if-no-files-found: error
+          retention-days: 14
