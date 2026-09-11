@@ -52,6 +52,10 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" "$
 # workout bundle without rerendering/resetting Workout Mode position.
 bash "$ROOT_DIR/ci/apply-workout-review-live-count-v1.sh" "$TARGET"
 
+# Issues #57-59, discovered by #53: preserve all-or-nothing substitutions and
+# reject overlapping stale database writes. No program or athlete-data migration.
+bash "$ROOT_DIR/ci/apply-native-database-boundaries-v1.sh" "$TARGET"
+
 # Assert the source-level persistence/count boundary before minification. Vite is
 # allowed to rename local identifiers such as refreshedStats in the final bundle.
 grep -Fq "const refreshedStats = state.workout ? completionStats(state.workout) : null" "$TARGET/src/main.ts"
