@@ -125,6 +125,7 @@
   }
 
   function storageRead() {
+    if (window.LetMeFlyBarbellSettings) return window.LetMeFlyBarbellSettings.read(DEFAULTS)
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY)
       const parsed = raw ? JSON.parse(raw) : {}
@@ -350,6 +351,7 @@
   }
 
   function inventoryLabel(settings, unit) {
+    if (settings[unit === 'kg' ? 'inventoryConfirmedKg' : 'inventoryConfirmedLb'] === false) return 'Pair counts needed'
     const key = getPlatePresetKey(settings, unit)
     return PLATE_PRESETS[unit]?.[key]?.label || 'Custom inventory'
   }
@@ -391,6 +393,7 @@
               <strong id="lmf-inventory-label">${escapeHtml(inventoryLabel(settings, unit))}</strong>
             </summary>
             <div id="lmf-bar-inventory-grid">${renderInventory(settings, unit)}</div>
+            <button type="button" class="btn" data-lmf-confirm-inventory>USE THESE PLATE COUNTS</button>
           </details>
           <div class="lmf-bar-foot"><span>Saved on this device</span><span>Programmed workout loads are never changed</span></div>
         </section>
@@ -455,6 +458,7 @@
       if (unit === 'kg') settings.pairsKg = { ...preset.pairs }
       else settings.pairsLb = { ...preset.pairs }
       setPlatePresetKey(settings, unit, key)
+      settings[unit === 'kg' ? 'inventoryConfirmedKg' : 'inventoryConfirmedLb'] = true
     }
 
     storageWrite(settings)
@@ -480,6 +484,13 @@
       return
     }
     const collarTotal = Number.isFinite(collars) ? collars : 0
+    const currentSettings = storageRead()
+    if (currentSettings[unit === 'kg' ? 'inventoryConfirmedKg' : 'inventoryConfirmedLb'] === false) {
+      const known = currentSettings[unit === 'kg' ? 'knownPlatesKg' : 'knownPlatesLb'] || []
+      result.innerHTML = `<div class="lmf-bar-result-empty warning"><strong>${formatWeight(target)} ${unit} target · ${formatWeight(bar)} ${unit} bar</strong><p>Saved plate sizes: ${known.map(formatWeight).join(', ')} ${unit}. Confirm how many pairs you have under Available Plates before calculating.</p></div>`
+      delete result.dataset.lmfCopyText
+      return
+    }
     if (target < bar + collarTotal) {
       result.innerHTML = '<div class="lmf-bar-result-empty warning">Target is lighter than the selected bar + collars.</div>'
       return
@@ -652,6 +663,16 @@
       renderResult()
     })
 
+    modal.querySelector('[data-lmf-confirm-inventory]')?.addEventListener('click', () => {
+      const settings = collectSettings()
+      const unit = modal.querySelector('#lmf-bar-unit')?.value === 'kg' ? 'kg' : 'lb'
+      settings[unit === 'kg' ? 'inventoryConfirmedKg' : 'inventoryConfirmedLb'] = true
+      storageWrite(settings)
+      setInventoryFromSettings(settings, unit)
+      renderResult()
+      window.dispatchEvent(new Event('lmf:barbell-inventory-saved'))
+    })
+
     modal.querySelector('#lmf-bar-unit')?.addEventListener('change', (event) => {
       rebuildForUnit(event.target.value === 'kg' ? 'kg' : 'lb')
     })
@@ -672,9 +693,9 @@
     renderResult()
   }
 
-  function closeBarLoader() {
+  function closeBarLoader(persist = true) {
     if (!modal) return
-    storageWrite(collectSettings())
+    if (persist) storageWrite(collectSettings())
     modal.remove()
     modal = null
     currentContext = null
@@ -694,6 +715,11 @@
 
   function start() {
     enhanceAll(document)
+    window.addEventListener('lmf:barbell-settings-changed', () => {
+      // Closing stale athlete context cannot save its draft over the new one.
+      closeBarLoader(false)
+      scheduleRefresh(0)
+    })
     const observer = new MutationObserver((mutations) => {
       if (mutations.some((mutation) => mutation.addedNodes.length > 0)) scheduleRefresh(0)
     })
