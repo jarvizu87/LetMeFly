@@ -148,9 +148,32 @@ export function compareVolume(current, previous) {
     interpretation: 'Descriptive external-load volume only; exercise mix and session count may differ. Not a strength or recovery diagnosis.' }
 }
 
+/** Saved coaching context only. A blank v2 field intentionally overrides legacy data. */
+export function readCoachProfile(athlete, athleteId) {
+  if (!validId(athleteId) || athlete?.id !== athleteId || !live(athlete)) throw new Error('Coach profile identity mismatch')
+  const context = object(athlete.profile_context_v2)
+  const fields = [
+    ['primaryGoal', 'Primary goal', 'primary_goal'],
+    ['strengthGoals', 'Strength goals', 'strength_goals'],
+    ['developmentPriorities', 'Development priorities', 'development_priorities'],
+    ['trainingExperience', 'Training experience', 'training_experience'],
+    ['trainingHistory', 'Training history', 'training_history'],
+    ['preferredExercises', 'Preferred exercises / methods', 'preferred_exercises'],
+    ['avoidExercises', 'Avoid / dislike', 'avoid_exercises'],
+    ['equipment', 'Equipment available', 'equipment'],
+    ['coachingNotes', 'Coaching notes', 'coaching_notes'],
+  ].map(([key, label, legacy]) => {
+    const saved = context[key] ?? athlete[legacy]
+    return { key, label, value: typeof saved === 'string' ? saved.trim() : '' }
+  })
+  return { athleteId, source: 'saved-athlete-profile', fields, savedCount: fields.filter(field => field.value).length,
+    missing: fields.filter(field => !field.value).map(({ key, label }) => ({ key, label })) }
+}
+
 /** Standby source rules are context for review, never executable instructions. */
-export function buildCoachBrief(summary, { athleteId, exerciseKey = null, requestedRuleIds = [] }, manifest) {
+export function buildCoachBrief(summary, { athleteId, exerciseKey = null, requestedRuleIds = [], athleteProfile = null }, manifest) {
   if (!validId(athleteId) || summary.athleteId !== athleteId) throw new Error('Coach athlete identity mismatch')
+  if (athleteProfile && athleteProfile.athleteId !== athleteId) throw new Error('Coach profile identity mismatch')
   if (manifest?.executionMode !== 'review-only' || manifest.source?.recovery !== 'reconstructed-control-index' || !/^[a-f0-9]{64}$/.test(manifest.source?.sectionSha256 ?? '')) throw new Error('Provenance-qualified review manifest required')
   if (!Array.isArray(requestedRuleIds) || requestedRuleIds.some(id => typeof id !== 'string')) throw new Error('Rule IDs must be explicit')
   const known = new Map(manifest.rules.map(rule => [rule.id, rule]))
@@ -160,6 +183,7 @@ export function buildCoachBrief(summary, { athleteId, exerciseKey = null, reques
   if (reviewContext.some(rule => rule.state !== 'STANDBY')) throw new Error('Unexpected rule state requires separate review')
   return {
     athleteId, window: { ...summary.window }, history: { ...summary.totals },
+    athleteProfile: structuredClone(athleteProfile),
     selectedExercise: structuredClone(summary.exercises.find(exercise => exercise.exerciseKey === exerciseKey) ?? null),
     diagnostics: { ...summary.diagnostics }, source: { ...manifest.source },
     reviewContext: reviewContext.map(rule => ({ ...rule, triggerConfirmed: false, mode: 'source-context-only' })),
