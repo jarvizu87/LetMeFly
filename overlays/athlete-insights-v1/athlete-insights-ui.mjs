@@ -1,6 +1,7 @@
 import { summarizeAthlete, compareVolume, buildCoachBrief, readCoachProfile } from './athlete-insights.mjs'
 import { progressDetail } from './progress-detail-ui.mjs'
 import { readPrivateHistory, historyWindows } from './private-history.mjs'
+import { coachDecisionView, changeCoachDecision, clickCoachDecision, resetCoachDecision } from './coach-decisions-ui.mjs'
 
 const manifest = await fetch(new URL('./coach-rule-manifest.json', import.meta.url)).then(r => {
   if (!r.ok) throw new Error('Coach source context unavailable')
@@ -82,19 +83,29 @@ function profileContext(profile) {
 function renderCoach(target, data) {
   const { current } = summaryFor(data, '30d'), exercise = coachExercise(current), unit = unitFor(data)
   const athleteProfile = readCoachProfile(data.athlete, data.athlete.id)
-  const program = data.programs.find(row => row.status === 'active')
+  const activePrograms = data.programs.filter(row => row.status === 'active')
+  const program = activePrograms.length === 1 ? activePrograms[0] : null
+  const selectedExerciseId = document.getElementById('lmf-coach-exercise-context')?.value || ''
+  const selectedExercise = window.LetMeFlyExerciseIntelligence?.getExercise(selectedExerciseId)
+  const decision = coachDecisionView(data, current, { selection: { selectedExerciseId, selectedExerciseName: selectedExercise?.canonicalName || selectedExerciseId, exerciseKey: exercise?.exerciseKey }, athleteProfile, manifest })
   const readiness = data.readiness.filter(row => Number.isFinite(Date.parse(row.recorded_at ?? row.created_at)) && Date.parse(row.recorded_at ?? row.created_at) <= Date.now()).sort((a, b) => Date.parse(b.recorded_at ?? b.created_at) - Date.parse(a.recorded_at ?? a.created_at))[0]
   const brief = manifest ? buildCoachBrief(current, { athleteId: data.athlete.id, exerciseKey: exercise?.exerciseKey, requestedRuleIds: topics[coachTopic], athleteProfile }, manifest) : null
-  const signature = JSON.stringify([data.athlete.id, current.totals, current.sessions.at(-1), exercise, program, readiness, coachTopic, athleteProfile])
+  const signature = JSON.stringify([data.athlete.id, current.totals, current.sessions.at(-1), exercise, program, readiness, coachTopic, athleteProfile, decision.signature])
   let section = target.querySelector('#lmf-athlete-coach')
   if (section?.dataset.signature === signature) return
   if (!section) { section = document.createElement('section'); section.id = 'lmf-athlete-coach'; section.className = 'lmf-athlete-insights'; target.appendChild(section) }
+  const openDetails = [...section.querySelectorAll('details[data-ai-coach-detail][open]')].map(row => row.dataset.aiCoachDetail)
+  const focusKey = section.contains(document.activeElement) ? document.activeElement.dataset.aiFeedback : null
+  const focusAction = section.contains(document.activeElement) ? ['data-ai-review-current', 'data-ai-clear-current', 'data-ai-coach-topic'].find(key => document.activeElement.hasAttribute(key)) : null
   const latest = exercise?.history.at(-1) ?? current.sessions.at(-1)
   const effort = latest ? `${latest.completedSets} completed sets${latest.averageRpe !== null ? ` · average RPE ${fmt(latest.averageRpe)} from ${latest.rpeSetCount} sets` : ' · no RPE recorded'}` : 'Complete a session to build your first history point.'
   const readinessParts = ['energy', 'sleep_quality', 'soreness', 'stress'].filter(key => typeof readiness?.[key] === 'number' && readiness[key] >= 1 && readiness[key] <= 5).map(key => `${key.replace('_', ' ')} ${readiness[key]}/5`)
-  section.innerHTML = `<header><div><span class="lmf-ai-kicker">YOUR TRAINING CONTEXT</span><h3>${esc(data.athlete.display_name || 'Athlete')} · Coach read</h3></div><button type="button" data-ai-refresh aria-label="Refresh Coach history">Refresh</button></header><p>${esc(program ? `${program.program_name || program.program_key} · Week ${program.current_week ?? '—'} · ${String(program.current_day_key ?? '').replace('-', ' ')}` : 'No active program found.')}</p><div class="lmf-ai-metrics">${metric('LAST 30 DAYS', `${current.totals.completedSessions} sessions`, `${current.totals.completedSets} completed sets`)}${metric('LOGGED LIFTING VOLUME', `${fmt(displayLoad(current.totals.externalLoadVolumeKg, unit))} ${unit}-reps`, 'Completed load × reps')}</div><div class="lmf-ai-context"><strong>${esc(exercise ? exercise.exerciseName : 'Latest completed session')}</strong><p>${esc(effort)}</p>${latest ? `<small>${esc(dateLabel(latest.completedAt))}${exercise ? ` · ${exercise.sessionCount} sessions for this exercise in 30 days` : ''}</small>` : ''}${document.getElementById('lmf-coach-exercise-context')?.value && !exercise ? '<small>No unambiguous completed history for the selected exercise in this range.</small>' : ''}</div><div class="lmf-ai-context"><strong>Latest readiness check-in</strong><p>${esc(readinessParts.length ? readinessParts.join(' · ') : 'No scored readiness check-in available.')}</p>${readiness ? `<small>${esc(dateLabel(readiness.recorded_at ?? readiness.created_at))} · recorded context, not a current recovery score</small>` : ''}</div><label class="lmf-ai-select">Review a training situation<select data-ai-coach-topic><option value="recent">Recent effort</option><option value="difficult">A difficult session</option><option value="time">Short on time</option><option value="missed">Missed accessory work</option><option value="specialty">Specialization progress</option></select></label><div class="lmf-ai-source"><strong>${coachTopic === 'recent' ? 'Build the evidence' : 'Training Intelligence · review guidance'}</strong>${coachTopic === 'recent' ? '<p>Compare the same exercise and prescription across sessions. Log effort consistently so one difficult day can be understood in context.</p>' : brief ? `<p>These source rules are conditional. Your saved history alone does not confirm their triggers.</p>${brief.reviewContext.map(rule => `<details><summary>${esc(rule.trigger)}</summary><p>${esc(rule.sourceAction)}</p><small>${esc(rule.boundary)}</small></details>`).join('')}` : '<p>Source guidance is unavailable. Your saved training history remains available above.</p>'}<small>Your active program controls the prescription. No workout changes are applied here.</small>${brief && coachTopic !== 'recent' ? `<details><summary>Source and status</summary><p>Training Intelligence ${esc(brief.source.version)} · reconstructed decision index · candidate rules awaiting application review.</p><small>${esc(brief.reviewContext.map(rule => rule.id).join(' · '))}</small></details>` : ''}</div>`
+  section.innerHTML = `<header><div><span class="lmf-ai-kicker">YOUR TRAINING CONTEXT</span><h3>${esc(data.athlete.display_name || 'Athlete')} · Coach read</h3></div><button type="button" data-ai-refresh aria-label="Refresh Coach history">Refresh</button></header><p>${esc(program ? `${program.program_name || program.program_key} · Week ${program.current_week ?? '—'} · ${String(program.current_day_key ?? '').replace('-', ' ')}` : activePrograms.length > 1 ? 'Multiple active programs need review.' : 'No active program found.')}</p><div class="lmf-ai-metrics">${metric('LAST 30 DAYS', `${current.totals.completedSessions} sessions`, `${current.totals.completedSets} completed sets`)}${metric('LOGGED LIFTING VOLUME', `${fmt(displayLoad(current.totals.externalLoadVolumeKg, unit))} ${unit}-reps`, 'Completed load × reps')}</div><div class="lmf-ai-context"><strong>${esc(exercise ? exercise.exerciseName : 'Latest completed session')}</strong><p>${esc(effort)}</p>${latest ? `<small>${esc(dateLabel(latest.completedAt))}${exercise ? ` · ${exercise.sessionCount} sessions for this exercise in 30 days` : ''}</small>` : ''}${document.getElementById('lmf-coach-exercise-context')?.value && !exercise ? '<small>No unambiguous completed history for the selected exercise in this range.</small>' : ''}</div><div class="lmf-ai-context"><strong>Latest readiness check-in</strong><p>${esc(readinessParts.length ? readinessParts.join(' · ') : 'No scored readiness check-in available.')}</p>${readiness ? `<small>${esc(dateLabel(readiness.recorded_at ?? readiness.created_at))} · recorded context, not a current recovery score</small>` : ''}</div><label class="lmf-ai-select">Review a training situation<select data-ai-coach-topic><option value="recent">Recent effort</option><option value="difficult">A difficult session</option><option value="time">Short on time</option><option value="missed">Missed accessory work</option><option value="specialty">Specialization progress</option></select></label><div class="lmf-ai-source"><strong>${coachTopic === 'recent' ? 'Build the evidence' : 'Training Intelligence · review guidance'}</strong>${coachTopic === 'recent' ? '<p>Compare the same exercise and prescription across sessions. Log effort consistently so one difficult day can be understood in context.</p>' : brief ? `<p>These source rules are conditional. Your saved history alone does not confirm their triggers.</p>${brief.reviewContext.map(rule => `<details><summary>${esc(rule.trigger)}</summary><p>${esc(rule.sourceAction)}</p><small>${esc(rule.boundary)}</small></details>`).join('')}` : '<p>Source guidance is unavailable. Your saved training history remains available above.</p>'}<small>Your active program controls the prescription. No workout changes are applied here.</small>${brief && coachTopic !== 'recent' ? `<details><summary>Source and status</summary><p>Training Intelligence ${esc(brief.source.version)} · reconstructed decision index · candidate rules awaiting application review.</p><small>${esc(brief.reviewContext.map(rule => rule.id).join(' · '))}</small></details>` : ''}</div>`
   section.querySelector('[data-ai-coach-topic]').value = coachTopic
-  section.querySelector('.lmf-ai-metrics').insertAdjacentHTML('afterend', profileContext(athleteProfile))
+  section.querySelector('.lmf-ai-metrics').insertAdjacentHTML('afterend', profileContext(athleteProfile) + decision.html)
+  for (const key of openDetails) { const row = section.querySelector(`[data-ai-coach-detail="${key}"]`); if (row) row.open = true }
+  if (focusKey) section.querySelector(`[data-ai-feedback="${focusKey}"]`)?.focus({ preventScroll: true })
+  if (focusAction) section.querySelector(`[${focusAction}]`)?.focus({ preventScroll: true })
   section.dataset.signature = signature
 }
 
@@ -129,14 +140,18 @@ new MutationObserver(records => {
   if (records.some(r => !(r.target instanceof Element) || !r.target.closest('.lmf-athlete-insights, .lmf-ai-unavailable'))) schedule()
 }).observe(document.body, { childList: true, subtree: true })
 document.addEventListener('change', event => {
+  changeCoachDecision(event.target)
   if (event.target.matches('[data-ai-exercise]')) { selectedKey = event.target.value; selectedReps = null }
   if (event.target.matches('[data-ai-reps]')) selectedReps = Number(event.target.value)
   if (event.target.matches('[data-ai-dimension]')) selectedDimension = event.target.value === 'muscles' ? 'muscles' : 'roles'
   if (event.target.matches('[data-ai-coach-topic]')) coachTopic = Object.hasOwn(topics, event.target.value) ? event.target.value : 'recent'
   schedule()
 })
-document.addEventListener('click', event => { if (event.target.closest('[data-ai-refresh]')) void refresh(true) })
-window.addEventListener('hashchange', () => { generation++; snapshot = null; selectedKey = ''; selectedReps = null; coachTopic = 'recent'; schedule() })
+document.addEventListener('click', event => {
+  if (clickCoachDecision(event.target, () => void refresh(true))) { void refresh(true); return }
+  if (event.target.closest('[data-ai-refresh]')) void refresh(true)
+})
+window.addEventListener('hashchange', () => { resetCoachDecision(); generation++; snapshot = null; selectedKey = ''; selectedReps = null; coachTopic = 'recent'; schedule() })
 window.addEventListener('letmefly:exercise-intelligence-ready', schedule)
 window.addEventListener('storage', () => { snapshot = null; schedule() })
 window.addEventListener('lmf:profile-v2-updated', () => { snapshot = null; void refresh(true) })
