@@ -4,12 +4,12 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 test -s "$DIST_DIR/index.html"
 test -s "$DIST_DIR/service-worker.js"
-node --test "$ROOT_DIR/ci/audit-athlete-insights.mjs" "$ROOT_DIR/ci/audit-progress-detail.mjs"
+node --test "$ROOT_DIR/ci/audit-athlete-insights.mjs" "$ROOT_DIR/ci/audit-progress-detail.mjs" "$ROOT_DIR/ci/audit-coach-decisions.mjs"
 mkdir -p "$DIST_DIR/ui/athlete-insights-v1"
-for file in athlete-insights.mjs private-history.mjs progress-detail.mjs progress-detail-ui.mjs athlete-insights-ui.mjs coach-rule-manifest.json athlete-insights.css; do
+for file in athlete-insights.mjs private-history.mjs progress-detail.mjs progress-detail-ui.mjs coach-decisions.mjs coach-decisions-ui.mjs athlete-insights-ui.mjs coach-rule-manifest.json athlete-insights.css; do
   cp "$ROOT_DIR/overlays/athlete-insights-v1/$file" "$DIST_DIR/ui/athlete-insights-v1/$file"
 done
-for file in athlete-insights.mjs private-history.mjs progress-detail.mjs progress-detail-ui.mjs athlete-insights-ui.mjs; do node --check "$DIST_DIR/ui/athlete-insights-v1/$file"; done
+for file in athlete-insights.mjs private-history.mjs progress-detail.mjs progress-detail-ui.mjs coach-decisions.mjs coach-decisions-ui.mjs athlete-insights-ui.mjs; do node --check "$DIST_DIR/ui/athlete-insights-v1/$file"; done
 DIST_DIR="$DIST_DIR" python3 - <<'PY'
 import os, pathlib, re
 dist = pathlib.Path(os.environ['DIST_DIR'])
@@ -26,7 +26,7 @@ text = p.read_text()
 m = re.search(r'const\s+PRECACHE\s*=\s*\[([^\]]*)\]', text)
 assert m, 'Missing offline asset list'
 assets = re.findall(r"['\"]([^'\"]+)['\"]", m.group(1))
-assets += ['/ui/athlete-insights-v1/'+name for name in ['athlete-insights.mjs','private-history.mjs','progress-detail.mjs','progress-detail-ui.mjs','athlete-insights-ui.mjs','coach-rule-manifest.json','athlete-insights.css']]
+assets += ['/ui/athlete-insights-v1/'+name for name in ['athlete-insights.mjs','private-history.mjs','progress-detail.mjs','progress-detail-ui.mjs','coach-decisions.mjs','coach-decisions-ui.mjs','athlete-insights-ui.mjs','coach-rule-manifest.json','athlete-insights.css']]
 text = text[:m.start()]+'const PRECACHE = ['+', '.join(repr(a) for a in dict.fromkeys(assets))+']'+text[m.end():]
 p.write_text(text)
 PY
