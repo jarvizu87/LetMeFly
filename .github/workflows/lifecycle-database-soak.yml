@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/lifecycle-database-soak.yml'
       - 'ci/audit-lifecycle-database-soak.mjs'
+      - 'ci/lifecycle-database-scenarios.js'
 
 permissions:
   contents: read
@@ -22,7 +23,7 @@ env:
 
 jobs:
   prepare:
-    name: Prepare exact production service test kit (not a test pass)
+    name: Prepare exact production service test kit
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -56,13 +57,14 @@ jobs:
           import * as athlete from './src/services/athlete-service'
           import * as workout from './src/services/workout-service'
           import * as progression from './src/services/program-progression-service'
+          import * as readiness from './src/services/readiness-service'
           import * as db from './src/db/local-db'
           import * as mutations from './src/db/local-mutations'
           import * as programs from './src/data/programs'
           if (location.hostname !== '127.0.0.1' || !location.search.includes('disposable-qa=1')) {
             throw new Error('QA service bridge is restricted to an explicit disposable loopback page')
           }
-          ;(window as any).__LMF_LIFECYCLE_QA__ = Object.freeze({ athlete, workout, progression, db, mutations, programs })
+          ;(window as any).__LMF_LIFECYCLE_QA__ = Object.freeze({ athlete, workout, progression, readiness, db, mutations, programs })
           TS
           node --input-type=module <<'JS'
           import { build } from 'vite'
@@ -87,3 +89,59 @@ jobs:
           path: ${{ runner.temp }}/letmefly-lifecycle-test-kit.tgz
           if-no-files-found: error
           retention-days: 3
+
+  database:
+    name: IndexedDB ${{ matrix.scenario }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        scenario: [perfect, variable, restart, grouped-metrics, substitution, adversarial]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifecycle-db-prepared-${{ env.PRODUCTION_SHA }}
+          path: test-kit
+      - name: Unpack exact kit and validate QA code
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build-src/letmefly_app
+          tar -xzf test-kit/letmefly-lifecycle-test-kit.tgz -C .build-src/letmefly_app
+          node --check ci/audit-lifecycle-database-soak.mjs
+          node --check ci/lifecycle-database-scenarios.js
+          python3 - <<'PY'
+          import json, os, pathlib
+          p=json.loads(pathlib.Path('.build-src/letmefly_app/qa-runtime/provenance.json').read_text())
+          assert p['productionSha']==os.environ['PRODUCTION_SHA']
+          PY
+      - name: Run actual production services through on-disk Chromium IndexedDB
+        shell: bash
+        env:
+          QA_SCENARIO: ${{ matrix.scenario }}
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p qa-evidence
+          node ci/audit-lifecycle-database-soak.mjs .build-src/letmefly_app "$QA_SCENARIO" 2>&1 | tee "qa-evidence/$QA_SCENARIO.log"
+      - name: Publish actual database evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-db-${{ matrix.scenario }}-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/DATABASE_LIFECYCLE_AUDIT
+            .build-src/letmefly_app/qa-runtime/provenance.json
+            .build-src/letmefly_app/qa-runtime/release-held.log
+            qa-evidence
+          if-no-files-found: error
+          retention-days: 14
