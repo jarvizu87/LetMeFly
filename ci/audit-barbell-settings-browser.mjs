@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
+import { applicationBootState } from './browser-boot-contract.mjs'
 const root = path.resolve(import.meta.dirname, '..'), app = path.join(root, '.build-src/letmefly_app')
 const { chromium } = createRequire(path.join(app, 'package.json'))('playwright-core')
 const base = process.env.LMF_AUDIT_BASE_URL || 'http://127.0.0.1:4173'
@@ -63,7 +64,12 @@ try {
     await modal.screenshot({ path: path.join(out, `confirmed-${width}.png`) })
     await modal.locator('#lmf-bar-weight').fill('35')
     await modal.locator('[data-lmf-bar-close="button"]').click()
-    await page.reload(); await page.waitForFunction(() => window.LetMeFlyBarbellSettings && window.LetMeFlyBarLoader)
+    await page.reload()
+    // Bridge globals are installed before native boot has restored the athlete.
+    // Opening then can be invalidated by the first athlete-settings notification.
+    // Wait for the real app controls, as a user must, before testing reopen.
+    await page.waitForFunction(applicationBootState)
+    await page.waitForFunction(() => window.LetMeFlyBarbellSettings && window.LetMeFlyBarLoader)
     await page.evaluate(async () => { await window.LetMeFlyBarbellSettings.refresh(); window.LetMeFlyBarLoader.open({ target: 155, unit: 'lb' }) })
     assert.equal(await modal.locator('#lmf-bar-weight').inputValue(), '35', 'Device override must survive athlete defaults and reload')
     await modal.locator('#lmf-bar-unit').selectOption('kg')
