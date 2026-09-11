@@ -6,6 +6,9 @@
   let timer = 0
   let lastDesktopMode = media.matches
   let layoutGeneration = 0
+  let restoringLayout = false
+  let lastNativeSection = null
+  let lastNativeViewport = null
   const text = node => (node?.textContent || '').replace(/\s+/g, ' ').trim()
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))
   const disabled = node => !node || node.disabled || node.getAttribute('aria-disabled') === 'true'
@@ -20,8 +23,18 @@
     ['watch','.exercise-actions [data-watch]'], ['info','[data-exercise-info]'], ['substitute','[data-substitute]'],
     ['coach','[data-action="go-coach"]'], ['loader','[data-lmf-bar-loader-open="exercise"]'], ['undo','[data-revert-substitution]'],
   ]
+  function rememberNativeSection() {
+    if (restoringLayout || media.matches !== lastDesktopMode) return
+    const viewport = document.querySelector('#swipe-viewport')
+    const selected = document.querySelector('#session-track [data-session-index].active')
+    if (viewport && selected instanceof HTMLButtonElement) {
+      lastNativeViewport = viewport
+      lastNativeSection = selected
+    }
+  }
   function schedule() { clearTimeout(timer); timer = setTimeout(render, 35) }
   function render() {
+    rememberNativeSection()
     if (!media.matches) return
     const panel = document.querySelector('.lmf-desktop-context-panel')
     const body = panel?.querySelector('.lmf-desktop-context-body')
@@ -53,28 +66,48 @@
       <div class="lmf-desktop-context-card" data-lmf-desktop-v2-content><small>Current Section</small><strong style="font-size:20px">${esc(section)}</strong><p>Live loading, plates, and exercise tools appear when you enter an exercise block.</p></div>`
     body.dataset.lmfDesktopV2Signature = signature
   }
-  // A breakpoint reparents the native carousel. Re-select its existing section
-  // through the original navigation control after layout, rather than keeping a
-  // competing program index or overriding the native scroll-state machine.
+  // Keep the last stable native control only for the transient layout handoff.
+  // Reparent-induced scroll events must not overwrite that selection mid-resize.
   window.addEventListener('resize', () => {
     const desktop = media.matches
     if (desktop === lastDesktopMode) return
     lastDesktopMode = desktop
     const viewport = document.querySelector('#swipe-viewport')
-    const selected = document.querySelector('#session-track [data-session-index].active')
+    const selected = lastNativeViewport === viewport && lastNativeSection?.isConnected
+      ? lastNativeSection : document.querySelector('#session-track [data-session-index].active')
     if (!viewport || !(selected instanceof HTMLButtonElement)) return
     const generation = ++layoutGeneration
+    restoringLayout = true
     let frames = 0
+    let applied = false
     function restoreNativeSection() {
-      if (generation !== layoutGeneration || !selected.isConnected || document.querySelector('#swipe-viewport') !== viewport) return
+      if (generation !== layoutGeneration) return
+      if (!selected.isConnected || document.querySelector('#swipe-viewport') !== viewport) { restoringLayout = false; return }
       const mounted = Boolean(viewport.closest('[data-lmf-desktop-workspace]'))
-      if (mounted === desktop) { selected.click(); schedule(); return }
-      if (++frames < 30) requestAnimationFrame(restoreNativeSection)
+      if (mounted === desktop) {
+        if (!applied) { selected.click(); applied = true }
+        const active = viewport.querySelector(':scope > .swipe-page.active-page')
+        if (active && selected.classList.contains('active')) {
+          const a = active.getBoundingClientRect(), v = viewport.getBoundingClientRect()
+          if (Math.abs(a.left + a.width / 2 - v.left - v.width / 2) < 4) {
+            restoringLayout = false; rememberNativeSection(); schedule(); return
+          }
+        }
+      }
+      if (++frames < 60) requestAnimationFrame(restoreNativeSection)
+      else { restoringLayout = false; schedule() }
     }
     requestAnimationFrame(restoreNativeSection)
   }, { passive: true })
   document.addEventListener('click', event => {
-    if (event.isTrusted && event.target instanceof Element && event.target.closest('[data-session-index],[data-session-step]')) layoutGeneration++
+    const nativeNavigation = event.target instanceof Element ? event.target.closest('[data-session-index],[data-session-step]') : null
+    if (event.isTrusted && nativeNavigation) {
+      layoutGeneration++; restoringLayout = false
+      if (nativeNavigation instanceof HTMLButtonElement && nativeNavigation.hasAttribute('data-session-index') && !disabled(nativeNavigation)) {
+        lastNativeSection = nativeNavigation; lastNativeViewport = document.querySelector('#swipe-viewport')
+      }
+      schedule()
+    }
     if (!media.matches || !(event.target instanceof Element)) return
     const forward = event.target.closest('[data-lmf-desktop-v2-action]')
     if (forward) {
@@ -87,7 +120,7 @@
   }, true)
   for (const type of ['input','change']) document.addEventListener(type, schedule, true)
   new MutationObserver(changes => {
-    if (media.matches && changes.some(m => !(m.target instanceof Element && m.target.closest('.lmf-desktop-context-panel')))) schedule()
+    if (changes.some(m => !(m.target instanceof Element && m.target.closest('.lmf-desktop-context-panel')))) schedule()
   }).observe(document.documentElement, {childList:true,subtree:true,attributes:true,attributeFilter:['class','value','disabled','aria-disabled']})
   media.addEventListener('change', schedule)
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true})
