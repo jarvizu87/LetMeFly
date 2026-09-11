@@ -13,6 +13,7 @@ on:
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser-v2.mjs'
+      - 'ci/audit-workout-substitution-today-browser-v3.mjs'
       - 'ci/audit-issue54-integration-gates-v2.mjs'
       - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
@@ -29,6 +30,7 @@ on:
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser-v2.mjs'
+      - 'ci/audit-workout-substitution-today-browser-v3.mjs'
       - 'ci/audit-issue54-integration-gates-v2.mjs'
       - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
@@ -64,6 +66,7 @@ jobs:
           bash -n ci/normalize-workout-substitution-governance-v1.sh
           node --check ci/audit-workout-substitution-today-v1.mjs
           node --check ci/audit-workout-substitution-today-browser-v2.mjs
+          node --check ci/audit-workout-substitution-today-browser-v3.mjs
           node --check ci/audit-issue54-integration-gates-v2.mjs
           node --check ci/report-issue54-history-progress-surface.mjs
           node --check overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
@@ -123,7 +126,7 @@ jobs:
           done
           CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           test -n "$CHROME_BIN"
-          CHROME_BIN="$CHROME_BIN" node ci/audit-workout-substitution-today-browser-v2.mjs
+          CHROME_BIN="$CHROME_BIN" node ci/audit-workout-substitution-today-browser-v3.mjs
 
       - name: Audit history PR and Bar Loader integration
         run: node ci/audit-issue54-integration-gates-v2.mjs .build-src/letmefly_app
