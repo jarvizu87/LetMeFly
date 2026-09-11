@@ -254,9 +254,19 @@ try {
   else fail('Review increments after native save', `expected 1, saw ${reviewAfterSave.text || 'unreadable'}`)
 
   await page.reload({ waitUntil: 'domcontentloaded' })
-  await page.waitForSelector('.set-row[data-set-id]', { timeout: 10000 })
+  // A resumed workout may open on Readiness, so its first set can legitimately
+  // be in a hidden carousel panel. Require the exact saved row to be mounted,
+  // then verify its authoritative database record, not incidental panel focus.
+  await page.waitForSelector(`[data-set-id="${setId}"]`, { state: 'attached', timeout: 10000 })
   await settleFirstRunPrompts(page, 3)
   await page.waitForTimeout(700)
+  const persistedAfterReload = await dbSet(page, setId)
+  report.observations.persistedAfterReload = persistedAfterReload
+  if (persistedAfterReload.record?.completed === true
+    && persistedAfterReload.record.workout_session_id === stored1.record?.workout_session_id
+    && persistedAfterReload.record.workout_exercise_id === stored1.record?.workout_exercise_id) {
+    pass('Exact saved set and workout ownership survive reload', setId)
+  } else fail('Exact saved set and workout ownership survive reload', JSON.stringify(persistedAfterReload.record))
   const reviewAfterReload = await readReview(page)
   report.observations.reviewAfterReload = reviewAfterReload
   if (reviewAfterReload.done === 1) pass('Review survives authoritative reload', reviewAfterReload.text)
