@@ -51,7 +51,34 @@ const newBlock = `async function openTrain(page) {
 
 const source = fs.readFileSync(sourcePath, 'utf8')
 if (!source.includes(oldBlock)) throw new Error('Issue #54 browser v3 could not find the v2 Train navigation helper')
-const patched = source.replace(oldBlock, newBlock)
+let patched = source.replace(oldBlock, newBlock)
+
+const fixtureBlock = `const fixtures = await discoverBarbellFixtures()
+report.observations.reachableBarbellSubstitutionCases = fixtures.length
+report.observations.barbellFixtures = fixtures`
+const fixtureReplacement = `const discoveredBarbellFixtures = await discoverBarbellFixtures()
+const fixtureKeys = new Set()
+const fixtures = discoveredBarbellFixtures.filter((fixture) => {
+  const key = String(fixture.ruleId || '') + ':' + String(fixture.program || '')
+  if (fixtureKeys.has(key)) return false
+  fixtureKeys.add(key)
+  return true
+}).slice(0, 6)
+report.observations.discoveredBarbellSubstitutionOccurrences = discoveredBarbellFixtures.length
+report.observations.reachableBarbellSubstitutionCases = fixtures.length
+report.observations.barbellFixtures = fixtures`
+if (!patched.includes(fixtureBlock)) throw new Error('Issue #54 browser v3 could not find the v2 governed Bar Loader fixture block')
+patched = patched.replace(fixtureBlock, fixtureReplacement)
+
+const pageBlock = `const page = await context.newPage()
+page.on('console', message => { if (message.type() === 'error') console.log(\`BROWSER ERROR \${message.text()}\`) })`
+const pageReplacement = `const page = await context.newPage()
+page.setDefaultTimeout(7000)
+page.setDefaultNavigationTimeout(15000)
+page.on('console', message => { if (message.type() === 'error') console.log(\`BROWSER ERROR \${message.text()}\`) })`
+if (!patched.includes(pageBlock)) throw new Error('Issue #54 browser v3 could not find the v2 Playwright page setup')
+patched = patched.replace(pageBlock, pageReplacement)
+
 fs.writeFileSync(runtimePath, patched)
 
 try {
