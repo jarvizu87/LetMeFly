@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "workbook": "CROWN_TRAINING_INTELLIGENCE_SYSTEM_v1_9R5_CANDIDATE_GOVERNANCE.xlsx",
+    "version": "v1.9R5",
+    "sheet": "CROWN COACH \u2014 RECOVERED PRIORITY DECISION ORDER",
+    "recovery": "reconstructed-control-index",
+    "factualBase": "Stage4I v1.06R4",
+    "expandedMaster": "Stage4I v1.10",
+    "sectionSha256": "4b5bcefddd752d3b8901ca3c65e5aaf1cc35f7b091ae346f28eaeabb0c24c3b3"
+  },
+  "executionMode": "review-only",
+  "rules": [
+    {
+      "id": "DR-019",
+      "priority": 1,
+      "trigger": "Pain / medical flag present",
+      "sourceAction": "Do not escalate affected load/volume; conservative stop/substitution + qualified evaluation when warranted.",
+      "protectedOutcome": "Health and safe execution",
+      "evidenceBasis": "Evidence Governance GV-10",
+      "state": "STANDBY",
+      "boundary": "Safety takes precedence; no diagnosis."
+    },
+    {
+      "id": "DR-014",
+      "priority": 2,
+      "trigger": "Equipment constraint requires substitution",
+      "sourceAction": "Use highest-grade role-preserving substitute.",
+      "protectedOutcome": "Intended adaptation and loading integrity",
+      "evidenceBasis": "Stage4I variation/substitution governance + Substitution Matrix",
+      "state": "STANDBY",
+      "boundary": "Recalculate load from correct authority."
+    },
+    {
+      "id": "DR-004",
+      "priority": 3,
+      "trigger": "Time pressure / equipment delay compresses session",
+      "sourceAction": "Use universal bottom-up cut order.",
+      "protectedOutcome": "Primary and key secondary work",
+      "evidenceBasis": "Stage4B GR-01.1",
+      "state": "STANDBY",
+      "boundary": "Do not shorten protected rest."
+    },
+    {
+      "id": "DR-003",
+      "priority": 4,
+      "trigger": "Power/Olympic technical quality is RED",
+      "sourceAction": "Stop escalation; crisp low-rep technical work only; pull/high-pull if receiving inappropriate.",
+      "protectedOutcome": "Technical quality / power",
+      "evidenceBasis": "Crown Olympic quality rules; Catalyst/APRE principles",
+      "state": "STANDBY",
+      "boundary": "Quality before density."
+    },
+    {
+      "id": "DR-005",
+      "priority": 5,
+      "trigger": "Grip interference is MATERIAL",
+      "sourceAction": "Remove direct grip; count carries/heavy pulls as grip credit.",
+      "protectedOutcome": "Primary pulling / Olympic mechanics",
+      "evidenceBasis": "Stage4B + Black Crown grip/yoke governance",
+      "state": "STANDBY",
+      "boundary": "Protect pulling mechanics."
+    },
+    {
+      "id": "DR-006",
+      "priority": 6,
+      "trigger": "Yoke / trap interference is MATERIAL",
+      "sourceAction": "Reduce direct shrug/back-off volume; preserve required pulls + one purposeful yoke/carry role.",
+      "protectedOutcome": "Pull performance + yoke identity",
+      "evidenceBasis": "Stage4C/4H yoke governance",
+      "state": "STANDBY",
+      "boundary": "Count indirect yoke stress."
+    },
+    {
+      "id": "DR-007",
+      "priority": 7,
+      "trigger": "Recovery-day work made next hard session WORSE",
+      "sourceAction": "Strip hidden loading; return day to recovery/structural roles.",
+      "protectedOutcome": "Readiness and structural support",
+      "evidenceBasis": "Stage4D recovery-primary governance",
+      "state": "STANDBY",
+      "boundary": "Recovery day must improve/maintain readiness."
+    },
+    {
+      "id": "DR-013",
+      "priority": 8,
+      "trigger": "Conditioning spillover is MATERIAL",
+      "sourceAction": "Reduce/move low-priority conditioning.",
+      "protectedOutcome": "Declared primary outcome",
+      "evidenceBasis": "Indigo concurrent benchmark; Stage4B",
+      "state": "STANDBY",
+      "boundary": "Conditioning cannot hijack primary work."
+    },
+    {
+      "id": "DR-010",
+      "priority": 9,
+      "trigger": "Specialization target UP while primary performance is NOT stable",
+      "sourceAction": "Reduce specialty dose from lowest-priority/highest-overlap role.",
+      "protectedOutcome": "Primary lift first; specialty second",
+      "evidenceBasis": "Stage4C specialization budget",
+      "state": "STANDBY",
+      "boundary": "Primary outcome protected."
+    },
+    {
+      "id": "DR-009",
+      "priority": 10,
+      "trigger": "Specialization target FLAT while primary performance is stable",
+      "sourceAction": "Improve execution/progression or reallocate redundant slot.",
+      "protectedOutcome": "Primary lift + specialty target",
+      "evidenceBasis": "Stage4C; Mountain Dog/Nippard transfer logic",
+      "state": "STANDBY",
+      "boundary": "Reallocate before add."
+    },
+    {
+      "id": "DR-008",
+      "priority": 11,
+      "trigger": "Specialization target UP while primary performance is stable",
+      "sourceAction": "Progress inside existing specialty slots; do not add a new slot.",
+      "protectedOutcome": "Primary lift + specialty target",
+      "evidenceBasis": "Stage4C + REPLACE > ADD",
+      "state": "STANDBY",
+      "boundary": "Success is not a volume-increase trigger."
+    },
+    {
+      "id": "DR-002",
+      "priority": 12,
+      "trigger": "Two comparable primary declines",
+      "sourceAction": "Hold escalation; cut lowest-priority competing support and reassess.",
+      "protectedOutcome": "Primary strength progression",
+      "evidenceBasis": "Stage4B cut order; Stage3 final verdict",
+      "state": "STANDBY",
+      "boundary": "Repeated evidence before larger change."
+    },
+    {
+      "id": "DR-001",
+      "priority": 13,
+      "trigger": "One isolated poor primary session",
+      "sourceAction": "Record it; keep long-term plan unchanged unless quality/safety cap crossed.",
+      "protectedOutcome": "Long-term progression",
+      "evidenceBasis": "Stage4B governance + anti-bloat rule",
+      "state": "STANDBY",
+      "boundary": "Do not overreact to noise."
+    },
+    {
+      "id": "DR-015",
+      "priority": 14,
+      "trigger": "Lower-priority work was missed",
+      "sourceAction": "Leave it missed unless a source rule explicitly reschedules it.",
+      "protectedOutcome": "Recovery and schedule integrity",
+      "evidenceBasis": "No-make-up governance + cut-order logic",
+      "state": "STANDBY",
+      "boundary": "No hidden catch-up session."
+    }
+  ]
+}
