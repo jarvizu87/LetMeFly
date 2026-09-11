@@ -135,6 +135,7 @@ async function probeExerciseSection(page) {
   await page.waitForFunction(() => /Main Strength Circuit/i.test(
     document.querySelector('.swipe-page.active-page .workout-panel-head h2')?.textContent || ''), null, { timeout: 10000 })
   await page.waitForSelector('.lmf-desktop-flow-item', { timeout: 10000 })
+  await page.waitForTimeout(1250)
   return true
 }
 
@@ -227,11 +228,18 @@ try {
 
   const foundExercises = await probeExerciseSection(desktop)
   if (foundExercises) {
-    const liveReuse = await desktop.evaluate(() => {
+    const liveReuseHandle = await desktop.waitForFunction(() => {
       const item = document.querySelector('.lmf-desktop-flow-item')
       const thumb = item?.querySelector('.lmf-desktop-flow-thumb')
       const shell = document.querySelector('[data-lmf-desktop-workspace="true"]')
-      const card = shell?.querySelector('#swipe-viewport .active-exercise')
+      const panel = shell?.querySelector('#swipe-viewport .swipe-page.active-page')
+      if (!/Main Strength Circuit/i.test(panel?.querySelector('h2')?.textContent || '')) return false
+      const cards = panel.querySelectorAll('.exercise-stack > .active-exercise')
+      const items = document.querySelectorAll('.lmf-desktop-flow-item')
+      if (!cards.length || items.length !== cards.length) return false
+      const card = cards[0]
+      const title = card.querySelector('.exercise-title h3')?.textContent.trim()
+      if (!title || item?.querySelector('b')?.textContent.trim() !== title) return false
       const input = card?.querySelector('.load-input,.reps-input,.rpe-input')
       const art = card?.getAttribute('data-exercise-art') || thumb?.getAttribute('data-exercise-art') || ''
       const image = thumb instanceof HTMLElement ? getComputedStyle(thumb).backgroundImage : ''
@@ -242,7 +250,9 @@ try {
         art,
         image,
       }
-    })
+    }, null, { timeout: 10000 })
+    const liveReuse = await liveReuseHandle.jsonValue()
+    await liveReuseHandle.dispose()
     report.observations.liveReuse = liveReuse
     if (liveReuse.itemPresent && liveReuse.originalCardInsideCenter) pass('Workout Flow mirrors authoritative exercise cards')
     else fail('Workout Flow mirrors authoritative exercise cards', JSON.stringify(liveReuse))
