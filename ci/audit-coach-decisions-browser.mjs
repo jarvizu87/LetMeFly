@@ -150,6 +150,19 @@ try {
     report.checks.push({ viewport: width, result: 'PASS', coverage: ['explicit current feedback', 'no stale profile inference', 'source priority and provenance', 'unknown states and evidence counts', 'edit invalidates reviewed answers', '15-minute expiry', 'exercise/program/athlete invalidation', 'native Train link', 'route and reload reset', 'all-store immutability', 'no web-storage feedback', 'literal profile text', 'mobile fit and focus preservation'] })
     await context.close()
   }
-} catch (error) { report.result = 'FAIL'; report.error = error.stack; if (activePage && !activePage.isClosed()) await activePage.screenshot({ path: path.join(out, 'failure.png'), fullPage: true }).catch(() => {}); throw error }
+} catch (error) {
+  report.result = 'FAIL'; report.error = error.stack
+  if (activePage && !activePage.isClosed()) {
+    report.feedbackAtFailure = await activePage.evaluate(() => {
+      const signature = JSON.parse(document.querySelector('#lmf-athlete-coach')?.dataset.signature || 'null')?.at(-1)
+      return signature && { status: signature[3], capturedAt: signature[2]?.capturedAt, observedAt: new Date().toISOString(),
+        sameContext: signature[0] === signature[2]?.contextKey,
+        notice: document.querySelector('[data-ai-feedback-status]')?.textContent,
+        result: document.querySelector('[data-ai-current-result]')?.textContent }
+    }).catch(() => null)
+    await activePage.screenshot({ path: path.join(out, 'failure.png'), fullPage: true }).catch(() => {})
+  }
+  throw error
+}
 finally { fs.writeFileSync(path.join(out, 'report.json'), JSON.stringify(report, null, 2)); await browser.close() }
 console.log(JSON.stringify(report))
