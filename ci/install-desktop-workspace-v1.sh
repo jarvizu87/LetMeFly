@@ -67,7 +67,32 @@ source = runtime.read_text()
 boundary = "    if (!(panel instanceof Element) || !(body instanceof Element)) return\n"
 assert source.count(boundary) == 1, 'Desktop context ownership boundary moved'
 source = source.replace(boundary, boundary + "    if (panel.classList.contains('lmf-desktop-context-panel-v2')) return\n", 1)
+# A continuously changing active workout must not indefinitely postpone its
+# desktop remount. Coalesce events with a bounded queue, rather than restarting
+# the debounce delay on every observed class mutation.
+old_schedule = """  function scheduleRefresh(delay = 0) {
+    window.clearTimeout(state.refreshTimer)
+    state.refreshTimer = window.setTimeout(refreshWorkspace, delay)
+  }"""
+new_schedule = """  function scheduleRefresh(delay = 0) {
+    if (state.refreshTimer) return
+    state.refreshTimer = window.setTimeout(() => {
+      state.refreshTimer = 0
+      refreshWorkspace()
+    }, delay)
+  }"""
+assert source.count(old_schedule) == 1, 'Desktop bounded refresh boundary moved'
+source = source.replace(old_schedule, new_schedule, 1)
+source = source.replace('    window.clearTimeout(state.refreshTimer)\n    unmountWorkspace()',
+                        '    window.clearTimeout(state.refreshTimer)\n    state.refreshTimer = 0\n    unmountWorkspace()', 1)
 runtime.write_text(source)
+
+polish = Path(os.environ['DIST_DIR']) / 'ui/desktop-workspace-v2-polish.js'
+source = polish.read_text()
+old_schedule = '  function schedule() { clearTimeout(timer); timer = setTimeout(render, 35) }'
+new_schedule = '  function schedule() { if (timer) return; timer = setTimeout(() => { timer = 0; render() }, 35) }'
+assert source.count(old_schedule) == 1, 'Desktop polish bounded refresh boundary moved'
+polish.write_text(source.replace(old_schedule, new_schedule, 1))
 
 p = Path(os.environ['DIST_DIR']) / 'index.html'
 text = p.read_text()
@@ -117,6 +142,7 @@ p.write_text(text.rstrip() + '\n')
 PY
 
 node --check "$DIST_DIR/ui/desktop-workspace-v1.js"
+node --check "$DIST_DIR/ui/desktop-workspace-v2-polish.js"
 node --check "$DIST_DIR/ui/desktop-nav-fixed-guard-v1.js"
 test -s "$DIST_DIR/ui/desktop-workspace-v1.css"
 grep -Fq '/ui/desktop-workspace-v1.css' "$DIST_DIR/index.html"

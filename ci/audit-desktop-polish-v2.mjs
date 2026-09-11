@@ -86,10 +86,12 @@ try {
  await page.waitForFunction(()=>document.querySelector('[data-lmf-desktop-v2-load]')?.textContent==='115 lb')
  check(true,'Rail follows native working-load input without a second editor')
  const before=await domain()
- await card.locator('[data-exercise-info]').evaluate(n=>n.addEventListener('click',()=>{window.__QA_INFO_FORWARDS=(window.__QA_INFO_FORWARDS||0)+1}))
+ await card.locator('[data-exercise-info]').evaluate(n=>{const original=n.click;n.click=function(...args){window.__QA_INFO_FORWARDS=(window.__QA_INFO_FORWARDS||0)+1;return original.apply(this,args)}})
  await page.locator('[data-lmf-desktop-v2-action="info"]').click()
  await page.waitForFunction(()=>window.__QA_INFO_FORWARDS===1)
  check(true,'Info action forwards exactly once to native exercise control')
+ await page.waitForSelector('#lmf-exercise-intelligence-modal')
+ check(await page.locator('#lmf-exercise-intelligence-modal').count()===1,'Native exercise information opens once')
  await page.locator('[data-lmf-intel-close]').first().click()
  await page.waitForSelector('#lmf-exercise-intelligence-modal',{state:'detached'})
  // Disabled native controls must be mirrored, not bypassed by a second enabled button.
@@ -104,6 +106,7 @@ try {
  await page.waitForSelector('[data-lmf-desktop-v2-action="info"]')
  check(await domain()===before,'Presentation/tools/resize do not alter saved workout or outbox')
  await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true})
+ check(report.observations.runtimeErrors.length===0,'No desktop runtime errors',report.observations.runtimeErrors)
  report.result='PASS'
 } catch(error) {report.result='FAIL'; report.failures.push({message:error.message,stack:error.stack});console.error(error)}
 finally {await diagnostic('final').catch(()=>{});await page.screenshot({path:path.join(out,'final.png'),fullPage:true}).catch(()=>{});await browser.close();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n')}
