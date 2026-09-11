@@ -169,6 +169,7 @@ jobs:
           run_browser_audit official-brand-browser-v2 node ci/audit-official-brand-browser-v2.mjs
           run_browser_audit desktop-workspace-v1 node ci/audit-desktop-workspace-v1.mjs
           CHECK_PROGRAM_ORDER=1 run_browser_audit athlete-insights node ci/audit-athlete-insights-browser.mjs
+          run_browser_audit profile-context node ci/audit-profile-context-browser.mjs
 
           if [[ "$BROWSER_AUDIT_FAILURES" -ne 0 ]]; then
             echo "Browser sub-audit failures: $BROWSER_AUDIT_FAILURES"
@@ -212,6 +213,7 @@ jobs:
             .build-src/letmefly_app/PROGRESS_CONDITIONING_V4_AUDIT
             .build-src/letmefly_app/PROGRESS_FINAL_V4_AUDIT
             .build-src/letmefly_app/ATHLETE_INSIGHTS_AUDIT
+            .build-src/letmefly_app/PROFILE_CONTEXT_AUDIT
             .build-src/letmefly_app/WORKOUT_MOBILE_SCROLL_AUDIT
             .build-src/letmefly_app/WORKOUT_DAY3_FIDELITY_AUDIT
             .build-src/letmefly_app/OFFICIAL_BRAND_AUDIT

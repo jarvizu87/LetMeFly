@@ -241,6 +241,14 @@
         <div class="lmf-profile-program-actions"><a href="#/program">PROGRAM</a><a href="#/train">TRAIN</a></div>
       </article>
 
+      <details class="lmf-profile-import lmf-profile-form-card">
+        <summary>Import athlete details</summary>
+        <p>Choose a profile file, review the details, then save your profile. Existing details are replaced only if you select them.</p>
+        <label>Profile file<input type="file" data-profile-import-file accept=".json,application/json"></label>
+        <p data-profile-import-status role="status" aria-live="polite"></p>
+        <div data-profile-import-preview></div>
+      </details>
+
       <div class="lmf-profile-section-title"><span>ATHLETE SNAPSHOT</span><small>Private • stored on this device</small></div>
       <div class="lmf-profile-form-card">
         <div class="lmf-profile-form-grid compact">
@@ -254,7 +262,7 @@
 
       <div class="lmf-profile-section-title"><span>GOALS & DEVELOPMENT</span><small>What the coaching system should optimize for</small></div>
       <div class="lmf-profile-form-card">
-        ${field('Primary Goal', 'primaryGoal', context.primaryGoal, { placeholder:'Your highest-priority outcome' })}
+        ${field('Primary Goal', 'primaryGoal', context.primaryGoal, { textarea:true, placeholder:'Your highest-priority outcome' })}
         ${field('Strength Goals', 'strengthGoals', context.strengthGoals, { textarea:true, placeholder:'Target lifts, performance standards, or strength outcomes.' })}
         ${field('Development Priorities', 'developmentPriorities', context.developmentPriorities, { textarea:true, placeholder:'Muscle groups, athletic qualities, technique, work capacity, resilience, etc.' })}
       </div>
@@ -307,6 +315,7 @@
   }
 
   async function saveContext(section, vault) {
+    if (section.dataset.saving === 'true') return
     const status = section.querySelector('[data-profile-save-status]')
     const button = section.querySelector('[data-action="save-profile-v2"]')
     const next = collect(section, vault.context)
@@ -317,36 +326,78 @@
       return
     }
 
+    section.dataset.saving = 'true'
     button?.setAttribute('disabled', 'disabled')
     if (status) status.textContent = 'Saving privately…'
     try {
-      const db = vault.db?.objectStoreNames?.contains('athletes') ? vault.db : await openPrivateDb()
-      if (!db) throw new Error('Private athlete database unavailable')
-      await new Promise((resolve, reject) => {
-        try {
-          const tx = db.transaction('athletes', 'readwrite')
-          tx.objectStore('athletes').put({ ...vault.athlete, [CONTEXT_KEY]: next })
-          tx.oncomplete = () => resolve()
-          tx.onerror = () => reject(tx.error || new Error('Profile save failed'))
-          tx.onabort = () => reject(tx.error || new Error('Profile save aborted'))
-        } catch (error) { reject(error) }
-      })
-      vault.context = next
-      vault.athlete = { ...vault.athlete, [CONTEXT_KEY]: next }
-      if (status) status.textContent = `Saved privately • ${new Date().toLocaleTimeString([], { hour:'numeric', minute:'2-digit' })}`
+      const bridge = window.LetMeFlyProfileContext
+      if (!bridge?.save) throw new Error('Reload the app to update the Profile editor before saving.')
+      const keys = Object.keys(next).filter(key => !['updatedAt', 'version'].includes(key) && next[key] !== vault.context[key])
+      const patch = Object.fromEntries(keys.map(key => [key, next[key]]))
+      const expected = Object.fromEntries(keys.map(key => [key, vault.context[key] ?? '']))
+      const saved = await bridge.save(vault.athlete.id, patch, expected)
+      vault.athlete = saved
+      vault.context = normalizeContext(saved)
+      // Refresh unchanged form fields from the committed row without discarding new typing.
+      for (const [key, value] of Object.entries(vault.context)) {
+        const input = section.querySelector(`[data-profile-key="${key}"]`)
+        if (input && text(input.value) === next[key]) input.value = value
+      }
+      if (status) status.textContent = keys.length ? 'Saved privately • queued for sync' : 'Your profile is up to date.'
       const ring = section.querySelector('.lmf-profile-completion')
-      const score = completionScore(vault.name, next)
+      const score = completionScore(vault.name, vault.context)
       if (ring) {
         ring.style.setProperty('--profile-completion', `${score * 3.6}deg`)
         const strong = ring.querySelector('strong')
         if (strong) strong.textContent = `${score}%`
       }
       expose(vault)
-      window.dispatchEvent(new CustomEvent('lmf:profile-v2-updated', { detail:{ athleteId:vault.athlete.id, updatedAt:next.updatedAt } }))
-    } catch (_) {
-      if (status) status.textContent = 'Could not save. Your existing athlete data was not changed.'
+      window.dispatchEvent(new CustomEvent('lmf:profile-v2-updated', { detail:{ athleteId:vault.athlete.id, updatedAt:vault.context.updatedAt } }))
+    } catch (error) {
+      if (status) status.textContent = error?.message || 'Could not save. Your existing athlete data was not changed.'
     } finally {
+      delete section.dataset.saving
       button?.removeAttribute('disabled')
+    }
+  }
+
+  async function previewProfileImport(section, vault, file) {
+    const status = section.querySelector('[data-profile-import-status]')
+    const preview = section.querySelector('[data-profile-import-preview]')
+    const token = String(Number(section.dataset.importGeneration || 0) + 1)
+    section.dataset.importGeneration = token
+    preview.replaceChildren()
+    if (!file) { status.textContent = ''; return }
+    status.textContent = 'Reading profile details…'
+    try {
+      if (file.size > 65536) throw new Error('Choose a profile JSON file smaller than 64 KB.')
+      const bridge = window.LetMeFlyProfileContext
+      if (!bridge?.parseImport) throw new Error('Reload the app to update the Profile importer.')
+      const parsed = bridge.parseImport(await file.text(), vault.athlete.id)
+      if (!section.isConnected || section.dataset.importGeneration !== token) return
+      const current = collect(section, vault.context)
+      const choices = Object.entries(parsed.fields).filter(([key, value]) => current[key] !== value)
+      if (!choices.length) { status.textContent = 'These details already match your form.'; return }
+      status.textContent = 'Blank fields are selected. Replacing an existing detail is optional.'
+      preview.innerHTML = choices.map(([key, value]) => `<div class="lmf-profile-import-row"><label><input type="checkbox" data-profile-import-key="${esc(key)}" ${current[key] ? '' : 'checked'}>${esc(parsed.labels[key])}</label><details><summary>${current[key] ? 'Compare with current detail' : 'Preview detail'}</summary>${current[key] ? `<small>Currently in your form</small><p>${esc(current[key])}</p><small>From profile file</small>` : ''}<p>${esc(value)}</p></details></div>`).join('') + '<button type="button" data-profile-import-apply>Load selected details into form</button>'
+      preview.querySelector('[data-profile-import-apply]').addEventListener('click', () => {
+        let count = 0
+        for (const checkbox of preview.querySelectorAll('[data-profile-import-key]:checked')) {
+          const key = checkbox.dataset.profileImportKey
+          const input = section.querySelector(`[data-profile-key="${key}"]`)
+          // Do not overwrite text entered since the preview was opened.
+          if (text(input.value) !== current[key]) { status.textContent = 'The form changed. Choose the file again to review your latest details.'; return }
+        }
+        for (const checkbox of preview.querySelectorAll('[data-profile-import-key]:checked')) {
+          const key = checkbox.dataset.profileImportKey
+          section.querySelector(`[data-profile-key="${key}"]`).value = parsed.fields[key]
+          count++
+        }
+        status.textContent = count ? `${count} details loaded. Review the form, then choose Save Athlete Context.` : 'Choose at least one detail to load.'
+        if (count) preview.replaceChildren()
+      })
+    } catch (error) {
+      if (section.dataset.importGeneration === token) status.textContent = error?.message || 'Could not read this profile file.'
     }
   }
 
@@ -357,6 +408,7 @@
       unit.setAttribute('aria-readonly', 'true')
     }
     section.querySelector('[data-action="save-profile-v2"]')?.addEventListener('click', () => void saveContext(section, vault))
+    section.querySelector('[data-profile-import-file]')?.addEventListener('change', event => void previewProfileImport(section, vault, event.target.files?.[0]))
   }
 
   function expose(vault) {

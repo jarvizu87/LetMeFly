@@ -17,7 +17,8 @@ grep -Fq "const CONTEXT_KEY = 'profile_context_v2'" "$JS_SRC"
 grep -Fq 'lmf-profile-v2' "$JS_SRC"
 grep -Fq 'SAVE ATHLETE CONTEXT' "$JS_SRC"
 grep -Fq 'Private Athlete Context' "$JS_SRC"
-grep -Fq 'tx.objectStore('"'"'athletes'"'"').put' "$JS_SRC"
+grep -Fq 'await bridge.save(vault.athlete.id, patch, expected)' "$JS_SRC"
+! grep -Fq "transaction('athletes', 'readwrite')" "$JS_SRC"
 ! grep -Eq "objectStore\(['\"](programInstances|workoutSessions|trainingMaxHistory|personalRecords|bodyweightEntries)['\"]\)\.put" "$JS_SRC"
 ! grep -Eq 'CROWNFORGE|BLACK_CROWN|prescription|sets.*=|reps.*=' "$JS_SRC"
 grep -Fq '.lmf-profile-v2' "$CSS_SRC"
@@ -34,8 +35,8 @@ import os, re
 root = Path(os.environ['DIST_DIR'])
 index = root / 'index.html'
 text = index.read_text()
-css = '<link rel="stylesheet" href="/ui/profile-v2.css?v=2">'
-js = '<script defer src="/ui/profile-v2.js?v=2"></script>'
+css = '<link rel="stylesheet" href="/ui/profile-v2.css?v=3">'
+js = '<script defer src="/ui/profile-v2.js?v=3"></script>'
 
 # Remove stale Profile v2 injection if an old artifact is reprocessed.
 text = re.sub(r'\s*<link rel="stylesheet" href="/ui/profile-v2\.css\?v=[^"]+">', '', text)
@@ -48,11 +49,21 @@ if js not in text:
 if text.lower().count('<!doctype html>') != 1:
     raise SystemExit('index.html must contain exactly one document')
 index.write_text(text)
+# Cache the matching editor version for offline use with the bundled save bridge.
+worker = root / 'service-worker.js'
+text = worker.read_text()
+match = re.search(r'const\s+PRECACHE\s*=\s*\[([^\]]*)\]', text)
+if not match: raise SystemExit('Missing offline asset list')
+assets = re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
+assets = [asset for asset in assets if not re.match(r'/ui/profile-v2\.(?:css|js)(?:\?|$)', asset)]
+assets += ['/ui/profile-v2.css?v=3', '/ui/profile-v2.js?v=3']
+text = text[:match.start()] + 'const PRECACHE = [' + ', '.join(repr(a) for a in dict.fromkeys(assets)) + ']' + text[match.end():]
+worker.write_text(text)
 PY
 
 node --check "$DIST_DIR/ui/profile-v2.js"
 test -s "$DIST_DIR/ui/profile-v2.css"
-grep -Fq '/ui/profile-v2.css?v=2' "$INDEX"
-grep -Fq '/ui/profile-v2.js?v=2' "$INDEX"
+grep -Fq '/ui/profile-v2.css?v=3' "$INDEX"
+grep -Fq '/ui/profile-v2.js?v=3' "$INDEX"
 
 echo "LetMeFly private athlete Profile v2: PASS"
