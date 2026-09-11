@@ -50,6 +50,66 @@ if old_main in main:
 elif 'substitutionPerformanceLoggedAt' not in main:
     raise SystemExit('Issue #54 history-lock card guard missing')
 
+# Preview/mutation affordances must fail closed from the refreshed in-memory
+# bundle as well, even when a previously logged set has been reopened.
+old_preview = "  if (item.sets.some((set) => Boolean(set.completed))) return { eligible: false, reason: 'Reopen completed sets before changing this exercise.' }"
+new_preview = "  if (item.sets.some((set) => Boolean(set.completed) || Boolean(((set.performance_data ?? {}) as Record<string, any>).substitutionPerformanceLoggedAt))) return { eligible: false, reason: 'Completed substitute work is locked to the exercise actually performed.' }"
+if old_preview in main:
+    main = main.replace(old_preview, new_preview, 1)
+elif 'Completed substitute work is locked to the exercise actually performed.' not in main:
+    raise SystemExit('Issue #54 history-lock preview guard missing')
+
+# Native set logging intentionally refreshes the authoritative workout bundle
+# without rerendering the whole Workout Mode screen. Keep the substitution card
+# synchronized in place so logging the first substitute set immediately disables
+# Change Substitute/Undo without resetting workout position or scroll.
+if 'function workoutSubstitutionRefreshLiveLocks()' not in main:
+    marker = 'function workoutSubstitutionPreview(workoutExerciseId: string, alternativeExerciseKey: string) {'
+    idx = main.find(marker)
+    if idx < 0:
+        raise SystemExit('Issue #54 live-lock helper insertion point missing')
+    helper = r'''function workoutSubstitutionRefreshLiveLocks(): void {
+  const workout = state.workout
+  if (!workout) return
+  for (const item of workout.exercises) {
+    const record = item.record
+    if (!record.substituted_from_exercise_key) continue
+    const locked = item.sets.some((set) =>
+      Boolean(set.completed)
+      || Boolean(((set.performance_data ?? {}) as Record<string, any>).substitutionPerformanceLoggedAt)
+    )
+    if (!locked) continue
+    const card = [...document.querySelectorAll<HTMLElement>('.exercise-card.active-exercise')]
+      .find((node) => String(node.dataset.exerciseId ?? '') === String(record.id))
+    if (!card) continue
+    const substitute = card.querySelector<HTMLButtonElement>('[data-substitute]')
+    if (substitute) {
+      substitute.disabled = true
+      substitute.setAttribute('aria-disabled', 'true')
+      substitute.textContent = 'SUBSTITUTE LOCKED'
+    }
+    card.querySelector<HTMLElement>('[data-revert-substitution]')?.remove()
+    const notice = card.querySelector<HTMLElement>('.lmf-substitution-active')
+    if (notice && !notice.querySelector('.lmf-substitution-lock')) {
+      const lock = document.createElement('small')
+      lock.className = 'lmf-substitution-lock'
+      lock.textContent = 'Logged substitute work is locked to the movement actually performed. The next programmed occurrence resets automatically.'
+      notice.appendChild(lock)
+    }
+  }
+}
+
+'''
+    main = main[:idx] + helper + main[idx:]
+
+if '  refreshLocks() {' not in main:
+    needle = '  async apply(input: { workoutExerciseId: string;'
+    idx = main.find(needle, main.find('LetMeFlyWorkoutSubstitutionBridge'))
+    if idx < 0:
+        raise SystemExit('Issue #54 live-lock bridge insertion point missing')
+    bridge_method = "  refreshLocks() {\n    workoutSubstitutionRefreshLiveLocks()\n  },\n"
+    main = main[:idx] + bridge_method + main[idx:]
+
 main_path.write_text(main)
 service_path.write_text(service)
 PY
@@ -57,5 +117,8 @@ PY
 grep -Fq 'substitutionPerformanceLoggedAt: completedAt' "$SERVICE"
 grep -Fq 'substitutionPerformanceLoggedAt' "$MAIN"
 grep -Fq 'Completed substitute work cannot be relabeled' "$SERVICE"
+grep -Fq 'function workoutSubstitutionRefreshLiveLocks()' "$MAIN"
+grep -Fq 'refreshLocks()' "$MAIN"
+grep -Fq 'Completed substitute work is locked to the exercise actually performed.' "$MAIN"
 
 echo "Issue #54 logged substitute history lock: PASS"
