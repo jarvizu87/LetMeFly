@@ -1,0 +1,42 @@
+name: Prepare parallel 43 and 53 workspaces
+on:
+  push:
+    branches: [qa/parallel-43-53]
+    paths: [.github/workflows/parallel-43-53-prep.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: main
+            ref: 797e2281e9124d6f0fe2ca6708e190eaaf3d96bb
+          - lane: desktop
+            ref: e260474209e299701364adab955f48d493e1f930
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.ref }}
+          persist-credentials: false
+      - name: Archive exact tracked source without building or deploying
+        env:
+          SOURCE_SHA: ${{ matrix.ref }}
+          LANE: ${{ matrix.lane }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          mkdir -p "$RUNNER_TEMP/snapshot"
+          git archive --format=tar.gz --prefix="$LANE/" HEAD > "$RUNNER_TEMP/snapshot/$LANE.tar.gz"
+          git rev-parse HEAD HEAD^{tree} > "$RUNNER_TEMP/snapshot/$LANE-provenance.txt"
+          sha256sum "$RUNNER_TEMP/snapshot/$LANE.tar.gz" > "$RUNNER_TEMP/snapshot/$LANE.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: parallel-source-${{ matrix.lane }}
+          path: ${{ runner.temp }}/snapshot
+          retention-days: 3
+          if-no-files-found: error
