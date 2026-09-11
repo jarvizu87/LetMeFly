@@ -144,12 +144,22 @@ for (const rule of governedRules) {
 
 check('Bar Loader binds to current active workout exercise cards',
   /querySelectorAll\('\.active-exercise'\)/.test(barLoader))
+check('Bar Loader locates the live workout action rail without direct-child coupling',
+  /card\.querySelector\('\.exercise-actions'\)/.test(barLoader)
+  && !/card\.querySelector\(':scope > \.exercise-actions'\)/.test(barLoader))
 check('Bar Loader decides eligibility from current displayed exercise title',
-  /exercise-title h3/.test(barLoader) && /isBarbellExercise\(name\)/.test(barLoader))
+  /exercise-title h3/.test(barLoader)
+  && /isBarbellExercise\(name\)/.test(barLoader)
+  && /isBarbellExercise\(performedName\)/.test(barLoader))
 check('Bar Loader target follows current active load input',
   /\.load-input/.test(barLoader) && /activeLoadForCard\(card\)/.test(barLoader))
+check('Bar Loader resolves performed exercise identity at click time',
+  /const performedName = cleanName\(card\.querySelector\('\.exercise-title h3'\)\?\.textContent\)/.test(barLoader))
 check('Bar Loader opens with performed exercise name and current working load',
-  /openBarLoader\(\{\s*source:\s*'exercise',\s*exerciseName:\s*name,\s*target:\s*load\.target,\s*unit:\s*load\.unit\s*\}\)/.test(barLoader))
+  /openBarLoader\(\{\s*source:\s*'exercise',\s*exerciseName:\s*performedName,\s*target:\s*load\.target,\s*unit:\s*load\.unit\s*\}\)/.test(barLoader))
+check('Bar Loader enhancer observes live exercise identity and card replacement changes',
+  /characterData:\s*true/.test(barLoader)
+  && /mutation\.removedNodes\.length\s*>\s*0/.test(barLoader))
 
 const browser = fs.existsSync(browserReportPath) ? JSON.parse(fs.readFileSync(browserReportPath, 'utf8')) : null
 const browserProof = browser?.observations?.barLoaderGovernedProof ?? null
