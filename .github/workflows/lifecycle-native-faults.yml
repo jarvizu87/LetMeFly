@@ -1,0 +1,77 @@
+name: LetMeFly Native Database Fault Probes
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [qa/full-lifecycle-soak]
+    paths:
+      - '.github/workflows/lifecycle-native-faults.yml'
+      - 'ci/audit-lifecycle-indexeddb-v1.mjs'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: native-fault-probes-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PRODUCTION_SHA: a64dccd902b1c4885a9e1f59aa5808b4366191aa
+  VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+
+jobs:
+  native-faults:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Reuse already verified exact production kit; do not rebuild or deploy
+        uses: actions/download-artifact@v4
+        with:
+          name: lifecycle-db-prepared-a64dccd902b1c4885a9e1f59aa5808b4366191aa
+          run-id: 34556108817
+          github-token: ${{ github.token }}
+          path: test-kit
+      - name: Unpack and verify every production source hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build-src/letmefly_app
+          tar -xzf test-kit/letmefly-lifecycle-test-kit.tgz -C .build-src/letmefly_app
+          node --check ci/audit-lifecycle-indexeddb-v1.mjs
+          python3 - <<'PY'
+          import json, hashlib, pathlib, os
+          app=pathlib.Path('.build-src/letmefly_app')
+          p=json.loads((app/'qa-runtime/provenance.json').read_text())
+          assert p['productionSha']==os.environ['PRODUCTION_SHA']
+          for name, expected in p['sourceHashes'].items():
+              assert hashlib.sha256((app/name).read_bytes()).hexdigest()==expected, name
+          assert 'production deploy skipped' in (app/'qa-runtime/release-held.log').read_text()
+          print('Exact source hashes and production-release hold verified')
+          PY
+      - name: Probe native transaction aborts and duplicate requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p qa-evidence
+          node ci/audit-lifecycle-indexeddb-v1.mjs .build-src/letmefly_app faults 2>&1 | tee qa-evidence/native-faults.log
+      - name: Preserve failures as failures and publish evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-native-faults-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/LIFECYCLE_DATABASE_faults
+            .build-src/letmefly_app/qa-runtime/provenance.json
+            .build-src/letmefly_app/qa-runtime/release-held.log
+            qa-evidence
+          if-no-files-found: error
+          retention-days: 14
