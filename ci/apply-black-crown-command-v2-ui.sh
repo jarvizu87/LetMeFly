@@ -52,7 +52,15 @@ program_page = r'''function programPage(): string {
   }).join('')
 
   return `<div class="page-head cinematic-head program-page-head"><div class="page-kicker">Program intelligence</div><h1>PROGRAM</h1><p class="muted">Governed program definitions stay separate from workout history and private athlete data.</p></div>
-    <section class="program-hero card"><div><span class="program-chip active">CURRENT PROGRAM</span><h2>${esc(CROWNFORGE.name)}</h2><p>${esc(CROWNFORGE.description)}</p><div class="hero-tags"><span>WEEK ${state.selectedProgram === 'crownforge' ? state.selectedWeek : 1}</span><span>WEEKS 1–14 VERIFIED</span><span>PROGRAM PROTECTED</span></div></div><div class="program-progress"><span>VERIFIED STRUCTURE</span><strong>${embeddedWeeks.length}/14 WEEKS</strong><div class="progress-bar"><span style="width:${embeddedPercent}%"></span></div></div></section>
+    <section class="program-hero card"><div><span class="program-chip active">${state.programInstance?.program_key === 'crownforge' ? 'CURRENT PROGRAM' : 'FOUNDATION PROGRAM'}</span><h2>${esc(CROWNFORGE.name)}</h2><p>${esc(CROWNFORGE.description)}</p><div class="hero-tags"><span>WEEK ${state.selectedProgram === 'crownforge' ? state.selectedWeek : 1}</span><span>WEEKS 1–14 VERIFIED</span><span>PROGRAM PROTECTED</span></div></div><div class="program-progress"><span>VERIFIED STRUCTURE</span><strong>${embeddedWeeks.length}/14 WEEKS</strong><div class="progress-bar"><span style="width:${embeddedPercent}%"></span></div></div></section>
+
+    <div class="program-current-week-label"><div><div class="page-kicker">Governed Crownforge detail</div><h2>VERIFIED WEEKS</h2></div><span>Tap a week to inspect it</span></div>
+    <nav class="program-week-nav" aria-label="Embedded Crownforge weeks"><span>JUMP TO</span>${embeddedWeeks.map((week) => `<button class="${state.selectedProgram === 'crownforge' && week.week === state.selectedWeek ? 'active' : ''}" data-jump-week="${week.week}">W${week.week}</button>`).join('')}</nav>
+    <div class="program-weeks-compact">${weekCards}</div>
+
+    <div class="section-title"><div><div class="page-kicker">Mandatory handoff</div><h2>CROWN MAINTENANCE</h2><p class="muted">Three governed bridge weeks after Crownforge testing and before Black Crown Week 1.</p></div><span class="badge mandatory">3 weeks embedded</span></div>
+    <section class="program-hero card"><div><span class="program-chip active">ENTRY BRIDGE</span><h2>${esc(CROWN_MAINTENANCE.name)}</h2><p>${esc(CROWN_MAINTENANCE.description)}</p><div class="hero-tags"><span>POST-TEST</span><span>STRENGTH RETENTION</span><span>ACTIVATION</span></div></div><div class="program-progress"><span>EMBEDDED SOURCE</span><strong>3/3 WEEKS</strong><div class="progress-bar"><span style="width:100%"></span></div></div></section>
+    <div class="program-weeks-compact maintenance-weeks-compact">${maintenanceCards}</div>
 
     <div class="section-title roadmap-title"><div><div class="page-kicker">Long-term strength & athletic development</div><h2>BLACK CROWN</h2></div><span class="badge mandatory">ACTIVE SOURCE</span></div>
     <section class="black-crown-panel v2-roadmap-priority">
@@ -62,14 +70,6 @@ program_page = r'''function programPage(): string {
     <div class="program-current-week-label"><div><div class="page-kicker">Governed Black Crown detail</div><h2>BLACK CROWN WEEKS</h2></div><span>Tap a week, then a day to train it</span></div>
     <nav class="program-week-nav black-crown-week-nav" aria-label="Black Crown governed weeks"><span>JUMP TO</span>${BLACK_CROWN.weekData.map((week) => `<button class="${state.selectedProgram === 'black-crown' && week.week === state.selectedWeek ? 'active' : ''}" data-jump-black-crown-week="${week.week}">W${week.week}</button>`).join('')}</nav>
     <div class="program-weeks-compact black-crown-weeks-compact">${blackCrownCards}</div>
-
-    <div class="program-current-week-label"><div><div class="page-kicker">Governed Crownforge detail</div><h2>VERIFIED WEEKS</h2></div><span>Tap a week to inspect it</span></div>
-    <nav class="program-week-nav" aria-label="Embedded Crownforge weeks"><span>JUMP TO</span>${embeddedWeeks.map((week) => `<button class="${state.selectedProgram === 'crownforge' && week.week === state.selectedWeek ? 'active' : ''}" data-jump-week="${week.week}">W${week.week}</button>`).join('')}</nav>
-    <div class="program-weeks-compact">${weekCards}</div>
-
-    <div class="section-title"><div><div class="page-kicker">Mandatory handoff</div><h2>CROWN MAINTENANCE</h2><p class="muted">Three governed bridge weeks after Crownforge testing and before Black Crown Week 1.</p></div><span class="badge mandatory">3 weeks embedded</span></div>
-    <section class="program-hero card"><div><span class="program-chip active">ENTRY BRIDGE</span><h2>${esc(CROWN_MAINTENANCE.name)}</h2><p>${esc(CROWN_MAINTENANCE.description)}</p><div class="hero-tags"><span>POST-TEST</span><span>STRENGTH RETENTION</span><span>ACTIVATION</span></div></div><div class="program-progress"><span>EMBEDDED SOURCE</span><strong>3/3 WEEKS</strong><div class="progress-bar"><span style="width:100%"></span></div></div></section>
-    <div class="program-weeks-compact maintenance-weeks-compact">${maintenanceCards}</div>
 
     <details class="source-details"><summary>Source governance notes</summary>${CROWNFORGE.sourceNotes.map((n) => `<div class="source-note">• ${esc(n)}</div>`).join('')}${CROWN_MAINTENANCE.sourceNotes.map((n) => `<div class="source-note">• ${esc(n)}</div>`).join('')}${BLACK_CROWN.sourceNotes.map((n) => `<div class="source-note">• ${esc(n)}</div>`).join('')}</details>`
 '''
