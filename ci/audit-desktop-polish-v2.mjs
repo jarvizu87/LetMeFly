@@ -104,6 +104,13 @@ try {
  check(true,'Same-session resize fully restores mobile workspace')
  await page.setViewportSize({width:1536,height:960})
  await page.waitForSelector('[data-lmf-desktop-v2-action="info"]')
+ await page.waitForFunction(() => {
+  const viewport=document.querySelector('#swipe-viewport'), active=viewport?.querySelector(':scope > .swipe-page.active-page')
+  if(!viewport || !active || !/Main Strength Circuit/i.test(active.querySelector('h2')?.textContent || ''))return false
+  const v=viewport.getBoundingClientRect(),a=active.getBoundingClientRect()
+  return Math.abs((a.left+a.width/2)-(v.left+v.width/2))<4
+ })
+ check(true,'Resize preserves visible center page and native active-section agreement')
  check(await domain()===before,'Presentation/tools/resize do not alter saved workout or outbox')
  await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true})
  check(report.observations.runtimeErrors.length===0,'No desktop runtime errors',report.observations.runtimeErrors)

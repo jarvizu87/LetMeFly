@@ -85,6 +85,29 @@ assert source.count(old_schedule) == 1, 'Desktop bounded refresh boundary moved'
 source = source.replace(old_schedule, new_schedule, 1)
 source = source.replace('    window.clearTimeout(state.refreshTimer)\n    unmountWorkspace()',
                         '    window.clearTimeout(state.refreshTimer)\n    state.refreshTimer = 0\n    unmountWorkspace()', 1)
+# Reparenting a scroll container can reset its scrollLeft without changing the
+# native active-page marker. Preserve that selected page, never a second index.
+helper = '''  function restoreSelectedPagePosition(viewport, selectedPage) {
+    if (!(viewport instanceof HTMLElement) || !(selectedPage instanceof HTMLElement)
+      || !viewport.isConnected || !viewport.contains(selectedPage)) return
+    const frame = viewport.getBoundingClientRect()
+    const selected = selectedPage.getBoundingClientRect()
+    const delta = selected.left + selected.width / 2 - frame.left - viewport.clientLeft - viewport.clientWidth / 2
+    viewport.scrollLeft = Math.max(0, viewport.scrollLeft + delta)
+  }
+
+'''
+assert source.count('  function mountWorkspace() {') == 1
+source = source.replace('  function mountWorkspace() {', helper + '  function mountWorkspace() {', 1)
+source = source.replace('    unmountWorkspace()\n\n    const parent = viewport.parentElement',
+                        "    const selectedPage = viewport.querySelector(':scope > .swipe-page.active-page')\n    unmountWorkspace()\n\n    const parent = viewport.parentElement", 1)
+source = source.replace('    workspace.append(flow, viewport, context)\n',
+                        '    workspace.append(flow, viewport, context)\n    restoreSelectedPagePosition(viewport, selectedPage)\n', 1)
+source = source.replace('    const viewport = state.viewport\n    if (workspace instanceof Element',
+                        "    const viewport = state.viewport\n    const selectedPage = viewport?.querySelector(':scope > .swipe-page.active-page')\n    if (workspace instanceof Element", 1)
+source = source.replace('    state.marker?.remove()\n    state.workspace = null',
+                        '    restoreSelectedPagePosition(viewport, selectedPage)\n    state.marker?.remove()\n    state.workspace = null', 1)
+assert source.count('restoreSelectedPagePosition(viewport, selectedPage)') == 3
 runtime.write_text(source)
 
 polish = Path(os.environ['DIST_DIR']) / 'ui/desktop-workspace-v2-polish.js'
