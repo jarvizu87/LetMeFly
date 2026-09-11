@@ -30,21 +30,21 @@
     nodes().forEach(element => {
       if (element.dataset.exerciseArt !== slug) return
       // Workout Flow can insert its media after the initial thumbnail scan.
-      if (entry.urls.length === 2 && element.querySelector(':scope > .lmf-exercise-media[data-exercise-art]')) { clearElement(element); return }
+      if (entry.urls.length > 1 && element.querySelector(':scope > .lmf-exercise-media[data-exercise-art]')) { clearElement(element); return }
       if (element.dataset.exerciseArtSource === entry.id) return
       clearElement(element)
       if (entry.urls.length === 1) {
         element.style.setProperty('--exercise-art', `url("${entry.urls[0]}")`)
       } else {
         element.style.setProperty('--exercise-art', 'none')
-        element.dataset.exerciseArtParts = '2'
+        element.dataset.exerciseArtParts = String(entry.urls.length)
         const pair = document.createElement('div'); pair.className = 'lmf-art-pair'
-        pair.setAttribute('role', 'group'); pair.setAttribute('aria-label', 'Separate component images')
+        pair.setAttribute('role', 'group'); pair.setAttribute('aria-label', entry.urls.length === 3 ? 'Exercise alternatives' : 'Separate component images')
         entry.urls.forEach((url, index) => {
           const part = document.createElement('div'); part.className = 'lmf-art-part'
           const picture = document.createElement('div'); picture.className = 'lmf-art-part-image'
           picture.style.backgroundImage = `url("${url}")`; picture.setAttribute('role', 'img'); picture.setAttribute('aria-label', entry.labels[index])
-          const label = document.createElement('span'); label.textContent = `${index + 1}. ${entry.labels[index]}`
+          const label = document.createElement('span'); label.textContent = entry.urls.length === 3 ? entry.labels[index] : `${index + 1}. ${entry.labels[index]}`
           part.append(picture, label); pair.append(part)
         })
         element.prepend(pair)

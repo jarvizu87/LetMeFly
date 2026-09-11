@@ -4,7 +4,7 @@ export const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 export const PRIVATE_BUCKET = 'athlete-exercise-art'
 const UUID = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/
 export function privateDelivery(value, athleteId) {
-  if (!UUID.test(athleteId || '') || value?.kind !== 'supabase-private' || value.bucket !== PRIVATE_BUCKET || !Array.isArray(value.parts) || ![1, 2].includes(value.parts.length)) return null
+  if (!UUID.test(athleteId || '') || value?.kind !== 'supabase-private' || value.bucket !== PRIVATE_BUCKET || !Array.isArray(value.parts) || ![1, 2, 3].includes(value.parts.length)) return null
   const parts = []
   for (const part of value.parts) {
     if (typeof part?.path !== 'string' || !part.path.startsWith(`${athleteId}/`) || !/^[0-9a-f]{64}\.(?:webp|png)$/.test(part.path.slice(athleteId.length + 1))) return null

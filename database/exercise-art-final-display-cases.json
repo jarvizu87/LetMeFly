@@ -1,0 +1,29 @@
+{
+  "purpose": "Presentation mappings only; never override governed exercise prescriptions.",
+  "cases": [
+    { "key": "bike-row-walk", "name": "Bike / Row / Walk", "parts": [
+      { "sourceKey": "stationary-bike", "label": "Bike" },
+      { "sourceKey": "row-ergometer", "label": "Row" },
+      { "sourceKey": "walking", "label": "Walk" }
+    ] },
+    { "key": "walk-bike-or-elliptical", "name": "Walk, Bike, or Elliptical", "parts": [
+      { "sourceKey": "walking", "label": "Walk" },
+      { "sourceKey": "stationary-bike", "label": "Bike" },
+      { "sourceKey": "elliptical-trainer", "label": "Elliptical" }
+    ] },
+    { "key": "bike-row-or-elliptical", "name": "Bike, Row, or Elliptical", "parts": [
+      { "sourceKey": "stationary-bike", "label": "Bike" },
+      { "sourceKey": "row-ergometer", "label": "Row" },
+      { "sourceKey": "elliptical-trainer", "label": "Elliptical" }
+    ] },
+    { "key": "relaxed-breathing", "name": "Relaxed Breathing", "parts": [
+      { "sourceKey": "box-breathing", "label": "Relaxed Breathing" }
+    ], "basis": "The approved image shows quiet seated breathing without a count, hold or timing diagram. Reuse the pose only; retain the governed 2–4 minutes and existing notes." },
+    { "key": "curl", "name": "Curl", "parts": [
+      { "sourceKey": "dumbbell-curl", "label": "Curl" }
+    ], "basis": "The governed structural-support slot specifies Curl 2x10–12 without equipment. The approved supinated dumbbell curl illustrates that movement; the artwork does not restrict equipment or alter the prescription." },
+    { "key": "machine-hip-abduction", "name": "Machine Hip Abduction", "newPrivateImage": true,
+      "basis": "Dedicated seated machine illustration: pads contact outer thighs, supported back and feet, moderate outward position. Preserve the existing 2x15–25, RPE 7–8 and fallback rules." }
+  ],
+  "nonExerciseEntries": ["verified-crownforge-results", "black-crown-entry-tm-rules", "full-rest"]
+}
