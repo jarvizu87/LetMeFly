@@ -1,4 +1,4 @@
-/* LetMeFly Command V2 Batch N — Cloudinary exercise artwork.
+/* LetMeFly Command V2 Batch N — Authenticated private exercise artwork.
    Priority: JP custom art -> generic workout art -> neutral LetMeFly fallback.
    Never stretch, blur, or show a misleading exercise photo when no exact art exists. */
 
@@ -20,9 +20,28 @@
   filter:none!important;
 }
 
-/* Cloudinary delivers aspect-ratio-preserving limit-fill crops. CSS cover only crops the
-   already-proportional image to the final card shape; it never distorts width vs height. */
+/* Single-image private artwork keeps the established aspect-ratio-safe layout. */
 [data-exercise-art-source="mine"],
 [data-exercise-art-source="others"]{
   image-rendering:auto;
 }
+
+/* Compound prescriptions have two independently labeled illustrations. Never
+   merge their images into an invented single exercise or silently use one part. */
+[data-exercise-art-parts="2"] > .lmf-art-pair{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;
+  width:100%;height:100%;min-height:0;position:relative;z-index:1;order:1;
+  background:#03070a;color:#edf1f5;box-sizing:border-box;
+}
+.lmf-art-pair > .lmf-art-part{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.lmf-art-pair .lmf-art-part-image{flex:1;min-height:0;background-size:contain;background-position:center;background-repeat:no-repeat}
+.lmf-art-pair .lmf-art-part > span{display:block;flex:none;padding:4px;white-space:normal;overflow-wrap:anywhere;text-align:center;font:600 11px/1.2 system-ui,sans-serif;background:#11171c;color:#edf1f5}
+html body .exercise-stack .exercise-card[data-exercise-art][data-exercise-art-parts="2"]::before,
+html body .exercise-stack .exercise-card:first-child[data-exercise-art][data-exercise-art-parts="2"]::before{display:none!important;content:none!important}
+.exercise-stack .exercise-card[data-exercise-art-parts="2"] > .lmf-art-pair{height:auto;aspect-ratio:1/1;flex:none}
+[data-exercise-art-parts="2"].lmf-exercise-media > .lmf-art-pair{position:absolute;inset:0}
+[data-exercise-art-parts="2"].lmf-exercise-media::after{display:none!important}
+[data-exercise-art-parts="2"].library-thumb > .lmf-art-pair,
+[data-exercise-art-parts="2"].lmf-compact-thumb > .lmf-art-pair,
+[data-exercise-art-parts="2"].lmf-next-thumb > .lmf-art-pair,
+[data-exercise-art-parts="2"].lmf-desktop-flow-thumb > .lmf-art-pair{overflow:hidden;border-radius:inherit}

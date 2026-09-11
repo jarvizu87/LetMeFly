@@ -1,8 +1,7 @@
 (async () => {
   'use strict'
-  const { MAP_KEY, SLUG, cleanMap, scopedMap } = await import('./exercise-art-contract.mjs')
-  const TRANSFORM = 'c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best'
-  const BASE_URL = `https://res.cloudinary.com/extor5az/image/upload/${TRANSFORM}/`
+  // Filename remains stable for installed app shells; private bytes have no public URL.
+  const { SLUG, approvedPrivateRows } = await import('./exercise-art-contract.mjs')
   const MIN_RENDER_DIMENSION = 640
   const ready = new Map(), pending = new Map()
   let epoch = 0, overrides = {}, athleteId = null, scheduled = 0
@@ -10,20 +9,74 @@
   function clearElement(element) {
     element.style.removeProperty('--exercise-art')
     delete element.dataset.exerciseArtSource
+    delete element.dataset.exerciseArtParts
+    element.querySelectorAll(':scope > .lmf-art-pair').forEach(pair => pair.remove())
+  }
+  function release(entry) {
+    entry.cancels.forEach(cancel => cancel())
+    entry.cancels.length = 0
+    entry.probes.forEach(image => { image.onload = image.onerror = null; image.src = '' })
+    entry.urls.forEach(url => URL.revokeObjectURL(url))
+    entry.urls.length = 0
   }
   function reset() {
     epoch += 1
-    pending.forEach(image => { image.onload = image.onerror = null; image.src = '' })
+    pending.forEach(release); ready.forEach(release)
     pending.clear(); ready.clear(); overrides = {}; athleteId = null
     nodes().forEach(clearElement)
   }
-  function activate(slug, url, token) {
+  function activate(slug, entry, token) {
     if (token !== epoch || !athleteId) return
     nodes().forEach(element => {
       if (element.dataset.exerciseArt !== slug) return
-      element.style.setProperty('--exercise-art', `url("${url}")`)
-      element.dataset.exerciseArtSource = 'private-athlete-map'
+      // Workout Flow can insert its media after the initial thumbnail scan.
+      if (entry.urls.length === 2 && element.querySelector(':scope > .lmf-exercise-media[data-exercise-art]')) { clearElement(element); return }
+      if (element.dataset.exerciseArtSource === entry.id) return
+      clearElement(element)
+      if (entry.urls.length === 1) {
+        element.style.setProperty('--exercise-art', `url("${entry.urls[0]}")`)
+      } else {
+        element.style.setProperty('--exercise-art', 'none')
+        element.dataset.exerciseArtParts = '2'
+        const pair = document.createElement('div'); pair.className = 'lmf-art-pair'
+        pair.setAttribute('role', 'group'); pair.setAttribute('aria-label', 'Separate component images')
+        entry.urls.forEach((url, index) => {
+          const part = document.createElement('div'); part.className = 'lmf-art-part'
+          const picture = document.createElement('div'); picture.className = 'lmf-art-part-image'
+          picture.style.backgroundImage = `url("${url}")`; picture.setAttribute('role', 'img'); picture.setAttribute('aria-label', entry.labels[index])
+          const label = document.createElement('span'); label.textContent = `${index + 1}. ${entry.labels[index]}`
+          part.append(picture, label); pair.append(part)
+        })
+        element.prepend(pair)
+      }
+      element.dataset.exerciseArtSource = entry.id
     })
+  }
+  function probeImage(url, entry) {
+    return new Promise(resolve => {
+      entry.cancels.push(() => resolve(false))
+      const probe = new Image(); entry.probes.push(probe); probe.decoding = 'async'
+      probe.onload = () => resolve(probe.naturalWidth >= MIN_RENDER_DIMENSION && probe.naturalHeight >= MIN_RENDER_DIMENSION)
+      probe.onerror = () => resolve(false)
+      probe.src = url
+    })
+  }
+  async function fetchArt(slug, token, id, asset) {
+    const entry = { id: asset.id, urls: [], labels: asset.delivery.parts.map(part => part.label), probes: [], cancels: [] }
+    pending.set(slug, entry)
+    try {
+      const blobs = await Promise.all(asset.delivery.parts.map(part => window.LetMeFlyExerciseArt.readAsset(id, slug, asset.id, part.path)))
+      if (token !== epoch || pending.get(slug) !== entry) return
+      if (blobs.some(blob => !(blob instanceof Blob) || !['image/webp', 'image/png'].includes(blob.type) || !blob.size || blob.size > 12 * 1024 * 1024)) throw new Error('Image unavailable')
+      entry.urls = blobs.map(blob => URL.createObjectURL(blob))
+      const quality = await Promise.all(entry.urls.map(url => probeImage(url, entry)))
+      if (token !== epoch || pending.get(slug) !== entry) return
+      if (quality.some(ok => !ok)) throw new Error('Image quality unavailable')
+      pending.delete(slug); ready.set(slug, entry); activate(slug, entry, token)
+    } catch {
+      if (pending.get(slug) === entry) pending.delete(slug)
+      release(entry)
+    }
   }
   function check(element) {
     const slug = element.dataset.exerciseArt
@@ -31,63 +84,19 @@
     const known = ready.get(slug)
     if (known) { activate(slug, known, epoch); return }
     if (pending.has(slug) || navigator.onLine === false) return
-    const token = epoch, asset = overrides[slug]
-    const url = `${BASE_URL}${asset.publicId}.${asset.format}`
-    const probe = new Image(); pending.set(slug, probe); probe.decoding = 'async'
-    probe.onload = () => {
-      if (token !== epoch || pending.get(slug) !== probe) return
-      pending.delete(slug)
-      if (probe.naturalWidth < MIN_RENDER_DIMENSION || probe.naturalHeight < MIN_RENDER_DIMENSION) return
-      ready.set(slug, url); activate(slug, url, token)
-    }
-    probe.onerror = () => { if (token === epoch && pending.get(slug) === probe) pending.delete(slug) }
-    probe.src = url
+    void fetchArt(slug, epoch, athleteId, overrides[slug])
   }
   function scan() { nodes().forEach(element => observer ? observer.observe(element) : check(element)) }
-  async function readLocal(id) {
-    const db = await new Promise((resolve, reject) => {
-      const request = indexedDB.open('letmefly-private')
-      request.onupgradeneeded = () => request.transaction.abort()
-      request.onerror = () => reject(request.error)
-      request.onblocked = () => reject(new Error('Private art storage unavailable'))
-      request.onsuccess = () => resolve(request.result)
-    })
-    try {
-      return await new Promise((resolve, reject) => {
-        const tx = db.transaction(['athletes', 'meta'], 'readonly')
-        let rows = [], config
-        tx.objectStore('athletes').getAll().onsuccess = event => { rows = event.target.result }
-        tx.objectStore('meta').get(`${MAP_KEY}:${id}`).onsuccess = event => { config = event.target.result?.value }
-        tx.oncomplete = () => resolve(rows.find(row => !row.deleted_at)?.id === id ? scopedMap(config, id) : {})
-        tx.onabort = tx.onerror = () => reject(tx.error)
-      })
-    } finally { db.close() }
-  }
   async function refresh() {
     reset()
     const token = epoch, bridge = window.LetMeFlyExerciseArt
-    if (!bridge || bridge.version !== 1) return
+    if (!bridge || bridge.version !== 2 || typeof bridge.readAsset !== 'function') return
     try {
       const context = await bridge.context()
-      if (token !== epoch || !context?.athleteId) return
-      const id = context.athleteId
-      const local = await readLocal(id).catch(() => ({}))
-      if (token !== epoch) return
-      athleteId = id; overrides = local; scan()
-      const rows = navigator.onLine === false ? [] : await bridge.readCloud(id).catch(() => [])
+      if (token !== epoch || !context?.athleteId || navigator.onLine === false) return
+      const id = context.athleteId, rows = await bridge.readCloud(id)
       if (token !== epoch || (await bridge.context())?.athleteId !== id || token !== epoch) return
-      const grouped = new Map()
-      for (const row of rows) {
-        if (row.athlete_id !== id || row.deleted_at || row.status !== 'approved' || row.is_active !== true) continue
-        const key = row.exercise_key
-        if (!grouped.has(key)) grouped.set(key, [])
-        grouped.get(key).push({ publicId: row.cloudinary_public_id, format: row.asset_format, status: row.status })
-      }
-      const cloud = cleanMap(Object.fromEntries([...grouped].filter(([, assets]) => assets.length === 1).map(([key, assets]) => [key, assets[0]])))
-      // A cloud replacement must invalidate pending local image callbacks too.
-      pending.forEach(image => { image.onload = image.onerror = null; image.src = '' })
-      pending.clear(); ready.clear(); epoch += 1
-      overrides = { ...local, ...cloud }; nodes().forEach(clearElement); scan()
+      athleteId = id; overrides = approvedPrivateRows(rows, id); scan()
     } catch { if (token === epoch) reset() }
   }
   function schedule() {
@@ -107,9 +116,11 @@
   window.addEventListener('lmf:exercise-art-context-changed', schedule)
   window.addEventListener('lmf:exercise-art-overrides-updated', schedule)
   window.addEventListener('online', schedule)
+  window.addEventListener('offline', schedule)
   window.addEventListener('focus', schedule)
   window.addEventListener('pageshow', schedule)
+  window.addEventListener('pagehide', reset)
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') schedule() })
   if ('BroadcastChannel' in window) new BroadcastChannel('letmefly-exercise-art').onmessage = schedule
   schedule()
-})().catch(() => { /* The themed fallback remains available without private mappings. */ })
+})().catch(() => { /* The themed fallback remains available without approved private bytes. */ })
