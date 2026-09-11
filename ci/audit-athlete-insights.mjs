@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import fs from 'node:fs'
-import { summarizeAthlete, compareVolume, buildCoachBrief } from '../overlays/athlete-insights-v1/athlete-insights.mjs'
+import { summarizeAthlete, compareVolume, buildCoachBrief, readCoachProfile } from '../overlays/athlete-insights-v1/athlete-insights.mjs'
 import { historyWindows } from '../overlays/athlete-insights-v1/private-history.mjs'
 
 const manifest = JSON.parse(fs.readFileSync(new URL('../overlays/athlete-insights-v1/coach-rule-manifest.json', import.meta.url)))
@@ -104,4 +104,26 @@ test('Coach rules are explicit, ordered, review-only, and cannot modify history'
   assert.throws(() => buildCoachBrief(summary, { athleteId: 'other' }, manifest), /identity/)
   assert.throws(() => buildCoachBrief(summary, { athleteId: 'jp', requestedRuleIds: ['invented'] }, manifest), /Unknown/)
   assert.throws(() => buildCoachBrief(summary, { athleteId: 'jp' }, { ...manifest, executionMode: 'automatic' }), /review manifest/)
+})
+test('Coach distinguishes an empty profile from saved goals without inferring context', () => {
+  const athlete = { id: 'jp', display_name: 'JP', profile_context_v2: { age: '35', height: '180 cm' } }
+  const profile = readCoachProfile(athlete, 'jp')
+  assert.equal(profile.savedCount, 0); assert.equal(profile.missing.length, 9)
+  assert.ok(profile.fields.every(field => field.value === ''))
+  assert.throws(() => readCoachProfile(athlete, 'foreign'), /identity/)
+  assert.throws(() => readCoachProfile({ ...athlete, deleted_at: opts.from }, 'jp'), /identity/)
+})
+test('Coach reads v2 and legacy context, respects cleared fields and rejects malformed values', () => {
+  const athlete = { id: 'jp', primary_goal: 'Legacy goal', training_history: 'Track athlete', equipment: 'Rack',
+    profile_context_v2: { primaryGoal: '  Stronger legs  ', equipment: '', coachingNotes: { unsafe: 'object' }, avoidExercises: ['guess'] } }
+  const before = structuredClone(athlete), profile = readCoachProfile(athlete, 'jp')
+  assert.equal(profile.savedCount, 2)
+  assert.equal(profile.fields.find(f => f.key === 'primaryGoal').value, 'Stronger legs')
+  assert.equal(profile.fields.find(f => f.key === 'trainingHistory').value, 'Track athlete')
+  assert.equal(profile.fields.find(f => f.key === 'equipment').value, '')
+  assert.deepEqual(athlete, before)
+  const brief = buildCoachBrief(summarizeAthlete(fixture(), opts), { athleteId: 'jp', athleteProfile: profile }, manifest)
+  brief.athleteProfile.fields[0].value = 'Changed copy'
+  assert.equal(profile.fields[0].value, 'Stronger legs'); assert.deepEqual(brief.mutations, [])
+  assert.throws(() => buildCoachBrief(summarizeAthlete(fixture(), opts), { athleteId: 'jp', athleteProfile: { athleteId: 'other' } }, manifest), /identity/)
 })
