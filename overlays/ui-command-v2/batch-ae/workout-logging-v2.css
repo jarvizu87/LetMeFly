@@ -137,3 +137,30 @@
   .lmf-log-detail-toggle{width:calc(100% - 20px);margin:0 10px 8px}
   .lmf-round-rest,.lmf-next-strip{margin-left:31px!important}
 }
+
+/* The original three narrow steppers leave no editable Load width on phones.
+   Give Load a full row and share the remaining row between Reps and RPE. */
+@media(max-width:680px){
+  .lmf-workout-flow-card .set-row.lmf-set-active{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-areas:
+      "set check"
+      "target target"
+      "load load"
+      "reps rpe"
+      "plates plates"!important;
+  }
+  .lmf-workout-flow-card .set-row.lmf-set-active[data-has-load="false"]{
+    grid-template-areas:
+      "set check"
+      "target target"
+      "reps reps"
+      "rpe rpe"!important;
+  }
+  .lmf-workout-flow-card .set-row.lmf-set-active .lmf-stepper{
+    grid-template-columns:26px minmax(0,1fr) 26px;
+    gap:3px;
+    padding:4px;
+  }
+  .lmf-workout-flow-card .set-row.lmf-set-active .lmf-step-btn{width:26px}
+}
