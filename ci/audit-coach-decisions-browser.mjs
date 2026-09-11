@@ -45,7 +45,11 @@ try {
     await context.route('**/*', route => route.request().url().startsWith(`${base}/`) ? route.continue() : route.abort())
     const page = activePage = await context.newPage(), errors = []
     page.on('pageerror', error => errors.push(error.message))
-    await page.clock.install()
+    // Keep wall time independent of the virtual timer queue. Playwright 1.55
+    // can rewind its running clock while dispatching an overdue timer.
+    const auditWallTime = new Date()
+    await page.clock.install({ time: auditWallTime })
+    await page.clock.setFixedTime(auditWallTime)
     await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' })
     const create = page.getByRole('button', { name: /CREATE LOCAL ATHLETE/i })
     await create.waitFor({ state: 'visible', timeout: 15000 })
@@ -94,6 +98,8 @@ try {
     await page.screenshot({ path: path.join(out, `current-review-viewport-${width}.png`) })
     await result.screenshot({ path: path.join(out, `current-review-${width}.png`) })
     await review.locator('[data-ai-coach-detail="decision-evidence"] > summary').click()
+    const expiredWallTime = await page.evaluate(() => Date.now() + 15 * 60 * 1000 + 100)
+    await page.clock.setFixedTime(expiredWallTime)
     await page.clock.fastForward(15 * 60 * 1000 + 100)
     await page.waitForFunction(() => document.querySelector('[data-ai-feedback-status]')?.textContent.includes('expired'))
     assert.doesNotMatch(await result.innerText(), /REVIEW FIRST/)
@@ -150,6 +156,19 @@ try {
     report.checks.push({ viewport: width, result: 'PASS', coverage: ['explicit current feedback', 'no stale profile inference', 'source priority and provenance', 'unknown states and evidence counts', 'edit invalidates reviewed answers', '15-minute expiry', 'exercise/program/athlete invalidation', 'native Train link', 'route and reload reset', 'all-store immutability', 'no web-storage feedback', 'literal profile text', 'mobile fit and focus preservation'] })
     await context.close()
   }
-} catch (error) { report.result = 'FAIL'; report.error = error.stack; if (activePage && !activePage.isClosed()) await activePage.screenshot({ path: path.join(out, 'failure.png'), fullPage: true }).catch(() => {}); throw error }
+} catch (error) {
+  report.result = 'FAIL'; report.error = error.stack
+  if (activePage && !activePage.isClosed()) {
+    report.feedbackAtFailure = await activePage.evaluate(() => {
+      const signature = JSON.parse(document.querySelector('#lmf-athlete-coach')?.dataset.signature || 'null')?.at(-1)
+      return signature && { status: signature[3], capturedAt: signature[2]?.capturedAt, observedAt: new Date().toISOString(),
+        sameContext: signature[0] === signature[2]?.contextKey,
+        notice: document.querySelector('[data-ai-feedback-status]')?.textContent,
+        result: document.querySelector('[data-ai-current-result]')?.textContent }
+    }).catch(() => null)
+    await activePage.screenshot({ path: path.join(out, 'failure.png'), fullPage: true }).catch(() => {})
+  }
+  throw error
+}
 finally { fs.writeFileSync(path.join(out, 'report.json'), JSON.stringify(report, null, 2)); await browser.close() }
 console.log(JSON.stringify(report))

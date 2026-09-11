@@ -1,6 +1,7 @@
 import { summarizeAthlete, compareVolume, buildCoachBrief, readCoachProfile } from './athlete-insights.mjs'
 import { progressDetail } from './progress-detail-ui.mjs'
 import { readPrivateHistory, historyWindows } from './private-history.mjs'
+import { createHistoryCache } from './history-cache.mjs'
 import { coachDecisionView, changeCoachDecision, clickCoachDecision, resetCoachDecision } from './coach-decisions-ui.mjs'
 
 const manifest = await fetch(new URL('./coach-rule-manifest.json', import.meta.url)).then(r => {
@@ -11,9 +12,9 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;
 const fmt = value => value === null || value === undefined ? '—' : new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(value)
 const dateLabel = value => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(value))
 const norm = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
-let timer = 0, generation = 0, snapshot = null, readAt = 0, selectedKey = '', coachTopic = 'recent'
+let timer = 0, generation = 0, selectedKey = '', coachTopic = 'recent'
 let selectedReps = null, selectedDimension = 'roles'
-let snapshotPromise = null
+const history = createHistoryCache(readPrivateHistory)
 const topics = { recent: [], difficult: ['DR-001', 'DR-002'], time: ['DR-004'], missed: ['DR-015'], specialty: ['DR-008', 'DR-009', 'DR-010'] }
 
 function selectedRange() {
@@ -115,10 +116,7 @@ async function refresh(force = false) {
   const coach = document.querySelector('#coach-answer')?.closest('.coach-chat')
   if (!panel && !coach) return
   try {
-    if (force || !snapshot || Date.now() - readAt > 3000) {
-      if (!snapshotPromise) snapshotPromise = readPrivateHistory().finally(() => { snapshotPromise = null })
-      snapshot = await snapshotPromise; readAt = Date.now()
-    }
+    const snapshot = await history.get({ force })
     if (token !== generation) return
     if (!snapshot) throw new Error('No local athlete history available')
     panel?.querySelector('.lmf-ai-unavailable')?.remove()
@@ -127,7 +125,7 @@ async function refresh(force = false) {
     if (coach?.isConnected) renderCoach(coach, snapshot)
   } catch (_) {
     if (token !== generation) return
-    snapshot = null
+    history.invalidate()
     for (const target of [panel, coach].filter(x => x?.isConnected)) {
       if (target.querySelector('.lmf-ai-unavailable')) continue
       target.querySelector('#lmf-advanced-progress, #lmf-athlete-coach')?.remove()
@@ -151,10 +149,10 @@ document.addEventListener('click', event => {
   if (clickCoachDecision(event.target, () => void refresh(true))) { void refresh(true); return }
   if (event.target.closest('[data-ai-refresh]')) void refresh(true)
 })
-window.addEventListener('hashchange', () => { resetCoachDecision(); generation++; snapshot = null; selectedKey = ''; selectedReps = null; coachTopic = 'recent'; schedule() })
+window.addEventListener('hashchange', () => { resetCoachDecision(); generation++; history.invalidate(); selectedKey = ''; selectedReps = null; coachTopic = 'recent'; schedule() })
 window.addEventListener('letmefly:exercise-intelligence-ready', schedule)
-window.addEventListener('storage', () => { snapshot = null; schedule() })
-window.addEventListener('lmf:profile-v2-updated', () => { snapshot = null; void refresh(true) })
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { snapshot = null; schedule() } })
+window.addEventListener('storage', () => { history.invalidate(); schedule() })
+window.addEventListener('lmf:profile-v2-updated', () => { void refresh(true) })
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { history.invalidate(); schedule() } })
 window.__LMF_ATHLETE_INSIGHTS__ = Object.freeze({ version: 1, refresh: () => refresh(true) })
 schedule()
