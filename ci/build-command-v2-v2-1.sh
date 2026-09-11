@@ -35,6 +35,10 @@ bash "$ROOT_DIR/ci/apply-workout-substitution-today-v2.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-substitution-history-lock-v1.sh" "$TARGET"
 node "$ROOT_DIR/ci/audit-workout-substitution-today-v1.mjs" "$TARGET"
 
+# Issue #60: overlapping starts must reuse one transactionally created workout.
+# No existing athlete history is deduplicated or otherwise migrated by this fix.
+bash "$ROOT_DIR/ci/apply-workout-start-serialization-v1.sh" "$TARGET"
+
 # Supabase's hosted default email sends a magic link unless custom SMTP allows
 # the project template to be changed to a numeric OTP. Consume the PKCE callback
 # in-app so authenticated private sync works with either supported email mode.
