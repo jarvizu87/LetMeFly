@@ -1,0 +1,135 @@
+{
+  "bike-incline-walk": [
+    "stationary-bike",
+    "incline-walk"
+  ],
+  "glute-bridge-iso": [
+    "glute-bridge-isometric-hold"
+  ],
+  "front-squat-bench-ramp-sets": [
+    "front-squat-plus-bench-ramp-sets"
+  ],
+  "kb-swing": [
+    "kettlebell-swing"
+  ],
+  "incline-db-press": [
+    "incline-dumbbell-press"
+  ],
+  "rear-delt-fly": [
+    "rear-deltoid-fly"
+  ],
+  "scap-push-up": [
+    "scapular-push-up"
+  ],
+  "db-curl": [
+    "dumbbell-curl"
+  ],
+  "kb-halo": [
+    "kettlebell-halo"
+  ],
+  "band-or-cable-march": [
+    "band-march",
+    "cable-march"
+  ],
+  "dead-bug-or-hollow-hold": [
+    "dead-bug",
+    "hollow-hold"
+  ],
+  "light-forward-sled-push": [
+    "forward-sled-push"
+  ],
+  "walk-or-bike": [
+    "walking",
+    "stationary-bike"
+  ],
+  "bike-walk": [
+    "stationary-bike",
+    "walking"
+  ],
+  "lat-pulldown-warm-up": [
+    "lat-pulldown"
+  ],
+  "pull-up-or-lat-pulldown": [
+    "pull-up",
+    "lat-pulldown"
+  ],
+  "reverse-crunch-or-dead-bug": [
+    "reverse-crunch",
+    "dead-bug"
+  ],
+  "bike-or-walk": [
+    "stationary-bike",
+    "walking"
+  ],
+  "wide-or-neutral-pulldown": [
+    "wide-grip-lat-pulldown",
+    "neutral-grip-lat-pulldown"
+  ],
+  "rdl": [
+    "romanian-deadlift"
+  ],
+  "kb-lateral-lunge": [
+    "kettlebell-lateral-lunge"
+  ],
+  "kb-lateral-clean-or-outside-swing-to-rack": [
+    "kettlebell-lateral-clean",
+    "outside-swing-to-rack"
+  ],
+  "optional-easy-walk": [
+    "walking"
+  ],
+  "mobility": [
+    "mobility-flow"
+  ],
+  "close-grip-pause-bench-press": [
+    "close-grip-bench-press",
+    "pause-bench-press"
+  ],
+  "easy-walk-bike": [
+    "walking",
+    "stationary-bike"
+  ],
+  "front-squat-governed-attempts": [
+    "front-squat"
+  ],
+  "full-rest-easy-walk": [
+    "walking"
+  ],
+  "back-squat-governed-attempts": [
+    "back-squat"
+  ],
+  "bench-press-governed-attempts": [
+    "bench-press"
+  ],
+  "deadlift-governed-attempts": [
+    "deadlift"
+  ],
+  "bike-or-incline-walk": [
+    "stationary-bike",
+    "incline-walk"
+  ],
+  "neutral-grip-pulldown": [
+    "neutral-grip-lat-pulldown"
+  ],
+  "easy-sled-drag": [
+    "sled-drag"
+  ],
+  "easy-incline-walk": [
+    "incline-walk"
+  ],
+  "snatch-grip-rdl": [
+    "snatch-grip-romanian-deadlift"
+  ],
+  "finger-extension": [
+    "finger-extension-band"
+  ],
+  "medicine-ball-chest-pass": [
+    "med-ball-chest-pass"
+  ],
+  "elliptical": [
+    "elliptical-trainer"
+  ],
+  "pushdown": [
+    "triceps-pushdown"
+  ]
+}
