@@ -709,8 +709,10 @@
   }
 
   function scheduleRefresh(delay = 0) {
-    window.clearTimeout(refreshTimer)
-    refreshTimer = window.setTimeout(() => enhanceAll(document), delay)
+    // Coalesce DOM updates. Continually resetting a debounce can postpone the
+    // workout tool indefinitely while other presentation layers are rendering.
+    if (refreshTimer !== null) return
+    refreshTimer = window.setTimeout(() => { refreshTimer = null; enhanceAll(document) }, delay)
   }
 
   function start() {

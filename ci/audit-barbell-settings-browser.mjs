@@ -68,8 +68,38 @@ try {
     assert.equal(await modal.locator('#lmf-bar-weight').inputValue(), '35', 'Device override must survive athlete defaults and reload')
     await modal.locator('#lmf-bar-unit').selectOption('kg')
     assert.equal(await modal.locator('#lmf-bar-weight').inputValue(), '20', 'Lb bar must not be relabeled as kg')
+    await modal.locator('[data-lmf-bar-close="button"]').click()
+    // Native workout creation and the real card tool: no manual enhancer call.
+    await page.evaluate(async () => {
+      localStorage.removeItem('letmefly-bar-loader-v1')
+      const db = await new Promise((resolve, reject) => { const r = indexedDB.open('letmefly-private'); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error) })
+      const tx = db.transaction('programInstances', 'readwrite'), store = tx.objectStore('programInstances')
+      const rows = await new Promise((resolve, reject) => { const r = store.getAll(); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error) })
+      store.put({ ...rows.find(row => row.status === 'active'), current_week: 1, current_day_key: 'day-4' })
+      await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error) }); db.close()
+    })
+    await page.goto(`${base}/#/train`); await page.reload()
+    await page.locator('.readiness-field').first().waitFor()
+    const dismiss = page.getByRole('button', { name: /Dismiss install prompt/i }); if (await dismiss.isVisible()) await dismiss.click()
+    await page.evaluate(() => {
+      for (const input of document.querySelectorAll('.readiness-field input[type="radio"][value="4"]')) {
+        input.checked = true; input.dispatchEvent(new Event('input', { bubbles: true })); input.dispatchEvent(new Event('change', { bubbles: true }))
+      }
+    })
+    await page.locator('[data-action="start-workout"]').first().click()
+    await page.locator('.active-exercise').first().waitFor({ state: 'attached' })
+    const sectionB = page.getByRole('button', { name: 'B', exact: true }); if (await sectionB.count()) await sectionB.first().click()
+    const deadlift = page.locator('.active-exercise').filter({ has: page.locator('.exercise-title h3', { hasText: /^Deadlift$/ }) })
+    await deadlift.locator('[data-lmf-bar-loader-open="exercise"]').waitFor({ state: 'visible', timeout: 10000 })
+    assert.deepEqual(await deadlift.locator('.load-input').evaluateAll(inputs => inputs.map(input => input.value)), ['155', '170', '180', '190'])
+    await page.waitForFunction(() => [...document.querySelectorAll('.active-exercise')].find(card => card.querySelector('h3')?.textContent === 'Deadlift')?.querySelector('.lmf-plates-line strong')?.textContent.includes('confirm plate counts'))
+    await deadlift.locator('[data-lmf-bar-loader-open="exercise"]').click()
+    assert.equal(await modal.locator('#lmf-bar-target').inputValue(), '155')
+    assert.equal(await modal.locator('#lmf-bar-weight').inputValue(), '45')
+    assert.equal((await modal.locator('.lmf-bar-context strong').innerText()).trim(), 'Deadlift')
+    await modal.screenshot({ path: path.join(out, `workout-card-${width}.png`) })
     assert.deepEqual(errors, [])
-    report.checks.push({ viewport: width, result: 'PASS', coverage: ['native athlete preference bridge', 'legacy auto-saved defaults do not imply confirmed quantities', 'known denominations without invented counts', 'explicit count confirmation', '155/170/180/190 lb exact plate math', 'inline helper shares utility settings', 'no unsupported plate suggestions', 'device override and reload', 'kg utility fallback'] })
+    report.checks.push({ viewport: width, result: 'PASS', coverage: ['native athlete preference bridge', 'legacy auto-saved defaults do not imply confirmed quantities', 'known denominations without invented counts', 'explicit count confirmation', '155/170/180/190 lb exact plate math', 'inline helper shares utility settings', 'no unsupported plate suggestions', 'device override and reload', 'kg utility fallback', 'native Day 4 start → actual Deadlift card → prefilled 155 lb Bar Loader without manual refresh'] })
     await context.close()
   }
 } catch (error) { report.result = 'FAIL'; report.error = error.stack; throw error }

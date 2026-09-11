@@ -215,8 +215,8 @@
   }
 
   function scheduleSync(delay = 0) {
-    window.clearTimeout(refreshTimer)
-    refreshTimer = window.setTimeout(() => syncAll(document), delay)
+    if (refreshTimer !== null) return
+    refreshTimer = window.setTimeout(() => { refreshTimer = null; syncAll(document) }, delay)
   }
 
   function start() {
