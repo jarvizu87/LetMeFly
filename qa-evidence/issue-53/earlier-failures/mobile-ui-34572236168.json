@@ -1,0 +1,2606 @@
+{
+  "result": "FAIL",
+  "passes": [
+    {
+      "label": "Day 1: native onboarding, intentional position and workout creation"
+    },
+    {
+      "label": "Main circuit advances exercise by exercise through the first round",
+      "detail": [
+        "Front Squat",
+        "Bench Press",
+        "Chest-Supported Row",
+        "KB Swing",
+        "Hanging Knee Raise",
+        "Backward Sled Drag"
+      ]
+    },
+    {
+      "label": "An intentional next-set prescription change overrides prior athlete load",
+      "detail": {
+        "priorActual": 115,
+        "nextPrescribed": 110
+      }
+    },
+    {
+      "label": "Same-prescription load carries to the next round and persists through native save",
+      "detail": 45
+    },
+    {
+      "label": "Reload preserves actual load, reps and RPE without rewriting prescriptions or duplicating records"
+    },
+    {
+      "label": "Day 3: native onboarding, intentional position and workout creation"
+    },
+    {
+      "label": "Recovery rounds traverse every exercise before round two; side-based targets remain visible",
+      "detail": [
+        "Turkish Get-Up",
+        "KB Halo",
+        "Windmill",
+        "Arm Bar"
+      ]
+    }
+  ],
+  "failures": [
+    {
+      "message": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "stack": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at section (file:///home/runner/work/LetMeFly/LetMeFly/ci/audit-lifecycle-public-ui.mjs:80:10)\n    at async roundsAndMetrics (file:///home/runner/work/LetMeFly/LetMeFly/ci/audit-lifecycle-public-ui.mjs:184:5)\n    at async file:///home/runner/work/LetMeFly/LetMeFly/ci/audit-lifecycle-public-ui.mjs:211:3"
+    }
+  ],
+  "observations": {
+    "actions": [
+      {
+        "id": "15474366-746e-42e9-9604-515c0b21d972",
+        "values": {
+          "load": 115
+        }
+      },
+      {
+        "id": "d6ed6f32-8bb2-4449-9a59-b2168dfa7434",
+        "values": {}
+      },
+      {
+        "id": "84966993-1a33-45af-86ce-e76dee250af8",
+        "values": {
+          "load": 45
+        }
+      },
+      {
+        "id": "76eb2854-7cf0-4ece-98c1-bbbc96eb48fe",
+        "values": {}
+      },
+      {
+        "id": "db5967f8-6212-4d61-aa87-c861dd0aed8e",
+        "values": {}
+      },
+      {
+        "id": "e268a5a6-0fef-41b8-a9a9-7a39179f8e59",
+        "values": {}
+      },
+      {
+        "id": "544e8f98-9b73-4a00-95a4-79352cb8e03e",
+        "values": {}
+      },
+      {
+        "id": "084377f8-280e-4bb6-8f79-729afc2c810e",
+        "values": {}
+      },
+      {
+        "id": "52250496-cf78-4c5c-8a07-eca90b90b411",
+        "values": {
+          "reps": 10,
+          "rpe": 7
+        }
+      },
+      {
+        "id": "37359b6f-b70a-4bbb-95dd-4cacbaea0a17",
+        "values": {
+          "reps": 1
+        }
+      },
+      {
+        "id": "268373a9-5b70-4167-b002-5706f3ead187",
+        "values": {}
+      },
+      {
+        "id": "93c0e3f8-7b08-4696-8c70-fb9cd5c6c0fe",
+        "values": {}
+      },
+      {
+        "id": "f61de40c-18ab-42c3-8091-20d99261fb0b",
+        "values": {}
+      }
+    ],
+    "failure": "LETMEFLY\nSIGN-IN REQUIRED\nCROWNFORGE REVISED — INTEGRATED • WEEK 1 • DAY 3\nRECOVERY + KNEES + HIP FLEXORS\n\nRecovery day. Move blood, restore positions, and protect Day 4 pulling.\n\nWORKOUT\nREADINESS\nA\nB\nC\nREVIEW\nD1\n09-07\nD2\n09-08\nD3\n09-09\nD4\n09-10\nD5\n09-11\nD6\n09-12\nD7\n09-13\nREADINESS RULE\nTarget 30–45 minutes. Yellow = minimum recovery core. Red = easy walk/mobility or full rest. Finish feeling better than you started.\nTAP A SECTION OR USE ARROWS\n2 / 5\n‹\nBLOCK A\n›\n01\nREADINESS\nFRONT OF EVERY TRAINING DAY\nHow are you showing up?\n\nThis controls allowed auto-regulation. It does not rewrite the selected governed program.\n\nSleep quality\n1 low • 5 high\n1\n2\n3\n4\n5\nEnergy\n1 low • 5 high\n1\n2\n3\n4\n5\nSoreness\n1 low • 5 high\n1\n2\n3\n4\n5\nStress\n1 low • 5 high\n1\n2\n3\n4\n5\nCOACH NOTES\n🎙\nVOICE NOTE\nSMART\nUPDATE READINESS\nA • WORKOUT SECTION\nRecovery Flow — Conditional\n1/3\nROUND\n2 / 2\nKETTLEBELL\nTurkish Get-Up\nCONDITIONAL\nSearch fallback — exact video not yet approved\n▶\nEXERCISE DETAILS\nSET\n2\n/ 2\nPRESCRIPTION\n1/side • 8 kg (20 lb) KB\nREPS\n−\n+\nLOAD\n−\n+\nRPE\n−\n+\n○\n▰\nLoad / bodyweight as prescribed\n✓1\n2\nA1\nKB Halo\n5 each direction • 8 kg (20 lb) KB\nUP NEXT\n›\nA2\nWindmill\n3/side • 8 kg (20 lb) KB\nUP NEXT\n›\nA3\nArm Bar\n3 slow breaths/side • 8 kg (20 lb) KB\nUP NEXT\n›\nA4\n◷\nBetween Rounds\nUse the programmed recovery before repeating the flow.\nFULL REST\nNEXT\nKB Halo — 5 each direction • 8 kg (20 lb) KB\n›\nB • WORKOUT SECTION\nHip Flexor / Core — Mandatory Minimum\n2/3\nROUND\n1 / 2\nCORE\nReverse Crunch\nMANDATORY\nSearch fallback — exact video not yet approved\n▶\nSET\n1\n/ 2\nPRESCRIPTION\n10–15\nREPS\n−\n+\nRPE\n−\n+\n○\n1\n2\nWATCH EXERCISE\nSUBSTITUTE (1)\nASK COACH\nB1\nBand or Cable March\n10/leg • 20 lb cable\nUP NEXT\n›\nB2\nDead Bug or Hollow Hold\n20–30 sec\nUP NEXT\n›\nB3\nHalf-Kneeling Chop\n10/side • 20 lb cable\nUP NEXT\n›\nB4\nHalf-Kneeling Lift\n10/side • 20 lb cable\nUP NEXT\n›\nB5\n◷\nBetween Rounds\nUse the programmed recovery before repeating the flow.\nFULL REST\nNEXT\nBand or Cable March — 10/leg • 20 lb cable\n›\nC • WORKOUT SECTION\nKnee / Sled Block\n3/3\nEXERCISES\n1 / 5\nSLED\nBackward Sled Drag\nMANDATORY\nPlan-linked demo/search\n▶\nSET\n1\n/ 4\nPRESCRIPTION\n20m • sled + 25 lb\nDISTANCE (M)\n−\n+\nLOAD\n−\n+\nRPE\n−\n+\n○\n▰\nLoad / bodyweight as prescribed\n1\n2\n3\n4\nWATCH EXERCISE\nSUBSTITUTE\nASK COACH\nC1\nLight Forward Sled Push\n20m • sled + 25 lb\nUP NEXT\n›\nC2\nTibialis Raise\n15–20\nUP NEXT\n›\nC3\nStep-Up\n8–10/leg • 20 lb DBs\nUP NEXT\n›\nC4\nWalk or Bike\n20–30 min easy\nUP NEXT\n›\nC5\nNEXT SET\nBackward Sled Drag — 20m • sled + 25 lb\n›\n♛\nSESSION REVIEW\n4 / 32 sets logged\n28 sets remaining\nUse End Workout Early only if you intentionally want to close this session. The existing confirmation still protects the workout record.\n\nHistory records what actually happened. Program updates never rewrite this session.\n\nEND WORKOUT EARLY\nSYNC NOW\n⌂\nHOME\n⚔\nTRAIN\n▦\nPROGRAM\n↗\nPROGRESS\n☰\nMORE",
+    "saved": {
+      "athletes": [
+        {
+          "id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "display_name": "Disposable LMF53 UI Day 3",
+          "profile_notes": null,
+          "created_at": "2026-09-11T07:00:21.135Z",
+          "updated_at": "2026-09-11T07:00:21.135Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        }
+      ],
+      "workoutSessions": [
+        {
+          "id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "program_instance_id": "a42f453d-7b9f-4433-b15c-367faf28315d",
+          "readiness_id": "bd26910b-036a-4ddd-b4e4-4d93e0de6a6d",
+          "originating_device_id": null,
+          "program_key": "crownforge",
+          "program_version": "v2.1",
+          "phase_key": "build",
+          "week_number": 1,
+          "day_key": "day-3",
+          "workout_name": "RECOVERY + KNEES + HIP FLEXORS",
+          "scheduled_for": "2026-09-09",
+          "started_at": "2026-09-11T07:00:22.835Z",
+          "completed_at": null,
+          "status": "in_progress",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        }
+      ],
+      "workoutExercises": [
+        {
+          "id": "09430d09-60fa-4ef2-a86f-343ea206b7b6",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "reverse-crunch",
+          "exercise_name_snapshot": "Reverse Crunch",
+          "order_index": 4,
+          "group_key": "hip-core",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "reverse-crunch",
+            "prescribedExerciseName": "Reverse Crunch",
+            "priority": "mandatory",
+            "category": "core",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "10–15"
+              },
+              {
+                "label": "R2",
+                "reps": "10–15"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "23eedaaf-e942-4d97-a0f0-69cb97daadb7",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "forward-sled-push-light",
+          "exercise_name_snapshot": "Light Forward Sled Push",
+          "order_index": 10,
+          "group_key": "knee-sled",
+          "group_type": "section",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "forward-sled-push-light",
+            "prescribedExerciseName": "Light Forward Sled Push",
+            "priority": "conditional",
+            "category": "sled",
+            "notes": "Easy.",
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "1",
+                "reps": "20m",
+                "loadText": "sled + 25 lb"
+              },
+              {
+                "label": "2",
+                "reps": "20m",
+                "loadText": "sled + 25 lb"
+              },
+              {
+                "label": "3",
+                "reps": "20m",
+                "loadText": "sled + 25 lb"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "3fb29d54-712d-4d7c-b868-d049f7bf953c",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "step-up-d3",
+          "exercise_name_snapshot": "Step-Up",
+          "order_index": 12,
+          "group_key": "knee-sled",
+          "group_type": "section",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "step-up-d3",
+            "prescribedExerciseName": "Step-Up",
+            "priority": "conditional",
+            "category": "secondary",
+            "notes": "Source range is 2–3 sets; use the third only when it improves recovery.",
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "1",
+                "reps": "8–10/leg",
+                "loadText": "20 lb DBs"
+              },
+              {
+                "label": "2",
+                "reps": "8–10/leg",
+                "loadText": "20 lb DBs"
+              },
+              {
+                "label": "3",
+                "reps": "8–10/leg",
+                "loadText": "20 lb DBs",
+                "notes": "Optional third set only if restorative."
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "51360ceb-fb00-45ca-a933-9312f8e5527c",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "half-kneeling-chop",
+          "exercise_name_snapshot": "Half-Kneeling Chop",
+          "order_index": 7,
+          "group_key": "hip-core",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "half-kneeling-chop",
+            "prescribedExerciseName": "Half-Kneeling Chop",
+            "priority": "conditional",
+            "category": "core",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "10/side",
+                "loadText": "20 lb cable"
+              },
+              {
+                "label": "R2",
+                "reps": "10/side",
+                "loadText": "20 lb cable"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "5aa2d35f-785e-41ca-9529-d46b3cc86f45",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "windmill",
+          "exercise_name_snapshot": "Windmill",
+          "order_index": 2,
+          "group_key": "recovery-flow",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "windmill",
+            "prescribedExerciseName": "Windmill",
+            "priority": "conditional",
+            "category": "kettlebell",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "3/side",
+                "loadText": "8 kg (20 lb) KB"
+              },
+              {
+                "label": "R2",
+                "reps": "3/side",
+                "loadText": "8 kg (20 lb) KB"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "6c344fb8-80fd-4894-ba2a-83baa2a08fa6",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "half-kneeling-lift",
+          "exercise_name_snapshot": "Half-Kneeling Lift",
+          "order_index": 8,
+          "group_key": "hip-core",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "half-kneeling-lift",
+            "prescribedExerciseName": "Half-Kneeling Lift",
+            "priority": "conditional",
+            "category": "core",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "10/side",
+                "loadText": "20 lb cable"
+              },
+              {
+                "label": "R2",
+                "reps": "10/side",
+                "loadText": "20 lb cable"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "7a042278-ff0a-4b43-b593-838028534a07",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "cable-march",
+          "exercise_name_snapshot": "Band or Cable March",
+          "order_index": 5,
+          "group_key": "hip-core",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "cable-march",
+            "prescribedExerciseName": "Band or Cable March",
+            "priority": "mandatory",
+            "category": "core",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "10/leg",
+                "loadText": "20 lb cable"
+              },
+              {
+                "label": "R2",
+                "reps": "10/leg",
+                "loadText": "20 lb cable"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "80737638-55c3-44b2-8b63-71bedc3e9915",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "tibialis-raise-d3",
+          "exercise_name_snapshot": "Tibialis Raise",
+          "order_index": 11,
+          "group_key": "knee-sled",
+          "group_type": "section",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "tibialis-raise-d3",
+            "prescribedExerciseName": "Tibialis Raise",
+            "priority": "mandatory",
+            "category": "secondary",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "1",
+                "reps": "15–20"
+              },
+              {
+                "label": "2",
+                "reps": "15–20"
+              },
+              {
+                "label": "3",
+                "reps": "15–20"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "850be04b-b656-47a7-a566-81efa3192020",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "easy-cardio-d3",
+          "exercise_name_snapshot": "Walk or Bike",
+          "order_index": 13,
+          "group_key": "knee-sled",
+          "group_type": "section",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "easy-cardio-d3",
+            "prescribedExerciseName": "Walk or Bike",
+            "priority": "optional",
+            "category": "recovery",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "Zone 2",
+                "reps": "20–30 min easy"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.838Z",
+          "updated_at": "2026-09-11T07:00:22.838Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "99fe8b3d-aafe-4fcb-9611-b1c9b09595a5",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "backward-sled-drag-d3",
+          "exercise_name_snapshot": "Backward Sled Drag",
+          "order_index": 9,
+          "group_key": "knee-sled",
+          "group_type": "section",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "backward-sled-drag-d3",
+            "prescribedExerciseName": "Backward Sled Drag",
+            "priority": "mandatory",
+            "category": "sled",
+            "notes": "Easy.",
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "1",
+                "reps": "20m",
+                "loadText": "sled + 25 lb"
+              },
+              {
+                "label": "2",
+                "reps": "20m",
+                "loadText": "sled + 25 lb"
+              },
+              {
+                "label": "3",
+                "reps": "20m",
+                "loadText": "sled + 25 lb"
+              },
+              {
+                "label": "4",
+                "reps": "20m",
+                "loadText": "sled + 25 lb"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "b32cb193-5793-45aa-b0ec-5eab221de8f6",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "dead-bug-hollow",
+          "exercise_name_snapshot": "Dead Bug or Hollow Hold",
+          "order_index": 6,
+          "group_key": "hip-core",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "dead-bug-hollow",
+            "prescribedExerciseName": "Dead Bug or Hollow Hold",
+            "priority": "mandatory",
+            "category": "core",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "20–30 sec"
+              },
+              {
+                "label": "R2",
+                "reps": "20–30 sec"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "cad375f7-92e3-49f2-a270-536794815c94",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "turkish-getup",
+          "exercise_name_snapshot": "Turkish Get-Up",
+          "order_index": 0,
+          "group_key": "recovery-flow",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "turkish-getup",
+            "prescribedExerciseName": "Turkish Get-Up",
+            "priority": "conditional",
+            "category": "kettlebell",
+            "notes": "Light and smooth.",
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "1/side",
+                "loadText": "8 kg (20 lb) KB"
+              },
+              {
+                "label": "R2",
+                "reps": "1/side",
+                "loadText": "8 kg (20 lb) KB"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "d3cd0367-3a0b-41f1-a598-e964776a526b",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "kb-halo",
+          "exercise_name_snapshot": "KB Halo",
+          "order_index": 1,
+          "group_key": "recovery-flow",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "kb-halo",
+            "prescribedExerciseName": "KB Halo",
+            "priority": "conditional",
+            "category": "kettlebell",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "5 each direction",
+                "loadText": "8 kg (20 lb) KB"
+              },
+              {
+                "label": "R2",
+                "reps": "5 each direction",
+                "loadText": "8 kg (20 lb) KB"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "d4301cac-5623-41af-a4fc-a0daf251d2d1",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "exercise_key": "arm-bar",
+          "exercise_name_snapshot": "Arm Bar",
+          "order_index": 3,
+          "group_key": "recovery-flow",
+          "group_type": "round",
+          "prescription_snapshot": {
+            "prescribedExerciseKey": "arm-bar",
+            "prescribedExerciseName": "Arm Bar",
+            "priority": "conditional",
+            "category": "kettlebell",
+            "notes": null,
+            "coaching": null,
+            "sourceSets": [
+              {
+                "label": "R1",
+                "reps": "3 slow breaths/side",
+                "loadText": "8 kg (20 lb) KB"
+              },
+              {
+                "label": "R2",
+                "reps": "3 slow breaths/side",
+                "loadText": "8 kg (20 lb) KB"
+              }
+            ]
+          },
+          "substituted_from_exercise_key": null,
+          "completion_state": "pending",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        }
+      ],
+      "workoutSets": [
+        {
+          "id": "1b1d6419-6161-4637-95e4-8a06d4376f16",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "09430d09-60fa-4ef2-a86f-343ea206b7b6",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "10–15",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "267e02ef-7150-4840-bb3c-99859359a753",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "99fe8b3d-aafe-4fcb-9611-b1c9b09595a5",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "2",
+            "programmedReps": "20m",
+            "programmedLoadText": "sled + 25 lb",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "268373a9-5b70-4167-b002-5706f3ead187",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "d3cd0367-3a0b-41f1-a598-e964776a526b",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "5 each direction",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": true,
+          "completed_at": "2026-09-11T07:00:24.418Z",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:24.471Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 2,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "2b218805-fed6-4bb1-bc03-d01a46b74b33",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "80737638-55c3-44b2-8b63-71bedc3e9915",
+          "set_number": 3,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "3",
+            "programmedReps": "15–20",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "32ba1a90-a955-4e1e-9313-7bb9a8295507",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "09430d09-60fa-4ef2-a86f-343ea206b7b6",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "10–15",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "37359b6f-b70a-4bbb-95dd-4cacbaea0a17",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "cad375f7-92e3-49f2-a270-536794815c94",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": 1,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "1/side",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": true,
+          "completed_at": "2026-09-11T07:00:24.035Z",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:24.069Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 2,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "3b9b1305-2e65-480e-9d8a-c9098d00cec3",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "7a042278-ff0a-4b43-b593-838028534a07",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "10/leg",
+            "programmedLoadText": "20 lb cable",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "40974486-f7e2-47f8-8732-fe3aa2af15b0",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "23eedaaf-e942-4d97-a0f0-69cb97daadb7",
+          "set_number": 3,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "3",
+            "programmedReps": "20m",
+            "programmedLoadText": "sled + 25 lb",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "44297ac0-2dcf-4f2d-a38c-65d2e76c6b64",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "6c344fb8-80fd-4894-ba2a-83baa2a08fa6",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "10/side",
+            "programmedLoadText": "20 lb cable",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "45240acc-2f7d-44dd-85a7-3591c5a405e2",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "51360ceb-fb00-45ca-a933-9312f8e5527c",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "10/side",
+            "programmedLoadText": "20 lb cable",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "4d89a890-f54a-4cc1-b631-d0dab4f3d3bf",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "99fe8b3d-aafe-4fcb-9611-b1c9b09595a5",
+          "set_number": 4,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "4",
+            "programmedReps": "20m",
+            "programmedLoadText": "sled + 25 lb",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "5a6750f0-1b21-4938-94b2-4275733d26e8",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "51360ceb-fb00-45ca-a933-9312f8e5527c",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "10/side",
+            "programmedLoadText": "20 lb cable",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "5da74cdb-843d-4715-8a8a-43ca8f7a6b64",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "5aa2d35f-785e-41ca-9529-d46b3cc86f45",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "3/side",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "6f8a436c-4e81-4793-ad61-c366d140348c",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "80737638-55c3-44b2-8b63-71bedc3e9915",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "2",
+            "programmedReps": "15–20",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "7c30eac7-8b1b-4646-aca5-b6a95c825e47",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "99fe8b3d-aafe-4fcb-9611-b1c9b09595a5",
+          "set_number": 3,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "3",
+            "programmedReps": "20m",
+            "programmedLoadText": "sled + 25 lb",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "933f2960-6387-4b1f-872e-6940e19efd85",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "80737638-55c3-44b2-8b63-71bedc3e9915",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "1",
+            "programmedReps": "15–20",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "93c0e3f8-7b08-4696-8c70-fb9cd5c6c0fe",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "5aa2d35f-785e-41ca-9529-d46b3cc86f45",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "3/side",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": true,
+          "completed_at": "2026-09-11T07:00:24.845Z",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:24.890Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 2,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "9f02d8f3-f095-412f-a6a4-00477dd2b71b",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "3fb29d54-712d-4d7c-b868-d049f7bf953c",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "2",
+            "programmedReps": "8–10/leg",
+            "programmedLoadText": "20 lb DBs",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "a0b55570-401a-46df-a0f2-f73e41fa73a9",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "23eedaaf-e942-4d97-a0f0-69cb97daadb7",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "2",
+            "programmedReps": "20m",
+            "programmedLoadText": "sled + 25 lb",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "ae2174c4-580e-48a8-9015-7ee5de698695",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "3fb29d54-712d-4d7c-b868-d049f7bf953c",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "1",
+            "programmedReps": "8–10/leg",
+            "programmedLoadText": "20 lb DBs",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "b16cbf15-b506-4fd0-ad43-37020a207f1d",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "b32cb193-5793-45aa-b0ec-5eab221de8f6",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "20–30 sec",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "b6f5471c-1e9f-4367-a334-a7037d17ab51",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "cad375f7-92e3-49f2-a270-536794815c94",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "1/side",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "b7eb3b0c-d50e-4d4e-bc70-9113383d6e2e",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "7a042278-ff0a-4b43-b593-838028534a07",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "10/leg",
+            "programmedLoadText": "20 lb cable",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "bd18b2d6-0d31-4432-adad-484e1d1b0b65",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "b32cb193-5793-45aa-b0ec-5eab221de8f6",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "20–30 sec",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "c117a58b-af16-4c5c-90ef-ca5da04ed094",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "3fb29d54-712d-4d7c-b868-d049f7bf953c",
+          "set_number": 3,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "3",
+            "programmedReps": "8–10/leg",
+            "programmedLoadText": "20 lb DBs",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": "Optional third set only if restorative.",
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "d170f4e2-cd29-4857-a63d-ec9025f1097e",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "99fe8b3d-aafe-4fcb-9611-b1c9b09595a5",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "1",
+            "programmedReps": "20m",
+            "programmedLoadText": "sled + 25 lb",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "d2860d0d-c42e-4652-9d8a-ff6adf5e2aa6",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "d3cd0367-3a0b-41f1-a598-e964776a526b",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "5 each direction",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "dd59b130-cae2-45e7-b568-a0863cf083fd",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "850be04b-b656-47a7-a566-81efa3192020",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "Zone 2",
+            "programmedReps": "20–30 min easy",
+            "programmedLoadText": null,
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.838Z",
+          "updated_at": "2026-09-11T07:00:22.838Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "e4e51019-4c9a-4ffa-821b-6766de7a52be",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "6c344fb8-80fd-4894-ba2a-83baa2a08fa6",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "10/side",
+            "programmedLoadText": "20 lb cable",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "ef944f39-9e4b-471e-bff2-711e862cd80d",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "23eedaaf-e942-4d97-a0f0-69cb97daadb7",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "1",
+            "programmedReps": "20m",
+            "programmedLoadText": "sled + 25 lb",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.837Z",
+          "updated_at": "2026-09-11T07:00:22.837Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "f61de40c-18ab-42c3-8091-20d99261fb0b",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "d4301cac-5623-41af-a4fc-a0daf251d2d1",
+          "set_number": 1,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R1",
+            "programmedReps": "3 slow breaths/side",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": true,
+          "completed_at": "2026-09-11T07:00:26.722Z",
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:26.758Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 2,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        },
+        {
+          "id": "f627f53b-edfe-445f-b424-19c1adac4158",
+          "athlete_id": "af764b16-c756-441b-a4ae-d7373e420759",
+          "workout_session_id": "24acbb3b-ccdd-4d0f-ac6c-579ee571499d",
+          "workout_exercise_id": "d4301cac-5623-41af-a4fc-a0daf251d2d1",
+          "set_number": 2,
+          "set_type": "work",
+          "reps": null,
+          "load_value": null,
+          "load_unit": null,
+          "rpe": null,
+          "rir": null,
+          "tempo": null,
+          "rest_seconds": null,
+          "performance_data": {
+            "programmedLabel": "R2",
+            "programmedReps": "3 slow breaths/side",
+            "programmedLoadText": "8 kg (20 lb) KB",
+            "programmedLoadValue": null,
+            "programmedLoadUnit": null,
+            "duration": null,
+            "distance": null,
+            "notes": null,
+            "percentage": null,
+            "loadReference": null,
+            "rounding": null,
+            "resolvedTrainingMaxKey": null,
+            "resolvedTrainingMaxValue": null,
+            "resolvedTrainingMaxUnit": null,
+            "resolvedLoadValue": null
+          },
+          "completed": false,
+          "completed_at": null,
+          "notes": null,
+          "created_at": "2026-09-11T07:00:22.836Z",
+          "updated_at": "2026-09-11T07:00:22.836Z",
+          "deleted_at": null,
+          "revision": 0,
+          "_local": {
+            "localVersion": 1,
+            "baseRevision": 0,
+            "dirty": true,
+            "createdOffline": true,
+            "lastModifiedByDeviceId": "55887bdb-c76e-44f6-bc2b-8a313b0a6ae2"
+          }
+        }
+      ]
+    },
+    "inputs": [
+      {
+        "class": "set-input reps-input",
+        "parents": [
+          {
+            "class": "set-input reps-input",
+            "display": "block",
+            "visibility": "visible",
+            "width": 74.5,
+            "height": 50
+          },
+          {
+            "class": "lmf-stepper",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 142.5,
+            "height": 60
+          },
+          {
+            "class": "set-field reps-field ",
+            "display": "block",
+            "visibility": "visible",
+            "width": 142.5,
+            "height": 78.640625
+          },
+          {
+            "class": "set-row lmf-set-active",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 309,
+            "height": 337.125
+          },
+          {
+            "class": "set-table",
+            "display": "block",
+            "visibility": "visible",
+            "width": 329,
+            "height": 422.125
+          },
+          {
+            "class": "exercise-card active-exercise lmf-workout-flow-card lmf-logging-compact lmf-flow-active lmf-sequence-active",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 331,
+            "height": 920.125
+          },
+          {
+            "class": "exercise-stack lmf-group-flow",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 362,
+            "height": 1238.125
+          },
+          {
+            "class": "swipe-page workout-panel lmf-flow-panel lmf-flow-circuit active-page",
+            "display": "block",
+            "visibility": "visible",
+            "width": 384,
+            "height": 1493.328125
+          },
+          {
+            "class": "swipe-viewport",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 396,
+            "height": 1512.328125
+          },
+          {
+            "class": "train-shell",
+            "display": "block",
+            "visibility": "visible",
+            "width": 396,
+            "height": 1848.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 1932.296875
+          },
+          {
+            "class": "app-shell",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          }
+        ]
+      },
+      {
+        "class": "set-input load-input",
+        "parents": [
+          {
+            "class": "set-input load-input",
+            "display": "block",
+            "visibility": "visible",
+            "width": 223,
+            "height": 50
+          },
+          {
+            "class": "lmf-stepper",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 291,
+            "height": 60
+          },
+          {
+            "class": "set-field load-field",
+            "display": "block",
+            "visibility": "visible",
+            "width": 291,
+            "height": 78.640625
+          },
+          {
+            "class": "set-row lmf-set-active",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 309,
+            "height": 337.125
+          },
+          {
+            "class": "set-table",
+            "display": "block",
+            "visibility": "visible",
+            "width": 329,
+            "height": 422.125
+          },
+          {
+            "class": "exercise-card active-exercise lmf-workout-flow-card lmf-logging-compact lmf-flow-active lmf-sequence-active",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 331,
+            "height": 920.125
+          },
+          {
+            "class": "exercise-stack lmf-group-flow",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 362,
+            "height": 1238.125
+          },
+          {
+            "class": "swipe-page workout-panel lmf-flow-panel lmf-flow-circuit active-page",
+            "display": "block",
+            "visibility": "visible",
+            "width": 384,
+            "height": 1493.328125
+          },
+          {
+            "class": "swipe-viewport",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 396,
+            "height": 1512.328125
+          },
+          {
+            "class": "train-shell",
+            "display": "block",
+            "visibility": "visible",
+            "width": 396,
+            "height": 1848.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 1932.296875
+          },
+          {
+            "class": "app-shell",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          }
+        ]
+      },
+      {
+        "class": "set-input rpe-input",
+        "parents": [
+          {
+            "class": "set-input rpe-input",
+            "display": "block",
+            "visibility": "visible",
+            "width": 74.5,
+            "height": 50
+          },
+          {
+            "class": "lmf-stepper",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 142.5,
+            "height": 60
+          },
+          {
+            "class": "set-field rpe-field",
+            "display": "block",
+            "visibility": "visible",
+            "width": 142.5,
+            "height": 78.640625
+          },
+          {
+            "class": "set-row lmf-set-active",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 309,
+            "height": 337.125
+          },
+          {
+            "class": "set-table",
+            "display": "block",
+            "visibility": "visible",
+            "width": 329,
+            "height": 422.125
+          },
+          {
+            "class": "exercise-card active-exercise lmf-workout-flow-card lmf-logging-compact lmf-flow-active lmf-sequence-active",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 331,
+            "height": 920.125
+          },
+          {
+            "class": "exercise-stack lmf-group-flow",
+            "display": "grid",
+            "visibility": "visible",
+            "width": 362,
+            "height": 1238.125
+          },
+          {
+            "class": "swipe-page workout-panel lmf-flow-panel lmf-flow-circuit active-page",
+            "display": "block",
+            "visibility": "visible",
+            "width": 384,
+            "height": 1493.328125
+          },
+          {
+            "class": "swipe-viewport",
+            "display": "flex",
+            "visibility": "visible",
+            "width": 396,
+            "height": 1512.328125
+          },
+          {
+            "class": "train-shell",
+            "display": "block",
+            "visibility": "visible",
+            "width": 396,
+            "height": 1848.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 1932.296875
+          },
+          {
+            "class": "app-shell",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          },
+          {
+            "class": "",
+            "display": "block",
+            "visibility": "visible",
+            "width": 412,
+            "height": 2068.296875
+          }
+        ]
+      }
+    ]
+  },
+  "scope": "Real governed Crownforge W1D1 and W1D3 through visible native UI; complements five full service/IndexedDB lifecycles"
+}

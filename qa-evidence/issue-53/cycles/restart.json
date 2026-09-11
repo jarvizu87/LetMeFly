@@ -1,0 +1,5495 @@
+{
+  "result": "PASS",
+  "scenario": "restart",
+  "productionSha": "e3a50a87a592f916fdadaea31a8e0bb80906bfa3",
+  "startedAt": "2026-09-11T07:16:53.342Z",
+  "scope": "Actual unmodified production services compiled into a separate loopback-only QA bundle; actual Chromium IndexedDB. Not a full UI-click simulation.",
+  "counts": {
+    "positions": 383,
+    "sets": 12081,
+    "exercises": 4682,
+    "reloads": 8,
+    "browserRestarts": 30,
+    "substitutions": 0,
+    "historyLookups": 0,
+    "metricSets": 1264,
+    "resolvedPercentages": 1656,
+    "unresolvedPercentages": 35,
+    "roundSets": 3527,
+    "betweenCompletionAndProgressionRestarts": 6
+  },
+  "checkpoints": [
+    {
+      "label": "mid-session-0",
+      "restartedBrowser": true,
+      "hash": "ae7bad05163cc514b5cd661eb5e82799650097f1381e67b86e41f0277e1dc594",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 0,
+        "readinessEntries": 1,
+        "workoutSessions": 1,
+        "workoutExercises": 16,
+        "workoutSets": 48,
+        "syncOutbox": 94
+      },
+      "completedSessions": 0,
+      "completedSets": 24,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 1,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {}
+    },
+    {
+      "label": "completed-before-advancement-0",
+      "restartedBrowser": true,
+      "hash": "396d1adcdb6b2b7e7a73c5a1505e265dd4fd76fc6cb6f2867fcf69b28170624d",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 0,
+        "readinessEntries": 1,
+        "workoutSessions": 1,
+        "workoutExercises": 16,
+        "workoutSets": 48,
+        "syncOutbox": 120
+      },
+      "completedSessions": 1,
+      "completedSets": 48,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 1,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {}
+    },
+    {
+      "label": "mid-session-19",
+      "restartedBrowser": true,
+      "hash": "33b47af2aaee85c13b607dc34dff7fef7bc74671f3fefb7c241332b228804eba",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 19,
+        "readinessEntries": 20,
+        "workoutSessions": 20,
+        "workoutExercises": 325,
+        "workoutSets": 963,
+        "syncOutbox": 2330
+      },
+      "completedSessions": 19,
+      "completedSets": 922,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 3,
+          "day": "day-6"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 19
+      }
+    },
+    {
+      "label": "mid-session-38",
+      "restartedBrowser": true,
+      "hash": "3fd9bc4054129d68fe0583412879f93c0070a6f17c7818d0b368b32fc1596693",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 38,
+        "readinessEntries": 39,
+        "workoutSessions": 39,
+        "workoutExercises": 613,
+        "workoutSets": 1760,
+        "syncOutbox": 4352
+      },
+      "completedSessions": 38,
+      "completedSets": 1745,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 6,
+          "day": "day-4"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 38
+      }
+    },
+    {
+      "label": "long-horizon-46",
+      "restartedBrowser": false,
+      "hash": "6f19e920c71186d139ebeb42a988ba0f738a9811789e091a937e477ac615fcdd",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 47,
+        "readinessEntries": 47,
+        "workoutSessions": 47,
+        "workoutExercises": 734,
+        "workoutSets": 2085,
+        "syncOutbox": 5190
+      },
+      "completedSessions": 47,
+      "completedSets": 2085,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 7,
+          "day": "day-6"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 47
+      }
+    },
+    {
+      "label": "mid-session-57",
+      "restartedBrowser": true,
+      "hash": "20a54ba0116052f408da4da62d076e79e68f39ef102df6cb0d8ff5258700b400",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 57,
+        "readinessEntries": 58,
+        "workoutSessions": 58,
+        "workoutExercises": 911,
+        "workoutSets": 2621,
+        "syncOutbox": 6461
+      },
+      "completedSessions": 57,
+      "completedSets": 2581,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 9,
+          "day": "day-2"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 57
+      }
+    },
+    {
+      "label": "completed-before-advancement-71",
+      "restartedBrowser": true,
+      "hash": "4ddeb9dbca717523b5d14aee748779162c34b36351cc5dc27b5fc23ad52b81df",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 71,
+        "readinessEntries": 72,
+        "workoutSessions": 72,
+        "workoutExercises": 1129,
+        "workoutSets": 3276,
+        "syncOutbox": 8115
+      },
+      "completedSessions": 72,
+      "completedSets": 3276,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 11,
+          "day": "day-2"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 71
+      }
+    },
+    {
+      "label": "mid-session-76",
+      "restartedBrowser": true,
+      "hash": "33f1ce8db97a3a700cd59f818e2439d37aa8150e2e230328be335413b4525a52",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 76,
+        "readinessEntries": 77,
+        "workoutSessions": 77,
+        "workoutExercises": 1199,
+        "workoutSets": 3474,
+        "syncOutbox": 8608
+      },
+      "completedSessions": 76,
+      "completedSets": 3473,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 11,
+          "day": "day-7"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 76
+      }
+    },
+    {
+      "label": "long-horizon-93",
+      "restartedBrowser": false,
+      "hash": "25f5fe362dc503708f4535598b447f04a352d242dbd72362484f7b2e81834b03",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 94,
+        "readinessEntries": 94,
+        "workoutSessions": 94,
+        "workoutExercises": 1341,
+        "workoutSets": 3759,
+        "syncOutbox": 9427
+      },
+      "completedSessions": 94,
+      "completedSets": 3759,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 14,
+          "day": "day-4"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 94
+      }
+    },
+    {
+      "label": "mid-session-95",
+      "restartedBrowser": true,
+      "hash": "3b31d24dfc1a7940b737d1118866d3634c0b78ec9149885fec80772fc7993e48",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 95,
+        "readinessEntries": 96,
+        "workoutSessions": 96,
+        "workoutExercises": 1348,
+        "workoutSets": 3771,
+        "syncOutbox": 9461
+      },
+      "completedSessions": 95,
+      "completedSets": 3766,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "active",
+          "week": 14,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 95
+      }
+    },
+    {
+      "label": "program-boundary-97",
+      "restartedBrowser": true,
+      "hash": "5192f03ca16ff9e86ae014cd83b1b77f0fa9f0def42c661e73160e23e8b4cec8",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 2,
+        "programEvents": 98,
+        "readinessEntries": 98,
+        "workoutSessions": 98,
+        "workoutExercises": 1351,
+        "workoutSets": 3785,
+        "syncOutbox": 9514
+      },
+      "completedSessions": 98,
+      "completedSets": 3785,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "active",
+          "week": 1,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 97,
+        "crownforge-complete-maintenance-start": 1
+      }
+    },
+    {
+      "label": "program-boundary-112",
+      "restartedBrowser": true,
+      "hash": "82149dca5fff4e9a140381c358d64e5987fa1bfbef8a7878305bfe94bee33064",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 115,
+        "readinessEntries": 113,
+        "workoutSessions": 113,
+        "workoutExercises": 1619,
+        "workoutSets": 4522,
+        "syncOutbox": 11357
+      },
+      "completedSessions": 113,
+      "completedSets": 4522,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 1,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 111,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-114",
+      "restartedBrowser": true,
+      "hash": "cd64b991993b6c9c9d2c059e8d9186779104f0d4b66287906d596b8b69afdc31",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 116,
+        "readinessEntries": 115,
+        "workoutSessions": 115,
+        "workoutExercises": 1649,
+        "workoutSets": 4601,
+        "syncOutbox": 11533
+      },
+      "completedSessions": 114,
+      "completedSets": 4581,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 1,
+          "day": "day-2"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 112,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-133",
+      "restartedBrowser": true,
+      "hash": "1ea509adce398920a33486d13638452dbd0a8d11eb9e4200d8514b18a68e7be8",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 135,
+        "readinessEntries": 134,
+        "workoutSessions": 134,
+        "workoutExercises": 1930,
+        "workoutSets": 5330,
+        "syncOutbox": 13386
+      },
+      "completedSessions": 133,
+      "completedSets": 5310,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 5,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 131,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "long-horizon-140",
+      "restartedBrowser": false,
+      "hash": "c284fa94441aa392d6179329634959051a26a02f38ad7877c9cbc5b51680b8bd",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 143,
+        "readinessEntries": 141,
+        "workoutSessions": 141,
+        "workoutExercises": 2032,
+        "workoutSets": 5562,
+        "syncOutbox": 14018
+      },
+      "completedSessions": 141,
+      "completedSets": 5562,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 6,
+          "day": "day-4"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 139,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "completed-before-advancement-142",
+      "restartedBrowser": true,
+      "hash": "a795f7659142102004b6af0ee2e24e4973ae536b42c704e2378ff87f0105d95f",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 144,
+        "readinessEntries": 143,
+        "workoutSessions": 143,
+        "workoutExercises": 2060,
+        "workoutSets": 5622,
+        "syncOutbox": 14176
+      },
+      "completedSessions": 143,
+      "completedSets": 5622,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 6,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 140,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-152",
+      "restartedBrowser": true,
+      "hash": "48d511f5614024d3e40c85ea884a583284f8191156cac96dcfd4fe7927dde281",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 154,
+        "readinessEntries": 153,
+        "workoutSessions": 153,
+        "workoutExercises": 2208,
+        "workoutSets": 5994,
+        "syncOutbox": 15104
+      },
+      "completedSessions": 152,
+      "completedSets": 5972,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 8,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 150,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-171",
+      "restartedBrowser": true,
+      "hash": "6ea1c5db72f1314db97f88c37bb77743ad4b86393f2619efa3764b555c1d131d",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 173,
+        "readinessEntries": 172,
+        "workoutSessions": 172,
+        "workoutExercises": 2449,
+        "workoutSets": 6615,
+        "syncOutbox": 16714
+      },
+      "completedSessions": 171,
+      "completedSets": 6606,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 12,
+          "day": "day-4"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 169,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "long-horizon-187",
+      "restartedBrowser": false,
+      "hash": "3501d6a06c3454b8a6a501b6365a495987fa490df662235e6c4702743e14ec0e",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 190,
+        "readinessEntries": 188,
+        "workoutSessions": 188,
+        "workoutExercises": 2646,
+        "workoutSets": 7083,
+        "syncOutbox": 17956
+      },
+      "completedSessions": 188,
+      "completedSets": 7083,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 16,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 186,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-190",
+      "restartedBrowser": true,
+      "hash": "bfd035340c1cd5411f1a6cbe1f7877ead09ed3de3870d0b723f4057a4225ece0",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 192,
+        "readinessEntries": 191,
+        "workoutSessions": 191,
+        "workoutExercises": 2686,
+        "workoutSets": 7180,
+        "syncOutbox": 18188
+      },
+      "completedSessions": 190,
+      "completedSets": 7164,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 16,
+          "day": "day-3"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 188,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-209",
+      "restartedBrowser": true,
+      "hash": "394a11344a5a74827e532ecb521b6b2f4a7896114a63edb1d1f0588b4ea62115",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 211,
+        "readinessEntries": 210,
+        "workoutSessions": 210,
+        "workoutExercises": 2906,
+        "workoutSets": 7697,
+        "syncOutbox": 19550
+      },
+      "completedSessions": 209,
+      "completedSets": 7675,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 20,
+          "day": "day-2"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 207,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "completed-before-advancement-213",
+      "restartedBrowser": true,
+      "hash": "58693f0fae84ed20e37de1d332875a98ae43cba749089d00f15fb67088bd3763",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 215,
+        "readinessEntries": 214,
+        "workoutSessions": 214,
+        "workoutExercises": 2961,
+        "workoutSets": 7834,
+        "syncOutbox": 19927
+      },
+      "completedSessions": 214,
+      "completedSets": 7834,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 21,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 211,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-228",
+      "restartedBrowser": true,
+      "hash": "271a1947c6e51f7f3910f5f9ed277030846462f1ee285359667d99797a93a1df",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 230,
+        "readinessEntries": 229,
+        "workoutSessions": 229,
+        "workoutExercises": 3164,
+        "workoutSets": 8334,
+        "syncOutbox": 21211
+      },
+      "completedSessions": 228,
+      "completedSets": 8327,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 24,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 226,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "long-horizon-234",
+      "restartedBrowser": false,
+      "hash": "394555eda00d71a6e8d5164eb90427a19e24ec42fe023f017e14eb53442f7c52",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 237,
+        "readinessEntries": 235,
+        "workoutSessions": 235,
+        "workoutExercises": 3209,
+        "workoutSets": 8447,
+        "syncOutbox": 21529
+      },
+      "completedSessions": 235,
+      "completedSets": 8447,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 25,
+          "day": "day-3"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 233,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-247",
+      "restartedBrowser": true,
+      "hash": "b1939503b077d7c1f4415b45b87391aed64a5de303968dce7de5c6c46f5c6578",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 249,
+        "readinessEntries": 248,
+        "workoutSessions": 248,
+        "workoutExercises": 3353,
+        "workoutSets": 8817,
+        "syncOutbox": 22472
+      },
+      "completedSessions": 247,
+      "completedSets": 8802,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 27,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 245,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-266",
+      "restartedBrowser": true,
+      "hash": "84db82a680d22634d9a55232c2eb9f46595a0f58a581300049c3b058bbd454b5",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 268,
+        "readinessEntries": 267,
+        "workoutSessions": 267,
+        "workoutExercises": 3549,
+        "workoutSets": 9303,
+        "syncOutbox": 23758
+      },
+      "completedSessions": 266,
+      "completedSets": 9292,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 31,
+          "day": "day-4"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 264,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "long-horizon-281",
+      "restartedBrowser": false,
+      "hash": "84eba763b44ebe64f2c5e1aa00c973e2c510922fe50fc3a250ad10adbe402d93",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 284,
+        "readinessEntries": 282,
+        "workoutSessions": 282,
+        "workoutExercises": 3720,
+        "workoutSets": 9730,
+        "syncOutbox": 24888
+      },
+      "completedSessions": 282,
+      "completedSets": 9730,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 34,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 280,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "completed-before-advancement-284",
+      "restartedBrowser": true,
+      "hash": "cd734a3514f8f230b94ad8004eec51c968a200ccd57c7bfb041805e4c00afd5d",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 286,
+        "readinessEntries": 285,
+        "workoutSessions": 285,
+        "workoutExercises": 3755,
+        "workoutSets": 9818,
+        "syncOutbox": 25115
+      },
+      "completedSessions": 285,
+      "completedSets": 9818,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 35,
+          "day": "day-2"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 282,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-285",
+      "restartedBrowser": true,
+      "hash": "729e99b9d34336de03db187718a369bc29a3b77c339b293f96558de6ff2510aa",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 287,
+        "readinessEntries": 286,
+        "workoutSessions": 286,
+        "workoutExercises": 3765,
+        "workoutSets": 9847,
+        "syncOutbox": 25172
+      },
+      "completedSessions": 285,
+      "completedSets": 9832,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 35,
+          "day": "day-3"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 283,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-304",
+      "restartedBrowser": true,
+      "hash": "6b024dca35a5f10b1e84266e71d4d4436f3cfc514ea4447d413badaa4b4d22d0",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 306,
+        "readinessEntries": 305,
+        "workoutSessions": 305,
+        "workoutExercises": 3909,
+        "workoutSets": 10194,
+        "syncOutbox": 26129
+      },
+      "completedSessions": 304,
+      "completedSets": 10184,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 39,
+          "day": "day-2"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 302,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-323",
+      "restartedBrowser": true,
+      "hash": "91af45535307f2383b77c134451af2651c5e579347205c79284aaf7a493febe4",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 325,
+        "readinessEntries": 324,
+        "workoutSessions": 324,
+        "workoutExercises": 4066,
+        "workoutSets": 10571,
+        "syncOutbox": 27151
+      },
+      "completedSessions": 323,
+      "completedSets": 10558,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 43,
+          "day": "day-1"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 321,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "long-horizon-328",
+      "restartedBrowser": false,
+      "hash": "8a678eed9dba3ff73baed5b9b966c13d5a4223374919c7e4650e733001de448d",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 331,
+        "readinessEntries": 329,
+        "workoutSessions": 329,
+        "workoutExercises": 4126,
+        "workoutSets": 10714,
+        "syncOutbox": 27544
+      },
+      "completedSessions": 329,
+      "completedSets": 10714,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 44,
+          "day": "day-2"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 327,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-342",
+      "restartedBrowser": true,
+      "hash": "a77229ccadd0dcc4f0e5eeeb9db4bfa561675364525276b430c9896969676b38",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 344,
+        "readinessEntries": 343,
+        "workoutSessions": 343,
+        "workoutExercises": 4295,
+        "workoutSets": 11130,
+        "syncOutbox": 28609
+      },
+      "completedSessions": 342,
+      "completedSets": 11114,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 46,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 340,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "completed-before-advancement-355",
+      "restartedBrowser": true,
+      "hash": "46ef931bb841f5dc70fb53443d51e679d427fc192f10a9eb26d678c7669b0519",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 357,
+        "readinessEntries": 356,
+        "workoutSessions": 356,
+        "workoutExercises": 4415,
+        "workoutSets": 11423,
+        "syncOutbox": 29411
+      },
+      "completedSessions": 356,
+      "completedSets": 11423,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 49,
+          "day": "day-3"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 353,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-361",
+      "restartedBrowser": true,
+      "hash": "4613a7cf15804b0c983b6fc3f2967aa8a0694ebd6bab63dd36bd742b9790e1fb",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 363,
+        "readinessEntries": 362,
+        "workoutSessions": 362,
+        "workoutExercises": 4483,
+        "workoutSets": 11585,
+        "syncOutbox": 29826
+      },
+      "completedSessions": 361,
+      "completedSets": 11574,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 50,
+          "day": "day-4"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 359,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "long-horizon-375",
+      "restartedBrowser": false,
+      "hash": "0a057cb7e409bddc8b78aa32e22fb34b6a3cfe81eae48a3a32a5f7a6f80b2080",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 378,
+        "readinessEntries": 376,
+        "workoutSessions": 376,
+        "workoutExercises": 4634,
+        "workoutSets": 11971,
+        "syncOutbox": 30848
+      },
+      "completedSessions": 376,
+      "completedSets": 11971,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 53,
+          "day": "day-4"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 374,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "mid-session-380",
+      "restartedBrowser": true,
+      "hash": "a980fbc5ea91a32b16934bad4d77a81b17c83e96594461b52883451c2aa03205",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 382,
+        "readinessEntries": 381,
+        "workoutSessions": 381,
+        "workoutExercises": 4672,
+        "workoutSets": 12055,
+        "syncOutbox": 31075
+      },
+      "completedSessions": 380,
+      "completedSets": 12050,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "active",
+          "week": 54,
+          "day": "day-3"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 378,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1
+      }
+    },
+    {
+      "label": "program-boundary-382",
+      "restartedBrowser": true,
+      "hash": "9a688cf1d6131f302f44432e9bd60d97080a427fb27162a3f939d5eaf0e80061",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 385,
+        "readinessEntries": 383,
+        "workoutSessions": 383,
+        "workoutExercises": 4682,
+        "workoutSets": 12081,
+        "syncOutbox": 31158
+      },
+      "completedSessions": 383,
+      "completedSets": 12081,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "completed",
+          "week": 54,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 380,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1,
+        "black-crown-program-complete": 1
+      }
+    }
+  ],
+  "failures": [],
+  "observations": {
+    "inventory": {
+      "positions": [
+        {
+          "program": "crownforge",
+          "week": 1,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 48,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 1,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 1,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 1,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 1,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 36,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 1,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 82,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 1,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 2,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 48,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 2,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 2,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 2,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 2,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 36,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 2,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 82,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 2,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 3,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 48,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 3,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 3,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 3,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 3,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 3,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 82,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 3,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 4,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 47,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 4,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 4,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 4,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 4,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 4,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 81,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 4,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 5,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 48,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 5,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 80,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 5,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 5,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 42,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 5,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 46,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 5,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 5,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 6,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 6,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 49,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 6,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 6,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 30,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 6,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 6,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 54,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 6,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 7,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 48,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 7,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 7,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 7,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 45,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 7,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 7,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 7,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 8,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 48,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 8,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 8,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 8,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 45,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 8,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 8,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 81,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 8,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 9,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 48,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 9,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 9,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 9,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 45,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 9,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 9,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 82,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 9,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 10,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 47,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 10,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 10,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 10,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 44,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 10,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 46,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 10,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 79,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 10,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 11,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 47,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 11,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 77,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 11,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 11,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 43,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 11,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 11,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 80,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 11,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 12,
+          "day": 1,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 12,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 49,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 12,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 32,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 12,
+          "day": 4,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 30,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 12,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 12,
+          "day": 6,
+          "restDay": false,
+          "exercises": 27,
+          "sets": 54,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 12,
+          "day": 7,
+          "restDay": true,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 13,
+          "day": 1,
+          "restDay": false,
+          "exercises": 6,
+          "sets": 11,
+          "metricSets": 0,
+          "percentageSets": 1
+        },
+        {
+          "program": "crownforge",
+          "week": 13,
+          "day": 2,
+          "restDay": false,
+          "exercises": 3,
+          "sets": 5,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 13,
+          "day": 3,
+          "restDay": false,
+          "exercises": 2,
+          "sets": 4,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 13,
+          "day": 4,
+          "restDay": false,
+          "exercises": 4,
+          "sets": 6,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 13,
+          "day": 5,
+          "restDay": false,
+          "exercises": 2,
+          "sets": 4,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 13,
+          "day": 6,
+          "restDay": false,
+          "exercises": 3,
+          "sets": 6,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 13,
+          "day": 7,
+          "restDay": true,
+          "exercises": 1,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 14,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 10,
+          "metricSets": 0,
+          "percentageSets": 1
+        },
+        {
+          "program": "crownforge",
+          "week": 14,
+          "day": 2,
+          "restDay": false,
+          "exercises": 2,
+          "sets": 3,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 14,
+          "day": 3,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 11,
+          "metricSets": 0,
+          "percentageSets": 1
+        },
+        {
+          "program": "crownforge",
+          "week": 14,
+          "day": 4,
+          "restDay": false,
+          "exercises": 2,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crownforge",
+          "week": 14,
+          "day": 5,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 10,
+          "metricSets": 0,
+          "percentageSets": 1
+        },
+        {
+          "program": "crownforge",
+          "week": 14,
+          "day": 6,
+          "restDay": false,
+          "exercises": 2,
+          "sets": 12,
+          "metricSets": 0,
+          "percentageSets": 5
+        },
+        {
+          "program": "crownforge",
+          "week": 14,
+          "day": 7,
+          "restDay": true,
+          "exercises": 1,
+          "sets": 2,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 1,
+          "day": 1,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 0,
+          "percentageSets": 7
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 1,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 56,
+          "metricSets": 0,
+          "percentageSets": 8
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 1,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 28,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 1,
+          "day": 4,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 33,
+          "metricSets": 0,
+          "percentageSets": 7
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 1,
+          "day": 5,
+          "restDay": false,
+          "exercises": 26,
+          "sets": 55,
+          "metricSets": 0,
+          "percentageSets": 3
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 2,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 45,
+          "metricSets": 0,
+          "percentageSets": 10
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 2,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 73,
+          "metricSets": 0,
+          "percentageSets": 10
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 2,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 35,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 2,
+          "day": 4,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 43,
+          "metricSets": 0,
+          "percentageSets": 10
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 2,
+          "day": 5,
+          "restDay": false,
+          "exercises": 26,
+          "sets": 80,
+          "metricSets": 0,
+          "percentageSets": 4
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 3,
+          "day": 1,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 40,
+          "metricSets": 0,
+          "percentageSets": 9
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 3,
+          "day": 2,
+          "restDay": false,
+          "exercises": 23,
+          "sets": 71,
+          "metricSets": 0,
+          "percentageSets": 9
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 3,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 35,
+          "metricSets": 0,
+          "percentageSets": 0
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 3,
+          "day": 4,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 41,
+          "metricSets": 0,
+          "percentageSets": 8
+        },
+        {
+          "program": "crown-maintenance",
+          "week": 3,
+          "day": 5,
+          "restDay": false,
+          "exercises": 26,
+          "sets": 73,
+          "metricSets": 0,
+          "percentageSets": 4
+        },
+        {
+          "program": "black-crown",
+          "week": 1,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 7,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 1,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 2,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 1,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 1,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 1,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 43,
+          "metricSets": 11,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 2,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 7,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 2,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 2,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 2,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 2,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 2,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 43,
+          "metricSets": 11,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 3,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 46,
+          "metricSets": 7,
+          "percentageSets": 16
+        },
+        {
+          "program": "black-crown",
+          "week": 3,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 2,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 3,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 3,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 3,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 44,
+          "metricSets": 11,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 4,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 7,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 4,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 2,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 4,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 4,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 4,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 43,
+          "metricSets": 11,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 5,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 7,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 5,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 38,
+          "metricSets": 2,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 5,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 38,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 5,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 5,
+          "day": 5,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 40,
+          "metricSets": 9,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 6,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 30,
+          "metricSets": 6,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 6,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 5
+        },
+        {
+          "program": "black-crown",
+          "week": 6,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 29,
+          "metricSets": 4,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 6,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 9,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 6,
+          "day": 5,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 35,
+          "metricSets": 9,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 7,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 7,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 7,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 7,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 7,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 7,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 43,
+          "metricSets": 11,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 8,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 7,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 8,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 8,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 8,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 8,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 43,
+          "metricSets": 11,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 9,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 43,
+          "metricSets": 7,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 9,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 9,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 9,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 9,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 43,
+          "metricSets": 11,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 10,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 7,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 10,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 10,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 10,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 10,
+          "day": 5,
+          "restDay": false,
+          "exercises": 17,
+          "sets": 44,
+          "metricSets": 11,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 11,
+          "day": 1,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 41,
+          "metricSets": 7,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 11,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 38,
+          "metricSets": 2,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 11,
+          "day": 3,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 38,
+          "metricSets": 5,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 11,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 11,
+          "day": 5,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 41,
+          "metricSets": 9,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 12,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 17,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 12,
+          "day": 2,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 17,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 12,
+          "day": 3,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 9,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 12,
+          "day": 4,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 17,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 12,
+          "day": 5,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 17,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 13,
+          "day": 1,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 30,
+          "metricSets": 7,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 13,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 37,
+          "metricSets": 2,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 13,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 32,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 13,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 13,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 7,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 14,
+          "day": 1,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 30,
+          "metricSets": 7,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 14,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 37,
+          "metricSets": 2,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 14,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 32,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 14,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 14,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 7,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 15,
+          "day": 1,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 30,
+          "metricSets": 7,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 15,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 37,
+          "metricSets": 2,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 15,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 32,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 15,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 23,
+          "metricSets": 8,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 15,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 7,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 16,
+          "day": 1,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 7,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 16,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 37,
+          "metricSets": 2,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 16,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 32,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 16,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 23,
+          "metricSets": 8,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 16,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 7,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 17,
+          "day": 1,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 27,
+          "metricSets": 6,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 17,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 36,
+          "metricSets": 2,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 17,
+          "day": 3,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 32,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 17,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 17,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 26,
+          "metricSets": 6,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 18,
+          "day": 1,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 18,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 18,
+          "day": 2,
+          "restDay": false,
+          "exercises": 4,
+          "sets": 7,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 18,
+          "day": 3,
+          "restDay": false,
+          "exercises": 7,
+          "sets": 15,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 18,
+          "day": 4,
+          "restDay": false,
+          "exercises": 4,
+          "sets": 9,
+          "metricSets": 5,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 18,
+          "day": 5,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 18,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 19,
+          "day": 1,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 36,
+          "metricSets": 4,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 19,
+          "day": 2,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 43,
+          "metricSets": 2,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 19,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 34,
+          "metricSets": 5,
+          "percentageSets": 5
+        },
+        {
+          "program": "black-crown",
+          "week": 19,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 19,
+          "day": 5,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 34,
+          "metricSets": 6,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 20,
+          "day": 1,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 37,
+          "metricSets": 4,
+          "percentageSets": 15
+        },
+        {
+          "program": "black-crown",
+          "week": 20,
+          "day": 2,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 44,
+          "metricSets": 2,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 20,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 34,
+          "metricSets": 5,
+          "percentageSets": 5
+        },
+        {
+          "program": "black-crown",
+          "week": 20,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 20,
+          "day": 5,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 36,
+          "metricSets": 6,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 21,
+          "day": 1,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 39,
+          "metricSets": 4,
+          "percentageSets": 15
+        },
+        {
+          "program": "black-crown",
+          "week": 21,
+          "day": 2,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 44,
+          "metricSets": 2,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 21,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 34,
+          "metricSets": 5,
+          "percentageSets": 5
+        },
+        {
+          "program": "black-crown",
+          "week": 21,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 21,
+          "day": 5,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 36,
+          "metricSets": 6,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 22,
+          "day": 1,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 36,
+          "metricSets": 4,
+          "percentageSets": 14
+        },
+        {
+          "program": "black-crown",
+          "week": 22,
+          "day": 2,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 43,
+          "metricSets": 2,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 22,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 34,
+          "metricSets": 5,
+          "percentageSets": 5
+        },
+        {
+          "program": "black-crown",
+          "week": 22,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 22,
+          "day": 5,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 34,
+          "metricSets": 6,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 23,
+          "day": 1,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 35,
+          "metricSets": 4,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 23,
+          "day": 2,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 41,
+          "metricSets": 2,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 23,
+          "day": 3,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 33,
+          "metricSets": 5,
+          "percentageSets": 5
+        },
+        {
+          "program": "black-crown",
+          "week": 23,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 28,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 23,
+          "day": 5,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 31,
+          "metricSets": 5,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 24,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 24,
+          "day": 2,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 24,
+          "day": 3,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 9,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 24,
+          "day": 4,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 24,
+          "day": 5,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 25,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 26,
+          "metricSets": 3,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 25,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 1,
+          "percentageSets": 6
+        },
+        {
+          "program": "black-crown",
+          "week": 25,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 25,
+          "metricSets": 1,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 25,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 25,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 4,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 26,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 3,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 26,
+          "day": 2,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 41,
+          "metricSets": 1,
+          "percentageSets": 4
+        },
+        {
+          "program": "black-crown",
+          "week": 26,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 25,
+          "metricSets": 1,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 26,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 26,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 4,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 27,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 28,
+          "metricSets": 3,
+          "percentageSets": 10
+        },
+        {
+          "program": "black-crown",
+          "week": 27,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 1,
+          "percentageSets": 6
+        },
+        {
+          "program": "black-crown",
+          "week": 27,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 25,
+          "metricSets": 1,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 27,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 27,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 4,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 28,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 3,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 28,
+          "day": 2,
+          "restDay": false,
+          "exercises": 16,
+          "sets": 41,
+          "metricSets": 1,
+          "percentageSets": 4
+        },
+        {
+          "program": "black-crown",
+          "week": 28,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 25,
+          "metricSets": 1,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 28,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 28,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 5,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 29,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 3,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 29,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 38,
+          "metricSets": 1,
+          "percentageSets": 6
+        },
+        {
+          "program": "black-crown",
+          "week": 29,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 25,
+          "metricSets": 1,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 29,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 29,
+          "day": 5,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 25,
+          "metricSets": 0,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 30,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 22,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 30,
+          "day": 2,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 9,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 30,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 19,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 30,
+          "day": 4,
+          "restDay": false,
+          "exercises": 4,
+          "sets": 10,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 30,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 22,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 31,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 31,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 31,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 31,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 31,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 24,
+          "metricSets": 3,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 32,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 32,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 32,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 32,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 32,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 24,
+          "metricSets": 3,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 33,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 33,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 33,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 33,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 23,
+          "metricSets": 8,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 33,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 25,
+          "metricSets": 3,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 34,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 25,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 34,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 40,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 34,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 34,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 23,
+          "metricSets": 8,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 34,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 24,
+          "metricSets": 3,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 35,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 25,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 35,
+          "day": 2,
+          "restDay": false,
+          "exercises": 15,
+          "sets": 39,
+          "metricSets": 2,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 35,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 35,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 35,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 23,
+          "metricSets": 3,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 36,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 36,
+          "day": 2,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 36,
+          "day": 3,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 9,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 36,
+          "day": 4,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 36,
+          "day": 5,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 37,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 10,
+          "metricSets": 1,
+          "percentageSets": 2
+        },
+        {
+          "program": "black-crown",
+          "week": 37,
+          "day": 2,
+          "restDay": false,
+          "exercises": 7,
+          "sets": 20,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 37,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 1,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 37,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 9,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 37,
+          "day": 5,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 23,
+          "metricSets": 5,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 38,
+          "day": 1,
+          "restDay": false,
+          "exercises": 6,
+          "sets": 12,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 38,
+          "day": 2,
+          "restDay": false,
+          "exercises": 7,
+          "sets": 20,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 38,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 1,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 38,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 9,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 38,
+          "day": 5,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 23,
+          "metricSets": 5,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 39,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 10,
+          "metricSets": 1,
+          "percentageSets": 2
+        },
+        {
+          "program": "black-crown",
+          "week": 39,
+          "day": 2,
+          "restDay": false,
+          "exercises": 7,
+          "sets": 19,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 39,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 1,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 39,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 26,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 39,
+          "day": 5,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 23,
+          "metricSets": 6,
+          "percentageSets": 7
+        },
+        {
+          "program": "black-crown",
+          "week": 40,
+          "day": 1,
+          "restDay": false,
+          "exercises": 6,
+          "sets": 12,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 40,
+          "day": 2,
+          "restDay": false,
+          "exercises": 7,
+          "sets": 17,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 40,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 27,
+          "metricSets": 1,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 40,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 26,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 40,
+          "day": 5,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 22,
+          "metricSets": 6,
+          "percentageSets": 6
+        },
+        {
+          "program": "black-crown",
+          "week": 41,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 10,
+          "metricSets": 1,
+          "percentageSets": 2
+        },
+        {
+          "program": "black-crown",
+          "week": 41,
+          "day": 2,
+          "restDay": false,
+          "exercises": 6,
+          "sets": 16,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 41,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 26,
+          "metricSets": 0,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 41,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 9,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 41,
+          "day": 5,
+          "restDay": false,
+          "exercises": 7,
+          "sets": 21,
+          "metricSets": 4,
+          "percentageSets": 6
+        },
+        {
+          "program": "black-crown",
+          "week": 42,
+          "day": 1,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 20,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 42,
+          "day": 2,
+          "restDay": false,
+          "exercises": 4,
+          "sets": 7,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 42,
+          "day": 3,
+          "restDay": false,
+          "exercises": 8,
+          "sets": 17,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 42,
+          "day": 4,
+          "restDay": false,
+          "exercises": 4,
+          "sets": 10,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 42,
+          "day": 5,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 20,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 43,
+          "day": 1,
+          "restDay": false,
+          "exercises": 11,
+          "sets": 25,
+          "metricSets": 3,
+          "percentageSets": 4
+        },
+        {
+          "program": "black-crown",
+          "week": 43,
+          "day": 2,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 4,
+          "percentageSets": 3
+        },
+        {
+          "program": "black-crown",
+          "week": 43,
+          "day": 3,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 5,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 43,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 43,
+          "day": 5,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 28,
+          "metricSets": 4,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 44,
+          "day": 1,
+          "restDay": false,
+          "exercises": 11,
+          "sets": 25,
+          "metricSets": 3,
+          "percentageSets": 4
+        },
+        {
+          "program": "black-crown",
+          "week": 44,
+          "day": 2,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 4,
+          "percentageSets": 3
+        },
+        {
+          "program": "black-crown",
+          "week": 44,
+          "day": 3,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 5,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 44,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 44,
+          "day": 5,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 30,
+          "metricSets": 4,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 45,
+          "day": 1,
+          "restDay": false,
+          "exercises": 11,
+          "sets": 27,
+          "metricSets": 3,
+          "percentageSets": 4
+        },
+        {
+          "program": "black-crown",
+          "week": 45,
+          "day": 2,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 4,
+          "percentageSets": 3
+        },
+        {
+          "program": "black-crown",
+          "week": 45,
+          "day": 3,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 5,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 45,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 45,
+          "day": 5,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 30,
+          "metricSets": 4,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 46,
+          "day": 1,
+          "restDay": false,
+          "exercises": 11,
+          "sets": 25,
+          "metricSets": 3,
+          "percentageSets": 4
+        },
+        {
+          "program": "black-crown",
+          "week": 46,
+          "day": 2,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 4,
+          "percentageSets": 3
+        },
+        {
+          "program": "black-crown",
+          "week": 46,
+          "day": 3,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 33,
+          "metricSets": 5,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 46,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 25,
+          "metricSets": 11,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 46,
+          "day": 5,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 32,
+          "metricSets": 4,
+          "percentageSets": 15
+        },
+        {
+          "program": "black-crown",
+          "week": 47,
+          "day": 1,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 3,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 47,
+          "day": 2,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 31,
+          "metricSets": 4,
+          "percentageSets": 2
+        },
+        {
+          "program": "black-crown",
+          "week": 47,
+          "day": 3,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 32,
+          "metricSets": 5,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 47,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 24,
+          "metricSets": 10,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 47,
+          "day": 5,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 29,
+          "metricSets": 3,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 48,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 11,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 48,
+          "day": 2,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 11,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 48,
+          "day": 3,
+          "restDay": false,
+          "exercises": 6,
+          "sets": 10,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 48,
+          "day": 4,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 11,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 48,
+          "day": 5,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 11,
+          "metricSets": 3,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 49,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 25,
+          "metricSets": 3,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 49,
+          "day": 2,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 40,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 49,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 49,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 49,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 23,
+          "metricSets": 3,
+          "percentageSets": 11
+        },
+        {
+          "program": "black-crown",
+          "week": 50,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 26,
+          "metricSets": 3,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 50,
+          "day": 2,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 40,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 50,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 50,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 50,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 24,
+          "metricSets": 3,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 51,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 26,
+          "metricSets": 3,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 51,
+          "day": 2,
+          "restDay": false,
+          "exercises": 14,
+          "sets": 39,
+          "metricSets": 4,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 51,
+          "day": 3,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 29,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 51,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 23,
+          "metricSets": 8,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 51,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 25,
+          "metricSets": 3,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 52,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 24,
+          "metricSets": 3,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 52,
+          "day": 2,
+          "restDay": false,
+          "exercises": 13,
+          "sets": 36,
+          "metricSets": 4,
+          "percentageSets": 8
+        },
+        {
+          "program": "black-crown",
+          "week": 52,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 27,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 52,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 23,
+          "metricSets": 8,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 52,
+          "day": 5,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 25,
+          "metricSets": 3,
+          "percentageSets": 13
+        },
+        {
+          "program": "black-crown",
+          "week": 53,
+          "day": 1,
+          "restDay": false,
+          "exercises": 10,
+          "sets": 23,
+          "metricSets": 3,
+          "percentageSets": 12
+        },
+        {
+          "program": "black-crown",
+          "week": 53,
+          "day": 2,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 35,
+          "metricSets": 4,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 53,
+          "day": 3,
+          "restDay": false,
+          "exercises": 9,
+          "sets": 27,
+          "metricSets": 2,
+          "percentageSets": 9
+        },
+        {
+          "program": "black-crown",
+          "week": 53,
+          "day": 4,
+          "restDay": false,
+          "exercises": 12,
+          "sets": 22,
+          "metricSets": 7,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 53,
+          "day": 5,
+          "restDay": false,
+          "exercises": 11,
+          "sets": 27,
+          "metricSets": 3,
+          "percentageSets": 15
+        },
+        {
+          "program": "black-crown",
+          "week": 54,
+          "day": 1,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 54,
+          "day": 2,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 54,
+          "day": 3,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 9,
+          "metricSets": 1,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 54,
+          "day": 4,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        },
+        {
+          "program": "black-crown",
+          "week": 54,
+          "day": 5,
+          "restDay": false,
+          "exercises": 5,
+          "sets": 13,
+          "metricSets": 4,
+          "percentageSets": 0
+        }
+      ],
+      "programHash": "f863e5825d961b91b40b414cc67798cfd88294fd92a8fc57a18d32bae135e2ca",
+      "substitutionPlan": [
+        {
+          "index": 6,
+          "exerciseId": "easy-walk-rest",
+          "ruleId": "VS-005",
+          "primary": "walking",
+          "alternative": "stationary-bike",
+          "apply": true
+        },
+        {
+          "index": 13,
+          "exerciseId": "easy-walk-rest",
+          "ruleId": "VS-005",
+          "primary": "walking",
+          "alternative": "stationary-bike",
+          "apply": true
+        },
+        {
+          "index": 20,
+          "exerciseId": "easy-walk-rest",
+          "ruleId": "VS-005",
+          "primary": "walking",
+          "alternative": "stationary-bike",
+          "apply": true
+        },
+        {
+          "index": 27,
+          "exerciseId": "easy-walk-rest",
+          "ruleId": "VS-005",
+          "primary": "walking",
+          "alternative": "stationary-bike",
+          "apply": false
+        }
+      ],
+      "ruleCount": 27
+    },
+    "bootstrap": {
+      "athleteId": "f295a8b5-0225-4afc-95b8-f66eef462508",
+      "position": {
+        "program": "crownforge",
+        "week": 1,
+        "day": 1
+      },
+      "counts": {
+        "athletes": 1,
+        "programInstances": 1,
+        "programEvents": 0,
+        "readinessEntries": 0,
+        "workoutSessions": 0,
+        "workoutExercises": 0,
+        "workoutSets": 0,
+        "syncOutbox": 4
+      }
+    },
+    "current": {
+      "index": 382,
+      "program": "black-crown",
+      "week": 54,
+      "day": 5,
+      "restDay": false,
+      "exercises": 5,
+      "sets": 13,
+      "metricSets": 4,
+      "percentageSets": 0
+    },
+    "transitions": [
+      {
+        "index": 97,
+        "action": "maintenance-started",
+        "next": {
+          "program": "crown-maintenance",
+          "week": 1,
+          "day": 1
+        }
+      },
+      {
+        "index": 112,
+        "action": "entry-gate",
+        "next": {
+          "program": "black-crown",
+          "week": 1,
+          "day": 1
+        }
+      },
+      {
+        "index": 382,
+        "action": "program-complete",
+        "next": null
+      }
+    ],
+    "final": {
+      "hash": "9a688cf1d6131f302f44432e9bd60d97080a427fb27162a3f939d5eaf0e80061",
+      "counts": {
+        "athletes": 1,
+        "programInstances": 3,
+        "programEvents": 385,
+        "readinessEntries": 383,
+        "workoutSessions": 383,
+        "workoutExercises": 4682,
+        "workoutSets": 12081,
+        "syncOutbox": 31158
+      },
+      "completedSessions": 383,
+      "completedSets": 12081,
+      "programInstances": [
+        {
+          "program": "crownforge",
+          "status": "completed",
+          "week": 14,
+          "day": "day-7"
+        },
+        {
+          "program": "crown-maintenance",
+          "status": "completed",
+          "week": 3,
+          "day": "day-5"
+        },
+        {
+          "program": "black-crown",
+          "status": "completed",
+          "week": 54,
+          "day": "day-5"
+        }
+      ],
+      "eventTypes": {
+        "program-position-advanced": 380,
+        "black-crown-entry-blocked": 1,
+        "black-crown-entry-gate-opened": 1,
+        "crownforge-complete-maintenance-start": 1,
+        "black-crown-entry-activated": 1,
+        "black-crown-program-complete": 1
+      }
+    }
+  },
+  "externalRequestsBlocked": 0,
+  "finishedAt": "2026-09-11T07:21:28.826Z"
+}

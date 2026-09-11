@@ -1,0 +1,147 @@
+{
+  "result": "PASS",
+  "passes": [
+    {
+      "label": "Day 1: native onboarding, intentional position and workout creation"
+    },
+    {
+      "label": "Main circuit advances exercise by exercise through the first round",
+      "detail": [
+        "Front Squat",
+        "Bench Press",
+        "Chest-Supported Row",
+        "KB Swing",
+        "Hanging Knee Raise",
+        "Backward Sled Drag"
+      ]
+    },
+    {
+      "label": "An intentional next-set prescription change overrides prior athlete load",
+      "detail": {
+        "priorActual": 115,
+        "nextPrescribed": 110
+      }
+    },
+    {
+      "label": "Same-prescription load carries to the next round and persists through native save",
+      "detail": 45
+    },
+    {
+      "label": "Reload preserves actual load, reps and RPE without rewriting prescriptions or duplicating records"
+    },
+    {
+      "label": "Day 3: native onboarding, intentional position and workout creation"
+    },
+    {
+      "label": "Recovery rounds traverse every exercise before round two; side-based targets remain visible",
+      "detail": [
+        "Turkish Get-Up",
+        "KB Halo",
+        "Windmill",
+        "Arm Bar"
+      ]
+    },
+    {
+      "label": "Backward Sled Drag: visible metric input saves actual m",
+      "detail": {
+        "value": 20,
+        "load": 25,
+        "target": "20m"
+      }
+    },
+    {
+      "label": "Walk or Bike: visible metric input saves actual min",
+      "detail": {
+        "value": 25,
+        "load": null,
+        "target": "20–30 min easy"
+      }
+    },
+    {
+      "label": "Text-only metric targets remain distinct from saved actuals through reload",
+      "detail": {
+        "textOnly": 2
+      }
+    }
+  ],
+  "failures": [],
+  "observations": {
+    "actions": [
+      {
+        "id": "f78b141d-8e66-4351-a6ba-e66c789caa0b",
+        "values": {
+          "load": 115
+        }
+      },
+      {
+        "id": "a2ded31c-c28e-47cd-8a04-523b49285e42",
+        "values": {}
+      },
+      {
+        "id": "bb20f297-9211-4abb-8691-6a52f16e151f",
+        "values": {
+          "load": 45
+        }
+      },
+      {
+        "id": "f3c0c81c-6cd4-4d5a-8436-cadcdbccff18",
+        "values": {}
+      },
+      {
+        "id": "6586aa3b-b447-47c3-81c1-9deedb22fb83",
+        "values": {}
+      },
+      {
+        "id": "db8f6549-6cb8-48e4-91f1-c4715fbcd0d7",
+        "values": {}
+      },
+      {
+        "id": "61155e0c-2d43-49e8-8159-607b87b675e3",
+        "values": {}
+      },
+      {
+        "id": "c6772db9-1113-454e-868b-38bc223b00a1",
+        "values": {}
+      },
+      {
+        "id": "6397bd73-efaa-4e9a-b6fa-f53651d74c43",
+        "values": {
+          "reps": 10,
+          "rpe": 7
+        }
+      },
+      {
+        "id": "745267a6-1661-43d5-80d2-a7cd96ac2b06",
+        "values": {
+          "reps": 1
+        }
+      },
+      {
+        "id": "44f47252-6656-43f9-8368-a06badac9712",
+        "values": {}
+      },
+      {
+        "id": "cdc82d7b-1f56-4e5f-b752-c35d84dc39f9",
+        "values": {}
+      },
+      {
+        "id": "da4a3991-a6b3-4992-80b8-af0b06d7b6d8",
+        "values": {}
+      },
+      {
+        "id": "823b0001-f2dd-46ed-9bc3-a601fe0282bf",
+        "values": {
+          "metric": 20,
+          "load": 25
+        }
+      },
+      {
+        "id": "f52ecd8d-3227-4ac1-a906-e51f8c618dca",
+        "values": {
+          "metric": 25
+        }
+      }
+    ]
+  },
+  "scope": "Real governed Crownforge W1D1 and W1D3 through visible native UI; complements five full service/IndexedDB lifecycles"
+}

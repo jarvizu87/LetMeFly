@@ -1,0 +1,90 @@
+{
+  "result": "PASS",
+  "failures": [],
+  "passes": [
+    {
+      "label": "Desktop breakpoint activation",
+      "detail": "1536px viewport"
+    },
+    {
+      "label": "Desktop navigation rail",
+      "detail": "188×960px fixed rail"
+    },
+    {
+      "label": "Desktop LetMeFly brand reuse",
+      "detail": ""
+    },
+    {
+      "label": "Option 3 three-column Train workspace",
+      "detail": "286.375px 569.078px 323.094px"
+    },
+    {
+      "label": "Desktop Train uses the browser work area",
+      "detail": "1207px / 1348px usable"
+    },
+    {
+      "label": "Desktop Train columns are materially desktop-sized",
+      "detail": "286 / 569 / 323px"
+    },
+    {
+      "label": "Desktop page has no horizontal overflow",
+      "detail": "1536/1536px"
+    },
+    {
+      "label": "Workout Flow mirrors authoritative exercise cards",
+      "detail": ""
+    },
+    {
+      "label": "Original live set controls remain in center column",
+      "detail": ""
+    },
+    {
+      "label": "Desktop workspace reuses exercise artwork hook",
+      "detail": "front-squat"
+    },
+    {
+      "label": "Mobile UI remains isolated from desktop layer",
+      "detail": "412px viewport"
+    }
+  ],
+  "observations": {
+    "browserLaunchAttempt": 1,
+    "desktopRail": {
+      "position": "fixed",
+      "left": "0px",
+      "width": 188,
+      "height": 960
+    },
+    "workspace": {
+      "display": "grid",
+      "columns": "286.375px 569.078px 323.094px",
+      "width": 1206.5625,
+      "left": 298.71875,
+      "right": 1505.28125,
+      "flowWidth": 286.375,
+      "viewportWidth": 569.078125,
+      "contextWidth": 323.09375,
+      "viewportDirectChild": true,
+      "order": [
+        298.71875,
+        599.09375,
+        1182.171875
+      ],
+      "scrollWidth": 1536,
+      "innerWidth": 1536
+    },
+    "liveReuse": {
+      "itemPresent": true,
+      "originalCardInsideCenter": true,
+      "originalSetControlInsideCenter": true,
+      "art": "front-squat",
+      "image": "url(\"https://res.cloudinary.com/extor5az/image/upload/c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best/letmefly/private/jp/exercises/front-squat/v2.webp\")"
+    },
+    "mobileIsolation": {
+      "desktopFlag": null,
+      "workspace": false,
+      "railBrand": false,
+      "width": 412
+    }
+  }
+}

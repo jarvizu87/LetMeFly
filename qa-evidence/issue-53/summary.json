@@ -1,0 +1,571 @@
+{
+  "artifacts": [
+    {
+      "expiresAt": "2026-09-25T07:24:06Z",
+      "id": 10188944594,
+      "name": "parallel-43-53-substitution-34573302958",
+      "sha256": "sha256:d8095c87d52cc05e1429140560f79bd8a25bb947c16c149d05c6e6be66b02336",
+      "sizeBytes": 18095
+    },
+    {
+      "expiresAt": "2026-09-25T07:23:07Z",
+      "id": 10188916323,
+      "name": "parallel-43-53-grouped-metrics-34573302958",
+      "sha256": "sha256:1304eafae25ad1ea45fd22509dfd854743d896af2afb9b7ae66f280cb4c0da57",
+      "sizeBytes": 17537
+    },
+    {
+      "expiresAt": "2026-09-25T07:21:29Z",
+      "id": 10188869087,
+      "name": "parallel-43-53-restart-34573302958",
+      "sha256": "sha256:505833053a4c3554d3bc7895aa2516ae3d55f54dd3f61350d6e17393657f1b2f",
+      "sizeBytes": 20001
+    },
+    {
+      "expiresAt": "2026-09-25T07:21:03Z",
+      "id": 10188857099,
+      "name": "parallel-43-53-variable-34573302958",
+      "sha256": "sha256:e12027b42ffe13d029156a960763a1a2657bf73367d29f89a836b746f50bdb40",
+      "sizeBytes": 17478
+    },
+    {
+      "expiresAt": "2026-09-25T07:19:49Z",
+      "id": 10188821662,
+      "name": "parallel-43-53-perfect-34573302958",
+      "sha256": "sha256:a35a03c484e2de3ae1dbc68a0b6ec0f2cda87107567884e54bd51f1ca0451e9f",
+      "sizeBytes": 17462
+    },
+    {
+      "expiresAt": "2026-09-25T07:19:19Z",
+      "id": 10188806788,
+      "name": "parallel-43-53-browser-34573302958",
+      "sha256": "sha256:1806e1d502674124d2bc91ef99ac094ffc9ffe59d828bff414724d63d76a03f9",
+      "sizeBytes": 10786772
+    },
+    {
+      "expiresAt": "2026-09-25T07:16:38Z",
+      "id": 10188727069,
+      "name": "parallel-43-53-adversarial-34573302958",
+      "sha256": "sha256:3ddcb9150fdc64a92c107ee7651b3ef85be1ad17031f488da3c4ca62a5a5c7a3",
+      "sizeBytes": 15325
+    },
+    {
+      "expiresAt": "2026-09-25T07:16:37Z",
+      "id": 10188726547,
+      "name": "parallel-43-53-native-faults-34573302958",
+      "sha256": "sha256:a4aa72c46fa8ab0f4a996bf12b9d8643fae14dcd2ac9c8373693d8acfda13c34",
+      "sizeBytes": 17912
+    },
+    {
+      "expiresAt": "2026-09-25T07:16:14Z",
+      "id": 10188715017,
+      "name": "parallel-43-53-public-ui-34573302958",
+      "sha256": "sha256:526ec42985e350b6af26212bc45bcec8dd7f6cd16f7a18c5c02f7edc2ac49192",
+      "sizeBytes": 14142
+    },
+    {
+      "expiresAt": "2026-09-25T07:16:03Z",
+      "id": 10188709159,
+      "name": "parallel-43-53-recovery-34573302958",
+      "sha256": "sha256:6742835191f44962fa4246c91ab6d13a545d9e3c051b6444d2ae287600c5f2df",
+      "sizeBytes": 21294
+    },
+    {
+      "expiresAt": "2026-09-25T07:15:51Z",
+      "id": 10188703452,
+      "name": "parallel-43-53-desktop-34573302958",
+      "sha256": "sha256:97a4ffe11333a58ef10a8edc7899e5a547012017afb53291fc80a0b4ed289a44",
+      "sizeBytes": 1676240
+    },
+    {
+      "expiresAt": "2026-09-14T07:14:52Z",
+      "id": 10188674087,
+      "name": "parallel-43-53-kit-34573302958",
+      "sha256": "sha256:10fc9734a2968a2070934968dd2acd069a647a458c9dede9f481b93643e581c4",
+      "sizeBytes": 22415474
+    }
+  ],
+  "baselineMainSha": "797e2281e9124d6f0fe2ca6708e190eaaf3d96bb",
+  "browserSubaudits": 13,
+  "candidateSha": "e3a50a87a592f916fdadaea31a8e0bb80906bfa3",
+  "checks": {
+    "completionRecovery": {
+      "passes": 15,
+      "result": "PASS"
+    },
+    "desktopPolish": {
+      "passes": 13,
+      "result": "PASS"
+    },
+    "desktopWorkspace": {
+      "passes": 11,
+      "result": "PASS"
+    },
+    "nativeFaults": {
+      "passes": 8,
+      "result": "PASS"
+    },
+    "publicUi": {
+      "passes": 10,
+      "result": "PASS"
+    }
+  },
+  "cycles": [
+    {
+      "counts": {
+        "betweenCompletionAndProgressionRestarts": 0,
+        "browserRestarts": 3,
+        "exercises": 4682,
+        "historyLookups": 0,
+        "metricSets": 1264,
+        "positions": 383,
+        "reloads": 9,
+        "resolvedPercentages": 1656,
+        "roundSets": 3527,
+        "sets": 12081,
+        "substitutions": 0,
+        "unresolvedPercentages": 35
+      },
+      "finalState": {
+        "completedSessions": 383,
+        "completedSets": 12081,
+        "counts": {
+          "athletes": 1,
+          "programEvents": 385,
+          "programInstances": 3,
+          "readinessEntries": 383,
+          "syncOutbox": 31158,
+          "workoutExercises": 4682,
+          "workoutSessions": 383,
+          "workoutSets": 12081
+        },
+        "eventTypes": {
+          "black-crown-entry-activated": 1,
+          "black-crown-entry-blocked": 1,
+          "black-crown-entry-gate-opened": 1,
+          "black-crown-program-complete": 1,
+          "crownforge-complete-maintenance-start": 1,
+          "program-position-advanced": 380
+        },
+        "hash": "b38da0a26b0080c824480a71e64b51f6a40d516b0360f4bf94d2988c941d12b9",
+        "programInstances": [
+          {
+            "day": "day-7",
+            "program": "crownforge",
+            "status": "completed",
+            "week": 14
+          },
+          {
+            "day": "day-5",
+            "program": "crown-maintenance",
+            "status": "completed",
+            "week": 3
+          },
+          {
+            "day": "day-5",
+            "program": "black-crown",
+            "status": "completed",
+            "week": 54
+          }
+        ]
+      },
+      "finishedAt": "2026-09-11T07:19:49.735Z",
+      "report": "cycles/perfect.json",
+      "result": "PASS",
+      "scenario": "perfect",
+      "startedAt": "2026-09-11T07:16:33.414Z"
+    },
+    {
+      "counts": {
+        "betweenCompletionAndProgressionRestarts": 0,
+        "browserRestarts": 3,
+        "exercises": 4682,
+        "historyLookups": 0,
+        "metricSets": 1264,
+        "positions": 383,
+        "reloads": 9,
+        "resolvedPercentages": 1656,
+        "roundSets": 3527,
+        "sets": 12081,
+        "substitutions": 0,
+        "unresolvedPercentages": 35
+      },
+      "finalState": {
+        "completedSessions": 383,
+        "completedSets": 12081,
+        "counts": {
+          "athletes": 1,
+          "programEvents": 385,
+          "programInstances": 3,
+          "readinessEntries": 383,
+          "syncOutbox": 31924,
+          "workoutExercises": 4682,
+          "workoutSessions": 383,
+          "workoutSets": 12081
+        },
+        "eventTypes": {
+          "black-crown-entry-activated": 1,
+          "black-crown-entry-blocked": 1,
+          "black-crown-entry-gate-opened": 1,
+          "black-crown-program-complete": 1,
+          "crownforge-complete-maintenance-start": 1,
+          "program-position-advanced": 380
+        },
+        "hash": "1a068e1d18e3e77b64a7962c4f822570c8736fabb5a2d74c6808c07b8e9b3297",
+        "programInstances": [
+          {
+            "day": "day-5",
+            "program": "crown-maintenance",
+            "status": "completed",
+            "week": 3
+          },
+          {
+            "day": "day-7",
+            "program": "crownforge",
+            "status": "completed",
+            "week": 14
+          },
+          {
+            "day": "day-5",
+            "program": "black-crown",
+            "status": "completed",
+            "week": 54
+          }
+        ]
+      },
+      "finishedAt": "2026-09-11T07:21:03.463Z",
+      "report": "cycles/variable.json",
+      "result": "PASS",
+      "scenario": "variable",
+      "startedAt": "2026-09-11T07:17:13.551Z"
+    },
+    {
+      "counts": {
+        "betweenCompletionAndProgressionRestarts": 6,
+        "browserRestarts": 30,
+        "exercises": 4682,
+        "historyLookups": 0,
+        "metricSets": 1264,
+        "positions": 383,
+        "reloads": 8,
+        "resolvedPercentages": 1656,
+        "roundSets": 3527,
+        "sets": 12081,
+        "substitutions": 0,
+        "unresolvedPercentages": 35
+      },
+      "finalState": {
+        "completedSessions": 383,
+        "completedSets": 12081,
+        "counts": {
+          "athletes": 1,
+          "programEvents": 385,
+          "programInstances": 3,
+          "readinessEntries": 383,
+          "syncOutbox": 31158,
+          "workoutExercises": 4682,
+          "workoutSessions": 383,
+          "workoutSets": 12081
+        },
+        "eventTypes": {
+          "black-crown-entry-activated": 1,
+          "black-crown-entry-blocked": 1,
+          "black-crown-entry-gate-opened": 1,
+          "black-crown-program-complete": 1,
+          "crownforge-complete-maintenance-start": 1,
+          "program-position-advanced": 380
+        },
+        "hash": "9a688cf1d6131f302f44432e9bd60d97080a427fb27162a3f939d5eaf0e80061",
+        "programInstances": [
+          {
+            "day": "day-7",
+            "program": "crownforge",
+            "status": "completed",
+            "week": 14
+          },
+          {
+            "day": "day-5",
+            "program": "crown-maintenance",
+            "status": "completed",
+            "week": 3
+          },
+          {
+            "day": "day-5",
+            "program": "black-crown",
+            "status": "completed",
+            "week": 54
+          }
+        ]
+      },
+      "finishedAt": "2026-09-11T07:21:28.826Z",
+      "report": "cycles/restart.json",
+      "result": "PASS",
+      "scenario": "restart",
+      "startedAt": "2026-09-11T07:16:53.342Z"
+    },
+    {
+      "counts": {
+        "betweenCompletionAndProgressionRestarts": 0,
+        "browserRestarts": 3,
+        "exercises": 4682,
+        "historyLookups": 0,
+        "metricSets": 1264,
+        "positions": 383,
+        "reloads": 9,
+        "resolvedPercentages": 1656,
+        "roundSets": 3527,
+        "sets": 12081,
+        "substitutions": 0,
+        "unresolvedPercentages": 35
+      },
+      "finalState": {
+        "completedSessions": 383,
+        "completedSets": 12081,
+        "counts": {
+          "athletes": 1,
+          "programEvents": 385,
+          "programInstances": 3,
+          "readinessEntries": 383,
+          "syncOutbox": 31158,
+          "workoutExercises": 4682,
+          "workoutSessions": 383,
+          "workoutSets": 12081
+        },
+        "eventTypes": {
+          "black-crown-entry-activated": 1,
+          "black-crown-entry-blocked": 1,
+          "black-crown-entry-gate-opened": 1,
+          "black-crown-program-complete": 1,
+          "crownforge-complete-maintenance-start": 1,
+          "program-position-advanced": 380
+        },
+        "hash": "5941681cf347827289cc3495c070d531b88dc1ee824976514cbe132a6ae65b99",
+        "programInstances": [
+          {
+            "day": "day-5",
+            "program": "black-crown",
+            "status": "completed",
+            "week": 54
+          },
+          {
+            "day": "day-7",
+            "program": "crownforge",
+            "status": "completed",
+            "week": 14
+          },
+          {
+            "day": "day-5",
+            "program": "crown-maintenance",
+            "status": "completed",
+            "week": 3
+          }
+        ]
+      },
+      "finishedAt": "2026-09-11T07:23:07.324Z",
+      "report": "cycles/grouped-metrics.json",
+      "result": "PASS",
+      "scenario": "grouped-metrics",
+      "startedAt": "2026-09-11T07:19:36.097Z"
+    },
+    {
+      "counts": {
+        "betweenCompletionAndProgressionRestarts": 0,
+        "browserRestarts": 7,
+        "exercises": 4682,
+        "historyLookups": 3,
+        "metricSets": 1264,
+        "positions": 383,
+        "reloads": 9,
+        "resolvedPercentages": 1656,
+        "roundSets": 3527,
+        "sets": 12081,
+        "substitutions": 3,
+        "unresolvedPercentages": 35
+      },
+      "finalState": {
+        "completedSessions": 383,
+        "completedSets": 12081,
+        "counts": {
+          "athletes": 1,
+          "programEvents": 385,
+          "programInstances": 3,
+          "readinessEntries": 383,
+          "syncOutbox": 31185,
+          "workoutExercises": 4682,
+          "workoutSessions": 383,
+          "workoutSets": 12081
+        },
+        "eventTypes": {
+          "black-crown-entry-activated": 1,
+          "black-crown-entry-blocked": 1,
+          "black-crown-entry-gate-opened": 1,
+          "black-crown-program-complete": 1,
+          "crownforge-complete-maintenance-start": 1,
+          "program-position-advanced": 380
+        },
+        "hash": "d6cf53f66ab5f09887755204acc792a708fa3bccbf8cf9d717e66bd2367f1bf9",
+        "programInstances": [
+          {
+            "day": "day-7",
+            "program": "crownforge",
+            "status": "completed",
+            "week": 14
+          },
+          {
+            "day": "day-5",
+            "program": "crown-maintenance",
+            "status": "completed",
+            "week": 3
+          },
+          {
+            "day": "day-5",
+            "program": "black-crown",
+            "status": "completed",
+            "week": 54
+          }
+        ]
+      },
+      "finishedAt": "2026-09-11T07:24:06.242Z",
+      "report": "cycles/substitution.json",
+      "result": "PASS",
+      "scenario": "substitution",
+      "startedAt": "2026-09-11T07:20:10.812Z"
+    }
+  ],
+  "historicalFailures": [
+    {
+      "applicationSourceAndDistIdenticalToFinalCandidate": true,
+      "cause": "Desktop audit sampled a transient flow list and read a Warm-Up card instead of the selected section; the corrected audit checks settled selection, matching card count and title.",
+      "conclusion": "failure",
+      "runId": 34572159800
+    },
+    {
+      "cause": "Offscreen-control automation scrolled the mobile section carousel. Corrected by vertical scrolling to visible controls and settling native transitions; no app navigation override.",
+      "conclusion": "failure",
+      "report": "earlier-failures/mobile-ui-34572236168.json",
+      "resolvedIssue": 67,
+      "runId": 34572236168
+    }
+  ],
+  "issue": 53,
+  "limitations": [
+    "Cloud synchronization and real athlete history are outside this disposable test.",
+    "Operating-system power loss is not certified by browser restart tests.",
+    "PRs remain open; this is candidate acceptance, not merged-main acceptance."
+  ],
+  "manualWorkflowVerification": {
+    "harnessByteIdenticalTo": "1fe7d9451595012fc8418a3105f21c860eb09f8c",
+    "normalPrChecks": "PASS",
+    "note": "Manual workflow is ready for review in PR 68; its exact harness is exercised by the combined candidate run. Manual dispatch becomes available after default-branch merge.",
+    "standaloneManualDispatchRun": null,
+    "workflowSyntaxChecked": true
+  },
+  "pullRequests": [
+    {
+      "number": 43,
+      "scope": "Desktop UI and active-section audit",
+      "sha": "163aa909b92ba7876ebed76c6ef0d7de8b9e3258"
+    },
+    {
+      "number": 63,
+      "scope": "Normal startup recovers interrupted completion exactly once",
+      "sha": "e3041f4dc78fe716bccd33867149afe0de869261"
+    },
+    {
+      "number": 66,
+      "scope": "Mobile load input width and visible lifecycle audit",
+      "sha": "e1873683ec4c00d0048da1b697dcb17c81344380"
+    },
+    {
+      "number": 68,
+      "scope": "Manual database lifecycle workflow and tested harness",
+      "sha": "4988ce189d0eddf8add8f30ffeb2e5002a70b859"
+    }
+  ],
+  "release": {
+    "merged": false,
+    "productionPublished": false,
+    "realAthleteDataTouched": false
+  },
+  "result": "PASS_ON_UNMERGED_CANDIDATE",
+  "runId": 34573302958,
+  "runUrl": "https://github.com/jarvizu87/LetMeFly/actions/runs/34573302958",
+  "schemaVersion": 1,
+  "scope": "Five complete lifecycles using unmodified production services and real disposable Chromium IndexedDB, plus separate native UI and normal-app-startup recovery checks. This is not 1,915 workouts clicked through the UI.",
+  "totals": {
+    "betweenCompletionAndProgressionRestarts": 6,
+    "browserRestarts": 46,
+    "exercises": 23410,
+    "historyLookups": 3,
+    "metricSets": 6320,
+    "positions": 1915,
+    "reloads": 44,
+    "resolvedPercentages": 8280,
+    "roundSets": 17635,
+    "sets": 60405,
+    "substitutions": 3,
+    "unresolvedPercentages": 175
+  },
+  "workflowJobs": [
+    {
+      "conclusion": "success",
+      "id": 103180001719,
+      "name": "prepare"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653622,
+      "name": "Candidate adversarial"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653623,
+      "name": "Candidate browser"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653648,
+      "name": "Candidate public-ui"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653651,
+      "name": "Candidate native-faults"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653664,
+      "name": "Candidate recovery"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653668,
+      "name": "Candidate desktop"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653679,
+      "name": "Candidate substitution"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653708,
+      "name": "Candidate perfect"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653767,
+      "name": "Candidate restart"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653783,
+      "name": "Candidate variable"
+    },
+    {
+      "conclusion": "success",
+      "id": 103180653819,
+      "name": "Candidate grouped-metrics"
+    }
+  ]
+}

@@ -1,0 +1,548 @@
+{
+  "result": "PASS",
+  "passes": [
+    {
+      "label": "Preserves current fixed desktop navigation",
+      "detail": "fixed"
+    },
+    {
+      "label": "Compact existing artwork",
+      "detail": 184.3125
+    },
+    {
+      "label": "No desktop overflow",
+      "detail": 0
+    },
+    {
+      "label": "All four governed tools visible",
+      "detail": [
+        "WATCH EXERCISE›",
+        "EXERCISE INFO›",
+        "SUBSTITUTE›",
+        "ASK COACH›"
+      ]
+    },
+    {
+      "label": "Rail follows native working-load input without a second editor"
+    },
+    {
+      "label": "Info action forwards exactly once to native exercise control"
+    },
+    {
+      "label": "Native exercise information opens once"
+    },
+    {
+      "label": "Rail mirrors native disabled substitution controls"
+    },
+    {
+      "label": "Same-session resize fully restores mobile workspace"
+    },
+    {
+      "label": "Resize preserves visible center page and native active-section agreement"
+    },
+    {
+      "label": "Presentation/tools/resize do not alter saved workout or outbox"
+    },
+    {
+      "label": "Resize selection remains stable after native scrolling settles",
+      "detail": {
+        "scrollLeft": 1154,
+        "viewport": {
+          "left": 599.09375,
+          "width": 569.078125,
+          "top": 274.265625,
+          "height": 1494.734375
+        },
+        "pages": [
+          {
+            "active": false,
+            "heading": "How are you showing up?",
+            "left": -553.90625,
+            "width": 567.078125,
+            "top": 276.265625,
+            "height": 590
+          },
+          {
+            "active": false,
+            "heading": "Warm-Up",
+            "left": 23.171875,
+            "width": 567.078125,
+            "top": 276.265625,
+            "height": 590
+          },
+          {
+            "active": true,
+            "heading": "Main Strength Circuit",
+            "left": 600.25,
+            "width": 567.078125,
+            "top": 276.265625,
+            "height": 1473.734375
+          },
+          {
+            "active": false,
+            "heading": "Secondary Circuit",
+            "left": 1177.328125,
+            "width": 567.078125,
+            "top": 276.265625,
+            "height": 590
+          },
+          {
+            "active": false,
+            "heading": "0 / 48 sets logged",
+            "left": 1754.40625,
+            "width": 567.078125,
+            "top": 276.265625,
+            "height": 540
+          }
+        ]
+      }
+    },
+    {
+      "label": "No desktop runtime errors",
+      "detail": []
+    }
+  ],
+  "failures": [],
+  "observations": {
+    "runtimeErrors": [],
+    "scriptResponses": [
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-art-auto.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/workout-flow-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/pyramid-flow-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/pwa-install.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-art-cloudinary.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/smart-names-bar-loader-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/pwa-update.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/workout-load-display-sync-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-intelligence-runtime-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-intelligence-library-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-intelligence-ui-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-intelligence-coach-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-intelligence-coach-substitutions-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/exercise-intelligence-substitutions-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/progress-dashboard-v3-polish.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/assets/index-DGN1WUgn.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/voice-notes-v2.js?v=2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/progress-dashboard-mount-guard.js?v=10",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/strength-maxes-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/progress-dashboard-v1.js?v=10",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/progress-conditioning-v4.js?v=1",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/progress-finalize-v4.js?v=1",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/preview-readonly-set-cards-v1.js?v=3",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/mobile-recording-regression-v1.js?v=5",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/home-reference-v3.js?v=4",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/home-main-option1-v1.js?v=1",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/profile-v2.js?v=2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/workout-logging-v2.js?v=2",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/saved-set-controls-v1.js?v=1",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/desktop-nav-fixed-guard-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/desktop-workspace-v1.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4173/ui/desktop-workspace-v2-polish.js",
+        "status": 200
+      }
+    ],
+    "afterOnboarding": {
+      "ready": "complete",
+      "width": 1536,
+      "desktop": true,
+      "htmlData": {
+        "lmfDesktopUi": "true",
+        "lmfDesktopRoute": "home"
+      },
+      "workspaces": 0,
+      "panels": 0,
+      "info": 0,
+      "scripts": [
+        "http://127.0.0.1:4173/assets/index-DGN1WUgn.js",
+        "http://127.0.0.1:4173/ui/exercise-art-auto.js",
+        "http://127.0.0.1:4173/ui/workout-flow-v1.js",
+        "http://127.0.0.1:4173/ui/pyramid-flow-v1.js",
+        "http://127.0.0.1:4173/ui/pwa-install.js",
+        "http://127.0.0.1:4173/ui/pwa-update.js",
+        "http://127.0.0.1:4173/ui/exercise-art-cloudinary.js",
+        "http://127.0.0.1:4173/ui/smart-names-bar-loader-v1.js",
+        "http://127.0.0.1:4173/ui/workout-load-display-sync-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-runtime-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-ui-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-library-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-coach-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-coach-substitutions-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-substitutions-v1.js",
+        "http://127.0.0.1:4173/ui/voice-notes-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/strength-maxes-v1.js",
+        "http://127.0.0.1:4173/ui/progress-dashboard-v1.js?v=10",
+        "http://127.0.0.1:4173/ui/progress-dashboard-v3-polish.js",
+        "http://127.0.0.1:4173/ui/progress-dashboard-mount-guard.js?v=10",
+        "http://127.0.0.1:4173/ui/progress-conditioning-v4.js?v=1",
+        "http://127.0.0.1:4173/ui/progress-finalize-v4.js?v=1",
+        "http://127.0.0.1:4173/ui/mobile-recording-regression-v1.js?v=5",
+        "http://127.0.0.1:4173/ui/preview-readonly-set-cards-v1.js?v=3",
+        "http://127.0.0.1:4173/ui/home-reference-v3.js?v=4",
+        "http://127.0.0.1:4173/ui/home-main-option1-v1.js?v=1",
+        "http://127.0.0.1:4173/ui/profile-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/workout-logging-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/saved-set-controls-v1.js?v=1",
+        "http://127.0.0.1:4173/ui/desktop-workspace-v1.js",
+        "http://127.0.0.1:4173/ui/desktop-nav-fixed-guard-v1.js",
+        "http://127.0.0.1:4173/ui/desktop-workspace-v2-polish.js"
+      ],
+      "markup": "\n    <div class=\"app-shell\">\n      \n    <header class=\"topbar\">\n      <a class=\"brand\" href=\"#/home\" aria-label=\"LetMeFly home\">\n        <div class=\"brand-mark lmf-official-brand-mark\"><img src=\"/brand/letmefly-logo-display-512.png?v=9\" alt=\"\" aria-hidden=\"true\"></div>\n        <div class=\"brand-word\">LETMEFLY<small>TRAIN HARDER. BECOME MORE.</small></div>\n      </a>\n      <div class=\"topbar-context\"><strong>Command</strong><span>CF • W1 • D1</span></div>\n      <div id=\"sync-pill\" class=\"sync-pill\"><i class=\"dot red\"></i>SIGN-IN REQUIRED</div>\n    <div class=\"lmf-home-topbar-shell\"><div class=\"lmf-home-brand-lockup\"><img src=\"/app-icon-official-v6.svg?v=6\" alt=\"\" aria-hidden=\"true\"><div><strong>LetMe<span>Fly</span></strong><small>STRENGTH BUILDS FREEDOM</small></div></div><div class=\"lmf-home-option1-tools\"><button type=\"button\" class=\"lmf-home-option1-alert\" aria-label=\"Home notifications\" title=\"Notifications\">●</button><div class=\"lmf-home-v4-identity\" aria-label=\"Athlete profile\"><span class=\"lmf-home-v4-avatar\" data-lmf-avatar=\"\">AT</span></div></div></div></header>\n  \n      <main class=\"lmf-home-reference-v3\">\n    <section class=\"lmf-home-command-v4\" aria-label=\"LetMeFly Home command center\" data-lmf-bound=\"true\">\n      <header class=\"lmf-home-v4-greeting\">\n        <div>\n          <p class=\"lmf-home-v4-eyebrow\">ATHLETE COMMAND CENTER</p>\n          <h1><span data-lmf-greeting=\"\">Good morning, Disposable Desktop Polish QA.</span></h1>\n          <p>Discipline today. A stronger tomorrow.</p>\n        </div>\n        <div class=\"lmf-home-v4-identity\" aria-label=\"Athlete profile\" hidden=\"\"><span class=\"lmf-home-v4-avatar\" data-lmf-avatar=\"\">DQ</span></div>\n      </header>\n\n      <article class=\"lmf-home-v4-command\" data-lmf-home-theme=\"crownforge\">\n        <div class=\"lmf-home-v4-command-main\">\n          <p class=\"lmf-home-v4-kicker\">YOUR COMMAND</p>\n          <div class=\"lmf-home-v4-program-row\"><h2 data-lmf-program=\"\">CROWNFORGE</h2><span class=\"lmf-home-v4-live\">ACTIVE</span></div>\n          <p class=\"lmf-home-v4-tagline\">BUILDING STRONGER HUMANS</p>\n          <p class=\"lmf-home-v4-position\" data-lmf-position=\"\">Week 1 · Day 1</p>\n          <h3 data-lmf-workout=\"\">LOWER + PUSH STRENGTH / GLUTES</h3>\n          <div class=\"lmf-home-v4-meta\" aria-label=\"Workout summary\">\n            <div><span>SESSION</span><strong data-lmf-session=\"\">Week 1 · Day 1</strong></div>\n            <div><span>PROGRESS</span><strong data-lmf-sets=\"\">READY</strong></div>\n           "
+    },
+    "afterStart": {
+      "ready": "complete",
+      "width": 1536,
+      "desktop": true,
+      "htmlData": {
+        "lmfDesktopUi": "true",
+        "lmfDesktopRoute": "train"
+      },
+      "workspaces": 1,
+      "panels": 1,
+      "info": 16,
+      "scripts": [
+        "http://127.0.0.1:4173/assets/index-DGN1WUgn.js",
+        "http://127.0.0.1:4173/ui/exercise-art-auto.js",
+        "http://127.0.0.1:4173/ui/workout-flow-v1.js",
+        "http://127.0.0.1:4173/ui/pyramid-flow-v1.js",
+        "http://127.0.0.1:4173/ui/pwa-install.js",
+        "http://127.0.0.1:4173/ui/pwa-update.js",
+        "http://127.0.0.1:4173/ui/exercise-art-cloudinary.js",
+        "http://127.0.0.1:4173/ui/smart-names-bar-loader-v1.js",
+        "http://127.0.0.1:4173/ui/workout-load-display-sync-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-runtime-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-ui-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-library-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-coach-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-coach-substitutions-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-substitutions-v1.js",
+        "http://127.0.0.1:4173/ui/voice-notes-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/strength-maxes-v1.js",
+        "http://127.0.0.1:4173/ui/progress-dashboard-v1.js?v=10",
+        "http://127.0.0.1:4173/ui/progress-dashboard-v3-polish.js",
+        "http://127.0.0.1:4173/ui/progress-dashboard-mount-guard.js?v=10",
+        "http://127.0.0.1:4173/ui/progress-conditioning-v4.js?v=1",
+        "http://127.0.0.1:4173/ui/progress-finalize-v4.js?v=1",
+        "http://127.0.0.1:4173/ui/mobile-recording-regression-v1.js?v=5",
+        "http://127.0.0.1:4173/ui/preview-readonly-set-cards-v1.js?v=3",
+        "http://127.0.0.1:4173/ui/home-reference-v3.js?v=4",
+        "http://127.0.0.1:4173/ui/home-main-option1-v1.js?v=1",
+        "http://127.0.0.1:4173/ui/profile-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/workout-logging-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/saved-set-controls-v1.js?v=1",
+        "http://127.0.0.1:4173/ui/desktop-workspace-v1.js",
+        "http://127.0.0.1:4173/ui/desktop-nav-fixed-guard-v1.js",
+        "http://127.0.0.1:4173/ui/desktop-workspace-v2-polish.js"
+      ],
+      "active": "swipe-page workout-panel readiness-panel active-page",
+      "markup": "\n    <div class=\"app-shell\">\n      \n    <header class=\"topbar\">\n      <a class=\"brand\" href=\"#/home\" aria-label=\"LetMeFly home\">\n        <div class=\"brand-mark lmf-official-brand-mark\"><img src=\"/brand/letmefly-logo-display-512.png?v=9\" alt=\"\" aria-hidden=\"true\"></div>\n        <div class=\"brand-word\">LETMEFLY<small>TRAIN HARDER. BECOME MORE.</small></div>\n      </a>\n      <div class=\"topbar-context\"><strong>Train</strong><span>CF • W1 • D1</span></div>\n      <div id=\"sync-pill\" class=\"sync-pill\"><i class=\"dot red\"></i>SIGN-IN REQUIRED</div>\n    </header>\n  \n      <main>\n    <section class=\"train-shell\">\n      <div class=\"train-header\">\n        <div><div class=\"page-kicker\">Crownforge Revised — Integrated • Week 1 • Day 1</div><h1>LOWER + PUSH STRENGTH / GLUTES</h1><p class=\"muted\">Strength-density day. Main lifts ramp; final heavy sets may be focused alone.</p></div>\n        <span class=\"badge mandatory\">Workout</span>\n      </div>\n      <div class=\"session-track\" id=\"session-track\"><button class=\"active\" data-session-index=\"0\" aria-current=\"step\">READINESS</button><button data-session-index=\"1\" aria-current=\"false\">A</button><button data-session-index=\"2\" aria-current=\"false\">B</button><button data-session-index=\"3\" aria-current=\"false\">C</button><button data-session-index=\"4\" aria-current=\"false\">REVIEW</button></div>\n      <div class=\"day-strip\"><button class=\"day-chip active\" data-day=\"1\"><strong>D1</strong><small>09-07</small></button><button class=\"day-chip \" data-day=\"2\"><strong>D2</strong><small>09-08</small></button><button class=\"day-chip \" data-day=\"3\"><strong>D3</strong><small>09-09</small></button><button class=\"day-chip \" data-day=\"4\"><strong>D4</strong><small>09-10</small></button><button class=\"day-chip \" data-day=\"5\"><strong>D5</strong><small>09-11</small></button><button class=\"day-chip \" data-day=\"6\"><strong>D6</strong><small>09-12</small></button><button class=\"day-chip \" data-day=\"7\"><strong>D7</strong><small>09-13</small></button></div>\n      \n      <div class=\"train-rule\"><strong>Readiness rule</strong><span>Front Squat + Bench are mandatory. Yellow keeps clean primary work and highest-value chest/glute support. Stop the ramp before a grinder.</span></div>\n      <div class=\"swipe-meta\"><span>Tap a section or use arrows</span><strong id=\"session-position\">1 / 5</strong></div>\n      <div class=\"session-nav\" aria-label=\"Workout section navigation\"><button class=\"session-nav-btn\" data-session-step=\"-1\" disabled=\"\" aria-label=\"Previous se"
+    },
+    "view": {
+      "id": "617136af-f87a-4462-806c-ebcae4d9bb39",
+      "name": "Front Squat",
+      "artHeight": 184.3125,
+      "tools": [
+        "WATCH EXERCISE›",
+        "EXERCISE INFO›",
+        "SUBSTITUTE›",
+        "ASK COACH›"
+      ],
+      "fixed": "fixed",
+      "overflow": 0
+    },
+    "beforeViewportCapture": {
+      "scrollLeft": 1154,
+      "viewport": {
+        "left": 599.09375,
+        "width": 569.078125,
+        "top": 274.265625,
+        "height": 1494.734375
+      },
+      "pages": [
+        {
+          "active": false,
+          "heading": "How are you showing up?",
+          "left": -553.90625,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": false,
+          "heading": "Warm-Up",
+          "left": 23.171875,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": true,
+          "heading": "Main Strength Circuit",
+          "left": 600.25,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 1473.734375
+        },
+        {
+          "active": false,
+          "heading": "Secondary Circuit",
+          "left": 1177.328125,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": false,
+          "heading": "0 / 48 sets logged",
+          "left": 1754.40625,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 540
+        }
+      ]
+    },
+    "afterViewportCapture": {
+      "scrollLeft": 1154,
+      "viewport": {
+        "left": 599.09375,
+        "width": 569.078125,
+        "top": 274.265625,
+        "height": 1494.734375
+      },
+      "pages": [
+        {
+          "active": false,
+          "heading": "How are you showing up?",
+          "left": -553.90625,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": false,
+          "heading": "Warm-Up",
+          "left": 23.171875,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": true,
+          "heading": "Main Strength Circuit",
+          "left": 600.25,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 1473.734375
+        },
+        {
+          "active": false,
+          "heading": "Secondary Circuit",
+          "left": 1177.328125,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": false,
+          "heading": "0 / 48 sets logged",
+          "left": 1754.40625,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 540
+        }
+      ]
+    },
+    "afterFullPageCapture": {
+      "scrollLeft": 0,
+      "viewport": {
+        "left": 599.09375,
+        "width": 569.078125,
+        "top": 274.265625,
+        "height": 1494.734375
+      },
+      "pages": [
+        {
+          "active": false,
+          "heading": "How are you showing up?",
+          "left": 600.09375,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": false,
+          "heading": "Warm-Up",
+          "left": 1177.171875,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": true,
+          "heading": "Main Strength Circuit",
+          "left": 1754.25,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 1473.734375
+        },
+        {
+          "active": false,
+          "heading": "Secondary Circuit",
+          "left": 2331.328125,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 590
+        },
+        {
+          "active": false,
+          "heading": "0 / 48 sets logged",
+          "left": 2908.40625,
+          "width": 567.078125,
+          "top": 276.265625,
+          "height": 540
+        }
+      ]
+    },
+    "final": {
+      "ready": "complete",
+      "width": 1536,
+      "desktop": true,
+      "htmlData": {
+        "lmfDesktopUi": "true",
+        "lmfDesktopRoute": "train"
+      },
+      "workspaces": 1,
+      "panels": 1,
+      "info": 16,
+      "scripts": [
+        "http://127.0.0.1:4173/assets/index-DGN1WUgn.js",
+        "http://127.0.0.1:4173/ui/exercise-art-auto.js",
+        "http://127.0.0.1:4173/ui/workout-flow-v1.js",
+        "http://127.0.0.1:4173/ui/pyramid-flow-v1.js",
+        "http://127.0.0.1:4173/ui/pwa-install.js",
+        "http://127.0.0.1:4173/ui/pwa-update.js",
+        "http://127.0.0.1:4173/ui/exercise-art-cloudinary.js",
+        "http://127.0.0.1:4173/ui/smart-names-bar-loader-v1.js",
+        "http://127.0.0.1:4173/ui/workout-load-display-sync-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-runtime-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-ui-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-library-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-coach-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-coach-substitutions-v1.js",
+        "http://127.0.0.1:4173/ui/exercise-intelligence-substitutions-v1.js",
+        "http://127.0.0.1:4173/ui/voice-notes-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/strength-maxes-v1.js",
+        "http://127.0.0.1:4173/ui/progress-dashboard-v1.js?v=10",
+        "http://127.0.0.1:4173/ui/progress-dashboard-v3-polish.js",
+        "http://127.0.0.1:4173/ui/progress-dashboard-mount-guard.js?v=10",
+        "http://127.0.0.1:4173/ui/progress-conditioning-v4.js?v=1",
+        "http://127.0.0.1:4173/ui/progress-finalize-v4.js?v=1",
+        "http://127.0.0.1:4173/ui/mobile-recording-regression-v1.js?v=5",
+        "http://127.0.0.1:4173/ui/preview-readonly-set-cards-v1.js?v=3",
+        "http://127.0.0.1:4173/ui/home-reference-v3.js?v=4",
+        "http://127.0.0.1:4173/ui/home-main-option1-v1.js?v=1",
+        "http://127.0.0.1:4173/ui/profile-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/workout-logging-v2.js?v=2",
+        "http://127.0.0.1:4173/ui/saved-set-controls-v1.js?v=1",
+        "http://127.0.0.1:4173/ui/desktop-workspace-v1.js",
+        "http://127.0.0.1:4173/ui/desktop-nav-fixed-guard-v1.js",
+        "http://127.0.0.1:4173/ui/desktop-workspace-v2-polish.js"
+      ],
+      "active": "swipe-page workout-panel lmf-flow-panel lmf-flow-circuit active-page",
+      "markup": "\n    <div class=\"app-shell\">\n      \n    <header class=\"topbar\">\n      <a class=\"brand\" href=\"#/home\" aria-label=\"LetMeFly home\">\n        <div class=\"brand-mark lmf-official-brand-mark\"><img src=\"/brand/letmefly-logo-display-512.png?v=9\" alt=\"\" aria-hidden=\"true\"></div>\n        <div class=\"brand-word\">LETMEFLY<small>TRAIN HARDER. BECOME MORE.</small></div>\n      </a>\n      <div class=\"topbar-context\"><strong>Train</strong><span>CF • W1 • D1</span></div>\n      <div id=\"sync-pill\" class=\"sync-pill\"><i class=\"dot red\"></i>SIGN-IN REQUIRED</div>\n    </header>\n  \n      <main>\n    <section class=\"train-shell\">\n      <div class=\"train-header\">\n        <div><div class=\"page-kicker\">Crownforge Revised — Integrated • Week 1 • Day 1</div><h1>LOWER + PUSH STRENGTH / GLUTES</h1><p class=\"muted\">Strength-density day. Main lifts ramp; final heavy sets may be focused alone.</p></div>\n        <span class=\"badge mandatory\">Workout</span>\n      </div>\n      <div class=\"session-track\" id=\"session-track\"><button class=\"\" data-session-index=\"0\" aria-current=\"false\">READINESS</button><button data-session-index=\"1\" aria-current=\"false\" class=\"\">A</button><button data-session-index=\"2\" aria-current=\"step\" class=\"active\">B</button><button data-session-index=\"3\" aria-current=\"false\">C</button><button data-session-index=\"4\" aria-current=\"false\">REVIEW</button></div>\n      <div class=\"day-strip\"><button class=\"day-chip active\" data-day=\"1\"><strong>D1</strong><small>09-07</small></button><button class=\"day-chip \" data-day=\"2\"><strong>D2</strong><small>09-08</small></button><button class=\"day-chip \" data-day=\"3\"><strong>D3</strong><small>09-09</small></button><button class=\"day-chip \" data-day=\"4\"><strong>D4</strong><small>09-10</small></button><button class=\"day-chip \" data-day=\"5\"><strong>D5</strong><small>09-11</small></button><button class=\"day-chip \" data-day=\"6\"><strong>D6</strong><small>09-12</small></button><button class=\"day-chip \" data-day=\"7\"><strong>D7</strong><small>09-13</small></button></div>\n      \n      <div class=\"train-rule\"><strong>Readiness rule</strong><span>Front Squat + Bench are mandatory. Yellow keeps clean primary work and highest-value chest/glute support. Stop the ramp before a grinder.</span></div>\n      <div class=\"swipe-meta\"><span>Tap a section or use arrows</span><strong id=\"session-position\">3 / 5</strong></div>\n      <div class=\"session-nav\" aria-label=\"Workout section navigation\"><button class=\"session-nav-btn\" data-session-step=\"-1\" aria-label=\"Previ"
+    }
+  }
+}
