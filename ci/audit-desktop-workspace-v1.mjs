@@ -143,7 +143,10 @@ let currentPage = null
 try {
   browser = await launchBrowser()
 
-  const desktopContext = await browser.newContext({ viewport: { width: 1536, height: 960 }, deviceScaleFactor: 1 })
+  // Audit this build directly. The PWA controllerchange handler reloads on first
+  // install and can replace the onboarding form between fill() and click().
+  // Match the polish audit's isolation; keep native creation and DB verification.
+  const desktopContext = await browser.newContext({ viewport: { width: 1536, height: 960 }, deviceScaleFactor: 1, serviceWorkers: 'block' })
   const desktop = await desktopContext.newPage()
   currentPage = desktop
   await bootstrap(desktop, 'Desktop QA Athlete')
@@ -254,7 +257,7 @@ try {
   await desktop.screenshot({ path: path.join(outDir, 'desktop-train.png'), fullPage: true })
   await desktopContext.close()
 
-  const mobileContext = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true })
+  const mobileContext = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' })
   const mobile = await mobileContext.newPage()
   currentPage = mobile
   await bootstrap(mobile, 'Mobile QA Athlete')
