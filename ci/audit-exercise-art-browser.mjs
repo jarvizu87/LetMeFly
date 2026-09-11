@@ -7,6 +7,11 @@ const { chromium } = createRequire(path.join(app, 'package.json'))('playwright-c
 const out = path.join(app, 'EXERCISE_ART_AUDIT'); fs.mkdirSync(out, { recursive: true })
 const base = process.env.LMF_AUDIT_BASE_URL || 'http://127.0.0.1:4173'
 const report = { result: 'PASS', checks: [] }
+// Exercise the entire emitted cascade: older library badge rules must not
+// silently override component labels. A source-only stylesheet missed this.
+const builtHTML = fs.readFileSync(path.join(app, 'dist/index.html'), 'utf8')
+const productionStyles = (builtHTML.match(/<link\b[^>]*rel="stylesheet"[^>]*>/g) ?? []).join('\n')
+assert.ok(productionStyles.includes('/assets/'), 'compiled production styles are required')
 const policy = fs.readFileSync(path.join(root,'netlify.toml'),'utf8').match(/Content-Security-Policy = "([^"]+)"/)[1]
 async function enforcePolicy(context) {
   await context.route(`${base}/**`,async route=>{const response=await route.fetch();await route.fulfill({response,headers:{...response.headers(),'content-security-policy':policy}})})
@@ -36,8 +41,22 @@ try {
     const page = await context.newPage(), errors = [], external = []
     page.on('pageerror', error => errors.push(error.message))
     page.on('request', request => { if(/^https?:/.test(request.url())&&!request.url().startsWith(base))external.push(request.url()) })
-    await context.route('**/art-fixture', route => route.fulfill({contentType:'text/html',headers:{'content-security-policy':policy},body:'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/ui/private-art-audit.css"><style>body{margin:12px;background:#090b10;color:white}.library-thumb{display:block;width:140px;height:160px}.lmf-exercise-media{position:relative;width:360px;height:360px;max-width:100%;background-image:var(--exercise-art);background-size:contain;background-repeat:no-repeat}.exercise-card{max-width:360px}h3{font-family:system-ui}</style></head><body><h3>Authenticated private artwork</h3><div id="tile" class="library-thumb" data-exercise-art="squat"></div><div class="exercise-stack"><div id="preview" class="exercise-card" data-exercise-art="squat"></div><div class="exercise-card"><div id="media" class="lmf-exercise-media" data-exercise-art="squat"></div></div></div></body></html>'}))
-    await context.route('**/ui/private-art-audit.css',route=>route.fulfill({contentType:'text/css',body:fs.readFileSync(path.join(root,'overlays/ui-command-v2/batch-n/exercise-art-cloudinary.css'),'utf8')}))
+    await context.route('**/art-fixture', route => route.fulfill({contentType:'text/html',headers:{'content-security-policy':policy},body:`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">${productionStyles}<style>
+      :root{--v2-mountain:none;--v2-lifter:none;--v2-wolf:none}
+      body{margin:12px;background:#090b10;color:white}
+      #tile{width:92px} @media(max-width:420px){#tile{width:68px}}
+      #fixture{max-width:360px} .exercise-stack{display:block}
+      #media{position:relative;width:360px;height:360px;max-width:100%;background-image:var(--exercise-art);background-size:contain;background-repeat:no-repeat}
+      .exercise-card{max-width:360px} .small-previews{display:flex;gap:12px;align-items:center}
+      #desktop-tile{width:48px;height:48px}
+      </style></head><body><div id="fixture"><h3>Authenticated private artwork</h3>
+      <article class="library-card"><div id="tile" class="library-thumb" data-exercise-art="squat"></div><div class="library-copy"><h3 id="library-name">Squat</h3></div><i>›</i></article>
+      <section aria-label="Itinerary previews"><h3 id="itinerary-name">Squat</h3><div class="small-previews">
+      <div id="compact-tile" class="lmf-compact-thumb" aria-describedby="itinerary-name" data-exercise-art="squat"></div>
+      <div id="next-tile" class="lmf-next-thumb" aria-describedby="itinerary-name" data-exercise-art="squat"></div>
+      <div id="desktop-tile" class="lmf-desktop-flow-thumb" aria-describedby="itinerary-name" data-exercise-art="squat"></div>
+      </div></section>
+      <div class="exercise-stack"><div id="preview" class="exercise-card" data-exercise-art="squat"></div><div class="exercise-card"><div id="media" class="lmf-exercise-media" data-exercise-art="squat"></div></div></div></div></body></html>`}))
     await page.goto(`${base}/art-fixture`)
     await page.evaluate(async ({ a, b, legacy }) => {
       const db = await new Promise((resolve,reject) => { const r=indexedDB.open('letmefly-private',1);r.onupgradeneeded=()=>{for(const name of ['athletes','meta','workoutSets','outbox'])r.result.createObjectStore(name,{keyPath:name==='meta'?'key':'id'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error) })
@@ -57,7 +76,7 @@ try {
     await page.waitForTimeout(100)
     assert.equal(await page.evaluate(()=>window.downloads.length),0)
     assert.equal(await page.locator('#tile').evaluate(el=>el.style.getPropertyValue('--exercise-art')),'')
-    const setRows=async(rows,key='squat')=>page.evaluate(({rows,key})=>{window.cloudRows=rows;document.querySelectorAll('[data-exercise-art]').forEach(el=>el.dataset.exerciseArt=key);window.dispatchEvent(new Event('lmf:exercise-art-overrides-updated'))},{rows,key})
+    const setRows=async(rows,key='squat')=>page.evaluate(({rows,key})=>{window.cloudRows=rows;for(const heading of document.querySelectorAll('#itinerary-name,#library-name'))heading.textContent=rows[0]?.metadata.delivery.parts.map(part=>part.label).join(' / ')||key;document.querySelectorAll('[data-exercise-art]').forEach(el=>el.dataset.exerciseArt=key);window.dispatchEvent(new Event('lmf:exercise-art-overrides-updated'))},{rows,key})
     const applied=()=>page.waitForFunction(()=>document.querySelector('#tile').style.getPropertyValue('--exercise-art').includes('blob:'))
     await setRows([row(a,'squat')]);await applied()
     assert.equal(await page.evaluate(()=>window.downloads.length),1,'repeated DOM tiles share the exact asset download')
@@ -80,6 +99,7 @@ try {
     await page.locator('#media > .lmf-art-pair').waitFor()
     assert.deepEqual(await page.locator('#media .lmf-art-part > span').allTextContents(),['1. Front squat','2. Bench ramp sets'])
     assert.equal(await page.locator('#media .lmf-art-part-image').count(),2)
+    assert.equal(await page.locator('#tile .lmf-art-part-image').evaluateAll(images=>images.every(image=>{const box=image.getBoundingClientRect();return box.width>0&&box.height>0})),true,'paired library images remain visible')
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
     assert.ok(!(await page.locator('#tile').evaluate(el=>el.style.getPropertyValue('--exercise-art'))).includes(oldURL))
     await page.screenshot({path:path.join(out,`private-components-${width}.png`),fullPage:true})
@@ -100,7 +120,22 @@ try {
       assert.deepEqual(await page.locator('#tile .lmf-art-part-image').evaluateAll(images=>images.map(image=>image.getAttribute('aria-label'))),labels)
       assert.equal(await page.locator('#media .lmf-art-part-image').count(),3)
       assert.equal(await page.locator('#preview > .lmf-art-pair').count(),0,'native media owns the entire triple')
-      assert.equal(await page.locator('#tile .lmf-art-part > span').evaluateAll(labels=>labels.every(label=>label.scrollWidth<=label.clientWidth&&label.scrollHeight<=label.clientHeight)),true,'all three compact option names fit')
+      assert.equal(await page.locator('#tile').evaluate(el=>el.getBoundingClientRect().width),width===412?68:92,'actual small library widths are covered')
+      assert.equal(await page.locator('#library-name').textContent(),labels.join(' / '))
+      assert.equal(await page.locator('#library-name').evaluate(label=>{
+        const css=getComputedStyle(label),box=label.getBoundingClientRect()
+        return parseFloat(css.fontSize)>=16&&css.whiteSpace==='normal'&&box.width>0&&box.height>0&&label.scrollWidth<=label.clientWidth&&label.scrollHeight<=label.clientHeight
+      }),true,'complete option names fit beside the actual narrow library tile')
+      assert.equal(await page.locator('#tile .lmf-art-part > span').evaluateAll(labels=>labels.every(label=>getComputedStyle(label).display==='none')),true,'compact library uses its readable adjacent name')
+      for(const selector of ['#tile','#compact-tile','#next-tile','#desktop-tile']) {
+        assert.deepEqual(await page.locator(`${selector} .lmf-art-part-image`).evaluateAll(images=>images.map(image=>image.getAttribute('aria-label'))),labels)
+        assert.equal(await page.locator(`${selector} .lmf-art-part-image`).evaluateAll(images=>images.every(image=>{
+          const box=image.getBoundingClientRect(),host=image.closest('[data-exercise-art]').getBoundingClientRect()
+          return box.width>0&&box.height>0&&box.left>=host.left&&box.right<=host.right+1&&box.top>=host.top&&box.bottom<=host.bottom+1&&getComputedStyle(image).backgroundImage.includes('blob:')
+        })),true,`${selector}: every image fits inside the real thumbnail size`)
+      }
+      assert.equal(await page.locator('.small-previews .lmf-art-part > span').evaluateAll(labels=>labels.every(label=>getComputedStyle(label).display==='none')),true,'tiny previews use their adjacent full exercise name and image labels')
+      assert.equal(await page.locator('#itinerary-name').textContent(),labels.join(' / '))
       assert.equal(await page.locator('#media .lmf-art-part-image').evaluateAll(images=>images.every(image=>{const box=image.getBoundingClientRect();return box.width>0&&box.height>0&&getComputedStyle(image).backgroundImage.includes('blob:')})),true,'all three images are visible')
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
       await page.screenshot({path:path.join(out,`${key}-${width}.png`),fullPage:true})
@@ -119,7 +154,7 @@ try {
     const after=await page.evaluate(()=>window.snapshot());assert.deepEqual(after,before)
     assert.deepEqual(external,[],'private art must never request public or external image URLs')
     assert.deepEqual(await page.evaluate(()=>window.cspViolations),[],'private image decoding must comply with the production CSP')
-    report.checks.push(`${width}px: legacy maps inactive; authenticated blob images; deduped tile reads; stale download/athlete switch; foreign/duplicate rejection; quality fallback; paired components and all three cardio option sets; compact label fit; atomic fallback on missing third image; logout revocation; no public requests or runtime writes`)
+    report.checks.push(`${width}px: legacy maps inactive; authenticated blob images; deduped tile reads; stale download/athlete switch; foreign/duplicate rejection; quality fallback; paired components and all three cardio option sets; full production CSS at 68/92px library widths and real itinerary sizes; readable labels; atomic fallback on missing third image; logout revocation; no public requests or runtime writes`)
     await page.evaluate(async({a,b})=>{const db=await new Promise(resolve=>{const r=indexedDB.open('letmefly-private');r.onsuccess=()=>resolve(r.result)});await new Promise(resolve=>{const tx=db.transaction('athletes','readwrite');tx.objectStore('athletes').put({id:a,display_name:'QA Athlete A',deleted_at:'2026-01-01'});tx.objectStore('athletes').put({id:b,display_name:'QA Athlete B'});tx.oncomplete=resolve});db.close()},{a,b})
     await page.goto(`${base}/exercise-art-import.html`)
     await page.getByRole('heading',{name:'For QA Athlete B'}).waitFor()

@@ -32,8 +32,16 @@ Every source was checked through the production private-art contract. All 40 ali
 The final display-case follow-up is recorded in `database/exercise-art-final-display-cases.json`:
 - Bike / Row / Walk; Walk, Bike, or Elliptical; Bike, Row, or Elliptical now have three individually approved source images. The updated renderer validates all three and presents contained images with unnumbered, readable option labels. The older production renderer retains its fallback until this code is published.
 - Relaxed Breathing reuses the approved quiet seated pose without importing box-breathing timing. Generic Curl uses the approved supinated curl illustration without changing the equipment-neutral program prescription. Both exact aliases are active.
-- Five final aliases bring the active lookup total to 227, still referencing the original 163 images. No new bytes were uploaded for these cases.
-- Machine Hip Abduction has a dedicated reviewed illustration ready. Automatic approval review rejected its upload because it requires explicit approval of that new image payload and the existing private Supabase destination. The new image remains unuploaded and unmapped; its temporary transfer endpoint was closed. Finish that approval and verify delivery before declaring the library complete or publishing the final batch.
+- Five final aliases bring the active lookup total to 227, referencing the original 163 images. No new bytes were needed for these cases.
+- Machine Hip Abduction now has a dedicated reviewed and explicitly owner-approved illustration. The exact approved image was uploaded to the existing private bucket; the stored SHA-256 and byte count match the selected source. Its mapping is active and its temporary transfer endpoint is closed. The completed library has 228 exact mappings and 164 private images, covering all 147 exercise labels in the governed programs.
 - Three non-exercise entries—verified Crownforge results, Black Crown entry TM rules, and full rest—intentionally have no exercise thumbnail.
 
 Actual physical-phone acceptance is separate from browser verification. No workout, readiness, profile, training-max or progression data is changed by this follow-up.
+
+## Final thumbnail release
+
+PR #87 passed its nine checks and Netlify preview, all 10 private-art tests, and all 16 browser subaudits in [run 34652787001](https://github.com/jarvizu87/LetMeFly/actions/runs/34652787001). The merged application also passed [run 34653358605](https://github.com/jarvizu87/LetMeFly/actions/runs/34653358605). Three-option cards were checked at 412px and 1440px, including label fit, complete image delivery, missing-component fallback, native-media deduplication and logout cleanup.
+
+The final artwork transfer occurred only after the owner explicitly approved the new image, private destination and final publication. Anonymous access, assets outside the exact transfer manifest, and altered bytes were rejected. Owner and nonowner isolation tests were repeated after all 228 mappings were active. All legacy public copies remain retired.
+
+Publish this completed batch once through the existing intentional `[release netlify]` gate. No duplicate site, image reupload or legacy cutover is required. Device-specific physical-phone acceptance remains a separate check after publication.
