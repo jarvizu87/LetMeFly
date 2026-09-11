@@ -112,7 +112,25 @@ try {
  })
  check(true,'Resize preserves visible center page and native active-section agreement')
  check(await domain()===before,'Presentation/tools/resize do not alter saved workout or outbox')
+ // Record steady state and a native-size screenshot before any full-page capture.
+ // Full-page capture itself can resize/scroll a responsive document.
+ async function captureGeometry() {
+  return page.evaluate(() => {
+   const viewport=document.querySelector('#swipe-viewport'), box=viewport.getBoundingClientRect()
+   return {scrollLeft:viewport.scrollLeft, viewport:{left:box.left,width:box.width,top:box.top,height:box.height},
+    pages:[...viewport.querySelectorAll(':scope > .swipe-page')].map(p=>{const r=p.getBoundingClientRect();return {active:p.classList.contains('active-page'),heading:p.querySelector('h2')?.textContent,left:r.left,width:r.width,top:r.top,height:r.height}})}
+  })
+ }
+ await page.waitForTimeout(600)
+ report.observations.beforeViewportCapture=await captureGeometry()
+ const selected=report.observations.beforeViewportCapture.pages.find(p=>p.active)
+ const frame=report.observations.beforeViewportCapture.viewport
+ check(/Main Strength Circuit/i.test(selected?.heading || '') && Math.abs(selected.left+selected.width/2-frame.left-frame.width/2)<4,
+  'Resize selection remains stable after native scrolling settles',report.observations.beforeViewportCapture)
+ await page.screenshot({path:path.join(out,'desktop-viewport.png'),fullPage:false})
+ report.observations.afterViewportCapture=await captureGeometry()
  await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true})
+ report.observations.afterFullPageCapture=await captureGeometry()
  check(report.observations.runtimeErrors.length===0,'No desktop runtime errors',report.observations.runtimeErrors)
  report.result='PASS'
 } catch(error) {report.result='FAIL'; report.failures.push({message:error.message,stack:error.stack});console.error(error)}

@@ -3,7 +3,7 @@ name: LetMeFly Parallel 43 and 53 Integration
 on:
   workflow_dispatch:
   push:
-    branches: [qa/integration-43-53]
+    branches: [qa/integration-43-53, qa/issue53-finish]
 
 permissions:
   contents: read
@@ -92,7 +92,7 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        scenario: [recovery, desktop, browser, native-faults, adversarial, perfect, variable, restart, grouped-metrics, substitution]
+        scenario: [recovery, desktop, browser, public-ui, native-faults, adversarial, perfect, variable, restart, grouped-metrics, substitution]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -143,13 +143,15 @@ jobs:
             recovery)
               node ci/audit-workout-completion-recovery.mjs .build-src/letmefly_app 2>&1 | tee qa-evidence/recovery.log
               ;;
-            desktop|browser)
+            desktop|browser|public-ui)
               python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >qa-evidence/http.log 2>&1 &
               SERVER_PID=$!
               trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
               for i in {1..40}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 0.25; done
               curl -fsS http://127.0.0.1:4173/ >/dev/null
-              if [[ "$QA_SCENARIO" == 'desktop' ]]; then
+              if [[ "$QA_SCENARIO" == 'public-ui' ]]; then
+                node ci/audit-lifecycle-public-ui.mjs 2>&1 | tee qa-evidence/public-ui.log
+              elif [[ "$QA_SCENARIO" == 'desktop' ]]; then
                 node ci/audit-desktop-polish-v2.mjs 2>&1 | tee qa-evidence/desktop-polish.log
                 node ci/audit-desktop-workspace-v1.mjs 2>&1 | tee qa-evidence/desktop-base.log
               else
