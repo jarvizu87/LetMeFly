@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { parseProfileImport, mergeProfilePatch, profileValues } from '../overlays/profile-context-v1/contract.mjs'
+import { parseProfileImport, mergeProfilePatch, profileValues, preserveLocalProfileContext } from '../overlays/profile-context-v1/contract.mjs'
 const athlete = { id: 'qa', primary_goal: 'Old goal', profile_context_v2: { primaryGoal: '', equipmentAccess: { rack: { availability: 'available' } } } }
 const file = fields => JSON.stringify({ format: 'letmefly-athlete-profile', formatVersion: 1, athleteId: 'qa', profileContext: fields })
 test('profile import is identity-bound and cannot import workout or training-max data', () => {
@@ -39,4 +39,15 @@ test('manual clear is explicit and changes only selected fields', () => {
   const current = { id: 'qa', profile_context_v2: { primaryGoal: 'Goal', height: '180 cm' } }
   const next = mergeProfilePatch(current, { primaryGoal: '' }, { primaryGoal: 'Goal' }, 'now')
   assert.equal(next.primaryGoal, ''); assert.equal(next.height, '180 cm')
+})
+test('nullable cloud-column rollout preserves local context without blocking explicit remote objects', () => {
+  const previous = { profile_context_v2: { age: '39', height: '5 ft 6 in' } }
+  for (const payload of [{ revision: 2 }, { revision: 2, profile_context_v2: null }]) {
+    assert.deepEqual(preserveLocalProfileContext(payload, previous).profile_context_v2, previous.profile_context_v2)
+    assert.equal(payload.profile_context_v2 == null, true)
+  }
+  for (const profile_context_v2 of [{}, { age: '' }, { age: '40' }]) {
+    const payload = { profile_context_v2 }
+    assert.equal(preserveLocalProfileContext(payload, previous), payload)
+  }
 })

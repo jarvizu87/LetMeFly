@@ -59,6 +59,7 @@ bash "$ROOT_DIR/ci/apply-native-database-boundaries-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-completion-recovery-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-profile-context-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-exercise-art-context-v1.sh" "$TARGET"
+bash "$ROOT_DIR/ci/apply-barbell-settings-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-recap-v1.sh" "$TARGET"
 
 # Assert the source-level persistence/count boundary before minification. Vite is

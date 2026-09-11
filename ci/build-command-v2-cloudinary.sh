@@ -8,6 +8,7 @@ CLOUDINARY_JS="overlays/ui-command-v2/batch-n/exercise-art-cloudinary.js"
 CLOUDINARY_CSS="overlays/ui-command-v2/batch-n/exercise-art-cloudinary.css"
 READINESS_COMFORT_CSS="overlays/ui-command-v2/batch-o/readiness-mobile-comfort.css"
 ART_IMPORT_HTML="overlays/ui-command-v2/batch-q/exercise-art-import.html"
+ART_IMPORT_MODULE="overlays/ui-command-v2/batch-q/exercise-art-import.mjs"
 
 # First reconstruct and validate the exact hardened Command V2 production source.
 bash ci/build-command-v2-hardening.sh
@@ -31,18 +32,20 @@ test -s "$CLOUDINARY_JS"
 test -s "$CLOUDINARY_CSS"
 test -s "$READINESS_COMFORT_CSS"
 test -s "$ART_IMPORT_HTML"
+test -s "$ART_IMPORT_MODULE"
+node --check "$ART_IMPORT_MODULE"
 node --check "$CLOUDINARY_JS"
 
 grep -Fq "LetMeFlyExerciseArt" "$CLOUDINARY_JS"
-grep -Fq "cloudinary_public_id" "$CLOUDINARY_JS"
+grep -Fq "readAsset" "$CLOUDINARY_JS"
 grep -Fq "privateExerciseArtMap" "overlays/ui-command-v2/batch-n/exercise-art-contract.mjs"
 ! grep -Fq "letmefly/private/jp" "$CLOUDINARY_JS"
 ! grep -Fq "localStorage.setItem" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/mine/" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/others/" "$CLOUDINARY_JS"
-grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" "$CLOUDINARY_JS"
-grep -Fq "letmefly-private-exercise-art-map" "$ART_IMPORT_HTML"
-grep -Fq "privateExerciseArtMap" "$ART_IMPORT_HTML"
+! grep -Fq "res.cloudinary.com" "$CLOUDINARY_JS"
+grep -Fq "letmefly-private-exercise-art-map" "$ART_IMPORT_MODULE"
+grep -Fq "privateExerciseArtMap" "$ART_IMPORT_MODULE"
 grep -Fq "var(--exercise-art,var(--v2-mountain))" "$CLOUDINARY_CSS"
 grep -Fq "background-size:cover!important" "$CLOUDINARY_CSS"
 grep -Fq "filter:none!important" "$CLOUDINARY_CSS"
@@ -62,12 +65,13 @@ cat "$ROOT_DIR/$READINESS_COMFORT_CSS" >> src/command-v2.css
 # The native bridge owns authenticated reads; presentation contains no tokens or mapping.
 mkdir -p public/ui
 cp "$ROOT_DIR/$ART_IMPORT_HTML" public/exercise-art-import.html
+cp "$ROOT_DIR/$ART_IMPORT_MODULE" public/ui/exercise-art-import.mjs
 cp "$ROOT_DIR/overlays/ui-command-v2/batch-n/exercise-art-contract.mjs" public/ui/exercise-art-contract.mjs
 cp "$ROOT_DIR/$CLOUDINARY_JS" public/ui/exercise-art-cloudinary.js
 node --check public/ui/exercise-art-cloudinary.js
 
 grep -Fq "privateExerciseArtMap" public/ui/exercise-art-contract.mjs
-grep -Fq "privateExerciseArtMap" public/exercise-art-import.html
+grep -Fq "privateExerciseArtMap" public/ui/exercise-art-import.mjs
 grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" public/ui/workout-flow-v1.js
 ! grep -Fq "activeTab.scrollIntoView" public/ui/workout-flow-v1.js
 
@@ -109,9 +113,9 @@ grep -Fq "/ui/exercise-art-auto.js" dist/index.html
 grep -Fq "/ui/workout-flow-v1.js" dist/index.html
 grep -Fq "/ui/pyramid-flow-v1.js" dist/index.html
 grep -Fq "LetMeFlyExerciseArt" dist/ui/exercise-art-cloudinary.js
-grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
+grep -Fq "readAsset" dist/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-contract.mjs
-grep -Fq "privateExerciseArtMap" dist/exercise-art-import.html
+grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-import.mjs
 grep -Fq 'jp-${slug}-v2' dist/ui/exercise-art-auto.js
 grep -Fq "lmf-set-tabs" dist/ui/workout-flow-v1.js
 grep -Fq "lmf-compact-summary" dist/ui/workout-flow-v1.js
@@ -124,7 +128,7 @@ grep -Fq "lmf-pyramid-plan-row" dist/ui/pyramid-flow-v1.js
 ! grep -Fq "__LMF_SUPABASE_" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
-grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
+! grep -Fq "res.cloudinary.com" dist/ui/exercise-art-cloudinary.js
 
 # Verify the user-visible mobile/video/art/workout-flow changes in the minified
 # production bundle without depending on the minifier's exact whitespace.
