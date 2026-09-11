@@ -1,0 +1,48 @@
+name: LetMeFly Database Race Probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [qa/full-lifecycle-soak]
+    paths: ['.github/workflows/lifecycle-database-race-probe.yml']
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  race:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e63a0c7cbe610dfb473489fe687876773c57377f
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifecycle-db-prepared-a64dccd902b1c4885a9e1f59aa5808b4366191aa
+          path: test-kit
+          run-id: 34556854631
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run bounded concurrent-start probe against the already-built exact source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build-src/letmefly_app qa-evidence
+          tar -xzf test-kit/letmefly-lifecycle-test-kit.tgz -C .build-src/letmefly_app
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          node ci/audit-lifecycle-database-soak.mjs .build-src/letmefly_app adversarial 2>&1 | tee qa-evidence/race-probe.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lifecycle-database-race-probe-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/DATABASE_LIFECYCLE_AUDIT
+            .build-src/letmefly_app/qa-runtime/provenance.json
+            qa-evidence
+          if-no-files-found: error
+          retention-days: 14
