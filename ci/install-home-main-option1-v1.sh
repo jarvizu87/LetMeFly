@@ -56,6 +56,7 @@ cp "$CARD_SRC" "$CARD_OUT"
 cp "$DESKTOP_SRC" "$DESKTOP_OUT"
 cat "$MOCKUP_SRC" >> "$DESKTOP_OUT"
 cp "$JS_SRC" "$JS_OUT"
+printf '\n;\n' >> "$JS_OUT"
 cat "$NAV_SRC" >> "$JS_OUT"
 # The historic filename stays stable for the existing Home CSS contract, while
 # the bytes now come from the approved cinematic red mountain landscape.
