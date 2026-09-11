@@ -1,0 +1,156 @@
+name: LetMeFly Database Lifecycle Soak
+
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+concurrency:
+  group: database-lifecycle-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PRODUCTION_SHA: ${{ github.sha }}
+  VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+
+jobs:
+  prepare:
+    name: Prepare exact production service test kit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PRODUCTION_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Reconstruct exact governed production assembly without deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PRODUCTION_SHA"
+          python3 - <<'PY' > "$RUNNER_TEMP/assembly.sh"
+          import pathlib, tomllib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash "$RUNNER_TEMP/assembly.sh"
+          printf '%s\n' 'Lifecycle QA reconstructed the app without invoking deployment.' > "$RUNNER_TEMP/release-held.log"
+      - name: Create QA-only service entry outside production dist
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cat > .qa-lifecycle-entry.ts <<'TS'
+          import * as athlete from './src/services/athlete-service'
+          import * as workout from './src/services/workout-service'
+          import * as progression from './src/services/program-progression-service'
+          import * as readiness from './src/services/readiness-service'
+          import * as db from './src/db/local-db'
+          import * as mutations from './src/db/local-mutations'
+          import * as programs from './src/data/programs'
+          if (location.hostname !== '127.0.0.1' || new URLSearchParams(location.search).get('disposable-qa') !== '1') {
+            throw new Error('QA service bridge is restricted to an explicit disposable loopback page')
+          }
+          ;(window as any).__LMF_LIFECYCLE_QA__ = Object.freeze({ athlete, workout, progression, readiness, db, mutations, programs })
+          TS
+          node --input-type=module <<'JS'
+          import { build } from 'vite'
+          await build({ configFile: false, publicDir: false, build: { outDir: 'qa-runtime', emptyOutDir: true, minify: false,
+            lib: { entry: '.qa-lifecycle-entry.ts', name: 'LifecycleQA', formats: ['es'], fileName: () => 'services.js' } } })
+          JS
+          printf '%s\n' '<!doctype html><title>Disposable IndexedDB Lifecycle QA</title><script type="module" src="./services.js"></script>' > qa-runtime/index.html
+          cp "$RUNNER_TEMP/release-held.log" qa-runtime/release-held.log
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path('.')
+          sources = {str(p):hashlib.sha256(p.read_bytes()).hexdigest() for folder in ['src','dist'] for p in sorted(root.joinpath(folder).rglob('*')) if p.is_file()}
+          pathlib.Path('qa-runtime/provenance.json').write_text(json.dumps({'productionSha': os.environ['PRODUCTION_SHA'], 'sourceHashes':sources,
+            'scope':'Unmodified production services in separate QA bundle; no production UI bridge or deployment'},indent=2)+'\n')
+          PY
+          cd ../..
+          git diff --exit-code HEAD -- .
+          tar -czf "$RUNNER_TEMP/letmefly-lifecycle-test-kit.tgz" -C .build-src/letmefly_app src dist qa-runtime node_modules package.json tsconfig.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-db-prepared-${{ env.PRODUCTION_SHA }}
+          path: ${{ runner.temp }}/letmefly-lifecycle-test-kit.tgz
+          if-no-files-found: error
+          retention-days: 3
+
+  database:
+    name: IndexedDB ${{ matrix.scenario }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        scenario: [perfect, variable, restart, grouped-metrics, substitution, adversarial, native-faults]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifecycle-db-prepared-${{ env.PRODUCTION_SHA }}
+          path: test-kit
+      - name: Unpack exact kit and validate QA code
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build-src/letmefly_app
+          tar -xzf test-kit/letmefly-lifecycle-test-kit.tgz -C .build-src/letmefly_app
+          node --check ci/audit-lifecycle-database-soak.mjs
+          node --check ci/lifecycle-database-scenarios.js
+          node --check ci/audit-lifecycle-indexeddb-v1.mjs
+          python3 - <<'PY'
+          import json, os, pathlib
+          p=json.loads(pathlib.Path('.build-src/letmefly_app/qa-runtime/provenance.json').read_text())
+          assert p['productionSha']==os.environ['PRODUCTION_SHA']
+          PY
+      - name: Run actual production services through on-disk Chromium IndexedDB
+        shell: bash
+        env:
+          QA_SCENARIO: ${{ matrix.scenario }}
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          mkdir -p qa-evidence
+          if [[ "$QA_SCENARIO" == 'native-faults' ]]; then
+            node ci/audit-lifecycle-indexeddb-v1.mjs .build-src/letmefly_app faults 2>&1 | tee "qa-evidence/$QA_SCENARIO.log"
+          else
+            node ci/audit-lifecycle-database-soak.mjs .build-src/letmefly_app "$QA_SCENARIO" 2>&1 | tee "qa-evidence/$QA_SCENARIO.log"
+          fi
+      - name: Verify source and production distribution remained unchanged
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          app=pathlib.Path('.build-src/letmefly_app')
+          data=json.loads((app/'qa-runtime/provenance.json').read_text())
+          for name,expected in data['sourceHashes'].items(): assert hashlib.sha256((app/name).read_bytes()).hexdigest()==expected,name
+          PY
+          git diff --exit-code HEAD -- .
+      - name: Publish actual database evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-db-${{ matrix.scenario }}-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/LIFECYCLE_DATABASE_faults
+            .build-src/letmefly_app/DATABASE_LIFECYCLE_AUDIT
+            .build-src/letmefly_app/qa-runtime/provenance.json
+            .build-src/letmefly_app/qa-runtime/release-held.log
+            qa-evidence
+          if-no-files-found: error
+          retention-days: 14
