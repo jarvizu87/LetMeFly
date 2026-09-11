@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
+import { applicationBootState } from './browser-boot-contract.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const target = path.join(root, '.build-src', 'letmefly_app')
@@ -82,28 +83,18 @@ async function waitForAthleteNameInput(page) {
 
 async function bootstrap(page, name) {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
-  await page.waitForSelector('body', { timeout: 10000 })
-  await page.waitForFunction(() => /LETMEFLY/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
-
-  let create = null
-  for (let i = 0; i < 20; i += 1) {
-    await dismissInstall(page)
-    create = await clickable(page, /^\s*CREATE LOCAL ATHLETE\s*$/i)
-    if (create) break
-    if (await clickable(page, /\bTRAIN\b/i)) break
-    await page.waitForTimeout(160)
-  }
-
-  if (create) {
-    const input = await waitForAthleteNameInput(page)
-    if (!input) throw new Error('Athlete name input missing after setup modal settled')
-    await input.fill(name)
-    await dismissInstall(page)
+  await page.waitForFunction(applicationBootState, null, { timeout: 20000 })
+  await dismissInstall(page)
+  // A navigation link under the first-run modal is not a signed-in athlete.
+  // Require the native form to finish before any workspace assertions run.
+  const create = page.locator('[data-action="create-athlete"]')
+  if (await create.count()) {
+    await page.locator('#onboard-name').fill(name)
     await create.click({ timeout: 5000 })
-    await page.waitForFunction(() => !/CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
-    await page.waitForTimeout(450)
+    await create.waitFor({ state: 'detached', timeout: 10000 })
   }
-
+  await page.waitForFunction(() => !document.querySelector('[data-action="create-athlete"]')
+    && Boolean(document.querySelector('#app .app-shell main')?.textContent?.trim()), null, {timeout:10000})
   for (let i = 0; i < 6; i += 1) {
     await dismissInstall(page)
     await page.waitForTimeout(140)
@@ -173,8 +164,8 @@ try {
     if (!(shell instanceof HTMLElement) || !(viewport instanceof HTMLElement)) return null
     const style = getComputedStyle(shell)
     const shellRect = shell.getBoundingClientRect()
-    const flowRect = flow?.getBoundingClientRect()
     const viewportRect = viewport.getBoundingClientRect()
+    const flowRect = flow?.getBoundingClientRect()
     const contextRect = context?.getBoundingClientRect()
     return {
       display: style.display,
