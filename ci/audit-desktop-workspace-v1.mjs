@@ -71,30 +71,39 @@ async function clickable(page, pattern) {
     || await firstVisible(page.getByText(pattern))
 }
 
-async function waitForAthleteNameInput(page) {
-  for (let i = 0; i < 24; i += 1) {
-    const input = await firstVisible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
-    if (input) return input
-    await dismissInstall(page)
-    await page.waitForTimeout(120)
-  }
-  return null
-}
-
 async function bootstrap(page, name) {
-  await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
+  // This audit owns the Train workspace. Enter that native route directly;
+  // Home is independently mounted and is covered by its own browser audit.
+  await page.goto('http://127.0.0.1:4173/#/train', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForFunction(applicationBootState, null, { timeout: 20000 })
   await dismissInstall(page)
-  // A navigation link under the first-run modal is not a signed-in athlete.
-  // Require the native form to finish before any workspace assertions run.
   const create = page.locator('[data-action="create-athlete"]')
-  if (await create.count()) {
-    await page.locator('#onboard-name').fill(name)
-    await create.click({ timeout: 5000 })
-    await create.waitFor({ state: 'detached', timeout: 10000 })
+  await page.locator('#onboard-name').fill(name)
+  await create.click({ timeout: 5000 })
+  await create.waitFor({ state: 'detached', timeout: 10000 })
+
+  // A dismissed form or a navigation link alone cannot prove onboarding.
+  // Read the record written by the actual button handler; never seed a fixture.
+  const savedNames = await page.evaluate(async () => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('letmefly-private')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    try {
+      const records = await new Promise((resolve, reject) => {
+        const request = db.transaction('athletes', 'readonly').objectStore('athletes').getAll()
+        request.onsuccess = () => resolve(request.result)
+        request.onerror = () => reject(request.error)
+      })
+      return records.filter(record => !record.deleted_at).map(record => record.display_name)
+    } finally { db.close() }
+  })
+  if (savedNames.length !== 1 || savedNames[0] !== name) {
+    throw new Error('Native onboarding did not persist the requested disposable athlete')
   }
   await page.waitForFunction(() => !document.querySelector('[data-action="create-athlete"]')
-    && Boolean(document.querySelector('#app .app-shell main')?.textContent?.trim()), null, {timeout:10000})
+    && Boolean(document.querySelector('#swipe-viewport .swipe-page h2')?.textContent?.trim()), null, { timeout: 10000 })
   for (let i = 0; i < 6; i += 1) {
     await dismissInstall(page)
     await page.waitForTimeout(140)
@@ -111,25 +120,32 @@ async function enterTrain(page) {
 }
 
 async function probeExerciseSection(page) {
-  if (await page.locator('.lmf-desktop-flow-item').count()) return true
-  const sectionButtons = page.locator('[data-session-step]')
-  const count = await sectionButtons.count()
-  for (let i = 0; i < count; i += 1) {
-    const button = sectionButtons.nth(i)
-    if (!(await button.isVisible().catch(() => false))) continue
-    await button.click({ timeout: 3500 }).catch(() => null)
-    await page.waitForTimeout(420)
-    if (await page.locator('.lmf-desktop-flow-item').count()) return true
+  // Complete readiness and start a real governed W1D1 workout, rather than
+  // reporting an exercise-reuse pass when only a preview was available.
+  const readiness = page.locator('.swipe-page.active-page .readiness-field input[type="radio"][value="3"]')
+  if (await readiness.count() < 4) throw new Error('Native readiness choices missing')
+  for (const input of await readiness.all()) {
+    await input.locator('..').click({ timeout: 5000 })
+    if (!(await input.isChecked())) throw new Error('Native readiness label did not select its input')
   }
-  return false
+  await dismissInstall(page)
+  await page.locator('.swipe-page.active-page [data-action="start-workout"]').click({ timeout: 5000 })
+  await page.waitForSelector('.exercise-stack > .active-exercise', { state: 'attached', timeout: 10000 })
+  await page.locator('[data-session-index="2"]').click({ timeout: 5000 })
+  await page.waitForFunction(() => /Main Strength Circuit/i.test(
+    document.querySelector('.swipe-page.active-page .workout-panel-head h2')?.textContent || ''), null, { timeout: 10000 })
+  await page.waitForSelector('.lmf-desktop-flow-item', { timeout: 10000 })
+  return true
 }
 
 let browser = null
+let currentPage = null
 try {
   browser = await launchBrowser()
 
   const desktopContext = await browser.newContext({ viewport: { width: 1536, height: 960 }, deviceScaleFactor: 1 })
   const desktop = await desktopContext.newPage()
+  currentPage = desktop
   await bootstrap(desktop, 'Desktop QA Athlete')
 
   const desktopFlag = await desktop.locator('html').getAttribute('data-lmf-desktop-ui')
@@ -232,7 +248,7 @@ try {
     if (liveReuse.art || (liveReuse.image && liveReuse.image !== 'none')) pass('Desktop workspace reuses exercise artwork hook', liveReuse.art || 'resolved background image')
     else fail('Desktop workspace reuses exercise artwork hook', JSON.stringify(liveReuse))
   } else {
-    pass('Exercise-card desktop reuse probe', 'Current QA program surface exposed no exercise section; workspace contract still verified')
+    fail('Exercise-card desktop reuse probe', 'Native workout could not reach its governed exercise section')
   }
 
   await desktop.screenshot({ path: path.join(outDir, 'desktop-train.png'), fullPage: true })
@@ -240,6 +256,7 @@ try {
 
   const mobileContext = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true })
   const mobile = await mobileContext.newPage()
+  currentPage = mobile
   await bootstrap(mobile, 'Mobile QA Athlete')
   const mobileState = await mobile.evaluate(() => ({
     desktopFlag: document.documentElement.getAttribute('data-lmf-desktop-ui'),
@@ -252,6 +269,14 @@ try {
   else fail('Mobile UI remains isolated from desktop layer', JSON.stringify(mobileState))
   await mobileContext.close()
 } catch (error) {
+  if (currentPage && !currentPage.isClosed()) {
+    report.observations.failureSnapshot = await currentPage.evaluate(() => ({
+      url: location.href, width: innerWidth, body: document.body.innerText.slice(0, 6000),
+      athleteForm: Boolean(document.querySelector('[data-action="create-athlete"]')),
+      trainViewport: Boolean(document.querySelector('#swipe-viewport')),
+    })).catch(() => null)
+    await currentPage.screenshot({ path: path.join(outDir, 'failure-viewport.png'), fullPage: false }).catch(() => null)
+  }
   fail('Desktop workspace audit execution', error instanceof Error ? error.message : String(error))
 } finally {
   if (browser) await browser.close().catch(() => null)
