@@ -39,6 +39,7 @@
   }
 
   function settingsRead() {
+    if (window.LetMeFlyBarbellSettings) return window.LetMeFlyBarbellSettings.read(DEFAULTS)
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY)
       const parsed = raw ? JSON.parse(raw) : {}
@@ -180,6 +181,11 @@
 
     line.classList.remove('is-empty')
     line.dataset.lmfLiveLoad = formatWeight(target)
+    if (settings[unit === 'kg' ? 'inventoryConfirmedKg' : 'inventoryConfirmedLb'] === false) {
+      writeText(strong, `${formatWeight(selectedBar)} ${unit} bar • confirm plate counts in Bar Loader`)
+      line.dataset.lmfLoadExact = 'false'
+      return
+    }
 
     if (target < minimum) {
       writeText(strong, `${formatWeight(selectedBar)} ${unit} bar • target below bar${collars > 0 ? ' + collars' : ''}`)
@@ -209,12 +215,14 @@
   }
 
   function scheduleSync(delay = 0) {
-    window.clearTimeout(refreshTimer)
-    refreshTimer = window.setTimeout(() => syncAll(document), delay)
+    if (refreshTimer !== null) return
+    refreshTimer = window.setTimeout(() => { refreshTimer = null; syncAll(document) }, delay)
   }
 
   function start() {
     syncAll(document)
+    window.addEventListener('lmf:barbell-settings-changed', () => scheduleSync(0))
+    window.addEventListener('lmf:barbell-inventory-saved', () => scheduleSync(0))
 
     document.addEventListener('input', (event) => {
       const target = event.target instanceof Element ? event.target : null
