@@ -99,8 +99,58 @@ if 'function workoutSubstitutionRefreshLiveLocks()' not in main:
   }
 }
 
+function workoutSubstitutionRefreshPresentationIntegrations(): void {
+  const refreshBarLoader = () => (window as any).LetMeFlyBarLoader?.refresh?.()
+  refreshBarLoader()
+  window.requestAnimationFrame(() => refreshBarLoader())
+  window.setTimeout(refreshBarLoader, 120)
+}
+
 '''
     main = main[:idx] + helper + main[idx:]
+
+if 'function workoutSubstitutionRefreshPresentationIntegrations()' not in main:
+    marker = 'function workoutSubstitutionPreview(workoutExerciseId: string, alternativeExerciseKey: string) {'
+    idx = main.find(marker)
+    if idx < 0:
+        raise SystemExit('Issue #54 presentation refresh helper insertion point missing')
+    helper = r'''function workoutSubstitutionRefreshPresentationIntegrations(): void {
+  const refreshBarLoader = () => (window as any).LetMeFlyBarLoader?.refresh?.()
+  refreshBarLoader()
+  window.requestAnimationFrame(() => refreshBarLoader())
+  window.setTimeout(refreshBarLoader, 120)
+}
+
+'''
+    main = main[:idx] + helper + main[idx:]
+
+# A workout-only substitution replaces the displayed exercise identity in-place.
+# Explicitly hand that new card to presentation utilities after render instead of
+# relying solely on MutationObserver timing. This keeps Bar Loader bound to the
+# movement actually being performed and also cleans stale controls on Undo.
+apply_boundary = """    showToast(`Using ${alternativeName} for this workout only`)
+    render()
+    return { ok: true, workoutExerciseId: input.workoutExerciseId, alternativeExerciseName: alternativeName }"""
+apply_refresh = """    showToast(`Using ${alternativeName} for this workout only`)
+    render()
+    workoutSubstitutionRefreshPresentationIntegrations()
+    return { ok: true, workoutExerciseId: input.workoutExerciseId, alternativeExerciseName: alternativeName }"""
+if apply_boundary in main:
+    main = main.replace(apply_boundary, apply_refresh, 1)
+elif main.count('workoutSubstitutionRefreshPresentationIntegrations()') < 2:
+    raise SystemExit('Issue #54 apply presentation refresh boundary missing')
+
+revert_boundary = """    showToast('Restored the programmed exercise for this workout')
+    render()
+    return { ok: true, workoutExerciseId }"""
+revert_refresh = """    showToast('Restored the programmed exercise for this workout')
+    render()
+    workoutSubstitutionRefreshPresentationIntegrations()
+    return { ok: true, workoutExerciseId }"""
+if revert_boundary in main:
+    main = main.replace(revert_boundary, revert_refresh, 1)
+elif main.count('workoutSubstitutionRefreshPresentationIntegrations()') < 3:
+    raise SystemExit('Issue #54 revert presentation refresh boundary missing')
 
 if '  refreshLocks() {' not in main:
     needle = '  async apply(input: { workoutExerciseId: string;'
@@ -118,7 +168,10 @@ grep -Fq 'substitutionPerformanceLoggedAt: completedAt' "$SERVICE"
 grep -Fq 'substitutionPerformanceLoggedAt' "$MAIN"
 grep -Fq 'Completed substitute work cannot be relabeled' "$SERVICE"
 grep -Fq 'function workoutSubstitutionRefreshLiveLocks()' "$MAIN"
+grep -Fq 'function workoutSubstitutionRefreshPresentationIntegrations()' "$MAIN"
+grep -Fq 'LetMeFlyBarLoader?.refresh?.()' "$MAIN"
+[[ "$(grep -Fc 'workoutSubstitutionRefreshPresentationIntegrations()' "$MAIN")" -ge 3 ]]
 grep -Fq 'refreshLocks()' "$MAIN"
 grep -Fq 'Completed substitute work is locked to the exercise actually performed.' "$MAIN"
 
-echo "Issue #54 logged substitute history lock: PASS"
+echo "Issue #54 logged substitute history lock + performed-exercise presentation refresh: PASS"
