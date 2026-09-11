@@ -2,6 +2,7 @@
   if (!('serviceWorker' in navigator)) return;
 
   let refreshing = false;
+  let previousController = navigator.serviceWorker.controller;
 
   async function refreshRegistration() {
     try {
@@ -20,7 +21,12 @@
   });
 
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
+    const nextController = navigator.serviceWorker.controller;
+    const hadController = previousController;
+    previousController = nextController;
+    // First installation already serves this build. Reloading here can erase
+    // an athlete name or interrupt the first native save between input and click.
+    if (!hadController || !nextController || hadController === nextController || refreshing) return;
     refreshing = true;
     window.location.reload();
   });
