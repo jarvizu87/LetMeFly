@@ -9,17 +9,19 @@ CARD_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-card-polis
 DESKTOP_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-desktop-bridge-v1.css"
 JS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-v1.js"
 MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-foundation.svg"
+CINEMATIC_MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-command-red-v1.svg"
 CSS_OUT="$DIST/ui/home-main-option1-v1.css"
 FIDELITY_OUT="$DIST/ui/home-main-option1-fidelity-v1.css"
 CARD_OUT="$DIST/ui/home-main-option1-card-polish-v1.css"
 DESKTOP_OUT="$DIST/ui/home-main-option1-desktop-bridge-v1.css"
 JS_OUT="$DIST/ui/home-main-option1-v1.js"
 MOUNTAIN_OUT="$DIST/ui/home-mountain-foundation-v1.svg"
+CINEMATIC_MOUNTAIN_OUT="$DIST/ui/home-mountain-command-v1.svg"
 FENRIR_OUT="$DIST/ui/fenrir.webp"
 INDEX="$DIST/index.html"
 SW="$DIST/service-worker.js"
 
-for required in "$CSS_SRC" "$FIDELITY_SRC" "$CARD_SRC" "$DESKTOP_SRC" "$JS_SRC" "$MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
+for required in "$CSS_SRC" "$FIDELITY_SRC" "$CARD_SRC" "$DESKTOP_SRC" "$JS_SRC" "$MOUNTAIN_SRC" "$CINEMATIC_MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
   test -s "$required" || { echo "Missing Option 1 Home dependency: $required" >&2; exit 1; }
 done
 
@@ -34,6 +36,7 @@ grep -Fq '.lmf-home-option1-performance-summary' "$CARD_SRC"
 grep -Fq '.lmf-home-option1-copy-dense' "$CARD_SRC"
 grep -Fq 'data-lmf-desktop-ui="true"' "$DESKTOP_SRC"
 grep -Fq '.lmf-home-brand-lockup' "$DESKTOP_SRC"
+grep -Fq 'home-mountain-command-v1.svg' "$DESKTOP_SRC"
 grep -Fq "const HOME_CLASS = 'lmf-home-ref3-active'" "$JS_SRC"
 grep -Fq 'ensureProgress' "$JS_SRC"
 grep -Fq 'ensurePerformancePresentation' "$JS_SRC"
@@ -46,6 +49,7 @@ cp "$CARD_SRC" "$CARD_OUT"
 cp "$DESKTOP_SRC" "$DESKTOP_OUT"
 cp "$JS_SRC" "$JS_OUT"
 cp "$MOUNTAIN_SRC" "$MOUNTAIN_OUT"
+cp "$CINEMATIC_MOUNTAIN_SRC" "$CINEMATIC_MOUNTAIN_OUT"
 
 INDEX="$INDEX" python3 - <<'PY'
 from pathlib import Path
@@ -85,6 +89,7 @@ required = [
     '/ui/home-main-option1-desktop-bridge-v1.css',
     '/ui/home-main-option1-v1.js',
     '/ui/home-mountain-foundation-v1.svg',
+    '/ui/home-mountain-command-v1.svg',
     '/ui/fenrir.webp',
 ]
 assets = []
@@ -102,6 +107,7 @@ test -s "$FIDELITY_OUT"
 test -s "$CARD_OUT"
 test -s "$DESKTOP_OUT"
 test -s "$MOUNTAIN_OUT"
+test -s "$CINEMATIC_MOUNTAIN_OUT"
 test -s "$FENRIR_OUT"
 grep -Fq '/ui/home-main-option1-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-fidelity-v1.css?v=1' "$INDEX"
@@ -114,6 +120,7 @@ grep -Fq "'/ui/home-main-option1-card-polish-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-desktop-bridge-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-v1.js'" "$SW"
 grep -Fq "'/ui/home-mountain-foundation-v1.svg'" "$SW"
+grep -Fq "'/ui/home-mountain-command-v1.svg'" "$SW"
 grep -Fq "'/ui/fenrir.webp'" "$SW"
 
 echo "LetMeFly approved Option 1 Home install: PASS"
