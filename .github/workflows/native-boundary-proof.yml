@@ -1,0 +1,57 @@
+name: LetMeFly Cross-Tab and Rollback Boundary Proof
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [qa/issue53-boundary-proof]
+    paths:
+      - '.github/workflows/native-boundary-proof.yml'
+      - 'ci/audit-native-boundary-proof.mjs'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: native-boundary-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prove-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Reuse already-built candidate kit from isolated regression run
+        uses: actions/download-artifact@v4
+        with:
+          name: candidate-db-kit-34557804977
+          run-id: 34557804977
+          github-token: ${{ github.token }}
+          path: test-kit
+      - name: Probe real shared-database pages and every atomic write boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build-src/letmefly_app qa-evidence
+          tar -xzf test-kit/candidate-kit.tgz -C .build-src/letmefly_app
+          node --check ci/audit-native-boundary-proof.mjs
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          node ci/audit-native-boundary-proof.mjs .build-src/letmefly_app 2>&1 | tee qa-evidence/boundary-proof.log
+      - name: Save exact candidate provenance and all assertions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-boundary-proof-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/NATIVE_BOUNDARY_PROOF
+            .build-src/letmefly_app/qa-runtime/provenance.json
+            .build-src/letmefly_app/qa-runtime/release-held.log
+            qa-evidence
+          if-no-files-found: error
+          retention-days: 14
