@@ -45,14 +45,12 @@ try {
  await page.waitForSelector('#swipe-viewport')
  await page.evaluate(()=>document.querySelectorAll('.readiness-field input[type="radio"][value="3"]').forEach(n=>{n.checked=true;n.dispatchEvent(new Event('change',{bubbles:true}))}))
  await dismiss()
- // Review has a second CTA in an inactive carousel page. Select the real active one.
  await page.locator('.swipe-page.active-page [data-action="start-workout"]').click()
  await page.waitForSelector('.active-exercise',{state:'attached'})
- for(const button of await page.locator('[data-session-step]').all()) {
-  if(await page.locator('[data-lmf-desktop-v2-action="info"]').isVisible().catch(()=>false))break
-  if(await button.isVisible())await button.click()
-  await page.waitForTimeout(250)
- }
+ // Crownforge W1D1: Readiness -> Warm-Up -> Main Strength Circuit. Navigate
+ // through the native section track, not disabled previous or rest controls.
+ await page.locator('[data-session-index="2"]').click()
+ await page.waitForFunction(() => /Main Strength Circuit/i.test(document.querySelector('.swipe-page.active-page .workout-panel-head h2')?.textContent || ''))
  await page.waitForSelector('[data-lmf-desktop-v2-action="info"]')
  await page.waitForTimeout(400)
  const view=await page.evaluate(()=>{
