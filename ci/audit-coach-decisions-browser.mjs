@@ -45,7 +45,11 @@ try {
     await context.route('**/*', route => route.request().url().startsWith(`${base}/`) ? route.continue() : route.abort())
     const page = activePage = await context.newPage(), errors = []
     page.on('pageerror', error => errors.push(error.message))
-    await page.clock.install()
+    // Keep wall time independent of the virtual timer queue. Playwright 1.55
+    // can rewind its running clock while dispatching an overdue timer.
+    const auditWallTime = new Date()
+    await page.clock.install({ time: auditWallTime })
+    await page.clock.setFixedTime(auditWallTime)
     await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' })
     const create = page.getByRole('button', { name: /CREATE LOCAL ATHLETE/i })
     await create.waitFor({ state: 'visible', timeout: 15000 })
@@ -94,6 +98,8 @@ try {
     await page.screenshot({ path: path.join(out, `current-review-viewport-${width}.png`) })
     await result.screenshot({ path: path.join(out, `current-review-${width}.png`) })
     await review.locator('[data-ai-coach-detail="decision-evidence"] > summary').click()
+    const expiredWallTime = await page.evaluate(() => Date.now() + 15 * 60 * 1000 + 100)
+    await page.clock.setFixedTime(expiredWallTime)
     await page.clock.fastForward(15 * 60 * 1000 + 100)
     await page.waitForFunction(() => document.querySelector('[data-ai-feedback-status]')?.textContent.includes('expired'))
     assert.doesNotMatch(await result.innerText(), /REVIEW FIRST/)
