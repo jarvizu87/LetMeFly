@@ -1,0 +1,13 @@
+# Saved mountain workout recap
+
+Issue #64 adds the approved steel/red completion treatment to the existing native workout lifecycle. `REVIEW SAVED WORK & TONNAGE` opens the same read-only breakdown before finishing. The native confirmation, completion transaction, progression, outbox and interrupted-completion recovery remain responsible for all writes. History opens a recap by saved session ID after reload or program advancement.
+
+The hero totals saved completed load × reps, normalizing lb/kg to the athlete's saved weight preference. Pounds use US short tons (2,000 lb); kilograms use metric tonnes (1,000 kg). Missing measurements are excluded and explained. Identical repeated IDs are counted once; conflicting IDs, duplicate set slots and broken or relabeled exercise joins are excluded. No current canonical record describes an implement/side multiplier, so the recorded load counts once. The recap does not infer bodyweight or multiply dumbbell/per-side prose.
+
+Distance and duration use actual saved metric values and units, including carries and sled work. The breakdown retains saved circuit/round labels, prescription, performed load/reps, RPE/RIR, substitutions, optional work and explicit skips. Unlogged work is never relabeled skipped or completed. Elapsed time is the recorded start-to-finish interval.
+
+Mountain summits share a linear scale from zero. Slopes are decorative. A previous peak requires an earlier completed session with matching saved program/version/phase/day, exercise order and performed identities, saved prescriptions, resolved training-max/load basis and substitution load/equipment context. The actual performed load is excluded from that identity so volume can differ. Missing or ambiguous context produces an honest single peak without a comparison. More volume is not presented as a quality, strength or effort diagnosis.
+
+The footer separates confirmed local persistence, session-specific pending outbox work, current cloud status and the native governed next position. No XP is awarded. Native History keeps its eight recent sessions; an additional read-only “All saved session recaps” disclosure exposes every locally saved completed session, including older workouts.
+
+Validation: `node --test ci/audit-workout-recap.mjs` covers calculation and comparison boundaries. `ci/audit-workout-recap-browser.mjs` covers native logging, review, reload/resume, finish/advancement and saved History reopening at phone/desktop widths, including kg preference conversion. The regular build installs the overlay and runs the browser audit alongside the other application gates.
