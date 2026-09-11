@@ -32,14 +32,14 @@ async function domain() {
 }
 async function dismiss() {
   const button=page.getByRole('button',{name:/^(Not now|Dismiss install prompt)$/i})
-  if(await button.isVisible().catch(()=>false))await button.click()
+  if(await button.isVisible().catch(()=>false))await button.tap()
 }
 async function boot(day) {
   context=await browser.newContext({viewport:{width:412,height:915},isMobile:true,hasTouch:true,serviceWorkers:'block'})
   await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4173'?route.continue():route.abort())
   page=await context.newPage();page.setDefaultTimeout(10000)
   await page.addLocatorHandler(page.locator('#lmf-install-banner'),async()=>{
-    await page.getByRole('button',{name:'Dismiss install prompt',exact:true}).click()
+    await page.getByRole('button',{name:'Dismiss install prompt',exact:true}).tap()
   })
   page.on('pageerror',error=>report.failures.push({label:'Runtime error',message:error.message}))
   await page.goto('http://127.0.0.1:4173/#/train')
@@ -47,23 +47,23 @@ async function boot(day) {
   await dismiss()
   const name=`Disposable LMF53 UI Day ${day}`
   await page.locator('#onboard-name').fill(name)
-  await page.locator('[data-action="create-athlete"]').click()
+  await page.locator('[data-action="create-athlete"]').tap()
   await page.locator('[data-action="create-athlete"]').waitFor({state:'detached'})
   await page.locator('#swipe-viewport').waitFor()
   assert.deepEqual((await domain()).athletes.map(x=>x.display_name),[name])
   if(day!==1) {
-    await page.locator(`[data-day="${day}"]`).click()
+    await page.locator(`[data-day="${day}"]`).tap()
     const reposition=page.locator('[data-action="make-current-position"]')
     await reposition.waitFor()
     page.once('dialog',dialog=>dialog.accept())
-    await reposition.click()
+    await reposition.tap()
     await reposition.waitFor({state:'detached'})
   }
   await dismiss()
   const inputs=page.locator('.swipe-page.active-page .readiness-field input[value="4"]')
   assert.equal(await inputs.count(),4)
-  for(const input of await inputs.all()) {await input.locator('..').click();assert.equal(await input.isChecked(),true)}
-  await page.locator('.swipe-page.active-page [data-action="start-workout"]').click()
+  for(const input of await inputs.all()) {await input.locator('..').tap();assert.equal(await input.isChecked(),true)}
+  await page.locator('.swipe-page.active-page [data-action="start-workout"]').tap()
   await page.locator('.set-row[data-set-id]').first().waitFor({state:'attached'})
   await page.locator('.active-exercise.lmf-sequence-active').first().waitFor({state:'attached'})
   pass(`Day ${day}: native onboarding, intentional position and workout creation`)
@@ -71,11 +71,12 @@ async function boot(day) {
 async function section(heading) {
   const index=await page.locator('#swipe-viewport > .swipe-page').evaluateAll((pages,title)=>pages.findIndex(p=>p.querySelector('h2')?.textContent.trim()===title),heading)
   assert.ok(index>=0,`Missing governed section ${heading}`)
-  await page.locator(`#session-track [data-session-index="${index}"]`).click()
+  await page.locator(`#session-track [data-session-index="${index}"]`).tap()
   await page.waitForFunction(title=>document.querySelector('.swipe-page.active-page h2')?.textContent.trim()===title,heading)
   // Native smooth scrolling temporarily crosses other sections. Assert the
   // settled native selection, then keep a stable locator for that same section.
-  await page.waitForTimeout(650)
+  // Include the logging layer's final 1000 ms callback and delayed scroll.
+  await page.waitForTimeout(1250)
   const panel=page.locator('#swipe-viewport > .swipe-page').nth(index)
   assert.equal(await panel.evaluate(n=>n.classList.contains('active-page')),true)
   return panel
@@ -88,6 +89,20 @@ async function active(panel) {
   const identity=await row.evaluate(row=>({id:row.dataset.setId,exerciseId:row.closest('.active-exercise').dataset.exerciseId,title:row.closest('.active-exercise').querySelector('.exercise-title h3').textContent}))
   return {card:page.locator(`[data-exercise-id="${identity.exerciseId}"]`),row:page.locator(`[data-set-id="${identity.id}"]`),...identity}
 }
+async function revealControl(control) {
+  // Scroll vertically like an athlete before interacting. Browser automation's
+  // offscreen-element scrolling can also move the horizontal section carousel.
+  for(let attempt=0;attempt<6;attempt++) {
+    const box=await control.boundingBox()
+    if(!box)throw new Error('Workout control is not visible')
+    const center=box.y+box.height/2
+    if(center>=110 && center<=790)return
+    await page.mouse.move(200,450)
+    await page.mouse.wheel(0,center-450)
+    await page.waitForTimeout(250)
+  }
+  throw new Error('Could not reach workout control by vertical scrolling')
+}
 async function save(row, values={}) {
   const id=await row.getAttribute('data-set-id')
   row=page.locator(`[data-set-id="${id}"]`)
@@ -98,9 +113,12 @@ async function save(row, values={}) {
     const input=row.locator(`.${field}-input`)
     const box=await input.boundingBox()
     assert.ok(box&&box.width>=32&&box.height>=40,`${field} must have usable visible input dimensions: ${JSON.stringify(box)}`)
+    await revealControl(input)
     await input.fill(String(value))
   }
-  await row.locator('.set-check[data-action="toggle-set"]').click()
+  const check=row.locator('.set-check[data-action="toggle-set"]')
+  await revealControl(check)
+  await check.tap()
   await page.waitForFunction(id=>document.querySelector(`[data-set-id="${id}"] .set-check`)?.classList.contains('done'),id)
   const saved=(await domain()).workoutSets.find(s=>s.id===id)
   assert.equal(saved?.completed,true,'Native set click must persist completion')
@@ -108,12 +126,16 @@ async function save(row, values={}) {
 }
 async function advance(panel, previousId) {
   const rest=panel.locator('[data-lmf-rest-continue]')
-  if(await rest.isVisible().catch(()=>false))await rest.click()
+  if(await rest.isVisible().catch(()=>false))await rest.tap()
   await page.waitForFunction(id=>{
     const panel=document.querySelector('.swipe-page.active-page')
     return Boolean(panel?.querySelector('[data-lmf-rest-continue]')) || panel?.querySelector('.lmf-sequence-active .lmf-set-active')?.getAttribute('data-set-id')!==id
   },previousId)
-  if(await rest.isVisible().catch(()=>false))await rest.click()
+  if(await rest.isVisible().catch(()=>false))await rest.tap()
+  // Set activation is asynchronous and has fallback callbacks through 1000 ms.
+  // Do not focus the next input in the middle of that native transition.
+  await page.waitForTimeout(1250)
+  assert.equal(await panel.evaluate(n=>n.classList.contains('active-page')),true,'Saving a set must retain the selected section')
 }
 const snapshots=data=>data.workoutExercises.map(e=>({id:e.id,snapshot:e.prescription_snapshot})).sort((a,b)=>a.id.localeCompare(b.id))
 async function loadAndCircuit() {
@@ -142,8 +164,6 @@ async function loadAndCircuit() {
   for(let i=0;next.id!==same.id&&i<expected.length;i++) {await save(next.row);await advance(panel,next.id);next=await active(panel)}
   assert.equal(next.id,same.id)
   assert.equal(Number(await next.row.locator('.load-input').inputValue()),45)
-  await next.row.scrollIntoViewIfNeeded()
-  await page.screenshot({path:path.join(out,'mobile-load-controls.png')})
   const saved=await save(next.row,{reps:10,rpe:7})
   assert.equal(saved.load_value,45)
   pass('Same-prescription load carries to the next round and persists through native save',45)
@@ -183,7 +203,7 @@ async function roundsAndMetrics() {
     const cardHeading=await card.locator('xpath=ancestor::*[contains(@class,"workout-panel")][1]').locator('h2').textContent()
     await section(cardHeading.trim())
     const summary=card.locator(':scope > .lmf-compact-summary')
-    if(await summary.isVisible().catch(()=>false))await summary.click()
+    if(await summary.isVisible().catch(()=>false))await summary.tap()
     const row=card.locator('.set-row.lmf-set-active')
     await row.waitFor({state:'visible'})
     assert.equal(await row.getAttribute('data-prescription-kind'),fixture.kind)
