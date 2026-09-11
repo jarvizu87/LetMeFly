@@ -1,0 +1,106 @@
+name: LetMeFly Issue 60 Candidate Database Regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [qa/full-lifecycle-soak]
+    paths:
+      - '.github/workflows/lifecycle-database-candidate.yml'
+      - 'ci/apply-workout-start-serialization-v1.sh'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  candidate:
+    name: Candidate ${{ matrix.scenario }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        scenario: [adversarial, perfect, restart, variable, grouped-metrics, substitution]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: lifecycle-db-prepared-a64dccd902b1c4885a9e1f59aa5808b4366191aa
+          path: test-kit
+          run-id: 34556854631
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Apply only the Issue 60 candidate to a copy of the exact source kit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .build-src/letmefly_app qa-evidence
+          tar -xzf test-kit/letmefly-lifecycle-test-kit.tgz -C .build-src/letmefly_app
+          cp .build-src/letmefly_app/qa-runtime/provenance.json qa-evidence/unmodified-production-provenance.json
+          bash ci/apply-workout-start-serialization-v1.sh .build-src/letmefly_app
+          cd .build-src/letmefly_app
+          npm run typecheck
+          cat > .qa-lifecycle-entry.ts <<'TS'
+          import * as athlete from './src/services/athlete-service'
+          import * as workout from './src/services/workout-service'
+          import * as progression from './src/services/program-progression-service'
+          import * as readiness from './src/services/readiness-service'
+          import * as db from './src/db/local-db'
+          import * as mutations from './src/db/local-mutations'
+          import * as programs from './src/data/programs'
+          if (location.hostname !== '127.0.0.1' || !location.search.includes('disposable-qa=1')) throw new Error('Disposable loopback QA required')
+          ;(window as any).__LMF_LIFECYCLE_QA__ = Object.freeze({athlete,workout,progression,readiness,db,mutations,programs})
+          TS
+          cp qa-runtime/provenance.json /tmp/lmf-unmodified-provenance.json
+          node --input-type=module <<'JS'
+          import { build } from 'vite'
+          await build({configFile:false,build:{outDir:'qa-runtime',emptyOutDir:true,minify:false,
+            lib:{entry:'.qa-lifecycle-entry.ts',name:'LifecycleQA',formats:['es'],fileName:()=> 'services.js'}}})
+          JS
+          printf '%s\n' '<!doctype html><title>Disposable Issue 60 Candidate</title><script type="module" src="./services.js"></script>' > qa-runtime/index.html
+          python3 - <<'PY'
+          import json, pathlib, hashlib, os
+          original=json.loads(pathlib.Path('/tmp/lmf-unmodified-provenance.json').read_text())
+          hashes={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(pathlib.Path('src').rglob('*')) if p.is_file()}
+          changed=[name for name,value in hashes.items() if original['sourceHashes'].get(name)!=value]
+          assert changed==['src/services/workout-service.ts'], changed
+          original.update({'sourceHashes':hashes,'candidate':True,'candidatePatchCommit':os.environ['GITHUB_SHA'],
+            'changedSourceFiles':changed,'scope':'Exact main source plus Issue 60 candidate only; NOT unchanged main or a production deployment'})
+          pathlib.Path('qa-runtime/provenance.json').write_text(json.dumps(original,indent=2)+'\n')
+          PY
+      - name: Run unchanged real IndexedDB test against candidate
+        shell: bash
+        env:
+          SCENARIO: ${{ matrix.scenario }}
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          node ci/audit-lifecycle-database-soak.mjs .build-src/letmefly_app "$SCENARIO" 2>&1 | tee "qa-evidence/candidate-$SCENARIO.log"
+      - name: Mark reports explicitly as candidate results
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,os
+          root=pathlib.Path('.build-src/letmefly_app/DATABASE_LIFECYCLE_AUDIT')
+          for path in root.rglob('audit.json'):
+            data=json.loads(path.read_text());data['candidatePatchCommit']=os.environ['GITHUB_SHA'];data['scope']='Actual Chromium IndexedDB on original main services PLUS Issue 60 candidate; not unchanged main, not production UI or cloud.'
+            path.write_text(json.dumps(data,indent=2)+'\n')
+          for path in root.rglob('audit.md'):
+            path.write_text('**CANDIDATE ONLY: main source plus Issue 60 patch at '+os.environ['GITHUB_SHA']+'. Not released.**\n\n'+path.read_text())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue60-candidate-${{ matrix.scenario }}-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/DATABASE_LIFECYCLE_AUDIT
+            .build-src/letmefly_app/qa-runtime/provenance.json
+            qa-evidence
+          if-no-files-found: error
+          retention-days: 14
