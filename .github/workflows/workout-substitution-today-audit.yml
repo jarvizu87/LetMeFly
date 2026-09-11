@@ -13,6 +13,7 @@ on:
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser.mjs'
+      - 'ci/audit-issue54-integration-gates.mjs'
       - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/install-exercise-intelligence-substitutions-v1.sh'
@@ -28,6 +29,7 @@ on:
       - 'ci/normalize-workout-substitution-governance-v1.sh'
       - 'ci/audit-workout-substitution-today-v1.mjs'
       - 'ci/audit-workout-substitution-today-browser.mjs'
+      - 'ci/audit-issue54-integration-gates.mjs'
       - 'ci/report-issue54-history-progress-surface.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/install-exercise-intelligence-substitutions-v1.sh'
@@ -62,6 +64,7 @@ jobs:
           bash -n ci/normalize-workout-substitution-governance-v1.sh
           node --check ci/audit-workout-substitution-today-v1.mjs
           node --check ci/audit-workout-substitution-today-browser.mjs
+          node --check ci/audit-issue54-integration-gates.mjs
           node --check ci/report-issue54-history-progress-surface.mjs
           node --check overlays/exercise-intelligence/runtime/exercise-intelligence-runtime-v1.js
           node --check overlays/exercise-intelligence/runtime/exercise-intelligence-substitutions-v1.js
@@ -100,6 +103,9 @@ jobs:
           bash ci/install-official-brand-v2.sh
           bash ci/install-desktop-workspace-v1.sh
 
+      - name: Audit history PR and Bar Loader integration
+        run: node ci/audit-issue54-integration-gates.mjs .build-src/letmefly_app
+
       - name: Re-audit finished substitution assembly
         run: |
           node ci/audit-workout-substitution-today-v1.mjs .build-src/letmefly_app
@@ -134,5 +140,7 @@ jobs:
             .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_AUDIT.json
             .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT
             .build-src/letmefly_app/ISSUE54_HISTORY_PROGRESS_SURFACE.md
+            .build-src/letmefly_app/ISSUE54_INTEGRATION_GATES.json
+            .build-src/letmefly_app/ISSUE54_INTEGRATION_GATES.md
           if-no-files-found: warn
           retention-days: 14
