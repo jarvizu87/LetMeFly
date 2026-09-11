@@ -14,6 +14,19 @@ const browser = await chromium.launch({executablePath:process.env.CHROME_BIN,arg
 const context = await browser.newContext({viewport:{width:1536,height:960},serviceWorkers:'block'})
 await context.route('**/*',r=> new URL(r.request().url()).origin==='http://127.0.0.1:4173'?r.continue():r.abort('blockedbyclient'))
 const page = await context.newPage(); page.setDefaultTimeout(10000)
+report.observations.runtimeErrors=[]
+report.observations.scriptResponses=[]
+page.on('pageerror',error=>report.observations.runtimeErrors.push(error.message))
+page.on('response',response=>{if(/\.js(?:$|[?])/.test(response.url()))report.observations.scriptResponses.push({url:response.url(),status:response.status()})})
+async function diagnostic(label) {
+ const value=await page.evaluate(()=>({ready:document.readyState,width:innerWidth,desktop:matchMedia('(min-width: 1100px)').matches,htmlData:{...document.documentElement.dataset},
+  workspaces:document.querySelectorAll('[data-lmf-desktop-workspace]').length,panels:document.querySelectorAll('.lmf-desktop-context-panel').length,
+  info:document.querySelectorAll('[data-exercise-info]').length,scripts:[...document.scripts].map(s=>s.src),
+  active:document.querySelector('.swipe-page.active-page')?.className,
+  markup:document.querySelector('#app')?.innerHTML.slice(0,2500)}))
+ report.observations[label]=value
+ console.log('DESKTOP_DIAGNOSTIC '+label+' '+JSON.stringify(value))
+}
 async function dismiss() {
  for(let i=0;i<3;i++) {
   const b=page.locator('button').filter({hasText:/^\s*Not now\s*$/i}).first()
@@ -41,12 +54,14 @@ try {
  await page.locator('[data-action="create-athlete"]').click()
  await page.waitForSelector('[data-action="create-athlete"]',{state:'detached'})
  await dismiss()
+ await diagnostic('afterOnboarding')
  await page.locator('nav [href="#/train"]').first().click()
  await page.waitForSelector('#swipe-viewport')
  await page.evaluate(()=>document.querySelectorAll('.readiness-field input[type="radio"][value="3"]').forEach(n=>{n.checked=true;n.dispatchEvent(new Event('change',{bubbles:true}))}))
  await dismiss()
  await page.locator('.swipe-page.active-page [data-action="start-workout"]').click()
  await page.waitForSelector('.active-exercise',{state:'attached'})
+ await diagnostic('afterStart')
  // Crownforge W1D1: Readiness -> Warm-Up -> Main Strength Circuit. Navigate
  // through the native section track, not disabled previous or rest controls.
  await page.locator('[data-session-index="2"]').click()
@@ -91,5 +106,5 @@ try {
  await page.screenshot({path:path.join(out,'desktop.png'),fullPage:true})
  report.result='PASS'
 } catch(error) {report.result='FAIL'; report.failures.push({message:error.message,stack:error.stack});console.error(error)}
-finally {await page.screenshot({path:path.join(out,'final.png'),fullPage:true}).catch(()=>{});await browser.close();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n')}
+finally {await diagnostic('final').catch(()=>{});await page.screenshot({path:path.join(out,'final.png'),fullPage:true}).catch(()=>{});await browser.close();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n')}
 if(report.result!=='PASS')process.exitCode=1
