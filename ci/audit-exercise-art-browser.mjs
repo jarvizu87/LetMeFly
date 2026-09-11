@@ -50,7 +50,7 @@ try {
       .exercise-card{max-width:360px} .small-previews{display:flex;gap:12px;align-items:center}
       #desktop-tile{width:48px;height:48px}
       </style></head><body><div id="fixture"><h3>Authenticated private artwork</h3>
-      <div id="tile" class="library-thumb" data-exercise-art="squat"></div>
+      <article class="library-card"><div id="tile" class="library-thumb" data-exercise-art="squat"></div><div class="library-copy"><h3 id="library-name">Squat</h3></div><i>›</i></article>
       <section aria-label="Itinerary previews"><h3 id="itinerary-name">Squat</h3><div class="small-previews">
       <div id="compact-tile" class="lmf-compact-thumb" aria-describedby="itinerary-name" data-exercise-art="squat"></div>
       <div id="next-tile" class="lmf-next-thumb" aria-describedby="itinerary-name" data-exercise-art="squat"></div>
@@ -76,7 +76,7 @@ try {
     await page.waitForTimeout(100)
     assert.equal(await page.evaluate(()=>window.downloads.length),0)
     assert.equal(await page.locator('#tile').evaluate(el=>el.style.getPropertyValue('--exercise-art')),'')
-    const setRows=async(rows,key='squat')=>page.evaluate(({rows,key})=>{window.cloudRows=rows;document.querySelector('#itinerary-name').textContent=rows[0]?.metadata.delivery.parts.map(part=>part.label).join(' / ')||key;document.querySelectorAll('[data-exercise-art]').forEach(el=>el.dataset.exerciseArt=key);window.dispatchEvent(new Event('lmf:exercise-art-overrides-updated'))},{rows,key})
+    const setRows=async(rows,key='squat')=>page.evaluate(({rows,key})=>{window.cloudRows=rows;for(const heading of document.querySelectorAll('#itinerary-name,#library-name'))heading.textContent=rows[0]?.metadata.delivery.parts.map(part=>part.label).join(' / ')||key;document.querySelectorAll('[data-exercise-art]').forEach(el=>el.dataset.exerciseArt=key);window.dispatchEvent(new Event('lmf:exercise-art-overrides-updated'))},{rows,key})
     const applied=()=>page.waitForFunction(()=>document.querySelector('#tile').style.getPropertyValue('--exercise-art').includes('blob:'))
     await setRows([row(a,'squat')]);await applied()
     assert.equal(await page.evaluate(()=>window.downloads.length),1,'repeated DOM tiles share the exact asset download')
@@ -99,6 +99,7 @@ try {
     await page.locator('#media > .lmf-art-pair').waitFor()
     assert.deepEqual(await page.locator('#media .lmf-art-part > span').allTextContents(),['1. Front squat','2. Bench ramp sets'])
     assert.equal(await page.locator('#media .lmf-art-part-image').count(),2)
+    assert.equal(await page.locator('#tile .lmf-art-part-image').evaluateAll(images=>images.every(image=>{const box=image.getBoundingClientRect();return box.width>0&&box.height>0})),true,'paired library images remain visible')
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
     assert.ok(!(await page.locator('#tile').evaluate(el=>el.style.getPropertyValue('--exercise-art'))).includes(oldURL))
     await page.screenshot({path:path.join(out,`private-components-${width}.png`),fullPage:true})
@@ -120,10 +121,12 @@ try {
       assert.equal(await page.locator('#media .lmf-art-part-image').count(),3)
       assert.equal(await page.locator('#preview > .lmf-art-pair').count(),0,'native media owns the entire triple')
       assert.equal(await page.locator('#tile').evaluate(el=>el.getBoundingClientRect().width),width===412?68:92,'actual small library widths are covered')
-      assert.equal(await page.locator('#tile .lmf-art-part > span').evaluateAll(labels=>labels.every(label=>{
-        const css=getComputedStyle(label),box=label.getBoundingClientRect(),part=label.parentElement.getBoundingClientRect()
-        return css.position==='static'&&parseFloat(css.fontSize)>=12&&box.width>0&&box.height>0&&label.scrollWidth<=label.clientWidth&&label.scrollHeight<=label.clientHeight&&box.left>=part.left&&box.right<=part.right+1&&box.top>=part.top&&box.bottom<=part.bottom+1
-      })),true,'all three library option names are visible, readable and contained under the production cascade')
+      assert.equal(await page.locator('#library-name').textContent(),labels.join(' / '))
+      assert.equal(await page.locator('#library-name').evaluate(label=>{
+        const css=getComputedStyle(label),box=label.getBoundingClientRect()
+        return parseFloat(css.fontSize)>=16&&css.whiteSpace==='normal'&&box.width>0&&box.height>0&&label.scrollWidth<=label.clientWidth&&label.scrollHeight<=label.clientHeight
+      }),true,'complete option names fit beside the actual narrow library tile')
+      assert.equal(await page.locator('#tile .lmf-art-part > span').evaluateAll(labels=>labels.every(label=>getComputedStyle(label).display==='none')),true,'compact library uses its readable adjacent name')
       for(const selector of ['#tile','#compact-tile','#next-tile','#desktop-tile']) {
         assert.deepEqual(await page.locator(`${selector} .lmf-art-part-image`).evaluateAll(images=>images.map(image=>image.getAttribute('aria-label'))),labels)
         assert.equal(await page.locator(`${selector} .lmf-art-part-image`).evaluateAll(images=>images.every(image=>{
