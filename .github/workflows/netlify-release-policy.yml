@@ -1,0 +1,22 @@
+name: Netlify Release Policy
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deployment-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Audit credit-safe Netlify release policy
+        run: bash ci/audit-netlify-release-policy.sh

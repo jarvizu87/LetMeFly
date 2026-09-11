@@ -1,0 +1,63 @@
+/* LetMeFly Home Option 1 — bridge into the approved Option 3 desktop shell.
+   Home-only responsive presentation. Does not alter Train workspace behavior. */
+
+@media (min-width:1100px){
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-brand-lockup{
+    display:none!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-topbar-shell{
+    width:100%!important;
+    min-width:0!important;
+    justify-content:flex-end!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-option1-tools{
+    margin-left:0!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-reference-v3{
+    width:100%!important;
+    max-width:1240px!important;
+    margin:0 auto!important;
+    padding:0 4px 88px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-command-v4{
+    gap:16px!important;
+    padding-top:16px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-greeting{
+    padding:19px 4px 8px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-command{
+    min-height:440px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-command-main{
+    width:min(68%,820px)!important;
+    padding:34px 38px 31px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-command-main h3{
+    max-width:760px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-command-mark{
+    width:44%!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-grid{
+    gap:14px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-panel{
+    min-height:200px!important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body.lmf-home-ref3-active .lmf-home-v4-stats{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}

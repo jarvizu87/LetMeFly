@@ -1,0 +1,68 @@
+/* LetMeFly Home Option 1 — coaching-card presentation polish.
+   Presentation only. Keeps authoritative Home source data untouched. */
+
+body.lmf-home-ref3-active .lmf-home-v4-performance.lmf-home-option1-performance-polished [data-lmf-performance]{
+  display:none!important;
+}
+
+body.lmf-home-ref3-active .lmf-home-option1-performance-summary{
+  display:grid;
+  gap:6px;
+  margin:1px 0 28px;
+  min-width:0;
+}
+
+body.lmf-home-ref3-active .lmf-home-option1-performance-summary strong{
+  color:#eef2f4;
+  font:800 12px/1.25 system-ui,sans-serif;
+  letter-spacing:-.01em;
+  overflow-wrap:break-word;
+}
+
+body.lmf-home-ref3-active .lmf-home-option1-performance-summary span{
+  color:#98a5ad;
+  font:600 9px/1.42 system-ui,sans-serif;
+  overflow-wrap:break-word;
+}
+
+body.lmf-home-ref3-active .lmf-home-v4-coach blockquote.lmf-home-option1-copy-dense{
+  font-size:15px!important;
+  line-height:1.32!important;
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+}
+
+body.lmf-home-ref3-active .lmf-home-v4-milestone p.lmf-home-option1-copy-dense{
+  font-size:9px!important;
+  line-height:1.4!important;
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+}
+
+@media (max-width:700px){
+  body.lmf-home-ref3-active .lmf-home-option1-performance-summary{
+    gap:5px;
+    margin:0 0 27px;
+  }
+
+  body.lmf-home-ref3-active .lmf-home-option1-performance-summary strong{
+    font-size:10.5px;
+    line-height:1.25;
+  }
+
+  body.lmf-home-ref3-active .lmf-home-option1-performance-summary span{
+    font-size:7.8px;
+    line-height:1.4;
+  }
+
+  body.lmf-home-ref3-active .lmf-home-v4-coach blockquote.lmf-home-option1-copy-dense{
+    font-size:12.5px!important;
+    line-height:1.34!important;
+    -webkit-line-clamp:5!important;
+  }
+
+  body.lmf-home-ref3-active .lmf-home-v4-milestone p.lmf-home-option1-copy-dense{
+    font-size:8px!important;
+    line-height:1.38!important;
+  }
+}

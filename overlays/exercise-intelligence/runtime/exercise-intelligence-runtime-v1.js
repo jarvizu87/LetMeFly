@@ -5,6 +5,35 @@
   const READY_EVENT = 'letmefly:exercise-intelligence-ready';
   const ERROR_EVENT = 'letmefly:exercise-intelligence-error';
   const SUPPORTED_COUNTS = Object.freeze(['92/25', '94/27', '108/27', '112/27']);
+  const LOAD_STRATEGIES = Object.freeze([
+    'same-load',
+    'percentage-adjustment',
+    'rpe-guided',
+    'rep-guided',
+    'no-load-transfer',
+  ]);
+
+  // Issue #54: runtime substitution loading must be machine-readable. Unknown or
+  // not-yet-reviewed relationships fail safely to RPE-guided/manual loading; the
+  // app never tries to turn descriptive coaching prose into arithmetic.
+  const DEFAULT_LOAD_TRANSFER = Object.freeze({
+    strategy: 'rpe-guided',
+    factor: null,
+    rationale: 'No verified deterministic load conversion is registered; use the programmed effort target and choose an appropriate starting load.',
+  });
+  const LOAD_TRANSFER_BY_RULE = Object.freeze({
+    'VS-026': Object.freeze({
+      strategy: 'no-load-transfer',
+      factor: null,
+      rationale: 'Machine-stack load is not comparable to band resistance.',
+    }),
+    'VS-027': Object.freeze({
+      strategy: 'no-load-transfer',
+      factor: null,
+      rationale: 'Machine-stack load is not comparable to band resistance or lateral-walk resistance.',
+    }),
+  });
+
   let payload = null;
   let loadPromise = null;
 
@@ -16,6 +45,23 @@
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
   const freezeArray = (value) => Object.freeze(Array.isArray(value) ? [...value] : []);
+
+  function normalizeLoadTransfer(rule) {
+    const explicit = rule?.loadTransfer && typeof rule.loadTransfer === 'object' ? rule.loadTransfer : null;
+    if (explicit && LOAD_STRATEGIES.includes(String(explicit.strategy || ''))) {
+      const strategy = String(explicit.strategy);
+      const factor = typeof explicit.factor === 'number' && Number.isFinite(explicit.factor) && explicit.factor > 0
+        ? explicit.factor
+        : null;
+      return Object.freeze({
+        strategy,
+        factor,
+        rationale: String(explicit.rationale || rule.loadingAdjustment || DEFAULT_LOAD_TRANSFER.rationale),
+      });
+    }
+    const governed = LOAD_TRANSFER_BY_RULE[String(rule?.id || '')] || DEFAULT_LOAD_TRANSFER;
+    return Object.freeze({ ...governed });
+  }
 
   function validate(data) {
     if (!data || data.integrationStatus !== 'READY_FOR_NON_PRESCRIPTION_APP_INTEGRATION') {
@@ -48,7 +94,10 @@
     }
 
     const rulesByPrimary = new Map();
-    for (const rule of data.substitutionRules) {
+    const governedRules = [];
+    for (const sourceRule of data.substitutionRules) {
+      const rule = Object.freeze({ ...sourceRule, loadTransfer: normalizeLoadTransfer(sourceRule) });
+      governedRules.push(rule);
       const list = rulesByPrimary.get(rule.primaryExerciseId) || [];
       list.push(rule);
       rulesByPrimary.set(rule.primaryExerciseId, list);
@@ -81,7 +130,8 @@
       getExercise: resolveExercise,
       getSubstitutions: substitutionsFor,
       getAllExercises: () => freezeArray(data.exercises),
-      getAllSubstitutionRules: () => freezeArray(data.substitutionRules),
+      getAllSubstitutionRules: () => freezeArray(governedRules),
+      loadStrategies: LOAD_STRATEGIES,
       programPrescriptionOwner: 'program-packages-only',
     });
   }

@@ -28,7 +28,16 @@ grep -Fq 'getSubstitutions' "$SOURCE"
 grep -Fq 'includeBlocked: true' "$SOURCE"
 grep -Fq 'PROGRAM PRESCRIPTION LOCKED' "$SOURCE"
 grep -Fq 'VIEW ONLY' "$SOURCE"
+grep -Fq 'WORKOUT INSTANCE ONLY' "$SOURCE"
+grep -Fq 'USE THIS SUBSTITUTE FOR TODAY' "$SOURCE"
+grep -Fq 'LetMeFlyWorkoutSubstitutionBridge' "$SOURCE"
 ! grep -Fq 'data-action="apply' "$SOURCE"
+# Full production assemblies contain compiled assets and must expose the narrow
+# Workout Mode bridge. The installer's tiny standalone smoke fixture intentionally
+# has no compiled asset directory, so source/build audits carry that assertion there.
+if [[ -d "$DIST_DIR/assets" ]]; then
+  grep -Rq 'LetMeFlyWorkoutSubstitutionBridge' "$DIST_DIR/assets"
+fi
 
 mkdir -p "$DIST_DIR/ui"
 cp "$SOURCE" "$OUT"
@@ -92,9 +101,12 @@ grep -Fq "'/ui/exercise-intelligence-substitutions-v1.js'" "$SW_FILE"
 grep -Fq "'/ui/exercise-intelligence-substitutions-v1.css'" "$SW_FILE"
 grep -Fq 'NOT A DEFAULT SUBSTITUTE' "$OUT"
 grep -Fq 'FUTURE LIBRARY CANDIDATES' "$OUT"
+grep -Fq 'USE THIS SUBSTITUTE FOR TODAY' "$OUT"
+grep -Fq 'WORKOUT INSTANCE ONLY' "$OUT"
 grep -Fq '.lmf-sub-modal' "$CSS_OUT"
+grep -Fq '.lmf-substitution-active' "$CSS_OUT"
 ! grep -Fq 'localStorage' "$OUT"
 ! grep -Fq 'sessionStorage' "$OUT"
 ! grep -Fq 'indexedDB' "$OUT"
 
-echo "LetMeFly governed Exercise Intelligence substitution viewer: PASS"
+echo "LetMeFly governed Exercise Intelligence workout-scoped substitution viewer: PASS"

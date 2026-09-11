@@ -1,0 +1,52 @@
+name: Desktop Tools Polish Audit
+on:
+  push:
+    branches: [fix/desktop-tools-art-scale-v2]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: desktop-polish-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  desktop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Build exact production assembly, no deployment
+        run: |
+          python3 - <<'PY' > /tmp/lmf-build.sh
+          import tomllib,pathlib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash /tmp/lmf-build.sh
+      - name: Verify actual desktop tools and mobile isolation
+        run: |
+          set -euo pipefail
+          (cd .build-src/letmefly_app && npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0)
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >/tmp/desktop-http.log 2>&1 &
+          SERVER=$!
+          trap 'kill "$SERVER" 2>/dev/null || true' EXIT
+          for i in {1..40}; do curl -fsS http://127.0.0.1:4173/ >/dev/null && break; sleep 0.25; done
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium)"
+          node ci/audit-desktop-polish-v2.mjs
+          node ci/audit-desktop-workspace-v1.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: desktop-polish-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/DESKTOP_POLISH_AUDIT
+            .build-src/letmefly_app/DESKTOP_WORKSPACE_AUDIT
+          retention-days: 14
+          if-no-files-found: error

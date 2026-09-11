@@ -21,6 +21,7 @@ old = """  await refreshWorkout()
   showToast(alreadyDone ? 'Set reopened locally' : 'Set saved locally')
 }"""
 new = """  await refreshWorkout()
+  ;(window as any).LetMeFlyWorkoutSubstitutionBridge?.refreshLocks?.()
   const refreshedStats = state.workout ? completionStats(state.workout) : null
   if (refreshedStats) {
     const reviewPanel = document.querySelector<HTMLElement>('.review-panel')
@@ -40,6 +41,7 @@ if count != 1:
 p.write_text(text.replace(old, new, 1))
 PY
 
+grep -Fq ";(window as any).LetMeFlyWorkoutSubstitutionBridge?.refreshLocks?.()" "$MAIN"
 grep -Fq "const refreshedStats = state.workout ? completionStats(state.workout) : null" "$MAIN"
 grep -Fq "document.querySelector<HTMLElement>('.review-panel')" "$MAIN"
 grep -Fq "reviewHeading.textContent = \`\${refreshedStats.done} / \${refreshedStats.total} sets logged\`" "$MAIN"

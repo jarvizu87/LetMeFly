@@ -39,6 +39,14 @@ A substitution may be surfaced only when its rule allows it. The application mus
 respect `promotionStatus`, `rolePreserved`, `useCondition`, and
 `programOwnershipRule`.
 
+Issue #54 adds one intentionally narrow mutation boundary: from an **active Workout
+Mode exercise only**, an athlete may apply an eligible governed alternative as
+**Use This Substitute for Today**. That operation changes the current workout
+instance, not the program package. The original programmed movement remains
+snapshotted as prescription/provenance, completed substitute performance is
+attributed to the performed movement, and future program occurrences continue to
+start from the original program prescription.
+
 `candidateDirectUrl` values are review candidates only and must not replace the
 current demo URL until intentionally validated. A program supplement may add a
 direct demo only when its record is explicitly marked `direct-verified` and the
@@ -110,10 +118,13 @@ context and governed runtime substitution rules, but it has no Apply/Swap action
 persistent storage, network write, or program mutation path.
 
 `ci/install-exercise-intelligence-substitutions-v1.sh` installs the governed
-Exercise-page substitution guidance viewer. It may read the runtime substitution
-rules and intercept the existing `SUBSTITUTE` button when a governed rule exists,
-but it has no apply control and no storage or program-write path. Its dedicated
-audit protects the default-blocked relationships and view-only boundary.
+substitution guidance viewer. Outside an active workout it remains view-only.
+Inside active Workout Mode it may expose **Use This Substitute for Today** for an
+eligible current-app governed rule, but the public viewer itself still has no
+direct localStorage, sessionStorage, IndexedDB, or program-package write path. It
+can request the operation only through the compiled Workout Mode substitution
+bridge. Its dedicated audits protect that narrow boundary and all default-blocked
+relationships.
 
 `ci/audit-exercise-intelligence-production-v1.sh` runs against the **finished
 production dist after all later LetMeFly installers**. It recognizes either the
@@ -125,10 +136,12 @@ program packages remain the declared prescription authority.
 
 ## Runtime status
 
-The overlay is **active as a read-only descriptive layer**. The Exercises page
-`INFO` button can use the intelligence API to show purpose, movement roles,
-equipment, primary/secondary muscles, coaching cues, common mistakes, and the
-current Watch Exercise link.
+The Exercise Intelligence overlay remains a **non-prescription intelligence
+layer**. The Exercises page `INFO` button can use the intelligence API to show
+purpose, movement roles, equipment, primary/secondary muscles, coaching cues,
+common mistakes, and the current Watch Exercise link. Governed substitution rules
+may also be read by the active Workout Mode bridge, but only the private workout
+service may persist a current-session substitute.
 
 The INFO enhancement fails open: if the intelligence payload is unavailable or a
 name cannot be resolved, the existing LetMeFly INFO behavior remains available.
@@ -179,13 +192,13 @@ adjustment, use condition, and coaching rationale. If no canonical exercise or n
 governed rule exists, the original program-aware Coach remains the fallback.
 
 This is explanation only. Coach cannot apply a substitution or mutate the active
-workout from this path.
+workout from this path. Applying a substitute, when allowed, is a separate explicit
+action from the corresponding active Workout Mode exercise card.
 
-### Governed Exercise-page substitution viewer v1
+### Governed substitution viewer v1
 
 When a `SUBSTITUTE` button resolves to one or more governed rules, LetMeFly opens a
-**ROLE-PRESERVING SUBSTITUTION GUIDE • VIEW ONLY** rather than silently changing
-the active workout. The viewer separates:
+role-preserving substitution guide. The viewer separates:
 
 - current-app governed options that are eligible to be considered;
 - protected `DO NOT DEFAULT` relationships; and
@@ -195,10 +208,20 @@ Each rule shows fit grade, role-preservation status, important differences,
 loading adjustment, use condition, and the coach explanation. Available current-
 app alternatives can expose their Watch Exercise link.
 
-The viewer intentionally contains **no Apply/Swap action**. It does not write to
-localStorage, sessionStorage, IndexedDB, workout state, program packages, or
-private athlete records. If no governed rule exists for a movement, the existing
-LetMeFly substitution behavior remains the fallback.
+Outside active Workout Mode the guide is **VIEW ONLY**. From an active workout
+exercise, eligible current-app options may expose **USE THIS SUBSTITUTE FOR TODAY**.
+The viewer does not write private storage itself; it delegates to the compiled
+Workout Mode bridge, which revalidates the governed rule before calling the private
+workout service. The service preserves the original programmed exercise,
+substitution provenance, set structure, and reversible load baseline. It refuses
+to relabel completed substitute sets; those sets must be reopened before changing
+or reverting the movement.
+
+Load is not copied blindly. Same-load or deterministic percentage adjustments may
+be prefilled when the governed rule supports them. Bodyweight/unloaded rules may
+clear meaningless external load. When no deterministic conversion exists, the
+athlete receives an editable starting-load field while the programmed sets/reps or
+metric structure remains intact.
 
 The protected default relationships remain:
 
@@ -213,11 +236,12 @@ The Black Crown v2.1 Machine Hip Abduction fallbacks are additive and program-ow
 - Machine Hip Abduction → Mini-Band Lateral Walk — `PROMOTE CONTEXTUAL`, role mostly
   preserved with additional standing frontal-plane control.
 
-Any actual substitution still requires an existing governed program rule or an
-intentional coaching/program-edit decision. The viewer and Coach explain options;
-they do not make or apply the program change.
+Any actual substitution still requires an existing governed rule or an intentional
+coaching/program-edit decision. Issue #54 does not make Exercise Intelligence the
+program owner: **Use This Substitute for Today** changes only the current workout
+instance, and future occurrences return to the unchanged program prescription.
 
 Exercise Intelligence public-shell resources, including INFO, exercise-aware
-Coach, Coach substitution guidance, and the Exercise-page substitution viewer, are
-precached for installed/offline use. This does not cache private athlete APIs or
-move private athlete data into the public shell.
+Coach, Coach substitution guidance, and the substitution viewer, are precached for
+installed/offline use. This does not cache private athlete APIs or move private
+athlete data into the public shell.
