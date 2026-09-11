@@ -45,7 +45,8 @@ try {
  await page.waitForSelector('#swipe-viewport')
  await page.evaluate(()=>document.querySelectorAll('.readiness-field input[type="radio"][value="3"]').forEach(n=>{n.checked=true;n.dispatchEvent(new Event('change',{bubbles:true}))}))
  await dismiss()
- await page.locator('[data-action="start-workout"]').click()
+ // Review has a second CTA in an inactive carousel page. Select the real active one.
+ await page.locator('.swipe-page.active-page [data-action="start-workout"]').click()
  await page.waitForSelector('.active-exercise',{state:'attached'})
  for(const button of await page.locator('[data-session-step]').all()) {
   if(await page.locator('[data-lmf-desktop-v2-action="info"]').isVisible().catch(()=>false))break
@@ -76,8 +77,8 @@ try {
  await page.locator('[data-lmf-desktop-v2-action="info"]').click()
  await page.waitForFunction(()=>window.__QA_INFO_FORWARDS===1)
  check(true,'Info action forwards exactly once to native exercise control')
- const close=page.locator('[data-close-modal]').last()
- if(await close.isVisible().catch(()=>false))await close.click()
+ await page.locator('[data-lmf-intel-close]').first().click()
+ await page.waitForSelector('#lmf-exercise-intelligence-modal',{state:'detached'})
  // Disabled native controls must be mirrored, not bypassed by a second enabled button.
  await card.locator('[data-substitute]').evaluate(n=>{n.disabled=true;n.setAttribute('aria-disabled','true')})
  await page.waitForFunction(()=>document.querySelector('[data-lmf-desktop-v2-action="substitute"]')?.disabled===true)
