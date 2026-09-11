@@ -58,58 +58,20 @@
     const progress = parseProgress(shell)
     const label = block.querySelector('[data-lmf-option1-progress-label]')
     const fill = block.querySelector('.lmf-home-option1-fill')
-    if (label) label.textContent = progress.label
+    if (label && label.textContent !== progress.label) label.textContent = progress.label
     if (fill instanceof HTMLElement) fill.style.width = `${progress.pct}%`
     block.setAttribute('aria-valuemin', '0')
     block.setAttribute('aria-valuemax', String(progress.total || 100))
     block.setAttribute('aria-valuenow', String(progress.current || 0))
   }
 
-  function labeledFields(value) {
-    const raw = clean(value)
-    if (!raw) return []
-    const fieldPattern = /(Program|Position|Workout|Status|Load|Reps|Sets|RPE|Result)\s*:?\s*/gi
-    const matches = [...raw.matchAll(fieldPattern)]
-    if (matches.length < 2) return []
-    return matches.map((match, index) => {
-      const next = matches[index + 1]
-      const start = (match.index || 0) + match[0].length
-      const end = next?.index ?? raw.length
-      return { label:match[1].toLowerCase(), value:clean(raw.slice(start, end)) }
-    }).filter((item) => item.value)
-  }
-
-  function humanizeDenseCopy(value) {
-    return clean(value)
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .replace(/\b(Program|Position|Workout|Status|Load|Reps|Sets|RPE|Result)(?=[A-Z0-9])/g, '$1: ')
-  }
-
   function performancePresentation(lines) {
-    const fields = lines.flatMap(labeledFields)
-    const get = (label) => fields.find((item) => item.label === label)?.value || ''
-    const program = get('program')
-    const position = get('position')
-    const workout = get('workout') || get('status')
-
-    if (/not started|not complete|no workout/i.test(workout) || /workout\s*not started/i.test(lines.join(' '))) {
-      return {
-        title:'No completed workout yet',
-        detail:'Finish a session to start your performance trend.'
-      }
-    }
-
-    if (workout) {
-      return {
-        title:humanizeDenseCopy(workout),
-        detail:[program, position].filter(Boolean).map(humanizeDenseCopy).join(' · ') || 'Latest training session'
-      }
-    }
-
-    const readable = lines.map(humanizeDenseCopy).filter(Boolean)
+    // Home's read-only history summary owns these lines. Today's unstarted
+    // workout is not evidence that the athlete has no completed history.
+    const readable = lines.map(clean).filter(Boolean)
     return {
-      title:readable[0] || 'No recent performance yet',
-      detail:readable[1] || 'Complete a workout to build your trend.'
+      title:readable[0] || 'Recent performance unavailable',
+      detail:readable[1] || 'Reopen Home to read your saved workout history.'
     }
   }
 

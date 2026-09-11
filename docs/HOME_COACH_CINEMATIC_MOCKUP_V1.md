@@ -35,6 +35,14 @@ The live app should match the approved mockup direction:
 7. Quieter metrics rail
 8. Existing authoritative navigation
 
+### Recent Performance data
+
+Recent Performance shows the latest completed workout and its completion date,
+program, and position from the same private, read-only session snapshot used for
+the workout count. Today's unstarted workout is not evidence of empty history.
+Loading, unavailable history, and genuinely empty history have separate messages.
+Rendering the card must not modify saved sessions or start a workout.
+
 ## Hero art rules
 
 - Use `/ui/fenrir.webp` for the current UI wolf.
