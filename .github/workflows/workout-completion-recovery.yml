@@ -1,0 +1,84 @@
+name: Workout Completion Recovery Audit
+on:
+  push:
+    branches: [fix/issue53-completion-recovery]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: completion-recovery-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  recovery:
+    name: Recovery ${{ matrix.source }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        source: [baseline, candidate]
+    env:
+      APPLICATION_SHA: ${{ matrix.source == 'baseline' && '797e2281e9124d6f0fe2ca6708e190eaaf3d96bb' || github.sha }}
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: harness
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.APPLICATION_SHA }}
+          persist-credentials: false
+          path: production
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Reconstruct exact application through its production assembly without publishing
+        working-directory: production
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$APPLICATION_SHA"
+          python3 - <<'PY' > /tmp/recovery-build.sh
+          import tomllib,pathlib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash /tmp/recovery-build.sh
+          CONTEXT=production COMMIT_REF="$APPLICATION_SHA" bash ci/netlify-deploy-gate.sh > release-held.log
+          grep -Fq 'production deploy skipped' release-held.log
+          (cd .build-src/letmefly_app && npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0)
+      - name: Reopen the production app after interrupted completion
+        env:
+          QA_SOURCE: ${{ matrix.source }}
+        run: |
+          set -euo pipefail
+          node --check harness/ci/audit-workout-completion-recovery.mjs
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium)"
+          FLAGS=()
+          if [[ "$QA_SOURCE" == 'baseline' ]]; then FLAGS+=(--baseline); fi
+          node harness/ci/audit-workout-completion-recovery.mjs production/.build-src/letmefly_app "${FLAGS[@]}" 2>&1 | tee production/recovery.log
+          python3 - <<'PY'
+          import json,os,pathlib
+          p=json.loads(pathlib.Path('production/.build-src/letmefly_app/COMPLETION_RECOVERY_AUDIT/report.json').read_text())
+          expected='BASELINE_REPRODUCED' if os.environ['QA_SOURCE']=='baseline' else 'PASS'
+          assert p['result']==expected and not p['failures']
+          assert p['applicationSha']==os.environ['APPLICATION_SHA']
+          if expected=='PASS': assert len(p['passes'])>=15
+          else: assert p['observations']['baselineMissingRecovery'] is True
+          PY
+      - name: Verify tracked production files remained unchanged
+        if: always()
+        working-directory: production
+        run: git diff --exit-code HEAD -- .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: completion-recovery-${{ matrix.source }}-${{ github.run_id }}
+          path: |
+            production/.build-src/letmefly_app/COMPLETION_RECOVERY_AUDIT
+            production/recovery.log
+            production/release-held.log
+          if-no-files-found: error
+          retention-days: 14
