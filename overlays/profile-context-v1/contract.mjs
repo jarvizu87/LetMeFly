@@ -12,6 +12,15 @@ export const PROFILE_FIELDS = Object.freeze({
 const object = value => value && typeof value === 'object' && !Array.isArray(value)
 const text = value => typeof value === 'string' || typeof value === 'number' ? String(value).trim() : ''
 
+// A newly added cloud column is null until its first saved profile arrives.
+// Preserve pre-migration local details; explicit remote objects (including {})
+// remain authoritative. This does not mark clean local data as synced remotely.
+export function preserveLocalProfileContext(payload, previous) {
+  return payload.profile_context_v2 == null && object(previous?.profile_context_v2)
+    ? { ...payload, profile_context_v2: previous.profile_context_v2 }
+    : payload
+}
+
 export function profileValues(athlete) {
   const context = object(athlete?.profile_context_v2) ? athlete.profile_context_v2 : {}
   return Object.fromEntries(Object.entries(PROFILE_FIELDS).map(([key, [, legacy]]) => [key,

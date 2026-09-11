@@ -14,5 +14,12 @@ if 'LetMeFlyProfileContext' in text: raise SystemExit('Profile bridge must be in
 text = "import { saveProfileContext } from './services/profile-context-service'\nimport { parseProfileImport } from './profile-context/contract.mjs'\n" + text
 text += "\n;(window as unknown as Record<string, unknown>).LetMeFlyProfileContext = Object.freeze({ version: 1, save: saveProfileContext, parseImport: parseProfileImport })\n"
 p.write_text(text)
+p = Path(os.environ['TARGET']) / 'src/sync/local-sync.ts'
+text = p.read_text()
+needle = '  const revision = Number(payload.revision ?? 0)\n'
+if text.count(needle) != 1: raise SystemExit('Profile remote merge anchor must be unique')
+text = "import { preserveLocalProfileContext } from '../profile-context/contract.mjs'\n" + text
+text = text.replace(needle, '  payload = preserveLocalProfileContext(payload, previous)\n' + needle, 1)
+p.write_text(text)
 PY
 node --test "$ROOT_DIR/ci/audit-profile-context.mjs"
