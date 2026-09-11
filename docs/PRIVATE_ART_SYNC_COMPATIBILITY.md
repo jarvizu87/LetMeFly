@@ -29,9 +29,11 @@ The current program registry has 150 distinct displayed exercise labels. The ori
 
 Every source was checked through the production private-art contract. All 40 aliases passed its one-or-two-part requirement. The backend now has 222 approved exact lookup keys referencing the original 163 image files. New image bytes were not introduced.
 
-The nine unmatched labels are explicitly retained:
-- Three non-exercise entries: verified Crownforge results, Black Crown entry TM rules, and full rest.
-- Three three-option cardio labels: Bike / Row / Walk; Walk, Bike, or Elliptical; Bike, Row, or Elliptical. The current private-art renderer supports at most two labeled parts.
-- Relaxed Breathing, generic Curl, and Machine Hip Abduction need a specific approved representation.
+The final display-case follow-up is recorded in `database/exercise-art-final-display-cases.json`:
+- Bike / Row / Walk; Walk, Bike, or Elliptical; Bike, Row, or Elliptical now have three individually approved source images. The updated renderer validates all three and presents contained images with unnumbered, readable option labels. The older production renderer retains its fallback until this code is published.
+- Relaxed Breathing reuses the approved quiet seated pose without importing box-breathing timing. Generic Curl uses the approved supinated curl illustration without changing the equipment-neutral program prescription. Both exact aliases are active.
+- Five final aliases bring the active lookup total to 227, still referencing the original 163 images. No new bytes were uploaded for these cases.
+- Machine Hip Abduction has a dedicated reviewed illustration ready. Automatic approval review rejected its upload because it requires explicit approval of that new image payload and the existing private Supabase destination. The new image remains unuploaded and unmapped; its temporary transfer endpoint was closed. Finish that approval and verify delivery before declaring the library complete or publishing the final batch.
+- Three non-exercise entries—verified Crownforge results, Black Crown entry TM rules, and full rest—intentionally have no exercise thumbnail.
 
-Do not represent these remaining display gaps as full artwork completion. Actual physical-phone acceptance is separate from the verified production desktop browser.
+Actual physical-phone acceptance is separate from browser verification. No workout, readiness, profile, training-max or progression data is changed by this follow-up.

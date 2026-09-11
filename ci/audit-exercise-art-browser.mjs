@@ -48,7 +48,7 @@ try {
       const canvas=document.createElement('canvas');canvas.width=canvas.height=1280;const ctx=canvas.getContext('2d');ctx.fillStyle='#9c1830';ctx.fillRect(0,0,1280,1280)
       window.goodBlob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp'))
       canvas.width=canvas.height=100;window.lowBlob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp'))
-      window.LetMeFlyExerciseArt={version:2,context:async()=>({athleteId:window.currentAthlete}),readCloud:async()=>window.cloudRows,readAsset:async(id,key,rowId,path)=>{window.downloads.push({id,key,rowId,path});if(window.hold)await new Promise(resolve=>window.waiting.push(resolve));return window.lowQuality?window.lowBlob:window.goodBlob}}
+      window.LetMeFlyExerciseArt={version:2,context:async()=>({athleteId:window.currentAthlete}),readCloud:async()=>window.cloudRows,readAsset:async(id,key,rowId,path)=>{window.downloads.push({id,key,rowId,path});if(window.hold)await new Promise(resolve=>window.waiting.push(resolve));if(window.missingThird&&path.endsWith('3'.repeat(64)+'.webp'))return null;return window.lowQuality?window.lowBlob:window.goodBlob}}
       window.snapshot=async()=>{const db=await new Promise(resolve=>{const r=indexedDB.open('letmefly-private');r.onsuccess=()=>resolve(r.result)});const data=await new Promise(resolve=>{const names=[...db.objectStoreNames],tx=db.transaction(names,'readonly'),data={};for(const name of names)tx.objectStore(name).getAll().onsuccess=e=>data[name]=e.target.result;tx.oncomplete=()=>resolve(data)});db.close();return data}
     },{a,b,legacy:envelope(a,{squat:asset('qa/legacy/squat')})})
     const before=await page.evaluate(()=>window.snapshot())
@@ -87,6 +87,31 @@ try {
     await page.evaluate(()=>{const parent=document.querySelector('#preview'),media=document.createElement('div');media.className='lmf-exercise-media';media.dataset.exerciseArt=parent.dataset.exerciseArt;parent.prepend(media)})
     await page.locator('#preview > .lmf-exercise-media > .lmf-art-pair').waitFor()
     assert.equal(await page.locator('#preview > .lmf-art-pair').count(),0,'late native media insertion must not duplicate the compound pair')
+    for(const [key,labels] of [
+      ['bike-row-walk',['Bike','Row','Walk']],
+      ['walk-bike-or-elliptical',['Walk','Bike','Elliptical']],
+      ['bike-row-or-elliptical',['Bike','Row','Elliptical']],
+    ]) {
+      const triple=row(b,key,3)
+      triple.metadata.delivery.parts.forEach((part,index)=>part.label=labels[index])
+      await setRows([triple],key)
+      await page.waitForFunction(()=>document.querySelector('#media')?.dataset.exerciseArtParts==='3')
+      assert.deepEqual(await page.locator('#media .lmf-art-part > span').allTextContents(),labels)
+      assert.deepEqual(await page.locator('#tile .lmf-art-part-image').evaluateAll(images=>images.map(image=>image.getAttribute('aria-label'))),labels)
+      assert.equal(await page.locator('#media .lmf-art-part-image').count(),3)
+      assert.equal(await page.locator('#preview > .lmf-art-pair').count(),0,'native media owns the entire triple')
+      assert.equal(await page.locator('#tile .lmf-art-part > span').evaluateAll(labels=>labels.every(label=>label.scrollWidth<=label.clientWidth&&label.scrollHeight<=label.clientHeight)),true,'all three compact option names fit')
+      assert.equal(await page.locator('#media .lmf-art-part-image').evaluateAll(images=>images.every(image=>{const box=image.getBoundingClientRect();return box.width>0&&box.height>0&&getComputedStyle(image).backgroundImage.includes('blob:')})),true,'all three images are visible')
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
+      await page.screenshot({path:path.join(out,`${key}-${width}.png`),fullPage:true})
+    }
+    await page.evaluate(()=>window.missingThird=true)
+    await setRows([row(b,'bike-row-walk',3)],'bike-row-walk')
+    await page.waitForFunction(()=>window.created.every(url=>window.revoked.includes(url)))
+    assert.equal(await page.locator('.lmf-art-pair').count(),0,'one unavailable alternative must not render an incomplete card')
+    await page.evaluate(()=>window.missingThird=false)
+    await setRows([row(b,'bike-row-walk',3)],'bike-row-walk')
+    await page.waitForFunction(()=>document.querySelector('#media')?.dataset.exerciseArtParts==='3')
     await page.evaluate(()=>{window.currentAthlete=null;window.cloudRows=[];window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))})
     await page.waitForTimeout(80)
     assert.equal(await page.locator('.lmf-art-pair').count(),0)
@@ -94,7 +119,7 @@ try {
     const after=await page.evaluate(()=>window.snapshot());assert.deepEqual(after,before)
     assert.deepEqual(external,[],'private art must never request public or external image URLs')
     assert.deepEqual(await page.evaluate(()=>window.cspViolations),[],'private image decoding must comply with the production CSP')
-    report.checks.push(`${width}px: legacy maps inactive; authenticated blob images; deduped tile reads; stale download/athlete switch; foreign/duplicate rejection; quality fallback; two separately labeled components; logout revocation; no public requests or runtime writes`)
+    report.checks.push(`${width}px: legacy maps inactive; authenticated blob images; deduped tile reads; stale download/athlete switch; foreign/duplicate rejection; quality fallback; paired components and all three cardio option sets; compact label fit; atomic fallback on missing third image; logout revocation; no public requests or runtime writes`)
     await page.evaluate(async({a,b})=>{const db=await new Promise(resolve=>{const r=indexedDB.open('letmefly-private');r.onsuccess=()=>resolve(r.result)});await new Promise(resolve=>{const tx=db.transaction('athletes','readwrite');tx.objectStore('athletes').put({id:a,display_name:'QA Athlete A',deleted_at:'2026-01-01'});tx.objectStore('athletes').put({id:b,display_name:'QA Athlete B'});tx.oncomplete=resolve});db.close()},{a,b})
     await page.goto(`${base}/exercise-art-import.html`)
     await page.getByRole('heading',{name:'For QA Athlete B'}).waitFor()

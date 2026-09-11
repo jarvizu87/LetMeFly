@@ -47,6 +47,26 @@ function fixture() {
   const result=createPrivateArtBridge({activeAthlete:async()=>({id:state.athleteId}),auth:{getLocalSession:async()=>state.session,getTrustedCurrentUser:async()=>state.user},client,configured:()=>true})
   return{state,...result}
 }
+test('three alternatives retain every distinct owner-scoped image and reject incomplete or oversized sets',()=>{
+  const parts=['Bike','Row','Walk'].map((label,i)=>({path:`${athleteId}/${String(i+1).repeat(64)}.webp`,label}))
+  const triple={...delivery,parts}
+  assert.deepEqual(privateDelivery(triple,athleteId),triple)
+  assert.equal(approvedPrivateRows([{...cloudRow,metadata:{delivery:triple}}],athleteId)['front-squat'].delivery.parts.length,3)
+  for(const invalid of [[...parts, {path:`${athleteId}/${'4'.repeat(64)}.webp`,label:'Fourth'}], [parts[0],parts[1],parts[0]], [parts[0],parts[1],{...parts[2],path:parts[2].path.replace(athleteId,otherId)}], [parts[0],parts[1],{...parts[2],label:''}]]) {
+    assert.equal(privateDelivery({...triple,parts:invalid},athleteId),null)
+  }
+})
+test('native bridge authorizes all three alternatives individually and rechecks revocation',async()=>{
+  const {state,bridge}=fixture()
+  const parts=['Bike','Row','Walk'].map((label,i)=>({path:`${athleteId}/${String(i+1).repeat(64)}.webp`,label}))
+  state.rows=[{...cloudRow,exercise_key:'bike-row-walk',metadata:{delivery:{...delivery,parts}}}]
+  await bridge.readCloud(athleteId)
+  for(const part of parts) assert.equal(await bridge.readAsset(athleteId,'bike-row-walk',rowId,part.path),state.bytes)
+  assert.deepEqual(state.downloads.map(item=>item.path),parts.map(part=>part.path))
+  state.rows=[{...state.rows[0],status:'review'}]
+  assert.equal(await bridge.readAsset(athleteId,'bike-row-walk',rowId,parts[2].path),null)
+  assert.equal(state.downloads.length,3)
+})
 test('native bridge downloads only an issued, currently approved exact reference',async()=>{
   const {state,bridge}=fixture()
   assert.equal(await bridge.readAsset(athleteId,'front-squat',rowId,imagePath),null)
