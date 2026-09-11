@@ -4,6 +4,8 @@
   // Native workout cards retain authority for every field and tool action.
   const media = matchMedia('(min-width: 1100px)')
   let timer = 0
+  let lastDesktopMode = media.matches
+  let layoutGeneration = 0
   const text = node => (node?.textContent || '').replace(/\s+/g, ' ').trim()
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))
   const disabled = node => !node || node.disabled || node.getAttribute('aria-disabled') === 'true'
@@ -51,7 +53,28 @@
       <div class="lmf-desktop-context-card" data-lmf-desktop-v2-content><small>Current Section</small><strong style="font-size:20px">${esc(section)}</strong><p>Live loading, plates, and exercise tools appear when you enter an exercise block.</p></div>`
     body.dataset.lmfDesktopV2Signature = signature
   }
+  // A breakpoint reparents the native carousel. Re-select its existing section
+  // through the original navigation control after layout, rather than keeping a
+  // competing program index or overriding the native scroll-state machine.
+  window.addEventListener('resize', () => {
+    const desktop = media.matches
+    if (desktop === lastDesktopMode) return
+    lastDesktopMode = desktop
+    const viewport = document.querySelector('#swipe-viewport')
+    const selected = document.querySelector('#session-track [data-session-index].active')
+    if (!viewport || !(selected instanceof HTMLButtonElement)) return
+    const generation = ++layoutGeneration
+    let frames = 0
+    function restoreNativeSection() {
+      if (generation !== layoutGeneration || !selected.isConnected || document.querySelector('#swipe-viewport') !== viewport) return
+      const mounted = Boolean(viewport.closest('[data-lmf-desktop-workspace]'))
+      if (mounted === desktop) { selected.click(); schedule(); return }
+      if (++frames < 30) requestAnimationFrame(restoreNativeSection)
+    }
+    requestAnimationFrame(restoreNativeSection)
+  }, { passive: true })
   document.addEventListener('click', event => {
+    if (event.isTrusted && event.target instanceof Element && event.target.closest('[data-session-index],[data-session-step]')) layoutGeneration++
     if (!media.matches || !(event.target instanceof Element)) return
     const forward = event.target.closest('[data-lmf-desktop-v2-action]')
     if (forward) {
