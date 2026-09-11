@@ -22,19 +22,9 @@ Keep one public image per slug. WebP is preferred.
 
 ## 2. Approved private JP exercise artwork
 
-The current private-art/Cloudinary resolver intentionally supports the locked-JP asset convention:
+Existing approved masters may retain the legacy `jp-${slug}-v2` naming convention. Do not bulk rename them. The convention remains an audit/reference marker; it no longer grants runtime approval or implies an athlete mapping.
 
-`jp-${slug}-v2`
-
-Examples:
-
-- `Push Press` → `jp-push-press-v2.webp`
-- `Front Squat` → `jp-front-squat-v2.webp`
-- `Cable Press-Around` → `jp-cable-press-around-v2.webp`
-
-These filenames are **not an error** and should not be bulk-renamed to the public drop-in convention. The production build explicitly audits for the `jp-${slug}-v2` resolver behavior.
-
-Private approved art is resolved through the governed private-art mapping/Cloudinary layer. It must not require a private athlete profile or private credentials to be committed into the public repository.
+Private art uses exact reviewed mappings scoped to the active athlete. See [delivery and migration rules](../../docs/CLOUDINARY_EXERCISE_ART.md). Global legacy maps and prefixes remain stored but need an explicitly reviewed athlete-bound import. Unmapped exercises retain the themed fallback.
 
 ## Privacy boundary
 

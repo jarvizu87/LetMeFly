@@ -204,6 +204,7 @@ SW
 
 node --check public/ui/pwa-install.js
 node --check public/ui/pwa-update.js
+node --test "$ROOT_DIR/ci/audit-pwa-update.mjs"
 grep -Fq '"id": "/letmefly-pwa-v2"' public/manifest.webmanifest
 grep -Fq 'source=pwa&app=letmefly-v2' public/manifest.webmanifest
 grep -Fq 'letmefly-app-icon-192-v2.png' public/manifest.webmanifest

@@ -58,6 +58,7 @@ bash "$ROOT_DIR/ci/apply-native-database-boundaries-v1.sh" "$TARGET"
 # Issue #53: persist completion intent and recover it through governed progression.
 bash "$ROOT_DIR/ci/apply-workout-completion-recovery-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-profile-context-v1.sh" "$TARGET"
+bash "$ROOT_DIR/ci/apply-exercise-art-context-v1.sh" "$TARGET"
 
 # Assert the source-level persistence/count boundary before minification. Vite is
 # allowed to rename local identifiers such as refreshedStats in the final bundle.

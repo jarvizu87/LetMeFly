@@ -1,409 +1,115 @@
-(() => {
+(async () => {
   'use strict'
-
-  const CLOUD_NAME = 'extor5az'
+  const { MAP_KEY, SLUG, cleanMap, scopedMap } = await import('./exercise-art-contract.mjs')
   const TRANSFORM = 'c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best'
-  const BASE_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${TRANSFORM}/`
+  const BASE_URL = `https://res.cloudinary.com/extor5az/image/upload/${TRANSFORM}/`
   const MIN_RENDER_DIMENSION = 640
-  const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-  const PREFIX_PATTERN = /^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*$/
-  const SUPABASE_URL = '__LMF_SUPABASE_URL__'
-  const SUPABASE_PUBLISHABLE_KEY = '__LMF_SUPABASE_PUBLISHABLE_KEY__'
-  const LOCAL_DB_NAME = 'letmefly-private'
-  const LOCAL_META_STORE = 'meta'
-  const LOCAL_MAP_KEY = 'privateExerciseArtMap'
-  const LOCAL_PREFIX_KEY = 'privateExerciseArtPrefix'
-  const LOCAL_STORAGE_MAP_KEY = 'lmf_private_exercise_art_map_v1'
-
-  // Program/display aliases are generic app semantics, not athlete-specific mappings.
-  const CANONICAL_SLUG_ALIASES = Object.freeze({
-    'band-or-cable-march': 'band-march',
-    'bike-incline-walk': 'recovery-cardio',
-    'bike-row-walk': 'recovery-cardio',
-    'bike-walk': 'recovery-cardio',
-    'bike-or-walk': 'recovery-cardio',
-    'db-curl': 'dumbbell-curl',
-    'dead-bug-or-hollow-hold': 'dead-bug',
-    'front-squat-bench-ramp-sets': 'front-squat',
-    'glute-bridge-iso': 'glute-bridge-isometric-hold',
-    'incline-db-press': 'incline-dumbbell-press',
-    'kb-halo': 'kettlebell-halo',
-    'kb-lateral-clean-or-outside-swing-to-rack': 'kettlebell-lateral-clean',
-    'kb-lateral-lunge': 'kettlebell-lateral-lunge',
-    'kb-swing': 'kettlebell-swing',
-    'lat-pulldown-warm-up': 'lat-pulldown',
-    'light-forward-sled-push': 'forward-sled-push',
-    'mobility': 'hip-opener',
-    'optional-easy-walk': 'recovery-cardio',
-    'pull-up-or-lat-pulldown': 'pull-up',
-    'rdl': 'romanian-deadlift',
-    'rear-delt-fly': 'rear-deltoid-fly',
-    'reverse-crunch-or-dead-bug': 'reverse-crunch',
-    'scap-push-up': 'scapular-push-up',
-    'sled-push': 'forward-sled-push',
-    'walk-or-bike': 'recovery-cardio',
-    'wide-or-neutral-pulldown': 'neutral-grip-lat-pulldown',
-    'farmers-carry': 'farmer-carry',
-    'farmer-s-carry': 'farmer-carry',
-    'leg-curl': 'hamstring-curl',
-    'ohp': 'overhead-press'
-  })
-
-  const statusBySlug = new Map()
-  const waitingBySlug = new Map()
-  let localOverrideMap = {}
-  let cloudOverrideMap = {}
-  let overrideMap = {}
-  let localPrivatePrefix = ''
-  let cloudRefreshStarted = false
-  let localRefreshStarted = false
-
-  function candidates(slug) {
-    return document.querySelectorAll(`[data-exercise-art="${slug}"]`)
+  const ready = new Map(), pending = new Map()
+  let epoch = 0, overrides = {}, athleteId = null, scheduled = 0
+  const nodes = () => document.querySelectorAll('[data-exercise-art]')
+  function clearElement(element) {
+    element.style.removeProperty('--exercise-art')
+    delete element.dataset.exerciseArtSource
   }
-
-  function canonicalSlug(slug) {
-    return CANONICAL_SLUG_ALIASES[slug] || slug
+  function reset() {
+    epoch += 1
+    pending.forEach(image => { image.onload = image.onerror = null; image.src = '' })
+    pending.clear(); ready.clear(); overrides = {}; athleteId = null
+    nodes().forEach(clearElement)
   }
-
-  function normalizePrefix(value) {
-    if (typeof value !== 'string') return ''
-    const clean = value.trim().replace(/^\/+|\/+$/g, '')
-    return PREFIX_PATTERN.test(clean) ? clean : ''
-  }
-
-  function normalizeOverride(value) {
-    if (!value || typeof value !== 'object') return null
-    const publicId = typeof value.publicId === 'string' ? value.publicId.trim() : ''
-    const format = typeof value.format === 'string' && value.format.trim() ? value.format.trim() : 'webp'
-    const status = typeof value.status === 'string' ? value.status : 'approved'
-    if (!publicId || status !== 'approved') return null
-    return { publicId, format }
-  }
-
-  function normalizeMap(value) {
-    const clean = {}
-    if (!value || typeof value !== 'object' || Array.isArray(value)) return clean
-    Object.entries(value).forEach(([slug, asset]) => {
-      if (!SLUG_PATTERN.test(slug)) return
-      const normalized = normalizeOverride(asset)
-      if (normalized) clean[slug] = normalized
-    })
-    return clean
-  }
-
-  function mergeOverrideMaps() {
-    overrideMap = { ...localOverrideMap, ...cloudOverrideMap }
-  }
-
-  function resolvedAssetForSlug(slug) {
-    const direct = normalizeOverride(overrideMap[slug])
-    if (direct) {
-      const source = cloudOverrideMap[slug] ? 'private-cloud-override' : 'private-local-override'
-      return { asset: direct, source }
-    }
-
-    const canonical = canonicalSlug(slug)
-    if (canonical !== slug) {
-      const canonicalOverride = normalizeOverride(overrideMap[canonical])
-      if (canonicalOverride) {
-        const source = cloudOverrideMap[canonical] ? 'private-cloud-override' : 'private-local-override'
-        return { asset: canonicalOverride, source }
-      }
-    }
-
-    if (localPrivatePrefix && SLUG_PATTERN.test(canonical)) {
-      return {
-        asset: {
-          publicId: `${localPrivatePrefix}/${canonical}/v2`,
-          // Cloudinary can convert the source to WebP even when the original master is PNG.
-          format: 'webp'
-        },
-        source: 'private-local-convention'
-      }
-    }
-
-    return null
-  }
-
-  function activate(slug, url, source) {
-    candidates(slug).forEach((element) => {
+  function activate(slug, url, token) {
+    if (token !== epoch || !athleteId) return
+    nodes().forEach(element => {
+      if (element.dataset.exerciseArt !== slug) return
       element.style.setProperty('--exercise-art', `url("${url}")`)
-      element.dataset.exerciseArtSource = source
+      element.dataset.exerciseArtSource = 'private-athlete-map'
     })
   }
-
-  function clearActivation(slug) {
-    candidates(slug).forEach((element) => {
-      element.style.removeProperty('--exercise-art')
-      delete element.dataset.exerciseArtSource
+  function check(element) {
+    const slug = element.dataset.exerciseArt
+    if (!SLUG.test(slug || '') || !overrides[slug]) { clearElement(element); return }
+    const known = ready.get(slug)
+    if (known) { activate(slug, known, epoch); return }
+    if (pending.has(slug) || navigator.onLine === false) return
+    const token = epoch, asset = overrides[slug]
+    const url = `${BASE_URL}${asset.publicId}.${asset.format}`
+    const probe = new Image(); pending.set(slug, probe); probe.decoding = 'async'
+    probe.onload = () => {
+      if (token !== epoch || pending.get(slug) !== probe) return
+      pending.delete(slug)
+      if (probe.naturalWidth < MIN_RENDER_DIMENSION || probe.naturalHeight < MIN_RENDER_DIMENSION) return
+      ready.set(slug, url); activate(slug, url, token)
+    }
+    probe.onerror = () => { if (token === epoch && pending.get(slug) === probe) pending.delete(slug) }
+    probe.src = url
+  }
+  function scan() { nodes().forEach(element => observer ? observer.observe(element) : check(element)) }
+  async function readLocal(id) {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('letmefly-private')
+      request.onupgradeneeded = () => request.transaction.abort()
+      request.onerror = () => reject(request.error)
+      request.onblocked = () => reject(new Error('Private art storage unavailable'))
+      request.onsuccess = () => resolve(request.result)
     })
-  }
-
-  function deliveryUrl(asset) {
-    return `${BASE_URL}${asset.publicId}.${asset.format}`
-  }
-
-  function probeOverride(slug, asset, source) {
-    const url = deliveryUrl(asset)
-    const probeImage = new Image()
-    probeImage.decoding = 'async'
-    probeImage.onload = () => {
-      waitingBySlug.delete(slug)
-      if (probeImage.naturalWidth < MIN_RENDER_DIMENSION || probeImage.naturalHeight < MIN_RENDER_DIMENSION) {
-        statusBySlug.set(slug, { state: 'missing' })
-        clearActivation(slug)
-        return
-      }
-      statusBySlug.set(slug, { state: 'ready', url, source })
-      activate(slug, url, source)
-    }
-    probeImage.onerror = () => {
-      waitingBySlug.delete(slug)
-      statusBySlug.set(slug, { state: 'missing' })
-      clearActivation(slug)
-    }
-    waitingBySlug.set(slug, probeImage)
-    probeImage.src = url
-  }
-
-  function checkSlug(slug) {
-    if (!SLUG_PATTERN.test(slug)) return
-
-    const resolved = resolvedAssetForSlug(slug)
-    if (!resolved) {
-      statusBySlug.set(slug, { state: 'missing' })
-      clearActivation(slug)
-      return
-    }
-
-    const known = statusBySlug.get(slug)
-    if (known?.state === 'ready') {
-      activate(slug, known.url, known.source)
-      return
-    }
-    if (known?.state === 'pending') return
-    if (navigator.onLine === false) return
-
-    statusBySlug.set(slug, { state: 'pending' })
-    probeOverride(slug, resolved.asset, resolved.source)
-  }
-
-  function queueElement(element) {
-    const slug = element.getAttribute('data-exercise-art') || ''
-    const known = statusBySlug.get(slug)
-    if (known?.state === 'ready') activate(slug, known.url, known.source)
-    if (observer) observer.observe(element)
-    else checkSlug(slug)
-  }
-
-  function scan(root = document) {
-    const nodes = root instanceof Element && root.matches('[data-exercise-art]')
-      ? [root, ...root.querySelectorAll('[data-exercise-art]')]
-      : [...root.querySelectorAll('[data-exercise-art]')]
-    nodes.forEach(queueElement)
-  }
-
-  function readLocalStorageMap() {
     try {
-      return normalizeMap(JSON.parse(localStorage.getItem(LOCAL_STORAGE_MAP_KEY) || '{}'))
-    } catch {
-      return {}
-    }
-  }
-
-  function readLocalPrivateConfig() {
-    const storageMapFallback = readLocalStorageMap()
-    const fallback = { map: storageMapFallback, prefix: '' }
-    return new Promise((resolve) => {
-      let request
-      let created = false
-      try {
-        request = indexedDB.open(LOCAL_DB_NAME)
-      } catch {
-        resolve(fallback)
-        return
-      }
-
-      request.onupgradeneeded = () => {
-        created = true
-        try { request.transaction?.abort() } catch {}
-      }
-      request.onerror = () => resolve(fallback)
-      request.onsuccess = () => {
-        const db = request.result
-        try {
-          if (created || !db.objectStoreNames.contains(LOCAL_META_STORE)) {
-            db.close()
-            resolve(fallback)
-            return
-          }
-
-          const tx = db.transaction([LOCAL_META_STORE], 'readonly')
-          const store = tx.objectStore(LOCAL_META_STORE)
-          const mapRequest = store.get(LOCAL_MAP_KEY)
-          const prefixRequest = store.get(LOCAL_PREFIX_KEY)
-          let map = storageMapFallback
-          let prefix = ''
-
-          mapRequest.onsuccess = () => {
-            const indexedDbMap = normalizeMap(mapRequest.result?.value)
-            map = { ...storageMapFallback, ...indexedDbMap }
-          }
-          prefixRequest.onsuccess = () => {
-            prefix = normalizePrefix(prefixRequest.result?.value)
-          }
-          tx.oncomplete = () => {
-            db.close()
-            resolve({ map, prefix })
-          }
-          tx.onabort = () => {
-            db.close()
-            resolve(fallback)
-          }
-          tx.onerror = () => {
-            // onabort/oncomplete closes the database and resolves the fallback or result.
-          }
-        } catch {
-          db.close()
-          resolve(fallback)
-        }
-      }
-    })
-  }
-
-  async function refreshFromLocal() {
-    if (localRefreshStarted) return
-    localRefreshStarted = true
-    try {
-      const localConfig = await readLocalPrivateConfig()
-      localPrivatePrefix = localConfig.prefix
-      localOverrideMap = localConfig.map
-      mergeOverrideMaps()
-      statusBySlug.clear()
-      waitingBySlug.clear()
-      scan(document)
-      window.dispatchEvent(new CustomEvent('lmf:exercise-art-local-loaded', {
-        detail: {
-          count: Object.keys(localOverrideMap).length,
-          conventionEnabled: Boolean(localPrivatePrefix)
-        }
-      }))
-    } finally {
-      localRefreshStarted = false
-    }
-  }
-
-  function findAccessToken() {
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i) || ''
-      if (!key.startsWith('sb-') || !key.endsWith('-auth-token')) continue
-      try {
-        const parsed = JSON.parse(localStorage.getItem(key) || '{}')
-        const token = parsed?.access_token || parsed?.currentSession?.access_token
-        if (typeof token === 'string' && token.length > 20) return token
-      } catch {
-        // Keep scanning other Supabase auth keys.
-      }
-    }
-    return null
-  }
-
-  async function supabaseGet(path, accessToken) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers: {
-        apikey: SUPABASE_PUBLISHABLE_KEY,
-        Authorization: `Bearer ${accessToken}`,
-        Accept: 'application/json'
-      },
-      cache: 'no-store'
-    })
-    if (!response.ok) throw new Error(`Supabase REST ${response.status}`)
-    return response.json()
-  }
-
-  async function refreshFromCloud() {
-    if (cloudRefreshStarted || navigator.onLine === false) return
-    if (!SUPABASE_URL.startsWith('https://') || SUPABASE_PUBLISHABLE_KEY.startsWith('__LMF_')) return
-
-    const accessToken = findAccessToken()
-    if (!accessToken) return
-    cloudRefreshStarted = true
-
-    try {
-      const athletes = await supabaseGet('athletes?select=id&deleted_at=is.null&order=created_at.asc&limit=1', accessToken)
-      const athleteId = athletes?.[0]?.id
-      if (!athleteId) return
-
-      const rows = await supabaseGet(
-        `exercise_thumbnail_overrides?select=exercise_key,cloudinary_public_id,asset_format,status,is_active&athlete_id=eq.${encodeURIComponent(athleteId)}&deleted_at=is.null&status=eq.approved&is_active=eq.true`,
-        accessToken
-      )
-
-      const nextMap = {}
-      rows.forEach((row) => {
-        if (!SLUG_PATTERN.test(row.exercise_key || '')) return
-        nextMap[row.exercise_key] = {
-          publicId: row.cloudinary_public_id,
-          format: row.asset_format || 'webp',
-          status: row.status || 'approved'
-        }
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(['athletes', 'meta'], 'readonly')
+        let rows = [], config
+        tx.objectStore('athletes').getAll().onsuccess = event => { rows = event.target.result }
+        tx.objectStore('meta').get(`${MAP_KEY}:${id}`).onsuccess = event => { config = event.target.result?.value }
+        tx.oncomplete = () => resolve(rows.find(row => !row.deleted_at)?.id === id ? scopedMap(config, id) : {})
+        tx.onabort = tx.onerror = () => reject(tx.error)
       })
-
-      cloudOverrideMap = nextMap
-      mergeOverrideMaps()
-      statusBySlug.clear()
-      waitingBySlug.clear()
-      scan(document)
-      window.dispatchEvent(new CustomEvent('lmf:exercise-art-overrides-loaded', { detail: { count: rows.length } }))
-    } catch {
-      // Private art is opportunistic. Existing local workout UI remains authoritative.
-    } finally {
-      cloudRefreshStarted = false
+    } finally { db.close() }
+  }
+  async function refresh() {
+    reset()
+    const token = epoch, bridge = window.LetMeFlyExerciseArt
+    if (!bridge || bridge.version !== 1) return
+    try {
+      const context = await bridge.context()
+      if (token !== epoch || !context?.athleteId) return
+      const id = context.athleteId
+      const local = await readLocal(id).catch(() => ({}))
+      if (token !== epoch) return
+      athleteId = id; overrides = local; scan()
+      const rows = navigator.onLine === false ? [] : await bridge.readCloud(id).catch(() => [])
+      if (token !== epoch || (await bridge.context())?.athleteId !== id || token !== epoch) return
+      const grouped = new Map()
+      for (const row of rows) {
+        if (row.athlete_id !== id || row.deleted_at || row.status !== 'approved' || row.is_active !== true) continue
+        const key = row.exercise_key
+        if (!grouped.has(key)) grouped.set(key, [])
+        grouped.get(key).push({ publicId: row.cloudinary_public_id, format: row.asset_format, status: row.status })
+      }
+      const cloud = cleanMap(Object.fromEntries([...grouped].filter(([, assets]) => assets.length === 1).map(([key, assets]) => [key, assets[0]])))
+      // A cloud replacement must invalidate pending local image callbacks too.
+      pending.forEach(image => { image.onload = image.onerror = null; image.src = '' })
+      pending.clear(); ready.clear(); epoch += 1
+      overrides = { ...local, ...cloud }; nodes().forEach(clearElement); scan()
+    } catch { if (token === epoch) reset() }
+  }
+  function schedule() {
+    reset()
+    clearTimeout(scheduled)
+    scheduled = setTimeout(() => { scheduled = 0; void refresh() }, 0)
+  }
+  const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    entries.forEach(entry => { if (entry.isIntersecting) { observer.unobserve(entry.target); check(entry.target) } })
+  }, { rootMargin: '240px 0px' }) : null
+  new MutationObserver(records => {
+    for (const record of records) {
+      if (record.type === 'attributes') { clearElement(record.target); check(record.target) }
+      else record.addedNodes.forEach(node => { if (node instanceof Element) { if (node.matches('[data-exercise-art]')) check(node); node.querySelectorAll('[data-exercise-art]').forEach(check) } })
     }
-  }
-
-  const observer = 'IntersectionObserver' in window
-    ? new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
-          observer.unobserve(entry.target)
-          checkSlug(entry.target.getAttribute('data-exercise-art') || '')
-        })
-      }, { rootMargin: '240px 0px' })
-    : null
-
-  function start() {
-    scan(document)
-    refreshFromLocal()
-    refreshFromCloud()
-
-    const mutationObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node instanceof Element) scan(node)
-        })
-      })
-    })
-    mutationObserver.observe(document.documentElement, { childList: true, subtree: true })
-
-    window.addEventListener('online', () => {
-      statusBySlug.clear()
-      refreshFromLocal()
-      refreshFromCloud()
-      scan(document)
-    })
-
-    window.addEventListener('lmf:exercise-art-overrides-updated', () => {
-      statusBySlug.clear()
-      refreshFromLocal()
-      refreshFromCloud()
-    })
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true })
-  } else {
-    start()
-  }
-})()
+  }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-exercise-art'] })
+  window.addEventListener('lmf:exercise-art-context-changed', schedule)
+  window.addEventListener('lmf:exercise-art-overrides-updated', schedule)
+  window.addEventListener('online', schedule)
+  window.addEventListener('focus', schedule)
+  window.addEventListener('pageshow', schedule)
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') schedule() })
+  if ('BroadcastChannel' in window) new BroadcastChannel('letmefly-exercise-art').onmessage = schedule
+  schedule()
+})().catch(() => { /* The themed fallback remains available without private mappings. */ })

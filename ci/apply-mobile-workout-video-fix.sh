@@ -90,8 +90,8 @@ grep -Fq 'font-size:11px!important' "$TARGET_DIR/src/command-v2.css"
 test -s "$TARGET_DIR/public/ui/exercise-art-auto.js"
 grep -Fq '/ui/exercise-art-auto.js' "$TARGET_DIR/index.html"
 grep -Fq 'jp-${slug}-v2' "$TARGET_DIR/public/ui/exercise-art-auto.js"
-grep -Fq "'glute-bridge-iso': 'jp-glute-bridge-isometric-hold-v2'" "$TARGET_DIR/public/ui/exercise-art-auto.js"
-grep -Fq "'rear-delt-fly': 'jp-rear-deltoid-fly-v2'" "$TARGET_DIR/public/ui/exercise-art-auto.js"
+! grep -Fq "letmefly/private/jp" "$TARGET_DIR/public/ui/exercise-art-auto.js"
+
 
 test -s "$TARGET_DIR/public/ui/workout-flow-v1.js"
 grep -Fq '/ui/workout-flow-v1.js' "$TARGET_DIR/index.html"

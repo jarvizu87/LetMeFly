@@ -7,257 +7,104 @@
   <title>LetMeFly — Private Exercise Art</title>
   <style>
     :root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090b10;color:#f5f7fb}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#090b10,#10131b);padding:24px 16px}
-    main{max-width:620px;margin:0 auto}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#a88cff;margin-bottom:8px}
+    *{box-sizing:border-box;accent-color:#e82f4e}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#090b10,#10131b);padding:24px 16px}
+    main{max-width:620px;margin:0 auto}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#bac5d4;margin-bottom:8px}
     h1{font-size:28px;line-height:1.05;margin:0 0 12px}h2{font-size:19px;margin:0 0 8px}p{color:#c7cbd4;line-height:1.55;font-size:16px}
     .card{margin-top:20px;padding:18px;border:1px solid #292e3a;border-radius:18px;background:#121620;box-shadow:0 16px 40px #0006}
     input[type=file],input[type=text],textarea{width:100%;padding:14px;border:1px solid #474d5c;border-radius:14px;background:#0c0f16;color:#f5f7fb;font-size:16px}
     input[type=file]{border-style:dashed}textarea{min-height:140px;resize:vertical;margin-top:14px}
-    button,a.button{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;margin-top:14px;border:0;border-radius:14px;background:#6d45e8;color:white;font-weight:850;font-size:17px;text-decoration:none;cursor:pointer}
+    button,a.button{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;margin-top:14px;border:0;border-radius:14px;background:#9c1830;color:white;font-weight:850;font-size:17px;text-decoration:none;cursor:pointer}
     button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#202633!important}.status{margin-top:14px;padding:12px 14px;border-radius:12px;background:#0b0e14;color:#c7cbd4;min-height:48px;white-space:pre-wrap}.ok{color:#9ce8b8}.error{color:#ff9c9c}
     .privacy,.hint{font-size:13px;color:#9ba2af;margin-top:12px}.privacy strong,.hint strong{color:#fff}.divider{display:flex;align-items:center;gap:10px;margin:18px 0 2px;color:#747b89;font-size:12px;font-weight:800;letter-spacing:.08em}.divider:before,.divider:after{content:"";height:1px;background:#292e3a;flex:1}
   </style>
 </head>
-<body>
-<main>
-  <div class="eyebrow">Private Athlete Data</div>
-  <h1>Private Exercise Art</h1>
-  <p>Configure your private Cloudinary exercise-art source on this device. This changes presentation only; it does not alter Crownforge, Black Crown, loads, sets, reps, progression, workout history, or readiness.</p>
-
-  <section class="card">
-    <h2>Private Cloudinary folder</h2>
-    <p class="hint">Enter the private exercise root that contains one folder per canonical exercise, with the approved image at <strong>&lt;exercise-key&gt;/v2</strong>.</p>
-    <input id="prefix" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="private/folder/exercises" />
-    <button id="save-prefix" type="button">SAVE PRIVATE ART SOURCE</button>
-    <div id="prefix-status" class="status">Nothing is uploaded from this page. The folder setting stays in LetMeFly's private browser database.</div>
-    <p class="privacy"><strong>Privacy:</strong> the folder setting is stored only in this device's LetMeFly IndexedDB. The public app shell does not contain your athlete-specific mapping.</p>
-  </section>
-
-  <section class="card">
-    <h2>Advanced: explicit art map</h2>
-    <p class="hint">Optional. Use this only when an exercise needs an explicit asset override instead of the folder convention.</p>
-    <input id="file" type="file" accept="*/*,.json,.txt,application/json,text/plain" />
-    <div class="divider">OR PASTE JSON</div>
-    <textarea id="paste" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste a LetMeFly private exercise-art JSON map here."></textarea>
-    <button id="import" type="button">IMPORT EXPLICIT ART MAP</button>
-    <div id="status" class="status">Choose a file or paste JSON only if you need explicit per-exercise overrides.</div>
-    <p class="privacy"><strong>Privacy:</strong> explicit mappings are stored in LetMeFly's local IndexedDB on this device and are not uploaded by this importer.</p>
-  </section>
-
-  <a class="button secondary" href="/">Return to LetMeFly</a>
-</main>
-<script>
-(() => {
-  'use strict'
-  const DB_NAME = 'letmefly-private'
-  const STORE_NAME = 'meta'
-  const MAP_KEY = 'privateExerciseArtMap'
-  const PREFIX_KEY = 'privateExerciseArtPrefix'
-  const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-  const PREFIX_PATTERN = /^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*$/
-
-  const prefixInput = document.getElementById('prefix')
-  const prefixButton = document.getElementById('save-prefix')
-  const prefixStatus = document.getElementById('prefix-status')
-  const fileInput = document.getElementById('file')
-  const pasteInput = document.getElementById('paste')
-  const importButton = document.getElementById('import')
-  const status = document.getElementById('status')
-  let parsed = null
-
-  function setStatus(element, message, kind = '') {
-    element.textContent = message
-    element.className = `status ${kind}`.trim()
-  }
-
-  function normalizePrefix(value) {
-    const clean = String(value || '').trim().replace(/^\/+|\/+$/g, '')
-    if (!PREFIX_PATTERN.test(clean)) throw new Error('Enter a valid Cloudinary folder path using letters, numbers, dots, underscores, dashes, and slashes only.')
-    return clean
-  }
-
-  function openPrivateDb() {
-    return new Promise((resolve, reject) => {
-      let request
-      let created = false
-      try {
-        request = indexedDB.open(DB_NAME)
-      } catch (error) {
-        reject(error)
-        return
+<body><main>
+<div class="eyebrow">Your exercise library</div><h1>Exercise art</h1>
+<p>Add reviewed images for the athlete saved on this device.</p>
+<section class="card"><h2 id="athlete">Loading athlete…</h2><p class="hint">Only image mappings change. Your training and workout history stay as saved.</p>
+<input id="file" type="file" accept=".json,.txt,application/json,text/plain" aria-label="Exercise art map file" />
+<div class="divider">OR PASTE JSON</div><textarea id="paste" aria-label="Exercise art map JSON" placeholder="Paste your reviewed exercise-art map."></textarea>
+<button id="review" type="button">REVIEW MAP</button>
+<div id="status" class="status" role="status">Choose a reviewed map to begin.</div>
+<div id="preview" hidden><p id="review-summary"></p><label><input id="confirm" type="checkbox" /> Use these reviewed images for this athlete</label><button id="save" type="button" disabled>SAVE FOR THIS ATHLETE</button></div>
+<p class="privacy">The map stays in this device’s private database. Images are delivered by Cloudinary; a folder named “private” does not restrict access to an image URL.</p>
+</section><a class="button secondary" href="/">Return to LetMeFly</a>
+</main><script type="module">
+import { MAP_KEY, parseArtImport } from './ui/exercise-art-contract.mjs'
+// letmefly-private-exercise-art-map is saved under privateExerciseArtMap:<athleteId>.
+const $ = id => document.getElementById(id)
+let reviewed = null, expected = null, target = null, generation = 0
+function message(text, error = false) { $('status').textContent = text; $('status').className = `status ${error ? 'error' : ''}` }
+function invalidate() { generation++; reviewed = null; expected = null; $('preview').hidden = true; $('confirm').checked = false; $('save').disabled = true }
+function openDb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('letmefly-private')
+    req.onupgradeneeded = () => req.transaction.abort()
+    req.onerror = req.onblocked = () => reject(new Error('Open LetMeFly in this browser first, then return here.'))
+    req.onsuccess = () => resolve(req.result)
+  })
+}
+async function snapshot() {
+  const db = await openDb()
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(['athletes', 'meta'], 'readonly')
+      let athlete = null, config = null
+      tx.objectStore('athletes').getAll().onsuccess = event => {
+        athlete = event.target.result.find(row => !row.deleted_at)
+        if (athlete) tx.objectStore('meta').get(`${MAP_KEY}:${athlete.id}`).onsuccess = event => { config = event.target.result?.value ?? null }
       }
-      request.onupgradeneeded = () => {
-        created = true
-        try { request.transaction?.abort() } catch {}
-      }
-      request.onerror = () => reject(created
-        ? new Error('Open LetMeFly in this same browser/app once, then return here and try again.')
-        : (request.error || new Error('Could not open LetMeFly private storage.')))
-      request.onsuccess = () => {
-        const db = request.result
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.close()
-          reject(new Error('This browser does not have LetMeFly private storage yet. Open LetMeFly here once, then return and try again.'))
-          return
+      tx.oncomplete = () => resolve({ athlete, config })
+      tx.onabort = tx.onerror = () => reject(new Error('Private storage is unavailable.'))
+    })
+  } finally { db.close() }
+}
+async function loadAthlete() {
+  const state = await snapshot()
+  if (!state.athlete) throw new Error('Open LetMeFly and select your athlete first.')
+  target = state.athlete
+  $('athlete').textContent = `For ${target.display_name || 'your athlete'}`
+  return state
+}
+$('review').addEventListener('click', async () => {
+  invalidate(); const token = generation
+  try {
+    const text = $('paste').value.trim() || await $('file').files?.[0]?.text()
+    if (!text) throw new Error('Choose a file or paste a reviewed map first.')
+    const state = await loadAthlete()
+    if (token !== generation) return
+    reviewed = parseArtImport(JSON.parse(text), state.athlete.id); expected = JSON.stringify(state.config)
+    $('review-summary').textContent = `${Object.keys(reviewed.overrides).length} reviewed mappings for ${state.athlete.display_name || 'this athlete'}. Saving replaces this athlete’s current local map.`
+    $('preview').hidden = false; message('Review the athlete and map, then confirm below.')
+  } catch (error) { if (token === generation) { invalidate(); message(error.message, true) } }
+})
+for (const event of ['input', 'change']) for (const id of ['file', 'paste']) $(id).addEventListener(event, invalidate)
+$('confirm').addEventListener('change', () => { $('save').disabled = !reviewed || !$('confirm').checked })
+$('save').addEventListener('click', async () => {
+  if (!reviewed || !$('confirm').checked) return
+  const value = reviewed, before = expected
+  $('save').disabled = true
+  try {
+    const db = await openDb()
+    try {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(['athletes', 'meta'], 'readwrite')
+        let problem = 'Could not save the map.'
+        tx.objectStore('athletes').getAll().onsuccess = event => {
+          if (event.target.result.find(row => !row.deleted_at)?.id !== value.athleteId) { problem = 'The active athlete changed. Review the map again.'; tx.abort(); return }
+          const store = tx.objectStore('meta'), key = `${MAP_KEY}:${value.athleteId}`
+          store.get(key).onsuccess = event => {
+            if (JSON.stringify(event.target.result?.value ?? null) !== before) { problem = 'The saved map changed. Review it again before replacing it.'; tx.abort(); return }
+            store.put({ key, value, updatedAt: new Date().toISOString() })
+          }
         }
-        resolve(db)
-      }
-    })
-  }
-
-  async function readPrivateValue(key) {
-    const db = await openPrivateDb()
-    return new Promise((resolve, reject) => {
-      try {
-        const tx = db.transaction([STORE_NAME], 'readonly')
-        const request = tx.objectStore(STORE_NAME).get(key)
-        let value
-        request.onsuccess = () => { value = request.result?.value }
-        tx.oncomplete = () => { db.close(); resolve(value) }
-        tx.onabort = () => { db.close(); reject(tx.error || new Error('Private storage read was aborted.')) }
-        tx.onerror = () => {}
-      } catch (error) {
-        db.close()
-        reject(error)
-      }
-    })
-  }
-
-  async function writePrivateValue(key, value) {
-    const db = await openPrivateDb()
-    return new Promise((resolve, reject) => {
-      try {
-        const tx = db.transaction([STORE_NAME], 'readwrite')
-        tx.objectStore(STORE_NAME).put({ key, value, updatedAt: new Date().toISOString() })
-        tx.oncomplete = () => { db.close(); resolve() }
-        tx.onabort = () => { db.close(); reject(tx.error || new Error('Private storage write was aborted.')) }
-        tx.onerror = () => {}
-      } catch (error) {
-        db.close()
-        reject(error)
-      }
-    })
-  }
-
-  async function loadPrefix() {
-    const queryPrefix = new URLSearchParams(location.search).get('prefix') || ''
-    let saved = ''
-    try {
-      const stored = await readPrivateValue(PREFIX_KEY)
-      if (stored) saved = normalizePrefix(stored)
-    } catch {
-      // The app database may not exist yet; the save action gives the actionable error.
-    }
-
-    const initial = queryPrefix || saved
-    if (!initial) return
-    try {
-      prefixInput.value = normalizePrefix(initial)
-    } catch {
-      setStatus(prefixStatus, 'The supplied private Cloudinary folder is invalid.', 'error')
-      return
-    }
-    if (saved && !queryPrefix) setStatus(prefixStatus, 'Private exercise-art source is already configured on this device.', 'ok')
-    else if (queryPrefix) setStatus(prefixStatus, 'Private folder is ready. Tap SAVE PRIVATE ART SOURCE to keep it in LetMeFly private storage.', 'ok')
-  }
-
-  prefixButton.addEventListener('click', async () => {
-    prefixButton.disabled = true
-    try {
-      const prefix = normalizePrefix(prefixInput.value)
-      await writePrivateValue(PREFIX_KEY, prefix)
-      setStatus(prefixStatus, 'SUCCESS — private exercise-art source saved on this device. Return to LetMeFly and the approved images will resolve automatically.', 'ok')
-      prefixButton.textContent = 'SAVED ✓'
-    } catch (error) {
-      setStatus(prefixStatus, error instanceof Error ? error.message : 'Could not save the private folder.', 'error')
-      prefixButton.disabled = false
-      prefixButton.textContent = 'TRY SAVE AGAIN'
-    }
-  })
-
-  function validate(payload) {
-    if (!payload || payload.format !== 'letmefly-private-exercise-art-map' || payload.formatVersion !== 1) {
-      throw new Error('This is not a LetMeFly private exercise-art map.')
-    }
-    if (!payload.overrides || typeof payload.overrides !== 'object' || Array.isArray(payload.overrides)) {
-      throw new Error('The file is missing its overrides map.')
-    }
-    const clean = {}
-    for (const [slug, value] of Object.entries(payload.overrides)) {
-      if (!SLUG_PATTERN.test(slug)) throw new Error(`Invalid exercise key: ${slug}`)
-      if (!value || typeof value !== 'object') throw new Error(`Invalid asset record: ${slug}`)
-      const publicId = typeof value.publicId === 'string' ? value.publicId.trim() : ''
-      const format = typeof value.format === 'string' && value.format.trim() ? value.format.trim().toLowerCase() : 'webp'
-      if (!publicId || !/^[a-zA-Z0-9_./-]+$/.test(publicId)) throw new Error(`Invalid Cloudinary public ID: ${slug}`)
-      if (!/^[a-z0-9]+$/.test(format)) throw new Error(`Invalid image format: ${slug}`)
-      clean[slug] = { publicId, format, status: 'approved' }
-    }
-    const count = Object.keys(clean).length
-    if (!count || count > 500) throw new Error(`Unexpected exercise-art count: ${count}`)
-    return clean
-  }
-
-  function parseText(text) {
-    return validate(JSON.parse(text))
-  }
-
-  async function sourceText() {
-    const pasted = pasteInput.value.trim()
-    if (pasted) return pasted
-    const file = fileInput.files && fileInput.files[0]
-    if (file) return file.text()
-    throw new Error('Choose the exercise-art file or paste the JSON first.')
-  }
-
-  function saveMap(overrides) {
-    return writePrivateValue(MAP_KEY, overrides)
-  }
-
-  fileInput.addEventListener('change', async () => {
-    parsed = null
-    const file = fileInput.files && fileInput.files[0]
-    if (!file) return
-    try {
-      parsed = parseText(await file.text())
-      setStatus(status, `File ready: ${Object.keys(parsed).length} approved explicit mappings. Tap IMPORT EXPLICIT ART MAP.`, 'ok')
-    } catch (error) {
-      setStatus(status, error instanceof Error ? error.message : 'Could not read that file.', 'error')
-    }
-  })
-
-  pasteInput.addEventListener('input', () => {
-    parsed = null
-    const text = pasteInput.value.trim()
-    if (!text) {
-      setStatus(status, 'Choose a file or paste JSON only if you need explicit per-exercise overrides.')
-      return
-    }
-    try {
-      parsed = parseText(text)
-      setStatus(status, `Pasted map ready: ${Object.keys(parsed).length} approved explicit mappings. Tap IMPORT EXPLICIT ART MAP.`, 'ok')
-    } catch {
-      setStatus(status, 'JSON pasted. Complete the map, then tap IMPORT EXPLICIT ART MAP.')
-    }
-  })
-
-  importButton.addEventListener('click', async () => {
-    importButton.disabled = true
-    setStatus(status, 'Importing explicit exercise art…')
-    try {
-      if (!parsed) parsed = parseText(await sourceText())
-      await saveMap(parsed)
-      const count = Object.keys(parsed).length
-      setStatus(status, `SUCCESS — imported ${count} explicit exercise-image mappings.`, 'ok')
-      importButton.textContent = 'IMPORTED ✓'
-    } catch (error) {
-      setStatus(status, error instanceof Error ? error.message : 'Exercise-art import failed.', 'error')
-      importButton.disabled = false
-      importButton.textContent = 'TRY IMPORT AGAIN'
-    }
-  })
-
-  loadPrefix()
-})()
-</script>
-</body>
-</html>
+        tx.oncomplete = resolve
+        tx.onabort = tx.onerror = () => reject(new Error(problem))
+      })
+    } finally { db.close() }
+    if ('BroadcastChannel' in window) { const channel = new BroadcastChannel('letmefly-exercise-art'); channel.postMessage('updated'); channel.close() }
+    invalidate(); message('Exercise art saved for this athlete. Return to LetMeFly to see it.')
+  } catch (error) { invalidate(); message(error.message, true) }
+})
+loadAthlete().catch(error => { $('athlete').textContent = 'Athlete unavailable'; message(error.message, true) })
+</script></body></html>

@@ -33,11 +33,10 @@ test -s "$READINESS_COMFORT_CSS"
 test -s "$ART_IMPORT_HTML"
 node --check "$CLOUDINARY_JS"
 
-grep -Fq "exercise_thumbnail_overrides" "$CLOUDINARY_JS"
+grep -Fq "LetMeFlyExerciseArt" "$CLOUDINARY_JS"
 grep -Fq "cloudinary_public_id" "$CLOUDINARY_JS"
-grep -Fq "privateExerciseArtMap" "$CLOUDINARY_JS"
-grep -Fq "__LMF_SUPABASE_URL__" "$CLOUDINARY_JS"
-grep -Fq "__LMF_SUPABASE_PUBLISHABLE_KEY__" "$CLOUDINARY_JS"
+grep -Fq "privateExerciseArtMap" "overlays/ui-command-v2/batch-n/exercise-art-contract.mjs"
+! grep -Fq "letmefly/private/jp" "$CLOUDINARY_JS"
 ! grep -Fq "localStorage.setItem" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/mine/" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/others/" "$CLOUDINARY_JS"
@@ -60,26 +59,14 @@ cd .build-src/letmefly_app
 cat "$ROOT_DIR/$CLOUDINARY_CSS" >> src/command-v2.css
 cat "$ROOT_DIR/$READINESS_COMFORT_CSS" >> src/command-v2.css
 
-# Render the runtime resolver with browser-safe Supabase public configuration.
+# The native bridge owns authenticated reads; presentation contains no tokens or mapping.
 mkdir -p public/ui
 cp "$ROOT_DIR/$ART_IMPORT_HTML" public/exercise-art-import.html
-CLOUDINARY_TEMPLATE="$ROOT_DIR/$CLOUDINARY_JS" python - <<'PY'
-import json
-import os
-from pathlib import Path
-
-source = Path(os.environ['CLOUDINARY_TEMPLATE']).read_text()
-url = os.environ['VITE_SUPABASE_URL']
-key = os.environ['VITE_SUPABASE_PUBLISHABLE_KEY']
-source = source.replace("'__LMF_SUPABASE_URL__'", json.dumps(url))
-source = source.replace("'__LMF_SUPABASE_PUBLISHABLE_KEY__'", json.dumps(key))
-if '__LMF_SUPABASE_' in source:
-    raise SystemExit('exercise-art resolver still contains unresolved Supabase placeholders')
-Path('public/ui/exercise-art-cloudinary.js').write_text(source)
-PY
+cp "$ROOT_DIR/overlays/ui-command-v2/batch-n/exercise-art-contract.mjs" public/ui/exercise-art-contract.mjs
+cp "$ROOT_DIR/$CLOUDINARY_JS" public/ui/exercise-art-cloudinary.js
 node --check public/ui/exercise-art-cloudinary.js
 
-grep -Fq "privateExerciseArtMap" public/ui/exercise-art-cloudinary.js
+grep -Fq "privateExerciseArtMap" public/ui/exercise-art-contract.mjs
 grep -Fq "privateExerciseArtMap" public/exercise-art-import.html
 grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" public/ui/workout-flow-v1.js
 ! grep -Fq "activeTab.scrollIntoView" public/ui/workout-flow-v1.js
@@ -121,9 +108,9 @@ grep -Fq "/ui/exercise-art-cloudinary.js" dist/index.html
 grep -Fq "/ui/exercise-art-auto.js" dist/index.html
 grep -Fq "/ui/workout-flow-v1.js" dist/index.html
 grep -Fq "/ui/pyramid-flow-v1.js" dist/index.html
-grep -Fq "exercise_thumbnail_overrides" dist/ui/exercise-art-cloudinary.js
+grep -Fq "LetMeFlyExerciseArt" dist/ui/exercise-art-cloudinary.js
 grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
-grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-cloudinary.js
+grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-contract.mjs
 grep -Fq "privateExerciseArtMap" dist/exercise-art-import.html
 grep -Fq 'jp-${slug}-v2' dist/ui/exercise-art-auto.js
 grep -Fq "lmf-set-tabs" dist/ui/workout-flow-v1.js
