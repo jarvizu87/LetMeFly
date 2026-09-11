@@ -1,0 +1,177 @@
+/* LetMeFly Desktop Workspace v2 polish
+   Desktop-only presentation refinement. Mobile layout and workout/program logic remain unchanged.
+*/
+
+@media (min-width: 1100px) {
+  /* Keep native scroll/page offsets in the center-column coordinate space.
+     The original mobile carousel's viewport-width padding and flex basis must
+     not survive inside a narrower desktop grid column. */
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-workspace > #swipe-viewport {
+    position: relative;
+    padding: 1px 0 18px !important;
+    scroll-padding: 0;
+  }
+
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-workspace > #swipe-viewport > .swipe-page {
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* The desktop canvas has enough horizontal room that exercise artwork does not need
+     to consume a large phone-style vertical block. Keep the image useful, but compact. */
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-workspace .lmf-workout-flow-card > .lmf-exercise-media {
+    width: 100% !important;
+    height: clamp(140px, 12vw, 190px) !important;
+    min-height: 0 !important;
+    max-height: 190px !important;
+    aspect-ratio: auto !important;
+    background-size: contain !important;
+    background-position: center !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-flow-item {
+    min-height: 60px;
+    grid-template-columns: 42px minmax(0, 1fr) 14px;
+    gap: 9px;
+    padding: 7px;
+  }
+
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-flow-thumb {
+    width: 42px;
+    height: 42px;
+    border-radius: 7px;
+  }
+
+  /* Option 3 tool rail: show the useful workout information at once rather than
+     making the athlete hunt through an empty/default tab before tools appear. */
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-context-panel-v2 .lmf-desktop-context-tabs {
+    display: none !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-context-panel-v2 .lmf-desktop-context-body {
+    display: grid;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-context-panel-v2 .lmf-desktop-context-card {
+    margin: 0;
+    padding: 11px;
+  }
+
+  .lmf-desktop-live-set-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin-top: 9px;
+  }
+
+  .lmf-desktop-live-metric {
+    min-width: 0;
+    padding: 8px 7px;
+    border: 1px solid #2e3d49;
+    border-radius: 8px;
+    background: #0a141c;
+    text-align: center;
+  }
+
+  .lmf-desktop-live-metric small {
+    display: block;
+    margin-bottom: 4px;
+    color: #7f8d99;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  .lmf-desktop-live-metric strong {
+    display: block;
+    overflow: hidden;
+    color: #f4f7f9;
+    font-family: var(--condensed, inherit);
+    font-size: 20px;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lmf-desktop-v2-tools {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    margin-top: 8px;
+  }
+
+  .lmf-desktop-v2-tool {
+    min-width: 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 9px;
+    border: 1px solid #34434f;
+    border-radius: 8px;
+    color: #e6ebef;
+    background: #0b151d;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .035em;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .lmf-desktop-v2-tool:hover {
+    border-color: #667682;
+    background: #101c25;
+  }
+
+  .lmf-desktop-v2-tool:first-child {
+    border-color: rgba(255, 23, 49, .58);
+    background: linear-gradient(180deg, #351018, #1d0c11);
+  }
+
+  .lmf-desktop-v2-tool span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lmf-desktop-v2-tool span:last-child {
+    flex: 0 0 auto;
+    color: #8795a1;
+    font-size: 16px;
+  }
+
+  .lmf-desktop-v2-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .lmf-desktop-v2-progress-row strong {
+    color: #f4f7f9;
+    font-family: var(--condensed, inherit);
+    font-size: 22px;
+  }
+
+  .lmf-desktop-v2-progress-row span {
+    color: #8d9aa5;
+    font-size: 8px;
+    line-height: 1.35;
+    text-align: right;
+  }
+
+  @media (min-width: 1600px) {
+    html[data-lmf-desktop-ui="true"] .lmf-desktop-workspace .lmf-workout-flow-card > .lmf-exercise-media {
+      height: 180px !important;
+      max-height: 180px !important;
+    }
+  }
+}
