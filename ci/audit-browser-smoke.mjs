@@ -2,7 +2,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { createRequire } from 'node:module'
+import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { applicationBootState } from './browser-boot-contract.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const target = path.join(root, '.build-src', 'letmefly_app')
@@ -278,6 +280,9 @@ async function auditFuturePreview(page) {
   await assertNoOverflow(page, 'Train Future Day Preview')
 }
 
+// Prove this readiness predicate rejects broken/placeholder UI before using it.
+execFileSync(process.execPath, [path.join(root, 'ci/audit-browser-boot-contract.mjs')], { stdio: 'inherit' })
+
 const browser = await chromium.launch({ headless: true, executablePath: chromeBin, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
 const context = await browser.newContext({ viewport: { width: 412, height: 915 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true })
 const page = await context.newPage()
@@ -292,12 +297,18 @@ page.on('response', (response) => {
 try {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForSelector('body', { timeout: 10000 })
-  await page.waitForFunction(() => /LETMEFLY|BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 20000 }).catch(() => null)
-  await page.waitForTimeout(350)
+  // A PWA install prompt contains the brand before the application is ready.
+  // Wait on the actual first-run form or content/navigation, not transient text.
   await optionalInstallDismiss(page)
-  const bodyText = await page.locator('body').innerText()
-  if (!/LETMEFLY|BUILD THE ATHLETE VAULT|CREATE LOCAL ATHLETE/i.test(bodyText)) fail('Browser app boot', 'LetMeFly shell or valid first-run athlete UI not found after startup window')
-  else pass('Browser app boot')
+  try {
+    const ready = await page.waitForFunction(applicationBootState, null, { timeout: 20000 })
+    pass('Browser app boot', await ready.jsonValue())
+    await ready.dispose()
+  } catch (error) {
+    await capture(page, 'Boot Failure')
+    const bootText = (await page.locator('body').innerText()).replace(/\s+/g, ' ').slice(0, 700)
+    fail('Browser app boot', `Usable application UI missing after startup window: ${bootText || '(blank)'}; ${error.message}`)
+  }
 
   await bootstrapEphemeralAthlete(page)
   await settleFirstRunPrompts(page, 6)
