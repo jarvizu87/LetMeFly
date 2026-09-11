@@ -51,7 +51,7 @@ s = p.read_text()
 m = re.search(r'const\s+PRECACHE\s*=\s*\[([^\]]*)\]', s)
 assert m, 'Missing offline asset list'
 assets = re.findall(r"['\"]([^'\"]+)['\"]", m.group(1))
-assets += ['/ui/exercise-art-contract.mjs', '/ui/exercise-art-cloudinary.js', '/ui/exercise-art-auto.js', '/exercise-art-import.html']
+assets += ['/ui/exercise-art-contract.mjs', '/ui/exercise-art-cloudinary.js', '/ui/exercise-art-auto.js', '/exercise-art-import.html', '/ui/exercise-art-import.mjs']
 s = s[:m.start()]+'const PRECACHE = ['+', '.join(repr(a) for a in dict.fromkeys(assets))+']'+s[m.end():]
 p.write_text(s)
 PYTHON

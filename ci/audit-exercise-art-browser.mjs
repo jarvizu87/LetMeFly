@@ -7,6 +7,11 @@ const { chromium } = createRequire(path.join(app, 'package.json'))('playwright-c
 const out = path.join(app, 'EXERCISE_ART_AUDIT'); fs.mkdirSync(out, { recursive: true })
 const base = process.env.LMF_AUDIT_BASE_URL || 'http://127.0.0.1:4173'
 const report = { result: 'PASS', checks: [] }
+const policy = fs.readFileSync(path.join(root,'netlify.toml'),'utf8').match(/Content-Security-Policy = "([^"]+)"/)[1]
+async function enforcePolicy(context) {
+  await context.route(`${base}/**`,async route=>{const response=await route.fetch();await route.fulfill({response,headers:{...response.headers(),'content-security-policy':policy}})})
+  await context.addInitScript(()=>{window.cspViolations=[];document.addEventListener('securitypolicyviolation',event=>window.cspViolations.push(event.violatedDirective))})
+}
 const browser = await chromium.launch({ executablePath: process.env.CHROME_BIN, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
 const a = '00000000-0000-4000-8000-000000000001', b = '00000000-0000-4000-8000-000000000002'
 const rowId = '10000000-0000-4000-8000-000000000001'
@@ -16,6 +21,7 @@ const row = (athleteId,key,parts=1) => ({id:rowId,athlete_id:athleteId,exercise_
 try {
   if (!process.env.LMF_SKIP_NATIVE_ART_BRIDGE) {
     const context = await browser.newContext({ serviceWorkers:'block' }), page = await context.newPage()
+    await enforcePolicy(context)
     await page.goto(base)
     await page.waitForFunction(() => window.LetMeFlyExerciseArt?.version === 2)
     assert.deepEqual(await page.evaluate(() => window.LetMeFlyExerciseArt.context()), { athleteId:null })
@@ -26,10 +32,11 @@ try {
   }
   for (const width of [412,1440]) {
     const context = await browser.newContext({ viewport:{width,height:900},serviceWorkers:'block' })
+    await enforcePolicy(context)
     const page = await context.newPage(), errors = [], external = []
     page.on('pageerror', error => errors.push(error.message))
     page.on('request', request => { if(/^https?:/.test(request.url())&&!request.url().startsWith(base))external.push(request.url()) })
-    await context.route('**/art-fixture', route => route.fulfill({contentType:'text/html',body:'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/ui/private-art-audit.css"><style>body{margin:12px;background:#090b10;color:white}.library-thumb{display:block;width:140px;height:160px}.lmf-exercise-media{position:relative;width:360px;height:360px;max-width:100%;background-image:var(--exercise-art);background-size:contain;background-repeat:no-repeat}.exercise-card{max-width:360px}h3{font-family:system-ui}</style></head><body><h3>Authenticated private artwork</h3><div id="tile" class="library-thumb" data-exercise-art="squat"></div><div class="exercise-stack"><div id="preview" class="exercise-card" data-exercise-art="squat"></div><div class="exercise-card"><div id="media" class="lmf-exercise-media" data-exercise-art="squat"></div></div></div></body></html>'}))
+    await context.route('**/art-fixture', route => route.fulfill({contentType:'text/html',headers:{'content-security-policy':policy},body:'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/ui/private-art-audit.css"><style>body{margin:12px;background:#090b10;color:white}.library-thumb{display:block;width:140px;height:160px}.lmf-exercise-media{position:relative;width:360px;height:360px;max-width:100%;background-image:var(--exercise-art);background-size:contain;background-repeat:no-repeat}.exercise-card{max-width:360px}h3{font-family:system-ui}</style></head><body><h3>Authenticated private artwork</h3><div id="tile" class="library-thumb" data-exercise-art="squat"></div><div class="exercise-stack"><div id="preview" class="exercise-card" data-exercise-art="squat"></div><div class="exercise-card"><div id="media" class="lmf-exercise-media" data-exercise-art="squat"></div></div></div></body></html>'}))
     await context.route('**/ui/private-art-audit.css',route=>route.fulfill({contentType:'text/css',body:fs.readFileSync(path.join(root,'overlays/ui-command-v2/batch-n/exercise-art-cloudinary.css'),'utf8')}))
     await page.goto(`${base}/art-fixture`)
     await page.evaluate(async ({ a, b, legacy }) => {
@@ -86,6 +93,7 @@ try {
     assert.equal(await page.evaluate(()=>window.created.every(url=>window.revoked.includes(url))),true)
     const after=await page.evaluate(()=>window.snapshot());assert.deepEqual(after,before)
     assert.deepEqual(external,[],'private art must never request public or external image URLs')
+    assert.deepEqual(await page.evaluate(()=>window.cspViolations),[],'private image decoding must comply with the production CSP')
     report.checks.push(`${width}px: legacy maps inactive; authenticated blob images; deduped tile reads; stale download/athlete switch; foreign/duplicate rejection; quality fallback; two separately labeled components; logout revocation; no public requests or runtime writes`)
     await page.evaluate(async({a,b})=>{const db=await new Promise(resolve=>{const r=indexedDB.open('letmefly-private');r.onsuccess=()=>resolve(r.result)});await new Promise(resolve=>{const tx=db.transaction('athletes','readwrite');tx.objectStore('athletes').put({id:a,display_name:'QA Athlete A',deleted_at:'2026-01-01'});tx.objectStore('athletes').put({id:b,display_name:'QA Athlete B'});tx.oncomplete=resolve});db.close()},{a,b})
     await page.goto(`${base}/exercise-art-import.html`)
@@ -97,6 +105,7 @@ try {
     await page.locator('#paste').fill(JSON.stringify(envelope(a,{bench:asset('qa/foreign/bench')})));await page.locator('#review').click();await page.getByText('This map belongs to a different athlete.',{exact:true}).waitFor()
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
     assert.deepEqual(errors,[])
+    assert.deepEqual(await page.evaluate(()=>window.cspViolations),[],'legacy import must comply with the production CSP')
     report.checks.push(`${width}px: legacy import explains private delivery; explicit review/confirmation; foreign map rejected`)
     await context.close()
   }
