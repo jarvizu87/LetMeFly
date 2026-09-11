@@ -1,0 +1,89 @@
+name: LetMeFly Database Lifecycle Soak
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [qa/full-lifecycle-soak]
+    paths:
+      - '.github/workflows/lifecycle-database-soak.yml'
+      - 'ci/audit-lifecycle-database-soak.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-lifecycle-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PRODUCTION_SHA: a64dccd902b1c4885a9e1f59aa5808b4366191aa
+  VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+
+jobs:
+  prepare:
+    name: Prepare exact production service test kit (not a test pass)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PRODUCTION_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Reconstruct exact governed production assembly without deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PRODUCTION_SHA"
+          python3 - <<'PY' > "$RUNNER_TEMP/assembly.sh"
+          import pathlib, tomllib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash "$RUNNER_TEMP/assembly.sh"
+          CONTEXT=production COMMIT_REF="$PRODUCTION_SHA" bash ci/netlify-deploy-gate.sh > "$RUNNER_TEMP/release-held.log"
+          grep -Fq 'production deploy skipped' "$RUNNER_TEMP/release-held.log"
+      - name: Create QA-only service entry outside production dist
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cat > .qa-lifecycle-entry.ts <<'TS'
+          import * as athlete from './src/services/athlete-service'
+          import * as workout from './src/services/workout-service'
+          import * as progression from './src/services/program-progression-service'
+          import * as db from './src/db/local-db'
+          import * as mutations from './src/db/local-mutations'
+          import * as programs from './src/data/programs'
+          if (location.hostname !== '127.0.0.1' || !location.search.includes('disposable-qa=1')) {
+            throw new Error('QA service bridge is restricted to an explicit disposable loopback page')
+          }
+          ;(window as any).__LMF_LIFECYCLE_QA__ = Object.freeze({ athlete, workout, progression, db, mutations, programs })
+          TS
+          node --input-type=module <<'JS'
+          import { build } from 'vite'
+          await build({ configFile: false, build: { outDir: 'qa-runtime', emptyOutDir: true, minify: false,
+            lib: { entry: '.qa-lifecycle-entry.ts', name: 'LifecycleQA', formats: ['es'], fileName: () => 'services.js' } } })
+          JS
+          printf '%s\n' '<!doctype html><title>Disposable IndexedDB Lifecycle QA</title><script type="module" src="./services.js"></script>' > qa-runtime/index.html
+          cp "$RUNNER_TEMP/release-held.log" qa-runtime/release-held.log
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib
+          root = pathlib.Path('.')
+          sources = {str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.joinpath('src').rglob('*')) if p.is_file()}
+          pathlib.Path('qa-runtime/provenance.json').write_text(json.dumps({'productionSha': os.environ['PRODUCTION_SHA'], 'sourceHashes':sources,
+            'scope':'Unmodified production services in separate QA bundle; no production UI bridge or deployment'},indent=2)+'\n')
+          PY
+          cd ../..
+          git diff --exit-code HEAD -- .
+          tar -czf "$RUNNER_TEMP/letmefly-lifecycle-test-kit.tgz" -C .build-src/letmefly_app src dist qa-runtime node_modules package.json tsconfig.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lifecycle-db-prepared-${{ env.PRODUCTION_SHA }}
+          path: ${{ runner.temp }}/letmefly-lifecycle-test-kit.tgz
+          if-no-files-found: error
+          retention-days: 3
