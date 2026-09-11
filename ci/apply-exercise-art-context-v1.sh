@@ -1,47 +1,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 TARGET="${1:?reconstructed app root required}"
-TARGET="$TARGET" python3 - <<'PY'
-import os
+ART_SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../overlays/ui-command-v2/batch-n" && pwd)" TARGET="$TARGET" python3 - <<'PY'
+import os, shutil
 from pathlib import Path
+source = Path(os.environ['ART_SOURCE'])
+folder = Path(os.environ['TARGET'])/'src/exercise-art'
+folder.mkdir(parents=True, exist_ok=True)
+for name in ['exercise-art-contract.mjs', 'exercise-art-native.mjs', 'exercise-art-native.d.mts']:
+    shutil.copyfile(source/name, folder/name)
 p = Path(os.environ['TARGET'])/'src/main.ts'
 text = p.read_text()
 assert 'LetMeFlyExerciseArt' not in text, 'Exercise art bridge already installed'
-text = "import { supabase as exerciseArtSupabase } from './auth/supabase-client'\n" + text
+text = "import { createPrivateArtBridge } from './exercise-art/exercise-art-native.mjs'\nimport { supabase as exerciseArtSupabase } from './auth/supabase-client'\n" + text
 needle = 'function render(): void {\n'
 assert text.count(needle) == 1
 text = text.replace(needle, needle + '  notifyExerciseArtContext(state.athlete?.id ?? null)\n')
 text += '''
 // Read-only art bridge shares the native Auth client and athlete selection.
 let exerciseArtAthlete: string | null = null
-let exerciseArtAuthEpoch = 0
+const privateArt = createPrivateArtBridge({
+  activeAthlete: getActiveAthlete,
+  auth: state.cloud.auth,
+  client: exerciseArtSupabase,
+  configured: () => state.cloud.configured,
+})
 function notifyExerciseArtContext(id: string | null): void {
   if (exerciseArtAthlete === id) return
   exerciseArtAthlete = id
+  privateArt.invalidate()
   window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))
 }
 state.cloud.auth.onAuthStateChange(() => {
-  exerciseArtAuthEpoch += 1
+  privateArt.invalidate()
   window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))
 })
-;(window as unknown as Record<string, unknown>).LetMeFlyExerciseArt = Object.freeze({
-  version: 1,
-  async context() { return { athleteId: (await getActiveAthlete())?.id ?? null } },
-  async readCloud(athleteId: string) {
-    const epoch = exerciseArtAuthEpoch
-    if (!state.cloud.configured || (await getActiveAthlete())?.id !== athleteId) return []
-    const session = await state.cloud.auth.getLocalSession()
-    if (!session) return []
-    const user = await state.cloud.auth.getTrustedCurrentUser()
-    if (!user || user.id !== session.user.id || epoch !== exerciseArtAuthEpoch) return []
-    // RLS is authoritative. Both queries target exactly the active local athlete.
-    const owned = await exerciseArtSupabase.from('athletes').select('id').eq('id', athleteId).eq('owner_user_id', user.id).is('deleted_at', null)
-    if (owned.error || owned.data?.length !== 1 || epoch !== exerciseArtAuthEpoch) return []
-    const result = await exerciseArtSupabase.from('exercise_thumbnail_overrides').select('athlete_id,exercise_key,cloudinary_public_id,asset_format,status,is_active,deleted_at').eq('athlete_id', athleteId).eq('status', 'approved').eq('is_active', true).is('deleted_at', null)
-    if (result.error || epoch !== exerciseArtAuthEpoch || (await getActiveAthlete())?.id !== athleteId) return []
-    return result.data ?? []
-  },
-})
+;(window as unknown as Record<string, unknown>).LetMeFlyExerciseArt = privateArt.bridge
 window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))
 '''
 p.write_text(text)

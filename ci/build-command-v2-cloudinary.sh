@@ -34,13 +34,13 @@ test -s "$ART_IMPORT_HTML"
 node --check "$CLOUDINARY_JS"
 
 grep -Fq "LetMeFlyExerciseArt" "$CLOUDINARY_JS"
-grep -Fq "cloudinary_public_id" "$CLOUDINARY_JS"
+grep -Fq "readAsset" "$CLOUDINARY_JS"
 grep -Fq "privateExerciseArtMap" "overlays/ui-command-v2/batch-n/exercise-art-contract.mjs"
 ! grep -Fq "letmefly/private/jp" "$CLOUDINARY_JS"
 ! grep -Fq "localStorage.setItem" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/mine/" "$CLOUDINARY_JS"
 ! grep -Fq "letmefly/app/exercises/others/" "$CLOUDINARY_JS"
-grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" "$CLOUDINARY_JS"
+! grep -Fq "res.cloudinary.com" "$CLOUDINARY_JS"
 grep -Fq "letmefly-private-exercise-art-map" "$ART_IMPORT_HTML"
 grep -Fq "privateExerciseArtMap" "$ART_IMPORT_HTML"
 grep -Fq "var(--exercise-art,var(--v2-mountain))" "$CLOUDINARY_CSS"
@@ -109,7 +109,7 @@ grep -Fq "/ui/exercise-art-auto.js" dist/index.html
 grep -Fq "/ui/workout-flow-v1.js" dist/index.html
 grep -Fq "/ui/pyramid-flow-v1.js" dist/index.html
 grep -Fq "LetMeFlyExerciseArt" dist/ui/exercise-art-cloudinary.js
-grep -Fq "cloudinary_public_id" dist/ui/exercise-art-cloudinary.js
+grep -Fq "readAsset" dist/ui/exercise-art-cloudinary.js
 grep -Fq "privateExerciseArtMap" dist/ui/exercise-art-contract.mjs
 grep -Fq "privateExerciseArtMap" dist/exercise-art-import.html
 grep -Fq 'jp-${slug}-v2' dist/ui/exercise-art-auto.js
@@ -124,7 +124,7 @@ grep -Fq "lmf-pyramid-plan-row" dist/ui/pyramid-flow-v1.js
 ! grep -Fq "__LMF_SUPABASE_" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/mine/" dist/ui/exercise-art-cloudinary.js
 ! grep -Fq "letmefly/app/exercises/others/" dist/ui/exercise-art-cloudinary.js
-grep -Fq "c_lfill,g_auto,h_720,w_720/f_auto/q_auto:best" dist/ui/exercise-art-cloudinary.js
+! grep -Fq "res.cloudinary.com" dist/ui/exercise-art-cloudinary.js
 
 # Verify the user-visible mobile/video/art/workout-flow changes in the minified
 # production bundle without depending on the minifier's exact whitespace.

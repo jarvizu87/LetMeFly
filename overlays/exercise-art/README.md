@@ -24,7 +24,7 @@ Keep one public image per slug. WebP is preferred.
 
 Existing approved masters may retain the legacy `jp-${slug}-v2` naming convention. Do not bulk rename them. The convention remains an audit/reference marker; it no longer grants runtime approval or implies an athlete mapping.
 
-Private art uses exact reviewed mappings scoped to the active athlete. See [delivery and migration rules](../../docs/CLOUDINARY_EXERCISE_ART.md). Global legacy maps and prefixes remain stored but need an explicitly reviewed athlete-bound import. Unmapped exercises retain the themed fallback.
+Private art uses exact reviewed mappings scoped to the active athlete. See [delivery and migration rules](../../docs/CLOUDINARY_EXERCISE_ART.md). Global legacy maps, prefixes, and reviewed local Cloudinary maps remain stored as migration references. They cannot activate public image URLs. Approved private bytes load from authenticated Supabase Storage; unmapped or unavailable exercises retain the themed fallback.
 
 ## Privacy boundary
 

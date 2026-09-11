@@ -20,14 +20,14 @@
 </head>
 <body><main>
 <div class="eyebrow">Your exercise library</div><h1>Exercise art</h1>
-<p>Add reviewed images for the athlete saved on this device.</p>
+<p>Keep a reviewed legacy mapping for the athlete saved on this device.</p>
 <section class="card"><h2 id="athlete">Loading athlete…</h2><p class="hint">Only image mappings change. Your training and workout history stay as saved.</p>
 <input id="file" type="file" accept=".json,.txt,application/json,text/plain" aria-label="Exercise art map file" />
 <div class="divider">OR PASTE JSON</div><textarea id="paste" aria-label="Exercise art map JSON" placeholder="Paste your reviewed exercise-art map."></textarea>
 <button id="review" type="button">REVIEW MAP</button>
 <div id="status" class="status" role="status">Choose a reviewed map to begin.</div>
-<div id="preview" hidden><p id="review-summary"></p><label><input id="confirm" type="checkbox" /> Use these reviewed images for this athlete</label><button id="save" type="button" disabled>SAVE FOR THIS ATHLETE</button></div>
-<p class="privacy">The map stays in this device’s private database. Images are delivered by Cloudinary; a folder named “private” does not restrict access to an image URL.</p>
+<div id="preview" hidden><p id="review-summary"></p><label><input id="confirm" type="checkbox" /> Save these reviewed mappings for this athlete</label><button id="save" type="button" disabled>SAVE FOR THIS ATHLETE</button></div>
+<p class="privacy">The map stays on this device as a migration reference. It cannot activate public image links. Approved private images appear after signing in and securely loading this athlete’s library.</p>
 </section><a class="button secondary" href="/">Return to LetMeFly</a>
 </main><script type="module">
 import { MAP_KEY, parseArtImport } from './ui/exercise-art-contract.mjs'
@@ -103,7 +103,7 @@ $('save').addEventListener('click', async () => {
       })
     } finally { db.close() }
     if ('BroadcastChannel' in window) { const channel = new BroadcastChannel('letmefly-exercise-art'); channel.postMessage('updated'); channel.close() }
-    invalidate(); message('Exercise art saved for this athlete. Return to LetMeFly to see it.')
+    invalidate(); message('Legacy map saved for this athlete. Private images require an approved cloud library.')
   } catch (error) { invalidate(); message(error.message, true) }
 })
 loadAthlete().catch(error => { $('athlete').textContent = 'Athlete unavailable'; message(error.message, true) })
