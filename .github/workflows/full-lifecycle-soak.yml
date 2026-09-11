@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       passes:
-        description: Complete Crownforge -> Crown Maintenance -> Black Crown lifecycles
+        description: Complete deterministic Crownforge -> Maintenance -> Black Crown model lifecycles
         required: false
         default: '5'
+      production_sha:
+        description: Exact merged production-source commit to verify (no deployment)
+        required: true
+        default: 'a64dccd902b1c4885a9e1f59aa5808b4366191aa'
   push:
     branches:
       - qa/full-lifecycle-soak
@@ -14,114 +18,162 @@ on:
       - '.github/workflows/full-lifecycle-soak.yml'
       - 'ci/audit-full-lifecycle-soak-v2.mjs'
       - 'ci/audit-lifecycle-load-carry-v1.mjs'
-      - 'ci/audit-injury-substitution-athlete-v1.mjs'
       - 'ci/report-lifecycle-api-surface.mjs'
-      - 'ci/build-command-v2-v2-1.sh'
-      - 'ci/apply-athlete-program-progression-v1.sh'
-      - 'ci/apply-workout-prescription-fidelity-v1.sh'
-      - 'ci/normalize-workout-prescription-fidelity-source-v1.sh'
 
 permissions:
   contents: read
 
+concurrency:
+  group: lifecycle-soak-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  soak:
+  verify:
+    name: ${{ matrix.lane }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        lane: [deterministic-soak, live-substitutions]
+    defaults:
+      run:
+        shell: bash
+        working-directory: production
     env:
       VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      PRODUCTION_SHA: ${{ github.event.inputs.production_sha || 'a64dccd902b1c4885a9e1f59aa5808b4366191aa' }}
+      SOAK_PASSES: ${{ github.event.inputs.passes || '5' }}
+      QA_LANE: ${{ matrix.lane }}
+      QA_HARNESS_SHA: ${{ github.sha }}
     steps:
-      - name: Checkout isolated QA branch
+      - name: Checkout isolated QA harness
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout exact merged production source separately
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PRODUCTION_SHA }}
+          path: production
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
 
-      - name: Syntax-check soak harness
+      - name: Validate exact commit and bounded QA inputs
         run: |
-          node --check ci/audit-full-lifecycle-soak-v2.mjs
-          node --check ci/audit-lifecycle-load-carry-v1.mjs
-          node --check ci/audit-injury-substitution-athlete-v1.mjs
-          node --check ci/report-lifecycle-api-surface.mjs
+          set -euo pipefail
+          [[ "$PRODUCTION_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$SOAK_PASSES" =~ ^[0-9]+$ ]]
+          (( SOAK_PASSES >= 1 && SOAK_PASSES <= 10 ))
+          test "$(git rev-parse HEAD)" = "$PRODUCTION_SHA"
+          test "$VITE_SUPABASE_URL" = 'https://ci-placeholder.supabase.co'
+          mkdir -p qa-evidence
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          pathlib.Path('qa-evidence/provenance.json').write_text(json.dumps({
+              'productionSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'productionTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'qaHarnessSha': os.environ['QA_HARNESS_SHA'],
+              'lane': os.environ['QA_LANE'],
+              'requestedModelPasses': int(os.environ['SOAK_PASSES']),
+              'scope': 'Disposable QA only; no real athlete, production cloud, or deployment writes',
+              'modelIsNotIndexedDbProof': True,
+          }, indent=2) + '\n')
+          PY
 
-      - name: Audit real-program workout flow edge cases
-        run: node ci/audit-workout-flow-edge-cases.mjs
-
-      - name: Reconstruct exact production source
-        run: bash ci/build-command-v2-v2-1.sh
-
-      - name: Audit reconstructed workout persistence source
-        run: node ci/audit-workout-persistence-source.mjs .build-src/letmefly_app
-
-      - name: Install production post-build runtime layers
+      - name: Reconstruct and audit the exact Netlify production assembly without deploying
         run: |
-          bash ci/install-smart-names-bar-loader.sh
-          bash ci/install-exercise-intelligence-v1.sh
-          bash ci/install-exercise-intelligence-v2-supplement.sh
-          bash ci/install-exercise-intelligence-active-program-coverage-v1.sh
-          bash ci/install-exercise-intelligence-program-name-coverage-v1.sh
-          node ci/audit-exercise-intelligence-program-name-resolution.mjs .build-src/letmefly_app
-          bash ci/install-exercise-intelligence-library-v1.sh
-          bash ci/install-exercise-intelligence-coach-v1.sh
-          bash ci/install-exercise-intelligence-coach-substitutions-v1.sh
-          bash ci/install-exercise-intelligence-substitutions-v1.sh
-          bash ci/install-voice-notes-v2.sh
-          bash ci/install-strength-maxes-v1.sh
-          bash ci/install-progress-dashboard-v1.sh
-          bash ci/install-progress-tab-scroll-safety-v1.sh
-          bash ci/install-progress-conditioning-v4.sh
-          bash ci/install-command-refresh.sh
-          bash ci/install-mobile-recording-regression-v1.sh
-          bash ci/install-home-command-hero-v1.sh
-          bash ci/install-home-reference-v3.sh
-          bash ci/install-home-progress-route-isolation-v1.sh
-          bash ci/install-home-main-option1-v1.sh
-          bash ci/install-profile-v2.sh
-          bash ci/install-workout-logging-v2.sh
-          bash ci/install-official-brand-v2.sh
-          bash ci/install-desktop-workspace-v1.sh
-
-      - name: Audit finished production assembly baseline
-        run: |
-          node ci/audit-official-brand-v2.mjs .build-src/letmefly_app
-          node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
-          node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+          set -euo pipefail
+          python3 - <<'PY' > "$RUNNER_TEMP/letmefly-exact-assembly.sh"
+          import pathlib, tomllib
+          config = tomllib.loads(pathlib.Path('netlify.toml').read_text())
+          print('set -euo pipefail')
+          print(config['build']['command'])
+          PY
+          bash "$RUNNER_TEMP/letmefly-exact-assembly.sh" 2>&1 | tee qa-evidence/production-build.log
+          node ci/audit-workout-substitution-today-v1.mjs .build-src/letmefly_app
           node ci/audit-workout-prescription-fidelity-v1.mjs .build-src/letmefly_app
+          node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+          node ci/audit-workout-persistence-source.mjs .build-src/letmefly_app
 
-      - name: Report real lifecycle service API surface
-        run: node ci/report-lifecycle-api-surface.mjs .build-src/letmefly_app
-
-      - name: Run repeated full athlete lifecycle soak
+      - name: Verify production release remains held for this commit
         run: |
-          PASSES="${{ github.event.inputs.passes }}"
-          if [[ -z "$PASSES" ]]; then PASSES=5; fi
-          node ci/audit-full-lifecycle-soak-v2.mjs .build-src/letmefly_app "$PASSES"
+          set -euo pipefail
+          CONTEXT=production COMMIT_REF="$PRODUCTION_SHA" bash ci/netlify-deploy-gate.sh | tee qa-evidence/production-release-gate.log
+          grep -Fq 'production deploy skipped' qa-evidence/production-release-gate.log
 
-      - name: Audit long-horizon load carry matrix
-        run: node ci/audit-lifecycle-load-carry-v1.mjs .build-src/letmefly_app
+      - name: Run five-cycle deterministic model and load carry independently
+        if: matrix.lane == 'deterministic-soak'
+        run: |
+          set -euo pipefail
+          # Copy only QA harnesses, never old production patches or program data.
+          for file in audit-full-lifecycle-soak-v2.mjs audit-lifecycle-load-carry-v1.mjs report-lifecycle-api-surface.mjs; do
+            cp "../ci/$file" "ci/$file"
+            node --check "ci/$file"
+          done
+          node ci/audit-full-app-cycle-v2.mjs .build-src/letmefly_app
+          node ci/report-lifecycle-api-surface.mjs .build-src/letmefly_app
+          node ci/audit-full-lifecycle-soak-v2.mjs .build-src/letmefly_app "$SOAK_PASSES" 2>&1 | tee qa-evidence/deterministic-soak.log
+          node ci/audit-lifecycle-load-carry-v1.mjs .build-src/letmefly_app
 
-      - name: Run injured athlete substitution scenario
-        run: node ci/audit-injury-substitution-athlete-v1.mjs .build-src/letmefly_app
+      - name: Run real mobile substitution persistence instead of the simulated injury ledger
+        if: matrix.lane == 'live-substitutions'
+        run: |
+          set -euo pipefail
+          node --check ci/audit-workout-substitution-today-browser-v3.mjs
+          node ci/report-issue54-history-progress-surface.mjs .build-src/letmefly_app
+          (cd .build-src/letmefly_app && npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0)
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >qa-evidence/browser-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in {1..40}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 0.25
+          done
+          curl -fsS http://127.0.0.1:4173/ >/dev/null
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          node ci/audit-workout-substitution-today-browser-v3.mjs 2>&1 | tee qa-evidence/live-substitution-browser.log
+          node ci/audit-issue54-integration-gates-v2.mjs .build-src/letmefly_app
+          bash ci/audit-exercise-intelligence-production-v1.sh
+          python3 - <<'PY'
+          import json, pathlib
+          root = pathlib.Path('.build-src/letmefly_app')
+          browser = json.loads((root / 'WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT/audit.json').read_text())
+          integration = json.loads((root / 'ISSUE54_INTEGRATION_GATES.json').read_text())
+          assert browser['result'] == 'PASS' and not browser['failures']
+          assert len(browser['passes']) >= 19, 'Real browser coverage is incomplete'
+          assert browser['observations']['barLoaderGovernedProof']['passed'], 'Governed Bar Loader proof missing'
+          assert integration['result'] == 'PASS' and not integration['failures']
+          print('Exact merged-commit real substitution browser and integration proof: PASS')
+          PY
 
-      - name: Publish lifecycle soak report
+      - name: Ensure production tracked source was never modified by QA
+        if: always()
+        run: git diff --exit-code HEAD -- .
+
+      - name: Publish separately identified model and real-browser evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: letmefly-full-lifecycle-soak
+          name: letmefly-lifecycle-${{ matrix.lane }}-${{ github.run_id }}
           path: |
-            .build-src/letmefly_app/FULL_LIFECYCLE_SOAK_AUDIT.json
-            .build-src/letmefly_app/FULL_LIFECYCLE_SOAK_AUDIT.md
-            .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.json
-            .build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.md
-            .build-src/letmefly_app/LIFECYCLE_LOAD_CARRY_AUDIT.json
-            .build-src/letmefly_app/LIFECYCLE_LOAD_CARRY_AUDIT.md
-            .build-src/letmefly_app/INJURY_SUBSTITUTION_ATHLETE_AUDIT.json
-            .build-src/letmefly_app/INJURY_SUBSTITUTION_ATHLETE_AUDIT.md
-            .build-src/letmefly_app/LIFECYCLE_API_SURFACE.json
-            .build-src/letmefly_app/LIFECYCLE_API_SURFACE.md
-            .build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
-          if-no-files-found: warn
+            production/qa-evidence
+            production/.build-src/letmefly_app/FULL_LIFECYCLE_SOAK_AUDIT.*
+            production/.build-src/letmefly_app/FULL_APP_CYCLE_AUDIT.*
+            production/.build-src/letmefly_app/LIFECYCLE_LOAD_CARRY_AUDIT.*
+            production/.build-src/letmefly_app/LIFECYCLE_API_SURFACE.*
+            production/.build-src/letmefly_app/WORKOUT_PERSISTENCE_SOURCE_AUDIT.md
+            production/.build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_AUDIT.json
+            production/.build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT
+            production/.build-src/letmefly_app/ISSUE54_HISTORY_PROGRESS_SURFACE.md
+            production/.build-src/letmefly_app/ISSUE54_INTEGRATION_GATES.*
+          if-no-files-found: error
           retention-days: 14
