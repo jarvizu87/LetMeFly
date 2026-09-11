@@ -9,6 +9,7 @@ CARD_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-card-polis
 DESKTOP_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-desktop-bridge-v1.css"
 MOCKUP_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-mockup-fidelity-v1.css"
 JS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-v1.js"
+NAV_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/direct-coach-nav-v1.js"
 MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-foundation.svg"
 CINEMATIC_MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-command-red-v1.svg"
 CSS_OUT="$DIST/ui/home-main-option1-v1.css"
@@ -22,11 +23,12 @@ FENRIR_OUT="$DIST/ui/fenrir.webp"
 INDEX="$DIST/index.html"
 SW="$DIST/service-worker.js"
 
-for required in "$CSS_SRC" "$FIDELITY_SRC" "$CARD_SRC" "$DESKTOP_SRC" "$MOCKUP_SRC" "$JS_SRC" "$MOUNTAIN_SRC" "$CINEMATIC_MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
+for required in "$CSS_SRC" "$FIDELITY_SRC" "$CARD_SRC" "$DESKTOP_SRC" "$MOCKUP_SRC" "$JS_SRC" "$NAV_SRC" "$MOUNTAIN_SRC" "$CINEMATIC_MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
   test -s "$required" || { echo "Missing Option 1 Home dependency: $required" >&2; exit 1; }
 done
 
 node --check "$JS_SRC"
+node --check "$NAV_SRC"
 grep -Fq 'Approved Option 1 Command layout' "$CSS_SRC"
 grep -Fq '.lmf-home-option1-progress' "$CSS_SRC"
 grep -Fq "grid-template-areas:'readiness performance' 'milestone coach'" "$CSS_SRC"
@@ -39,10 +41,13 @@ grep -Fq 'data-lmf-desktop-ui="true"' "$DESKTOP_SRC"
 grep -Fq '.lmf-home-brand-lockup' "$DESKTOP_SRC"
 grep -Fq 'width:74%!important' "$MOCKUP_SRC"
 grep -Fq 'mountain landscape remains dominant' "$MOCKUP_SRC"
+grep -Fq 'data-lmf-direct-coach' "$NAV_SRC"
+grep -Fq "href = '#/coach'" "$NAV_SRC"
 grep -Fq "const HOME_CLASS = 'lmf-home-ref3-active'" "$JS_SRC"
 grep -Fq 'ensureProgress' "$JS_SRC"
 grep -Fq 'ensurePerformancePresentation' "$JS_SRC"
 ! grep -Eq 'localStorage\.setItem|indexedDB\.(open|deleteDatabase)|workoutSessions.*put|programInstances.*put|fetch\(' "$JS_SRC"
+! grep -Eq 'localStorage\.setItem|indexedDB\.(open|deleteDatabase)|fetch\(' "$NAV_SRC"
 
 mkdir -p "$DIST/ui"
 cp "$CSS_SRC" "$CSS_OUT"
@@ -51,6 +56,7 @@ cp "$CARD_SRC" "$CARD_OUT"
 cp "$DESKTOP_SRC" "$DESKTOP_OUT"
 cat "$MOCKUP_SRC" >> "$DESKTOP_OUT"
 cp "$JS_SRC" "$JS_OUT"
+cat "$NAV_SRC" >> "$JS_OUT"
 # The historic filename stays stable for the existing Home CSS contract, while
 # the bytes now come from the approved cinematic red mountain landscape.
 cp "$CINEMATIC_MOUNTAIN_SRC" "$MOUNTAIN_OUT"
@@ -117,6 +123,7 @@ test -s "$FENRIR_OUT"
 cmp -s "$MOUNTAIN_OUT" "$CINEMATIC_MOUNTAIN_SRC"
 cmp -s "$CINEMATIC_MOUNTAIN_OUT" "$CINEMATIC_MOUNTAIN_SRC"
 grep -Fq 'mountain landscape remains dominant' "$DESKTOP_OUT"
+grep -Fq 'data-lmf-direct-coach' "$JS_OUT"
 grep -Fq '/ui/home-main-option1-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-fidelity-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-card-polish-v1.css?v=1' "$INDEX"
