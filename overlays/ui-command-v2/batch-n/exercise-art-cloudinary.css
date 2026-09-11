@@ -50,7 +50,7 @@ html body .exercise-stack .exercise-card:first-child[data-exercise-art][data-exe
 [data-exercise-art-parts="3"] > .lmf-art-pair .lmf-art-part > span{display:flex;align-items:center;justify-content:center;font-size:.75rem;line-height:1.25}
 /* Library tiles are only 68–92px wide. Their adjacent full exercise heading
    names the options; stacked images preserve every component at a useful size. */
-.library-thumb[data-exercise-art-parts]{height:156px!important;min-height:156px!important}
+.library-thumb[data-exercise-art-parts]{width:100%;min-width:0;aspect-ratio:auto!important;height:156px!important;min-height:156px!important}
 .library-thumb[data-exercise-art-parts] > .lmf-art-pair{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr))}
 .library-thumb[data-exercise-art-parts="3"] > .lmf-art-pair{grid-template-rows:repeat(3,minmax(0,1fr))}
 .library-thumb[data-exercise-art-parts] .lmf-art-part{display:block}
