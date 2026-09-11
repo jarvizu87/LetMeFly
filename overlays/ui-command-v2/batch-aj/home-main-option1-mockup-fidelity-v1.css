@@ -1,0 +1,44 @@
+/* LetMeFly Home + Coach mockup fidelity v1.
+   Final presentation-only overrides after the Option 1 desktop bridge. */
+
+/* Keep a wide invisible Fenrir stage for layout safety while the actual wolf art
+   stays deliberately compact so the mountain landscape remains dominant. */
+body.lmf-home-ref3-active .lmf-home-v4-command-mark{width:44%!important}
+body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{opacity:.76!important}
+
+/* Reveal more of the approved cinematic landscape without sacrificing copy contrast. */
+body.lmf-home-ref3-active .lmf-home-v4-greeting{
+  background:
+    linear-gradient(90deg,rgba(2,6,9,.90) 0%,rgba(2,6,9,.64) 48%,rgba(2,6,9,.12) 100%),
+    url('/ui/home-mountain-foundation-v1.svg') center 42%/cover no-repeat!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-command{
+  background:
+    linear-gradient(90deg,rgba(2,6,9,.94) 0%,rgba(2,6,9,.82) 44%,rgba(2,6,9,.34) 69%,rgba(2,6,9,.06) 100%),
+    linear-gradient(180deg,rgba(255,23,55,.025),rgba(2,5,8,.44)),
+    url('/ui/home-mountain-foundation-v1.svg') center 48%/cover no-repeat!important;
+}
+.coach-banner{
+  background:
+    linear-gradient(90deg,rgba(2,6,9,.93) 0%,rgba(2,6,9,.70) 50%,rgba(2,6,9,.12) 100%),
+    url('/ui/home-mountain-foundation-v1.svg') center 44%/cover no-repeat!important;
+}
+
+@media(max-width:700px){
+  body.lmf-home-ref3-active .lmf-home-v4-greeting{
+    background:
+      linear-gradient(90deg,rgba(2,6,9,.91) 0%,rgba(2,6,9,.57) 58%,rgba(2,6,9,.10) 100%),
+      url('/ui/home-mountain-foundation-v1.svg') 57% 43%/cover no-repeat!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-command{
+    background:
+      linear-gradient(90deg,rgba(2,6,9,.94) 0%,rgba(2,6,9,.77) 54%,rgba(2,6,9,.23) 78%,rgba(2,6,9,.05) 100%),
+      url('/ui/home-mountain-foundation-v1.svg') 57% 48%/cover no-repeat!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-command-mark{width:74%!important}
+  body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{
+    width:150px!important;
+    opacity:.76!important;
+  }
+  .coach-banner::before{width:112px!important;opacity:.54!important}
+}
