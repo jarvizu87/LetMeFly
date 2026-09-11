@@ -30,7 +30,7 @@ body.lmf-home-ref3-active .lmf-home-v4-command{
 .lmf-direct-coach-nav.active{color:#ff2438!important}
 @media(max-width:1099px){
   .navbar.lmf-navbar-has-coach{grid-template-columns:repeat(6,minmax(0,1fr))!important}
-  .navbar.lmf-navbar-has-coach .nav-item{min-width:0!important;font-size:7px!important;padding-left:1px!important;padding-right:1px!important}
+  .navbar.lmf-navbar-has-coach .nav-item{min-width:0!important;font-size:10px!important;letter-spacing:.025em!important;padding-left:1px!important;padding-right:1px!important}
   .navbar.lmf-navbar-has-coach .nav-item span{font-size:15px!important}
 }
 

@@ -27,6 +27,13 @@
         tools.appendChild(clone)
       }
     }
+    // The header copy is created before private summary hydration finishes.
+    // Keep it aligned with the read-only source instead of freezing "AT".
+    const sourceAvatar = identity?.querySelector('[data-lmf-avatar]')
+    const headerAvatar = tools.querySelector('[data-lmf-avatar]')
+    if (sourceAvatar && headerAvatar && headerAvatar.textContent !== sourceAvatar.textContent) {
+      headerAvatar.textContent = sourceAvatar.textContent
+    }
     if (identity) identity.hidden = true
   }
 
