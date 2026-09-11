@@ -1,4 +1,5 @@
 import { summarizeAthlete, compareVolume, buildCoachBrief, readCoachProfile } from './athlete-insights.mjs'
+import { progressDetail } from './progress-detail-ui.mjs'
 import { readPrivateHistory, historyWindows } from './private-history.mjs'
 
 const manifest = await fetch(new URL('./coach-rule-manifest.json', import.meta.url)).then(r => {
@@ -10,6 +11,7 @@ const fmt = value => value === null || value === undefined ? '—' : new Intl.Nu
 const dateLabel = value => new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(value))
 const norm = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 let timer = 0, generation = 0, snapshot = null, readAt = 0, selectedKey = '', coachTopic = 'recent'
+let selectedReps = null, selectedDimension = 'roles'
 let snapshotPromise = null
 const topics = { recent: [], difficult: ['DR-001', 'DR-002'], time: ['DR-004'], missed: ['DR-015'], specialty: ['DR-008', 'DR-009', 'DR-010'] }
 
@@ -28,7 +30,7 @@ function summaryFor(data, range) {
 function exerciseSummary(summary, key) {
   if (!key) return summary
   const exercise = summary.exercises.find(row => row.exerciseKey === key)
-  return { ...summary, sessions: exercise?.history ?? [], totals: exercise ?? { externalLoadVolumeKg: null, completedSets: 0, volumeSetCount: 0, averageRpe: null, rpeSetCount: 0 } }
+  return { ...summary, sessions: exercise?.history ?? [], exercises: exercise ? [exercise] : [], sets: summary.sets.filter(row => row.exerciseKey === key), totals: exercise ?? { externalLoadVolumeKg: null, completedSets: 0, volumeSetCount: 0, averageRpe: null, rpeSetCount: 0 } }
 }
 function metric(label, value, detail) { return `<div class="lmf-ai-metric"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(detail)}</small></div>` }
 
@@ -48,12 +50,19 @@ function renderProgress(target, data) {
   const view = exerciseSummary(current, selectedKey), prior = previous && exerciseSummary(previous, selectedKey)
   const comparison = prior && compareVolume(view, prior), unit = unitFor(data), totals = view.totals
   const comparisonCopy = !prior ? 'Choose 7 or 30 days to compare equal rolling periods.' : comparison.status !== 'available' ? 'Needs two sessions with logged lifting volume in each period.' : comparison.percentChange === null ? 'The previous period has zero logged volume; a percentage is unavailable.' : `${comparison.percentChange >= 0 ? '+' : ''}${fmt(comparison.percentChange)}% volume vs. the previous ${selectedRange() === '7d' ? '7' : '30'} days · ${comparison.currentSessions} vs. ${comparison.previousSessions} loaded sessions.`
-  const sessions = view.sessions, signature = JSON.stringify([data.athlete.id, selectedRange(), selectedKey, view.totals, sessions, comparison])
+  const catalog = window.LetMeFlyExerciseIntelligence
+  const detail = progressDetail(data, current, view, { exerciseKey: selectedKey, reps: selectedReps, dimension: selectedDimension, unit, catalog: catalog?.getAllExercises() ?? [], catalogVersion: catalog?.version ?? null })
+  const sessions = view.sessions, signature = JSON.stringify([data.athlete.id, selectedRange(), selectedKey, view.totals, sessions, comparison, detail.signature])
   let section = target.querySelector('#lmf-advanced-progress')
   if (section?.dataset.signature === signature) return
   if (!section) { section = document.createElement('section'); section.id = 'lmf-advanced-progress'; section.className = 'lmf-athlete-insights'; target.appendChild(section) }
   const chosen = current.exercises.find(row => row.exerciseKey === selectedKey)
-  section.innerHTML = `<header><div><span class="lmf-ai-kicker">THE WORK YOU PUT IN</span><h3>Training workload</h3></div><button type="button" data-ai-refresh aria-label="Refresh training workload">Refresh</button></header><p>${current.totals.completedSessions ? 'Every completed session adds to your training history.' : 'Your first completed session starts the story.'}</p><label class="lmf-ai-select">Exercise<select data-ai-exercise><option value="">All exercises</option>${current.exercises.map(row => `<option value="${esc(row.exerciseKey)}" ${row.exerciseKey === selectedKey ? 'selected' : ''}>${esc(row.exerciseName)}</option>`).join('')}</select></label><div class="lmf-ai-metrics">${metric('TOTAL LIFTED', `${fmt(displayLoad(totals.externalLoadVolumeKg, unit))} ${unit}-reps`, `${totals.volumeSetCount} sets with logged load × reps`)}${metric('COMPLETED SESSIONS', sessions.length, selectedRange() === 'all' ? 'All stored history' : `Rolling ${selectedRange() === '7d' ? '7' : '30'} days`)}${metric('COMPLETED SETS', totals.completedSets, chosen ? chosen.exerciseName : 'All exercise types')}${metric('AVERAGE RPE', fmt(totals.averageRpe), `${totals.rpeSetCount} sets with effort recorded`)}</div>${chart(sessions, unit)}<p class="lmf-ai-comparison">${esc(comparisonCopy)}</p><p class="lmf-ai-note">Volume describes work done. Exercise mix and session count affect comparisons. It does not measure strength gains on its own.</p>${chosen?.prescribedExerciseKeys.some(key => key !== chosen.exerciseKey) ? '<p class="lmf-ai-note">Substitutions are grouped under the exercise performed.</p>' : ''}<details><summary>Session details (${sessions.length})</summary><div class="lmf-ai-table"><table><caption>Completed sessions in the selected range</caption><thead><tr><th scope="col">Session</th><th scope="col">Lifted (${unit}-reps)</th><th scope="col">Sets</th><th scope="col">RPE</th></tr></thead><tbody>${[...sessions].reverse().map(row => `<tr><th scope="row">${esc(dateLabel(row.completedAt))}${row.workoutName ? `<small>${esc(row.workoutName)}</small>` : ''}</th><td>${fmt(displayLoad(row.externalLoadVolumeKg, unit))}</td><td>${row.completedSets}</td><td>${fmt(row.averageRpe)}</td></tr>`).join('')}</tbody></table></div></details><p class="lmf-ai-note">Only completed sessions and saved sets count. Missing values stay blank. Distance and timed work are tracked separately; bodyweight, per-side reps and paired implements are never multiplied automatically.</p>`
+  const openDetails = [...section.querySelectorAll('details[data-ai-detail-key][open]')].map(row => row.dataset.aiDetailKey)
+  const focus = section.contains(document.activeElement) ? ['data-ai-exercise', 'data-ai-reps', 'data-ai-dimension'].find(key => document.activeElement.hasAttribute(key)) : null
+  section.innerHTML = `<header><div><span class="lmf-ai-kicker">THE WORK YOU PUT IN</span><h3>Training workload</h3></div><button type="button" data-ai-refresh aria-label="Refresh training workload">Refresh</button></header><p>${current.totals.completedSessions ? 'Every completed session adds to your training history.' : 'Your first completed session starts the story.'}</p><label class="lmf-ai-select">Exercise<select data-ai-exercise><option value="">All exercises</option>${current.exercises.map(row => `<option value="${esc(row.exerciseKey)}" ${row.exerciseKey === selectedKey ? 'selected' : ''}>${esc(row.exerciseName)}</option>`).join('')}</select></label><div class="lmf-ai-metrics">${metric('TOTAL LIFTED', `${fmt(displayLoad(totals.externalLoadVolumeKg, unit))} ${unit}-reps`, `${totals.volumeSetCount} sets with logged load × reps`)}${metric('COMPLETED SESSIONS', sessions.length, selectedRange() === 'all' ? 'All stored history' : `Rolling ${selectedRange() === '7d' ? '7' : '30'} days`)}${metric('COMPLETED SETS', totals.completedSets, chosen ? chosen.exerciseName : 'All exercise types')}${metric('AVERAGE RPE', fmt(totals.averageRpe), `${totals.rpeSetCount} sets with effort recorded`)}</div>${chart(sessions, unit)}<p class="lmf-ai-comparison">${esc(comparisonCopy)}</p><p class="lmf-ai-note">Volume describes work done. Exercise mix and session count affect comparisons. It does not measure strength gains on its own.</p>${chosen?.prescribedExerciseKeys.some(key => key !== chosen.exerciseKey) ? '<p class="lmf-ai-note">Substitutions are grouped under the exercise performed.</p>' : ''}<details data-ai-session-details><summary>Session details (${sessions.length})</summary><div class="lmf-ai-table"><table><caption>Completed sessions in the selected range</caption><thead><tr><th scope="col">Session</th><th scope="col">Lifted (${unit}-reps)</th><th scope="col">Sets</th><th scope="col">RPE</th></tr></thead><tbody>${[...sessions].reverse().map(row => `<tr><th scope="row">${esc(dateLabel(row.completedAt))}${row.workoutName ? `<small>${esc(row.workoutName)}</small>` : ''}</th><td>${fmt(displayLoad(row.externalLoadVolumeKg, unit))}</td><td>${row.completedSets}</td><td>${fmt(row.averageRpe)}</td></tr>`).join('')}</tbody></table></div></details><p class="lmf-ai-note">Only completed sessions and saved sets count. Missing values stay blank. Distance and timed work are tracked separately; bodyweight, per-side reps and paired implements are never multiplied automatically.</p>`
+  section.insertAdjacentHTML('beforeend', detail.html)
+  for (const key of openDetails) { const row = section.querySelector(`[data-ai-detail-key="${key}"]`); if (row) row.open = true }
+  if (focus) section.querySelector(`[${focus}]`)?.focus({ preventScroll: true })
   section.dataset.signature = signature
 }
 
@@ -120,12 +129,15 @@ new MutationObserver(records => {
   if (records.some(r => !(r.target instanceof Element) || !r.target.closest('.lmf-athlete-insights, .lmf-ai-unavailable'))) schedule()
 }).observe(document.body, { childList: true, subtree: true })
 document.addEventListener('change', event => {
-  if (event.target.matches('[data-ai-exercise]')) selectedKey = event.target.value
+  if (event.target.matches('[data-ai-exercise]')) { selectedKey = event.target.value; selectedReps = null }
+  if (event.target.matches('[data-ai-reps]')) selectedReps = Number(event.target.value)
+  if (event.target.matches('[data-ai-dimension]')) selectedDimension = event.target.value === 'muscles' ? 'muscles' : 'roles'
   if (event.target.matches('[data-ai-coach-topic]')) coachTopic = Object.hasOwn(topics, event.target.value) ? event.target.value : 'recent'
   schedule()
 })
 document.addEventListener('click', event => { if (event.target.closest('[data-ai-refresh]')) void refresh(true) })
-window.addEventListener('hashchange', () => { generation++; snapshot = null; selectedKey = ''; coachTopic = 'recent'; schedule() })
+window.addEventListener('hashchange', () => { generation++; snapshot = null; selectedKey = ''; selectedReps = null; coachTopic = 'recent'; schedule() })
+window.addEventListener('letmefly:exercise-intelligence-ready', schedule)
 window.addEventListener('storage', () => { snapshot = null; schedule() })
 window.addEventListener('lmf:profile-v2-updated', () => { snapshot = null; void refresh(true) })
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { snapshot = null; schedule() } })

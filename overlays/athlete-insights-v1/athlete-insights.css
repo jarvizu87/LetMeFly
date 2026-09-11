@@ -6,3 +6,7 @@
 .lmf-ai-profile-fields{font-size:13px;line-height:1.55}.lmf-ai-profile-fields dt{color:#a8b1bf;margin-top:12px}.lmf-ai-profile-fields dd{margin:3px 0 0;white-space:pre-wrap}.lmf-ai-profile-link{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;color:#fda2b0;font-size:13px;text-underline-offset:3px}.lmf-ai-profile-link:focus-visible{outline:2px solid #f27f91;outline-offset:3px}
 
 .lmf-athlete-insights header>button{flex-shrink:0;white-space:nowrap}
+
+.lmf-ai-detail{margin-top:20px;border-top:1px solid #41404a;padding-top:16px}.lmf-ai-detail h4{margin:0 0 5px;font-size:16px}.lmf-ai-completion-value strong{font-size:24px;color:#f7eef1;margin-right:8px}.lmf-ai-group{margin:16px 0}.lmf-ai-group>div:first-child{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;font-size:12px}.lmf-ai-group>div>span{color:#c2c8d3}.lmf-ai-group-track{height:7px;background:#282430;border-radius:5px;margin:7px 0;overflow:hidden}.lmf-ai-group-track span{display:block;height:100%;background:linear-gradient(90deg,#a92645,#ee607a);border-radius:5px}.lmf-ai-detail summary{min-height:44px;display:flex;align-items:center}.lmf-ai-detail summary::before{content:'▸';margin-right:9px;color:#eb6079}.lmf-ai-detail details[open]>summary::before{content:'▾'}
+
+.lmf-ai-detail .lmf-ai-chart text{font-size:18px}

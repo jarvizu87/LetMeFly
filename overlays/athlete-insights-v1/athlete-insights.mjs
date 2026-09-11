@@ -113,6 +113,7 @@ export function summarizeAthlete(snapshot, { athleteId, from, until }) {
   }
   const sessionRows = [...sessions.values()].sort((a, b) => time(a.completed_at) - time(b.completed_at) || a.id.localeCompare(b.id)).map(session => ({
     sessionId: session.id, completedAt: session.completed_at, programKey: session.program_key,
+    startedAt: session.started_at ?? null, readinessId: session.readiness_id ?? null,
     workoutName: session.workout_name ?? 'Completed workout',
     ...metrics(bySession.get(session.id) ?? []),
   }))
@@ -131,7 +132,7 @@ export function summarizeAthlete(snapshot, { athleteId, from, until }) {
       prescribedExerciseKeys: [...new Set(matching.map(s => s.prescribedExerciseKey))].sort(), ...metrics(matching), history }
   })
   return { schemaVersion: 1, athleteId, window: { from, until }, scope: 'completed-session-actuals',
-    totals: { completedSessions: sessions.size, ...metrics(actuals) }, sessions: sessionRows, exercises: exerciseRows, diagnostics }
+    totals: { completedSessions: sessions.size, ...metrics(actuals) }, sessions: sessionRows, exercises: exerciseRows, sets: actuals, diagnostics }
 }
 
 export function compareVolume(current, previous) {
