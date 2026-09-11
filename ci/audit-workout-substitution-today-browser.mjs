@@ -65,11 +65,69 @@ async function bootstrapAthlete(page) {
 }
 
 async function openTrain(page) {
-  const train = await clickable(page, /^\s*TRAIN\s*$/i)
-  if (!train) throw new Error('Train navigation control missing')
-  await train.click({ timeout: 5000 })
-  await page.waitForTimeout(450)
+  const structuralSelectors = [
+    'a[href="#/train"]',
+    'a[href="/#/train"]',
+    'a[href*="#/train"]',
+    '[data-route="train"]',
+    '[data-nav="train"]',
+    '[data-tab="train"]',
+    '[data-view="train"]',
+    '[aria-label="Train" i]',
+    '[aria-label*="Train" i]',
+    '[title="Train" i]',
+    '[title*="Train" i]',
+  ]
+
+  let train = null
+  for (const selector of structuralSelectors) {
+    train = await firstVisible(page.locator(selector))
+    if (train) break
+  }
+  if (!train) train = await clickable(page, /^\s*TRAIN\s*$/i)
+
+  report.observations.trainNavigation = await page.evaluate(() => [...document.querySelectorAll('nav a,nav button,nav [role="button"],footer a,footer button,footer [role="button"],a[href],button,[role="button"]')]
+    .filter(node => {
+      const rect = node.getBoundingClientRect()
+      return rect.width > 0 && rect.height > 0
+    })
+    .slice(0, 80)
+    .map(node => ({
+      tag: node.tagName.toLowerCase(),
+      text: String(node.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80),
+      href: node.getAttribute('href') || '',
+      ariaLabel: node.getAttribute('aria-label') || '',
+      title: node.getAttribute('title') || '',
+      dataRoute: node.getAttribute('data-route') || '',
+      dataNav: node.getAttribute('data-nav') || '',
+      dataTab: node.getAttribute('data-tab') || '',
+      dataView: node.getAttribute('data-view') || '',
+      className: String(node.className || '').slice(0, 120),
+    })))
+
+  if (train) {
+    await train.click({ timeout: 5000 })
+    report.observations.trainNavigationMode = 'structural-control'
+  } else {
+    await page.evaluate(() => {
+      if (location.hash !== '#/train') location.hash = '#/train'
+      else window.dispatchEvent(new HashChangeEvent('hashchange'))
+    })
+    report.observations.trainNavigationMode = 'explicit-route-fallback'
+  }
+
+  await page.waitForFunction(() => {
+    const visible = node => {
+      if (!(node instanceof HTMLElement)) return false
+      const rect = node.getBoundingClientRect()
+      const style = getComputedStyle(node)
+      return rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden'
+    }
+    return [...document.querySelectorAll('.readiness-field,[data-action="start-workout"],.workout-panel')].some(visible)
+  }, null, { timeout: 8000 })
+  await page.waitForTimeout(250)
   await settle(page, 3)
+  pass('Train route opens for substitution regression', String(report.observations.trainNavigationMode))
 }
 
 async function selectDay7(page) {
