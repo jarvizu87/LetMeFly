@@ -49,6 +49,80 @@ mkdir -p "$DIST_DIR/ui"
 cp "$JS_SOURCE" "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 cp "$CSS_SOURCE" "$DIST_DIR/ui/smart-names-bar-loader-v1.css"
 
+# Active workout cards are intentionally re-rendered by Workout Flow and by the
+# governed workout-only substitution bridge. Harden the presentation-only Bar
+# Loader against those DOM changes: discover a nested action rail, resolve the
+# performed exercise name at click time, remove stale buttons from non-barbell
+# substitutes, and expose a safe refresh hook for other presentation layers.
+DIST_DIR="$DIST_DIR" python - <<'PY'
+from pathlib import Path
+import os
+
+p = Path(os.environ['DIST_DIR']) / 'ui' / 'smart-names-bar-loader-v1.js'
+text = p.read_text()
+
+old_actions = """      const actions = card.querySelector(':scope > .exercise-actions')
+      const name = cleanName(card.querySelector('.exercise-title h3')?.textContent)
+      if (!actions || !isBarbellExercise(name)) return
+      if (actions.querySelector('[data-lmf-bar-loader-open]')) return
+"""
+new_actions = """      const actions = card.querySelector('.exercise-actions')
+      const name = cleanName(card.querySelector('.exercise-title h3')?.textContent)
+      const existing = actions?.querySelector('[data-lmf-bar-loader-open=\"exercise\"]')
+      if (!actions || !isBarbellExercise(name)) {
+        existing?.remove()
+        return
+      }
+      if (existing) return
+"""
+if old_actions not in text:
+    raise SystemExit('Bar Loader dynamic action-rail hardening point missing')
+text = text.replace(old_actions, new_actions, 1)
+
+old_open = """        const load = activeLoadForCard(card)
+        openBarLoader({ source: 'exercise', exerciseName: name, target: load.target, unit: load.unit })
+"""
+new_open = """        const load = activeLoadForCard(card)
+        const performedName = cleanName(card.querySelector('.exercise-title h3')?.textContent)
+        if (!isBarbellExercise(performedName)) return
+        openBarLoader({ source: 'exercise', exerciseName: performedName, target: load.target, unit: load.unit })
+"""
+if old_open not in text:
+    raise SystemExit('Bar Loader live performed-name hardening point missing')
+text = text.replace(old_open, new_open, 1)
+
+old_observer = """    const observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.addedNodes.length > 0)) scheduleRefresh(0)
+    })
+    observer.observe(document.documentElement, { childList: true, subtree: true })
+"""
+new_observer = """    const observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.type === 'characterData' || mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) scheduleRefresh(0)
+    })
+    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true })
+"""
+if old_observer not in text:
+    raise SystemExit('Bar Loader mutation observer hardening point missing')
+text = text.replace(old_observer, new_observer, 1)
+
+old_api = """  window.LetMeFlyBarLoader = {
+    open: (options) => openBarLoader(options || {}),
+    shortName: smartShortName,
+  }
+"""
+new_api = """  window.LetMeFlyBarLoader = {
+    open: (options) => openBarLoader(options || {}),
+    shortName: smartShortName,
+    refresh: () => enhanceAll(document),
+  }
+"""
+if old_api not in text:
+    raise SystemExit('Bar Loader public refresh hook insertion point missing')
+text = text.replace(old_api, new_api, 1)
+
+p.write_text(text)
+PY
+
 # Older Command V2 patch layers could occasionally leave two complete HTML documents
 # concatenated in dist/index.html. Browsers tolerated that malformed shell, but new UI
 # utilities should not perpetuate it. Canonicalize to the real Vite app document first,
@@ -153,12 +227,16 @@ grep -Fq 'COPY LOAD' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq 'CLOSEST POSSIBLE' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq 'lmf-bar-sleeve' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq 'Bar Loader' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq "const actions = card.querySelector('.exercise-actions')" "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'const performedName = cleanName' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'refresh: () => enhanceAll(document)' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+grep -Fq 'characterData: true' "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 grep -Fq '@media (max-width: 360px)' "$DIST_DIR/ui/smart-names-bar-loader-v1.css"
 
 DOCTYPE_COUNT="$(grep -io '<!doctype[[:space:]]\+html[^>]*>' "$DIST_DIR/index.html" | wc -l | tr -d ' ')"
 [[ "$DOCTYPE_COUNT" == "1" ]]
 
-echo "LetMeFly smart exercise names + locked Bar Loader presets/copy/mirrored sleeve geometry + canonical production shell: PASS"
+echo "LetMeFly smart exercise names + locked Bar Loader presets/copy/mirrored sleeve geometry + dynamic performed-exercise refresh + canonical production shell: PASS"
 
 # Keep the workout-specific load legibility and live inline plate helper in the
 # same isolated utility lane, after the canonical Bar Loader has been installed.
