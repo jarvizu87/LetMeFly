@@ -1,0 +1,169 @@
+/* Approved mountain preview theme; scoped to the saved recap. */
+#lmf-session-results-mountain {
+      --lmf-page: #05080b;
+      --lmf-surface: #091016;
+      --lmf-raised: #0d151d;
+      --lmf-rule: #28343b;
+      --lmf-text: #f7f8fa;
+      --lmf-muted: #a9b3b9;
+      --lmf-purple: #ff4050;
+      --lmf-red: #ff263e;
+      --lmf-track: #1a252e;
+      --lmf-previous: #687781;
+      --lmf-condensed: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue', Arial, sans-serif;
+      color: var(--lmf-text);
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      width: 100%;
+      background: transparent;
+    }
+    #lmf-session-results-mountain * { box-sizing: border-box; }
+    #lmf-session-results-mountain .lmf-screen {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--lmf-page);
+      border: 1px solid var(--lmf-rule);
+      border-radius: 14px;
+      overflow: hidden;
+      color-scheme: dark;
+    }
+    #lmf-session-results-mountain .lmf-chrome {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      padding: 12px 20px;
+      background: linear-gradient(180deg, #05080b, #070b0f);
+      border-bottom: 1px solid var(--lmf-rule);
+    }
+    #lmf-session-results-mountain .lmf-brand { display: flex; align-items: center; gap: 10px; }
+    #lmf-session-results-mountain .lmf-brand img { width: 64px; height: 64px; object-fit: contain; }
+    #lmf-session-results-mountain .lmf-wordmark { font-family: var(--lmf-condensed); font-style: italic; font-size: 28px; font-weight: 900; letter-spacing: -.025em; line-height: 1; }
+    #lmf-session-results-mountain .lmf-wordmark span { color: var(--lmf-text); }
+    #lmf-session-results-mountain .lmf-brand-label { margin-top: 7px; color: var(--lmf-muted); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+    #lmf-session-results-mountain .lmf-concept-label { color: var(--lmf-muted); font-size: 12px; }
+    #lmf-session-results-mountain .lmf-content { padding: 24px; }
+    #lmf-session-results-mountain .lmf-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--lmf-purple);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    #lmf-session-results-mountain .lmf-eyebrow svg { width: 16px; height: 16px; }
+    #lmf-session-results-mountain h2 {
+      color: var(--lmf-text);
+      font-family: var(--lmf-condensed);
+      font-size: 43px;
+      font-weight: 900;
+      letter-spacing: .01em;
+      line-height: 1;
+      margin: 9px 0 5px;
+    }
+    #lmf-session-results-mountain .lmf-session-name { color: var(--lmf-muted); margin: 0; }
+    #lmf-session-results-mountain .lmf-tonnage {
+      background: radial-gradient(circle at 88% 25%, rgba(255,38,62,.15), transparent 40%), #05090d;
+      border: 1px solid #34424b;
+      border-radius: 18px;
+      padding: 26px 28px;
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      box-shadow: 0 26px 65px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.035);
+    }
+    #lmf-session-results-mountain .lmf-tonnage::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      background: linear-gradient(90deg, rgba(3,6,9,.96) 0%, rgba(3,6,9,.7) 40%, rgba(3,6,9,.08) 100%), linear-gradient(0deg,#05090d 0%,transparent 75%);
+    }
+    #lmf-session-results-mountain .lmf-fenrir { position: absolute; z-index: -2; right: -8px; top: -7px; width: 57%; height: 110%; object-fit: cover; object-position: 75% 28%; opacity: .88; filter: saturate(.72) contrast(1.22) brightness(1.9); mix-blend-mode: screen; }
+    #lmf-session-results-mountain .lmf-program { color: var(--lmf-red); font-size: 12px; font-weight: 800; letter-spacing: .16em; margin-bottom: 18px; }
+    #lmf-session-results-mountain .lmf-tonnage-label { color: #c7cdd1; letter-spacing: .11em; text-transform: uppercase; font-size: 12px; font-weight: 700; }
+    #lmf-session-results-mountain .lmf-weight { display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
+    #lmf-session-results-mountain .lmf-weight strong { font-family: var(--lmf-condensed); font-size: clamp(60px, 14vw, 88px); font-weight: 900; line-height: 1; letter-spacing: -.02em; text-shadow: 0 5px 24px rgba(0,0,0,.72); }
+    #lmf-session-results-mountain .lmf-weight span { color: var(--lmf-muted); font-size: 21px; }
+    #lmf-session-results-mountain .lmf-tons { color: #d5dadd; margin-top: 6px; font-size: 14px; }
+    #lmf-session-results-mountain .lmf-earned { border-top: 1px solid rgba(147,164,174,.2); margin-top: 25px; padding-top: 18px; }
+    #lmf-session-results-mountain .lmf-earned strong { font-family: var(--lmf-condensed); font-size: 26px; font-weight: 900; text-transform: uppercase; }
+    #lmf-session-results-mountain .lmf-earned p { color: #bcc5ca; margin: 7px 0 0; max-width: 330px; font-size: 13px; }
+    #lmf-session-results-mountain .lmf-session-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 18px 0 20px; gap: 10px; padding: 16px 0; border-top: 1px solid var(--lmf-rule); border-bottom: 1px solid var(--lmf-rule); background: linear-gradient(180deg,rgba(10,16,20,.72),rgba(6,10,13,.56)); }
+    #lmf-session-results-mountain .lmf-session-stats div { border-left: 2px solid var(--lmf-rule); padding-left: 11px; }
+    #lmf-session-results-mountain .lmf-session-stats strong { display: block; font-family: var(--lmf-condensed); font-size: 27px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    #lmf-session-results-mountain .lmf-session-stats span { display: block; color: var(--lmf-muted); font-size: 12px; }
+    #lmf-session-results-mountain .lmf-panel { border: 1px solid var(--lmf-rule); padding: 18px; border-radius: 14px; background: linear-gradient(145deg,rgba(14,22,28,.94),rgba(8,13,17,.92)); }
+    #lmf-session-results-mountain .lmf-panel-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; }
+    #lmf-session-results-mountain h3 { margin: 0; color: var(--lmf-text); font-family: var(--lmf-condensed); font-size: 20px; font-weight: 900; text-transform: uppercase; }
+    #lmf-session-results-mountain .lmf-delta { color: var(--lmf-purple); font-size: 13px; font-variant-numeric: tabular-nums; }
+    #lmf-session-results-mountain .lmf-chart-subtitle { color: var(--lmf-muted); font-size: 12px; margin: 4px 0 12px; }
+    #lmf-session-results-mountain .lmf-volume-chart { width: 100%; display: block; }
+    #lmf-session-results-mountain .lmf-volume-chart text { font-family: inherit; font-size: 12px; fill: var(--lmf-muted); }
+    #lmf-session-results-mountain .lmf-volume-chart .lmf-value { fill: var(--lmf-text); font-weight: 500; }
+    #lmf-session-results-mountain .lmf-volume-chart .lmf-axis-title { fill: var(--lmf-muted); }
+    #lmf-session-results-mountain details { border-top: 1px solid var(--lmf-rule); margin-top: 20px; }
+    #lmf-session-results-mountain summary {
+      cursor: pointer;
+      color: var(--lmf-text);
+      padding: 15px 0;
+      min-height: 48px;
+      font-weight: 500;
+    }
+    #lmf-session-results-mountain summary::marker { color: var(--lmf-purple); }
+    #lmf-session-results-mountain .lmf-exercise { padding: 13px 0; border-top: 1px solid var(--lmf-rule); }
+    #lmf-session-results-mountain .lmf-exercise:first-child { border-top: 0; padding-top: 2px; }
+    #lmf-session-results-mountain .lmf-exercise-head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+    #lmf-session-results-mountain .lmf-exercise-head strong { font-weight: 500; }
+    #lmf-session-results-mountain .lmf-exercise-head span { font-variant-numeric: tabular-nums; }
+    #lmf-session-results-mountain .lmf-prescription { color: var(--lmf-muted); font-size: 12px; margin: 4px 0 8px; }
+    #lmf-session-results-mountain .lmf-contribution { height: 5px; background: var(--lmf-track); border-radius: 3px; overflow: hidden; }
+    #lmf-session-results-mountain .lmf-contribution span { display: block; height: 100%; background: var(--lmf-purple); }
+    #lmf-session-results-mountain .lmf-mixed-work { border-top: 1px solid var(--lmf-rule); padding-top: 18px; }
+    #lmf-session-results-mountain .lmf-work-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    #lmf-session-results-mountain .lmf-work { background: linear-gradient(145deg,rgba(14,22,28,.94),rgba(8,13,17,.92)); border: 1px solid var(--lmf-rule); border-radius: 14px; padding: 16px; }
+    #lmf-session-results-mountain .lmf-work-label { display: flex; align-items: center; gap: 7px; color: var(--lmf-muted); font-size: 13px; }
+    #lmf-session-results-mountain .lmf-work-label svg { width: 15px; height: 15px; }
+    #lmf-session-results-mountain .lmf-work strong { display: block; font-family: var(--lmf-condensed); font-size: 30px; font-weight: 900; margin: 6px 0 2px; }
+    #lmf-session-results-mountain .lmf-work small { display: block; color: var(--lmf-muted); font-size: 12px; }
+    #lmf-session-results-mountain .lmf-footer { margin-top: 23px; padding-top: 17px; border-top: 1px solid var(--lmf-rule); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; }
+    #lmf-session-results-mountain .lmf-footer span { color: var(--lmf-muted); font-size: 12px; }
+    #lmf-session-results-mountain .lmf-footer strong { color: var(--lmf-red); font-size: 12px; font-weight: 500; letter-spacing: .045em; }
+    @media (max-width: 390px) {
+      #lmf-session-results-mountain .lmf-chrome { padding: 14px 16px; }
+      #lmf-session-results-mountain .lmf-content { padding: 20px 16px; }
+      #lmf-session-results-mountain .lmf-tonnage { padding: 21px 18px; }
+      #lmf-session-results-mountain h2 { font-size: 35px; }
+      #lmf-session-results-mountain .lmf-session-stats strong { font-size: 23px; }
+      #lmf-session-results-mountain .lmf-fenrir { width: 72%; right: -32px; opacity: .75; }
+      #lmf-session-results-mountain .lmf-panel { padding: 14px; }
+      #lmf-session-results-mountain .lmf-work { padding: 12px; }
+    }
+  
+.lmf-recap-dialog {padding:0;border:1px solid #28343b;border-radius:14px;width:min(680px,calc(100% - 20px));max-width:680px;max-height:calc(100dvh - 24px);background:#05080b;color:#f7f8fa;overflow:auto;overscroll-behavior:contain;}
+.lmf-recap-dialog::backdrop{background:rgba(0,0,0,.78)}
+#lmf-session-results-mountain .lmf-screen{border:0;}
+#lmf-session-results-mountain .lmf-set-detail{display:grid;gap:5px;padding:12px 0;border-top:1px solid #28343b;overflow-wrap:anywhere;}
+#lmf-session-results-mountain .lmf-set-detail span,#lmf-session-results-mountain .lmf-record-state{font-size:13px;color:#bcc5ca;}
+#lmf-session-results-mountain .lmf-recap-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+#lmf-session-results-mountain .btn{min-height:44px;white-space:normal;}
+#lmf-session-results-mountain .lmf-volume-chart text{font-size:18px;}
+#lmf-session-results-mountain .lmf-volume-chart .lmf-value{font-size:20px;}
+#lmf-session-results-mountain .lmf-weight strong{font-size:clamp(44px,11vw,80px);overflow-wrap:anywhere;}
+#lmf-session-results-mountain .lmf-work-grid{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));}
+.history-card [data-workout-recap]{margin:8px 0;min-height:44px;}
+#lmf-recap-archive{border-top:1px solid #28343b;padding:12px 0;margin-top:16px;}
+#lmf-recap-archive summary{min-height:44px;cursor:pointer;}
+#lmf-recap-archive p{color:#a9b3b9;font-size:13px;}
+.lmf-recap-archive-list{display:grid;gap:8px;margin-top:12px;}
+.lmf-recap-archive-list button{display:grid;gap:4px;min-height:60px;text-align:left;justify-content:start;white-space:normal;}
+.lmf-recap-archive-list span{font-size:12px;color:#a9b3b9;}
+@media(max-width:430px){#lmf-session-results-mountain .lmf-content{padding:18px 14px;}#lmf-session-results-mountain .lmf-panel{padding:14px 8px;}#lmf-session-results-mountain .lmf-session-stats strong{font-size:21px;}}
