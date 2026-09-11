@@ -1,4 +1,4 @@
-// Preparation module only. No database, browser, network or mutation dependencies.
+// Pure calculations over an explicit athlete snapshot. No persistence or network.
 const LB_TO_KG = 0.45359237
 const number = value => {
   if (typeof value !== 'number' && typeof value !== 'string') return null
@@ -82,7 +82,9 @@ export function summarizeAthlete(snapshot, { athleteId, from, until }) {
     if (!validId(exercise.exercise_key)) { diagnostics.invalidIds++; continue }
     const performance = object(row.performance_data)
     const kind = performance.actualMetricKind
-    const metricPrescription = performance.distance != null || performance.duration != null || /\b(?:min|minutes?|seconds?|sec|meters?|yards?|miles?|km|yd)\b/i.test(String(performance.programmedReps ?? ''))
+    const sourceSet = object(exercise.prescription_snapshot).sourceSets?.[Number(row.set_number) - 1]
+    const target = [performance.programmedReps, sourceSet?.reps].filter(x => typeof x === 'string').join(' ')
+    const metricPrescription = performance.distance != null || performance.duration != null || sourceSet?.distance != null || sourceSet?.duration != null || /\d\s*(?:m|s|h|min|minutes?|seconds?|sec|meters?|yards?|miles?|km|yd|ft|rounds?)\b/i.test(target)
     const isMetric = (kind != null && kind !== 'reps') || metricPrescription
     const measurement = measuredMetric(performance)
     if (isMetric && !measurement) diagnostics.invalidActualMetrics++
@@ -92,31 +94,51 @@ export function summarizeAthlete(snapshot, { athleteId, from, until }) {
     const volumeKg = !isMetric && reps !== null && reps > 0 && Number.isInteger(reps) && loadKg !== null ? reps * loadKg : null
     if (!isMetric && volumeKg === null) diagnostics.unavailableVolumeSets++
     const rpe = number(row.rpe)
+    const savedExerciseKey = performance.substitutionPerformedExerciseKey
+    if (savedExerciseKey && savedExerciseKey !== exercise.exercise_key) { diagnostics.inconsistentSessionLinks++; continue }
     actuals.push({
       id: row.id, sessionId: row.workout_session_id, exerciseKey: exercise.exercise_key,
       exerciseName: exercise.exercise_name_snapshot ?? exercise.exercise_key,
       prescribedExerciseKey: exercise.substituted_from_exercise_key ?? exercise.exercise_key,
+      loadKg, reps: !isMetric && Number.isInteger(reps) && reps > 0 ? reps : null,
       volumeKg, distanceM: measurement?.distanceM ?? null, durationSeconds: measurement?.durationSeconds ?? null,
       rpe: rpe !== null && rpe >= 0 && rpe <= 10 ? rpe : null,
     })
   }
-  const sessionRows = [...sessions.values()].sort((a, b) => a.completed_at.localeCompare(b.completed_at) || a.id.localeCompare(b.id)).map(session => ({
+  const bySession = new Map(), byExercise = new Map()
+  for (const set of actuals) {
+    if (!bySession.has(set.sessionId)) bySession.set(set.sessionId, [])
+    if (!byExercise.has(set.exerciseKey)) byExercise.set(set.exerciseKey, [])
+    bySession.get(set.sessionId).push(set); byExercise.get(set.exerciseKey).push(set)
+  }
+  const sessionRows = [...sessions.values()].sort((a, b) => time(a.completed_at) - time(b.completed_at) || a.id.localeCompare(b.id)).map(session => ({
     sessionId: session.id, completedAt: session.completed_at, programKey: session.program_key,
-    ...metrics(actuals.filter(s => s.sessionId === session.id)),
+    workoutName: session.workout_name ?? 'Completed workout',
+    ...metrics(bySession.get(session.id) ?? []),
   }))
-  const exerciseRows = [...new Set(actuals.map(s => s.exerciseKey))].sort().map(exerciseKey => {
-    const matching = actuals.filter(s => s.exerciseKey === exerciseKey)
-    return { exerciseKey, exerciseName: matching[0].exerciseName, sessionCount: new Set(matching.map(s => s.sessionId)).size,
-      prescribedExerciseKeys: [...new Set(matching.map(s => s.prescribedExerciseKey))].sort(), ...metrics(matching) }
+  const exerciseRows = [...byExercise.keys()].sort().map(exerciseKey => {
+    const matching = byExercise.get(exerciseKey), workBySession = new Map()
+    for (const set of matching) {
+      if (!workBySession.has(set.sessionId)) workBySession.set(set.sessionId, [])
+      workBySession.get(set.sessionId).push(set)
+    }
+    const history = sessionRows.filter(s => workBySession.has(s.sessionId)).map(session => {
+      const work = workBySession.get(session.sessionId)
+      const loads = work.filter(set => set.loadKg !== null).map(set => set.loadKg)
+      return { sessionId: session.sessionId, completedAt: session.completedAt, ...metrics(work), topLoadKg: loads.length ? Math.max(...loads) : null }
+    })
+    return { exerciseKey, exerciseName: matching[0].exerciseName, sessionCount: history.length,
+      prescribedExerciseKeys: [...new Set(matching.map(s => s.prescribedExerciseKey))].sort(), ...metrics(matching), history }
   })
   return { schemaVersion: 1, athleteId, window: { from, until }, scope: 'completed-session-actuals',
     totals: { completedSessions: sessions.size, ...metrics(actuals) }, sessions: sessionRows, exercises: exerciseRows, diagnostics }
 }
 
 export function compareVolume(current, previous) {
+  if (!validId(current?.athleteId) || !validId(previous?.athleteId)) throw new Error('An explicit athlete ID is required')
   if (current.athleteId !== previous.athleteId) throw new Error('Cannot compare different athletes')
   const cw = current.window, pw = previous.window
-  if (time(cw.from) !== time(pw.until) || time(cw.until) - time(cw.from) !== time(pw.until) - time(pw.from)) throw new Error('Comparison requires adjacent equal-duration windows')
+  if ([cw?.from, cw?.until, pw?.from, pw?.until].some(x => time(x) === null) || time(cw.from) >= time(cw.until) || time(cw.from) !== time(pw.until) || time(cw.until) - time(cw.from) !== time(pw.until) - time(pw.from)) throw new Error('Comparison requires adjacent equal-duration windows')
   const currentSessions = current.sessions.filter(s => s.volumeSetCount > 0).length
   const previousSessions = previous.sessions.filter(s => s.volumeSetCount > 0).length
   const a = current.totals.externalLoadVolumeKg, b = previous.totals.externalLoadVolumeKg
@@ -138,7 +160,7 @@ export function buildCoachBrief(summary, { athleteId, exerciseKey = null, reques
   if (reviewContext.some(rule => rule.state !== 'STANDBY')) throw new Error('Unexpected rule state requires separate review')
   return {
     athleteId, window: { ...summary.window }, history: { ...summary.totals },
-    selectedExercise: summary.exercises.find(exercise => exercise.exerciseKey === exerciseKey) ?? null,
+    selectedExercise: structuredClone(summary.exercises.find(exercise => exercise.exerciseKey === exerciseKey) ?? null),
     diagnostics: { ...summary.diagnostics }, source: { ...manifest.source },
     reviewContext: reviewContext.map(rule => ({ ...rule, triggerConfirmed: false, mode: 'source-context-only' })),
     recommendation: 'No automatic plan change. Review current feedback and comparable history before applying any governed decision.',
