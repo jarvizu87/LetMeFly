@@ -3,6 +3,22 @@
 */
 
 @media (min-width: 1100px) {
+  /* Keep native scroll/page offsets in the center-column coordinate space.
+     The original mobile carousel's viewport-width padding and flex basis must
+     not survive inside a narrower desktop grid column. */
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-workspace > #swipe-viewport {
+    position: relative;
+    padding: 1px 0 18px !important;
+    scroll-padding: 0;
+  }
+
+  html[data-lmf-desktop-ui="true"] .lmf-desktop-workspace > #swipe-viewport > .swipe-page {
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
   /* The desktop canvas has enough horizontal room that exercise artwork does not need
      to consume a large phone-style vertical block. Keep the image useful, but compact. */
   html[data-lmf-desktop-ui="true"] .lmf-desktop-workspace .lmf-workout-flow-card > .lmf-exercise-media {
