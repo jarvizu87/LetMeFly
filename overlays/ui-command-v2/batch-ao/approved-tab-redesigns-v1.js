@@ -80,7 +80,10 @@
     if (!(head instanceof HTMLElement) || !(dashboard instanceof HTMLElement)) return
 
     head.classList.add('lmf-approved-progress-head-v1')
-    const subtitle = head.querySelector('p')
+    // The dashboard initially mounts after the native h1. Keep its live controls
+    // below the cinematic heading once both surfaces are ready.
+    if (head.contains(dashboard)) head.insertAdjacentElement('afterend', dashboard)
+    const subtitle = head.querySelector(':scope > p')
     if (subtitle && subtitle.textContent !== 'Measure • Improve • Become more.') subtitle.textContent = 'Measure • Improve • Become more.'
     dashboard.classList.add('lmf-approved-progress-v1')
 

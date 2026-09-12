@@ -60,6 +60,17 @@ try {
       },selector)
       assert.ok(geometry.scrollWidth <= width+1, route+' has no page-level horizontal overflow')
       assert.ok(geometry.artWidth > 100 && geometry.artHeight >= 160, route+' shows the identity panel')
+      if (route === 'progress') {
+        await page.locator('#lmf-progress-dashboard-v1[data-loaded="1"] [data-pg-tab="overview"]').waitFor({state:'visible'})
+        const layout = await page.evaluate(() => {
+          const head = document.querySelector('.lmf-approved-progress-head-v1')
+          const dashboard = document.querySelector('#lmf-progress-dashboard-v1')
+          const rect = head.getBoundingClientRect()
+          return {nested:head.contains(dashboard),height:rect.height,bottom:rect.bottom,dashboardTop:dashboard.getBoundingClientRect().top}
+        })
+        assert.equal(layout.nested, false, 'Live analytics must render below the cinematic header')
+        assert.ok(layout.height <= 300 && layout.dashboardTop >= layout.bottom-1, 'Progress keeps one compact hero above its controls')
+      }
       if (route === 'profile') {
         await page.locator('.lmf-profile-character-sheet-v1 .lmf-profile-strength-card').waitFor({state:'visible'})
         assert.equal(await page.locator('[data-profile-key="unit"]').inputValue(), 'kg')
