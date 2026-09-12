@@ -129,7 +129,9 @@
     root.addEventListener('click', (event) => {
       const control = event.target instanceof Element ? event.target.closest('[data-lmf-more-scroll]') : null
       if (!(control instanceof HTMLButtonElement)) return
-      const target = control.dataset.lmfMoreScroll === 'about' ? about : head
+      const showAbout = control.dataset.lmfMoreScroll === 'about'
+      about.classList.toggle('is-visible', showAbout)
+      const target = showAbout ? about : head
       target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       sidebar.querySelectorAll('[data-lmf-more-scroll]').forEach((button) => button.classList.toggle('is-active', button === control))
     })
