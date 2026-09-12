@@ -1,0 +1,141 @@
+/* LetMeFly locked mockup art fidelity v1
+   Locked mockups are the visual source of truth. This layer only restores the
+   approved Raizen + Fenrir identity treatment around existing governed UI.
+   It does not replace exercise instruction art or alter training/data behavior. */
+
+:root{
+  --lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg');
+}
+
+/* PROGRESS — the approved mockup uses a strong Raizen/Fenrir cinematic hero,
+   not a wolf-only badge. Keep live metrics and tabs untouched. */
+html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1{
+  min-height:220px!important;
+  background:
+    linear-gradient(90deg,rgba(3,6,10,.98) 0%,rgba(4,7,12,.84) 44%,rgba(4,7,12,.36) 72%,rgba(4,7,12,.62)),
+    radial-gradient(circle at 78% 24%,rgba(227,27,47,.15),transparent 31%),
+    radial-gradient(circle at 86% 48%,rgba(168,85,247,.13),transparent 29%),
+    var(--v2-mountain) center/cover no-repeat!important;
+}
+html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1::after{
+  content:''!important;
+  position:absolute!important;
+  right:-1%!important;
+  bottom:-54%!important;
+  width:350px!important;
+  height:430px!important;
+  opacity:.52!important;
+  background:var(--lmf-raizen-fenrir-art) center 14%/contain no-repeat!important;
+  filter:saturate(.92) contrast(1.05)!important;
+  pointer-events:none!important;
+}
+
+/* EXERCISES — Raizen/Fenrir belongs in the identity hero only. Exact mapped
+   exercise images remain untouched in the library/detail cards. */
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1{
+  min-height:218px!important;
+}
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1::after{
+  content:''!important;
+  position:absolute!important;
+  right:0!important;
+  top:-68px!important;
+  width:290px!important;
+  height:370px!important;
+  opacity:.50!important;
+  background:var(--lmf-raizen-fenrir-art) center 11%/contain no-repeat!important;
+  filter:saturate(.90) contrast(1.05)!important;
+  pointer-events:none!important;
+}
+html[data-lmf-approved-route='exercises'] .lmf-exercises-worldmark-v1{
+  z-index:2!important;
+}
+
+/* COACH — locked workspace uses Raizen/Fenrir as the identity illustration while
+   conversation, context and composer remain the real native controls. */
+html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner{
+  min-height:236px!important;
+  background:
+    linear-gradient(0deg,#051019 0%,rgba(3,9,14,.18) 70%),
+    linear-gradient(90deg,rgba(2,6,9,.68) 0%,rgba(2,6,9,.28) 56%,rgba(2,6,9,.54) 100%),
+    url('/ui/home-mountain-cinematic-v2.webp') center 42%/cover no-repeat!important;
+}
+html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner::before{
+  content:''!important;
+  position:absolute!important;
+  inset:-48px -8px auto auto!important;
+  width:300px!important;
+  height:350px!important;
+  opacity:.54!important;
+  background:var(--lmf-raizen-fenrir-art) center 12%/contain no-repeat!important;
+  filter:saturate(.92) contrast(1.06)!important;
+  pointer-events:none!important;
+}
+html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner-copy{
+  position:relative!important;
+  z-index:2!important;
+  max-width:62%!important;
+}
+
+/* PROFILE — approved character sheet is explicitly Raizen + Fenrir. */
+html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{
+  min-height:560px!important;
+  background:
+    linear-gradient(180deg,rgba(4,7,11,.03),rgba(4,7,11,.12) 42%,rgba(4,7,11,.96) 94%),
+    radial-gradient(circle at 48% 18%,rgba(227,27,47,.14),transparent 34%),
+    radial-gradient(circle at 67% 46%,rgba(168,85,247,.12),transparent 28%),
+    var(--lmf-raizen-fenrir-art) center 9%/cover no-repeat!important;
+}
+html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1::after{
+  box-shadow:inset 0 0 72px rgba(0,0,0,.42)!important;
+  background:linear-gradient(180deg,transparent 52%,rgba(3,6,10,.64) 82%,rgba(3,6,10,.92))!important;
+}
+
+/* MORE — the locked design ends with a cinematic Raizen/Fenrir identity panel. */
+html[data-lmf-approved-route='more'] .lmf-more-brand-v1{
+  min-height:176px!important;
+  background:
+    linear-gradient(90deg,rgba(4,7,11,.97) 0%,rgba(4,7,11,.79) 43%,rgba(4,7,11,.30) 72%,rgba(4,7,11,.56) 100%),
+    radial-gradient(circle at 78% 18%,rgba(227,27,47,.15),transparent 34%),
+    radial-gradient(circle at 88% 56%,rgba(168,85,247,.10),transparent 27%),
+    var(--lmf-raizen-fenrir-art) 91% 16%/220px auto no-repeat,
+    var(--v2-mountain) center/cover no-repeat!important;
+}
+html[data-lmf-approved-route='more'] .lmf-more-brand-copy-v1{
+  position:relative!important;
+  z-index:2!important;
+  max-width:58%!important;
+}
+
+@media(max-width:1099px){
+  html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner-copy{max-width:68%!important}
+}
+
+@media(max-width:720px){
+  html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1{min-height:178px!important}
+  html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1::after{right:-12%!important;bottom:-58%!important;width:245px!important;height:310px!important;opacity:.42!important}
+
+  html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1{min-height:184px!important}
+  html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1::after{right:-11%!important;top:-58px!important;width:220px!important;height:285px!important;opacity:.43!important}
+
+  html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner{min-height:186px!important}
+  html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner::before{right:-35px!important;top:-48px!important;width:225px!important;height:270px!important;opacity:.44!important}
+  html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner-copy{max-width:64%!important}
+
+  html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{min-height:390px!important;background-position:center top,center top,center center,center 8%!important;background-size:auto,auto,auto,cover!important}
+
+  html[data-lmf-approved-route='more'] .lmf-more-brand-v1{
+    min-height:166px!important;
+    background:
+      linear-gradient(90deg,rgba(4,7,11,.95),rgba(4,7,11,.62) 54%,rgba(4,7,11,.34)),
+      radial-gradient(circle at 78% 20%,rgba(227,27,47,.12),transparent 34%),
+      var(--lmf-raizen-fenrir-art) 104% 10%/190px auto no-repeat,
+      var(--v2-mountain) center/cover no-repeat!important;
+  }
+  html[data-lmf-approved-route='more'] .lmf-more-brand-copy-v1{max-width:62%!important}
+}
+
+@media(max-width:420px){
+  html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{min-height:360px!important}
+  html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner-copy{max-width:58%!important}
+}
