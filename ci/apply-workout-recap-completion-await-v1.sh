@@ -47,7 +47,12 @@ new_listener = """    dialog.addEventListener('click',async e=>{
         button.disabled=true
         try { await bridge()?.finish(sessionId) }
         finally {
-          if (dialog===finishingDialog) close()
+          if (dialog===finishingDialog && finishingDialog) {
+            finishingDialog.close()
+            finishingDialog.remove()
+            dialog=null
+            returnFocus?.focus?.()
+          }
           if (button.isConnected) button.disabled=false
         }
       }
@@ -65,6 +70,7 @@ grep -Fq 'await completeSelectedWorkout()' "$MAIN"
 ! grep -Fq "[data-action=\"complete-workout\"]')?.click()" "$MAIN"
 grep -Fq "dialog.addEventListener('click',async e=>" "$RECAP"
 grep -Fq 'try { await bridge()?.finish(sessionId) }' "$RECAP"
-grep -Fq 'if (dialog===finishingDialog) close()' "$RECAP"
+grep -Fq 'finishingDialog.close()' "$RECAP"
+grep -Fq 'dialog=null' "$RECAP"
 
-echo "LetMeFly workout recap awaits governed completion before teardown: PASS"
+echo "LetMeFly workout recap awaits governed completion and preserves completed recap reopening: PASS"
