@@ -113,6 +113,9 @@ a.btn.primary:not(.danger){
   image-rendering:auto;
 }
 
+/* More/About visibility is UI-only and stays independent of the hash router. */
+.lmf-more-about-v1.is-visible{display:block}
+
 /* Common spacing rhythm without changing component structure. */
 @media(min-width:781px){
   main > :where(.page-head,.section-title)+:where(.card,.program-hero,.exercise-search-card,.command-menu-grid){
