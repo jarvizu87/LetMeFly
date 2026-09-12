@@ -1,0 +1,36 @@
+{
+  "brand_version": "v1",
+  "production_cache_generation": "brand-v8",
+  "source_provenance": {
+    "filename": "letmefly-official-master-source-v1.jpg",
+    "dimensions": "1536x1536",
+    "sha256": "2b0bb29e200fb48ade90336bc355ad26c21277ddfcbacdf245474e85f82d348b",
+    "status": "approved source provenance; not required as a production runtime asset"
+  },
+  "runtime_transport": {
+    "format": "concatenated Base64 encoding of gzip-compressed tar",
+    "path_prefix": "transport/brand-icons-q256-v1.tar.gz.b64.",
+    "chunk_suffixes": ["00", "01", "02", "03", "04", "05", "06", "07", "08"],
+    "validation": "gzip/tar integrity plus exact SHA-256 of every shipped derivative"
+  },
+  "derivatives": [
+    {
+      "filename": "letmefly-app-icon-192-v1.png",
+      "dimensions": "192x192",
+      "purpose": "any",
+      "sha256": "978b556783eeeaa4f0d87b8d929fcc22b91f0cbb05f61c8d29f1869d83e87e39"
+    },
+    {
+      "filename": "letmefly-app-icon-512-v1.png",
+      "dimensions": "512x512",
+      "purpose": "any",
+      "sha256": "864067cda8175f18919ca038c4b1d9bf82a865fceb4438ebe777bb0c1ac4c743"
+    },
+    {
+      "filename": "letmefly-app-icon-512-maskable-v1.png",
+      "dimensions": "512x512",
+      "purpose": "maskable",
+      "sha256": "0e0262a8600d3fe62e45b645731264ea930ca4fd70ac28f91e1f671bf0d0fd5f"
+    }
+  ]
+}

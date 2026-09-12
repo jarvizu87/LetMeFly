@@ -124,7 +124,8 @@ grep -Fq 'flex:0 0 54px!important' "$TARGET_DIR/src/command-v2.css"
 bash "$ROOT_DIR/ci/apply-brand-pwa-fix.sh" "$TARGET_DIR"
 
 # The More tab uses a verified local PNG rather than the older inline SVG asset.
-# This avoids the partially-rendered/broken logo seen on Galaxy Chrome.
+# The source-stage URL remains v6 because the locked UI audit expects that
+# contract; ci/install-home-reference-v3.sh migrates final dist references to v8.
 bash "$ROOT_DIR/ci/apply-more-logo-raster-fix.sh" "$TARGET_DIR"
 
 test -s "$TARGET_DIR/public/app-icon-v4.svg"
@@ -153,4 +154,4 @@ test ! -e "$TARGET_DIR/public/icon-192.png"
 test ! -e "$TARGET_DIR/public/icon-512.png"
 test ! -e "$TARGET_DIR/public/app-icon-v3.svg"
 
-echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + real-program edge audit + Pyramid Flow v1 + official branding/install/update + More-tab raster logo reliability pass: PASS"
+echo "LetMeFly mobile workout + video + automatic art + Workout Flow v1 + real-program edge audit + Pyramid Flow v1 + official branding/install/update + authoritative More-tab pixels: PASS"
