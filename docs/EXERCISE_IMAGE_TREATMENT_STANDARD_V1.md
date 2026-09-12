@@ -138,4 +138,4 @@ A release passes only when:
 - keyboard/touch controls remain usable
 - no exercise/program/private-data behavior changes are introduced by the theme layer
 
-Implementation reference: `exercise-image-theme-v1`, the approved Train blended-card treatment, and the final `color-harmonization-v1` layer. Where earlier component CSS still contains purple-first tokens, the final color-harmonization layer is authoritative for rendered UI.
+Implementation reference: `exercise-image-theme-v1`, the approved Train blended-card treatment, and the final `color-harmonization-v1` layer. Where earlier component CSS still contains purple-first tokens, those declarations are implementation scaffolding only; the final color-harmonization layer is authoritative for rendered UI and design review.
