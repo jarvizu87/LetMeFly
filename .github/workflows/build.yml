@@ -139,6 +139,12 @@ jobs:
       - name: Audit final color harmonization + interaction safety
         run: node ci/audit-color-harmonization-v1.mjs .build-src/letmefly_app
 
+      - name: Install locked mockup Raizen/Fenrir art fidelity
+        run: bash ci/install-locked-art-fidelity-v1.sh
+
+      - name: Audit locked mockup Raizen/Fenrir art fidelity
+        run: node ci/audit-locked-art-fidelity-v1.mjs .build-src/letmefly_app
+
       - name: Audit official brand v2 production assets
         run: node ci/audit-official-brand-v2.mjs .build-src/letmefly_app
 
