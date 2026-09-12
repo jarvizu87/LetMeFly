@@ -158,6 +158,12 @@ html[data-lmf-approved-route='more'] .lmf-more-kicker-v1{color:var(--lmf-brand-r
   --lmf-energy-accent-hi:var(--lmf-energy-purple-hi);
 }
 
+/* Active-workout interaction safety. Status toasts are informational and must
+   never block workout controls. The install prompt remains available outside an
+   active workout, but steps out of the way once exercise execution is on screen. */
+.toast{pointer-events:none!important}
+body:has(.workout-panel .active-exercise) #lmf-install-banner{display:none!important}
+
 @media(max-width:720px){
   .lmf-progress-worldbar-v1{min-height:148px!important}
   .lmf-approved-exercises-hero-v1{min-height:168px!important}
