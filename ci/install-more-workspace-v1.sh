@@ -22,7 +22,7 @@ node --check "$MORE_JS_SOURCE"
 # Presentation/navigation only: this layer must never become a second data or
 # program engine.
 ! grep -Eq 'localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|\.write\(|setItem\(' "$MORE_JS_SOURCE"
-! grep -Eq '#/(nutrition|readiness|testing|utilities|resources|data|support)(["'"'/?#]|$)' "$MORE_JS_SOURCE"
+! grep -Eq '#/(nutrition|readiness|testing|utilities|resources|data|support)(["/?#]|$)' "$MORE_JS_SOURCE"
 grep -Fq "const ROUTE = '#/more'" "$MORE_JS_SOURCE"
 grep -Fq "title: 'Calendar'" "$MORE_JS_SOURCE"
 grep -Fq "title: 'Nutrition'" "$MORE_JS_SOURCE"
