@@ -41,12 +41,22 @@ new="""    dialog.addEventListener('click',async e=>{
       }
     })"""
 if s.count(old)!=1: raise SystemExit(f'Expected one installed recap finish listener, found {s.count(old)}')
-p.write_text(s.replace(old,new,1))
+s=s.replace(old,new,1)
+old_unit="    const unit = snapshot.preferences[0]?.weight_unit === 'kg' ? 'kg' : 'lb'"
+new_unit="""    const preference = [...snapshot.preferences].sort((a,b) =>
+      String(b.updated_at ?? b.created_at ?? '').localeCompare(String(a.updated_at ?? a.created_at ?? ''))
+    )[0]
+    const unit = preference?.weight_unit === 'kg' ? 'kg' : 'lb'"""
+if s.count(old_unit)!=1: raise SystemExit(f'Expected one recap preference-unit reader, found {s.count(old_unit)}')
+s=s.replace(old_unit,new_unit,1)
+p.write_text(s)
 PY
 
 node --check "$RECAP_UI"
 grep -Fq "dialog.addEventListener('click',async e=>" "$RECAP_UI"
 grep -Fq 'try { await bridge()?.finish(sessionId) }' "$RECAP_UI"
+grep -Fq 'const preference = [...snapshot.preferences].sort((a,b) =>' "$RECAP_UI"
+grep -Fq "const unit = preference?.weight_unit === 'kg' ? 'kg' : 'lb'" "$RECAP_UI"
 DIST_DIR="$DIST_DIR" python3 - <<'PY'
 import os,re
 from pathlib import Path
