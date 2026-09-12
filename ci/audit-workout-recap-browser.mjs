@@ -34,12 +34,26 @@ try {
     await page.locator('[data-action="create-athlete"]').click();await page.locator('[data-action="create-athlete"]').waitFor({state:'detached'})
     for(const input of await page.locator('.active-page .readiness-field input[value="4"]').all())await input.locator('..').click()
     await page.locator('.active-page [data-action="start-workout"]').click();await page.locator('[data-set-id]').first().waitFor({state:'attached'})
-    const row=page.locator('.active-exercise').filter({has:page.locator('h3',{hasText:/^Front Squat$/})}).locator('[data-set-id]').first()
+    const exercise=page.locator('.active-exercise').filter({has:page.locator('h3',{hasText:/^Front Squat$/})})
+    const row=exercise.locator('[data-set-id]').first()
     const setId=await row.getAttribute('data-set-id')
-    await page.evaluate(id=>window.LetMeFlyWorkoutRecap.reviewSet(id),setId)
+    // Enter the target section through the same visible control an athlete uses.
+    // Calling the review bridge during initial workout mounting can race the
+    // viewport's readiness selection. The actual recap correction is tested below.
+    const sectionIndex=await row.evaluate(el=>Array.from(document.querySelectorAll('#swipe-viewport > .swipe-page')).indexOf(el.closest('.swipe-page')))
+    await page.locator(`#session-track [data-session-index="${sectionIndex}"]`).click()
+    await page.waitForFunction(id=>document.querySelector(`[data-set-id="${id}"]`)?.closest('.swipe-page')?.classList.contains('active-page'),setId)
+    if(!await exercise.evaluate(el=>el.classList.contains('lmf-flow-active')))await exercise.locator('.lmf-compact-summary').click()
     assert.equal(await row.getAttribute('data-load-unit'),unit,'Visible load entry uses the athlete unit')
     await row.locator('.reps-input').fill('5');await row.locator('.load-input').fill('100')
-    if(width===1440)await page.waitForFunction(() => document.querySelector('[data-lmf-desktop-v2-load]')?.textContent?.trim()==='100 kg')
+    if(width===1440) {
+      try { await page.waitForFunction(() => document.querySelector('[data-lmf-desktop-v2-load]')?.textContent?.trim()==='100 kg') }
+      catch (error) {
+        const visible=await page.evaluate(()=>({section:document.querySelector('.active-page h2')?.textContent,tools:document.querySelector('.lmf-desktop-context-panel')?.textContent,focused:document.activeElement?.className}))
+        await page.screenshot({path:path.join(out,'metric-tools-failure.png')})
+        throw new Error(`Metric tools did not follow the visible field: ${JSON.stringify(visible)}`,{cause:error})
+      }
+    }
     await row.locator('[data-action="toggle-set"]').click()
     await page.waitForFunction(id=>document.querySelector(`[data-set-id="${id}"] .set-check`)?.classList.contains('done'),setId)
     let data=await snapshot(page),sessionId=data.workoutSessions.find(s=>s.status==='in_progress').id
