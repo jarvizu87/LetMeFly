@@ -8,6 +8,7 @@ on:
       - 'ci/five-athlete-fixtures.mjs'
       - 'ci/five-athlete-seed.mjs'
       - 'ci/audit-five-athlete-release-browser.mjs'
+      - 'ci/audit-workout-recap-browser.mjs'
       - 'ci/run-five-athlete-release-audit-v2.sh'
       - 'ci/apply-athlete-weight-unit-v1.sh'
       - 'ci/apply-workout-recap-completion-await-v1.sh'
