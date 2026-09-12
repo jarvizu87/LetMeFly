@@ -61,6 +61,9 @@ bash "$ROOT_DIR/ci/apply-profile-context-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-exercise-art-context-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-barbell-settings-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-recap-v1.sh" "$TARGET"
+# The recap Finish action must await the governed completion/progression transaction
+# instead of firing an unawaited DOM click that can briefly re-render stale Day 1.
+bash "$ROOT_DIR/ci/apply-workout-recap-completion-await-v1.sh" "$TARGET"
 # Five-athlete release hardening: honor the active athlete's weight unit in Workout
 # Mode and Bar Loader without rewriting the immutable source prescription.
 bash "$ROOT_DIR/ci/apply-athlete-weight-unit-v1.sh" "$TARGET"
@@ -76,6 +79,8 @@ grep -Fq "substituted_from_exercise_key: prescribedKey" "$TARGET/src/services/wo
 grep -Fq "updateSubstitutionEquipmentProfile" "$TARGET/src/services/athlete-service.ts"
 grep -Fq "previousExercisePerformance" "$TARGET/src/services/workout-service.ts"
 grep -Fq "substitutionPerformanceLoggedAt" "$TARGET/src/services/workout-service.ts"
+grep -Fq "async finish(sessionId: string)" "$TARGET/src/main.ts"
+grep -Fq "await completeSelectedWorkout()" "$TARGET/src/main.ts"
 
 cd "$TARGET"
 npm run audit:source
@@ -105,4 +110,4 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" di
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Issue #50 workout fidelity + Issue #54 governed workout substitutions + live Review persistence refresh + vertical-scroll isolation: PASS"
+echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"
