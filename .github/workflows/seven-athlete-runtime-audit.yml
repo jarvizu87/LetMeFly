@@ -1,0 +1,142 @@
+name: LetMeFly Seven-Athlete Runtime Audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ci/seven-athlete-release-audit.v2.json'
+      - 'ci/chaos-resilience-audit.v1.json'
+      - 'ci/audit-seven-athlete-runtime.mjs'
+      - 'ci/run-seven-athlete-runtime-v2.sh'
+      - '.github/workflows/seven-athlete-runtime-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seven-athlete-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+
+jobs:
+  seven-athlete-runtime:
+    name: Seven athletes — behavioral, scale, isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout audit contracts and runner
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Checkout exact release branch candidate
+        uses: actions/checkout@v4
+        with:
+          repository: jarvizu87/LetMeFly
+          ref: release/ui-redesign-2026-09-12
+          path: release-candidate
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Capture release candidate SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA="$(git -C release-candidate rev-parse HEAD)"
+          echo "RELEASE_CANDIDATE_SHA=$SHA" >> "$GITHUB_ENV"
+          echo "Testing release candidate $SHA"
+
+      - name: Validate locked seven-athlete and chaos contracts
+        run: node ci/validate-release-audit-contracts-v2.mjs
+
+      - name: Reconstruct exact governed release candidate without deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-candidate
+          python3 - <<'PY' > "$RUNNER_TEMP/assembly-seven.sh"
+          import pathlib, tomllib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash "$RUNNER_TEMP/assembly-seven.sh"
+          echo 'Production deployment remains held.'
+
+      - name: Install isolated browser harness dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-candidate/.build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+
+      - name: Syntax-check seven-athlete runtime gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check ci/audit-seven-athlete-runtime.mjs
+          bash -n ci/run-seven-athlete-runtime-v2.sh
+
+      - name: Run all seven synthetic athletes through real release-candidate UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          bash ci/run-seven-athlete-runtime-v2.sh "$PWD/release-candidate/.build-src/letmefly_app"
+
+      - name: Re-run governed substitution/safety mutation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory release-candidate/.build-src/letmefly_app/dist >"$RUNNER_TEMP/seven-athlete-substitution-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..40}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 0.25
+          done
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          (cd release-candidate && node ci/audit-workout-substitution-today-browser-v3.mjs)
+
+      - name: Targeted chaos evidence — lifecycle faults and program boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export PRODUCTION_SHA="$RELEASE_CANDIDATE_SHA"
+          (cd release-candidate && node ci/audit-lifecycle-indexeddb-v1.mjs .build-src/letmefly_app faults)
+          (cd release-candidate && node ci/audit-lifecycle-indexeddb-v1.mjs .build-src/letmefly_app boundaries)
+
+      - name: Confirm seven-athlete identities never ship in release candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Raizen is an approved production identity/art label, so the advanced
+          # synthetic fixture is guarded by its QA-only internal ID instead.
+          for marker in 'Pevra Soll' 'Dain Varr' 'qa_titan' 'Corra Bellan' 'Mara Venn' 'Rurik Hale' 'Hadrin Oss' 'QA-RURIK-SAFETY-MARKER'; do
+            if grep -R -Fq "$marker" release-candidate/.build-src/letmefly_app/dist; then
+              echo "Synthetic seven-athlete QA identity leaked into production dist: $marker" >&2
+              exit 1
+            fi
+          done
+          echo 'Seven-athlete synthetic identities remain audit-only: PASS'
+
+      - name: Publish seven-athlete runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seven-athlete-runtime-audit-${{ github.run_id }}
+          path: |
+            release-candidate/.build-src/letmefly_app/SEVEN_ATHLETE_RELEASE_AUDIT
+            release-candidate/.build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT
+            release-candidate/.build-src/letmefly_app/LIFECYCLE_DATABASE_faults
+            release-candidate/.build-src/letmefly_app/LIFECYCLE_DATABASE_boundaries
+          if-no-files-found: warn
+          retention-days: 14

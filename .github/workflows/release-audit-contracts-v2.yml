@@ -1,0 +1,54 @@
+name: LetMeFly Release Audit Contracts V2
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/SEVEN_ATHLETE_RELEASE_AUDIT_STANDARD_V2.md'
+      - 'docs/CHAOS_RESILIENCE_AUDIT_STANDARD_V1.md'
+      - 'ci/seven-athlete-release-audit.v2.json'
+      - 'ci/seven-athlete-release-audit-results.template.json'
+      - 'ci/chaos-resilience-audit.v1.json'
+      - 'ci/chaos-resilience-audit-results.template.json'
+      - 'ci/validate-release-audit-contracts-v2.mjs'
+      - '.github/workflows/release-audit-contracts-v2.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/SEVEN_ATHLETE_RELEASE_AUDIT_STANDARD_V2.md'
+      - 'docs/CHAOS_RESILIENCE_AUDIT_STANDARD_V1.md'
+      - 'ci/seven-athlete-release-audit.v2.json'
+      - 'ci/seven-athlete-release-audit-results.template.json'
+      - 'ci/chaos-resilience-audit.v1.json'
+      - 'ci/chaos-resilience-audit-results.template.json'
+      - 'ci/validate-release-audit-contracts-v2.mjs'
+      - '.github/workflows/release-audit-contracts-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-audit-contracts-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Validate seven-athlete and chaos/resilience contracts
+        run: node ci/validate-release-audit-contracts-v2.mjs
+      - name: Confirm audit files are synthetic and deployment-free
+        run: |
+          set -euo pipefail
+          grep -q '"syntheticOnly": true' ci/seven-athlete-release-audit.v2.json
+          grep -q '"mayOverwriteRealAthlete": false' ci/seven-athlete-release-audit.v2.json
+          ! grep -R '\[release netlify\]' docs/SEVEN_ATHLETE_RELEASE_AUDIT_STANDARD_V2.md docs/CHAOS_RESILIENCE_AUDIT_STANDARD_V1.md ci/seven-athlete-release-audit.v2.json ci/chaos-resilience-audit.v1.json
+          echo 'Release audit contracts are synthetic-only and deployment-free: PASS'
