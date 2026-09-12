@@ -5,7 +5,48 @@ DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 node --test "$ROOT_DIR/ci/audit-workout-recap.mjs"
 mkdir -p "$DIST_DIR/ui/workout-recap-v1"
 cp "$ROOT_DIR"/overlays/workout-recap-v1/* "$DIST_DIR/ui/workout-recap-v1/"
-node --check "$DIST_DIR/ui/workout-recap-v1/workout-recap-ui.mjs"
+
+# Keep the tracked overlay immutable during reconstruction. Apply the release
+# completion-await behavior only to the generated dist copy after installation.
+RECAP_UI="$DIST_DIR/ui/workout-recap-v1/workout-recap-ui.mjs"
+RECAP_UI="$RECAP_UI" python3 - <<'PY'
+from pathlib import Path
+import os
+p=Path(os.environ['RECAP_UI']);s=p.read_text()
+old="""    dialog.addEventListener('click',e=>{
+      const button=e.target.closest('button,a')
+      if (button?.hasAttribute('data-recap-history')) pendingHistorySession=sessionId
+      if (button?.matches('[data-recap-close],[data-recap-history]')) close()
+      if (button?.hasAttribute('data-recap-correct')) { const set=button.dataset.recapCorrect;close();bridge()?.reviewSet(set) }
+      if (button?.hasAttribute('data-recap-finish')) {close();bridge()?.finish(sessionId)}
+    })"""
+new="""    dialog.addEventListener('click',async e=>{
+      const button=e.target.closest('button,a')
+      if (button?.hasAttribute('data-recap-history')) pendingHistorySession=sessionId
+      if (button?.matches('[data-recap-close],[data-recap-history]')) close()
+      if (button?.hasAttribute('data-recap-correct')) { const set=button.dataset.recapCorrect;close();bridge()?.reviewSet(set) }
+      if (button?.hasAttribute('data-recap-finish')) {
+        const finishingDialog=dialog
+        button.disabled=true
+        try { await bridge()?.finish(sessionId) }
+        finally {
+          if (dialog===finishingDialog && finishingDialog) {
+            finishingDialog.close()
+            finishingDialog.remove()
+            dialog=null
+            returnFocus?.focus?.()
+          }
+          if (button.isConnected) button.disabled=false
+        }
+      }
+    })"""
+if s.count(old)!=1: raise SystemExit(f'Expected one installed recap finish listener, found {s.count(old)}')
+p.write_text(s.replace(old,new,1))
+PY
+
+node --check "$RECAP_UI"
+grep -Fq "dialog.addEventListener('click',async e=>" "$RECAP_UI"
+grep -Fq 'try { await bridge()?.finish(sessionId) }' "$RECAP_UI"
 DIST_DIR="$DIST_DIR" python3 - <<'PY'
 import os,re
 from pathlib import Path
