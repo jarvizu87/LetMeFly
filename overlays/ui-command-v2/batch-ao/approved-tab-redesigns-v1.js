@@ -5,11 +5,13 @@
   // Presentation/navigation only. This layer intentionally does not write athlete
   // data, program prescriptions, workout history, training maxes, or readiness.
 
-  const ROUTES = new Set(['program', 'progress', 'exercises', 'profile'])
+  // Tag every primary route so the final color-harmonization layer can distinguish
+  // Home from Train/Coach/More even when no route-specific DOM bridge is required.
+  const ROUTES = new Set(['home', 'train', 'program', 'progress', 'exercises', 'coach', 'profile', 'more'])
   let timer = 0
 
   const clean = (value) => String(value ?? '').trim()
-  const route = () => location.hash.replace(/^#\//, '').split(/[?#]/)[0]
+  const route = () => location.hash.replace(/^#\//, '').split(/[?#]/)[0] || 'home'
 
   function findPageHead(title) {
     const rx = new RegExp(`^${title}$`, 'i')
