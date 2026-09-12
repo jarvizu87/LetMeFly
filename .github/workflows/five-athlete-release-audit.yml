@@ -10,6 +10,7 @@ on:
       - 'ci/audit-five-athlete-release-browser.mjs'
       - 'ci/run-five-athlete-release-audit-v2.sh'
       - 'ci/apply-athlete-weight-unit-v1.sh'
+      - 'ci/apply-workout-recap-completion-await-v1.sh'
       - 'ci/build-command-v2-v2-1.sh'
       - '.github/workflows/five-athlete-release-audit.yml'
 
@@ -65,6 +66,7 @@ jobs:
           node --check ci/audit-five-athlete-release-browser.mjs
           bash -n ci/run-five-athlete-release-audit-v2.sh
           bash -n ci/apply-athlete-weight-unit-v1.sh
+          bash -n ci/apply-workout-recap-completion-await-v1.sh
           node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
           node ci/audit-workout-prescription-fidelity-v1.mjs .build-src/letmefly_app
 
