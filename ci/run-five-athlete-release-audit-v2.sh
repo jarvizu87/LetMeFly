@@ -51,6 +51,65 @@ new_logged = "      assert.equal(logged?.completed, true)\n      assert.equal(lo
 if source.count(old_logged) != 1:
     raise SystemExit(f'Expected one saved-unit assertion boundary, found {source.count(old_logged)}')
 source = source.replace(old_logged, new_logged, 1)
+
+# Temporary QA-only trace: capture every programInstances.put plus the exact row
+# sequence after Day 2 first becomes observable. This is designed to identify the
+# stale writer that briefly restores Day 1; it does not alter production source.
+old_finish = '''      page.once('dialog', dialog => dialog.accept())
+      await page.locator('[data-recap-finish]').click()
+      await waitForCompletedSession(page, sessionId)
+      const afterFinish = await snapshot(page)
+'''
+new_finish = '''      await page.evaluate(() => {
+        window.__LMF_PROGRAM_WRITE_TRACE__ = []
+        const proto = IDBObjectStore.prototype
+        if (!proto.__lmfTraceOriginalPut) {
+          const original = proto.put
+          Object.defineProperty(proto, '__lmfTraceOriginalPut', { value: original, configurable: true })
+          proto.put = function(value, ...args) {
+            if (this.name === 'programInstances') {
+              window.__LMF_PROGRAM_WRITE_TRACE__.push({
+                at: performance.now(), id: value?.id ?? null, athleteId: value?.athlete_id ?? null,
+                status: value?.status ?? null, program: value?.program_key ?? null,
+                week: value?.current_week ?? null, day: value?.current_day_key ?? null,
+                localVersion: value?._local?.localVersion ?? null,
+                pendingToken: value?.progression_state?.pendingWorkoutCompletion?.token ?? null,
+                stack: new Error('programInstances.put').stack ?? '',
+              })
+            }
+            return original.call(this, value, ...args)
+          }
+        }
+      })
+      page.once('dialog', dialog => dialog.accept())
+      await page.locator('[data-recap-finish]').click()
+      await waitForCompletedSession(page, sessionId)
+      const checkpoints = []
+      for (const delay of [0, 10, 30, 75, 150, 300, 600]) {
+        if (delay) await page.waitForTimeout(delay - checkpoints.at(-1).delay)
+        const data = await snapshot(page)
+        checkpoints.push({
+          delay,
+          activePrograms: (data.programInstances || []).filter(row => row.athlete_id === athleteId && row.status === 'active' && !row.deleted_at).map(row => ({
+            id: row.id, program: row.program_key, week: row.current_week, day: row.current_day_key,
+            localVersion: row?._local?.localVersion ?? null,
+            pendingToken: row?.progression_state?.pendingWorkoutCompletion?.token ?? null,
+            updatedAt: row.updated_at ?? null,
+          })),
+          events: (data.programEvents || []).filter(row => row.athlete_id === athleteId && !row.deleted_at).slice(-6).map(row => ({
+            id: row.id, type: row.event_type, at: row.effective_at, payload: row.event_payload ?? null,
+          })),
+        })
+      }
+      athleteResult.completionTrace = {
+        writes: await page.evaluate(() => window.__LMF_PROGRAM_WRITE_TRACE__ ?? []),
+        checkpoints,
+      }
+      const afterFinish = await snapshot(page)
+'''
+if source.count(old_finish) != 1:
+    raise SystemExit(f'Expected one completion trace boundary, found {source.count(old_finish)}')
+source = source.replace(old_finish, new_finish, 1)
 Path(os.environ['TMP']).write_text(source)
 PY
 
@@ -58,7 +117,7 @@ node --check "$TMP"
 grep -Fq "row.athlete_id === athleteId" "$TMP"
 grep -Fq "active?.current_day_key === 'day-2'" "$TMP"
 grep -Fq "saved actual load unit must follow athlete setting" "$TMP"
-! grep -Fq "__LMF_PROGRAM_WRITE_TRACE__" "$TMP"
-! grep -Fq "waitForTimeout(250)" "$TMP"
+grep -Fq "__LMF_PROGRAM_WRITE_TRACE__" "$TMP"
+grep -Fq "checkpoints" "$TMP"
 grep -Fq "assert.equal(activeProgram?.current_day_key, 'day-2')" "$TMP"
 node "$TMP" "$@"
