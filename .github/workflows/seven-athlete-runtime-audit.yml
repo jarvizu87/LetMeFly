@@ -118,7 +118,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for marker in 'Pevra Soll' 'Dain Varr' 'Raizen' 'Corra Bellan' 'Mara Venn' 'Rurik Hale' 'Hadrin Oss' 'QA-RURIK-SAFETY-MARKER'; do
+          # Raizen is an approved production identity/art label, so the advanced
+          # synthetic fixture is guarded by its QA-only internal ID instead.
+          for marker in 'Pevra Soll' 'Dain Varr' 'qa_titan' 'Corra Bellan' 'Mara Venn' 'Rurik Hale' 'Hadrin Oss' 'QA-RURIK-SAFETY-MARKER'; do
             if grep -R -Fq "$marker" release-candidate/.build-src/letmefly_app/dist; then
               echo "Synthetic seven-athlete QA identity leaked into production dist: $marker" >&2
               exit 1
