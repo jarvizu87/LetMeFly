@@ -38,7 +38,9 @@ try {
     const setId=await row.getAttribute('data-set-id')
     await page.evaluate(id=>window.LetMeFlyWorkoutRecap.reviewSet(id),setId)
     assert.equal(await row.getAttribute('data-load-unit'),unit,'Visible load entry uses the athlete unit')
-    await row.locator('.reps-input').fill('5');await row.locator('.load-input').fill('100');await row.locator('[data-action="toggle-set"]').click()
+    await row.locator('.reps-input').fill('5');await row.locator('.load-input').fill('100')
+    if(width===1440)await page.waitForFunction(() => document.querySelector('[data-lmf-desktop-v2-load]')?.textContent?.trim()==='100 kg')
+    await row.locator('[data-action="toggle-set"]').click()
     await page.waitForFunction(id=>document.querySelector(`[data-set-id="${id}"] .set-check`)?.classList.contains('done'),setId)
     let data=await snapshot(page),sessionId=data.workoutSessions.find(s=>s.status==='in_progress').id
     assert.equal(data.workoutSets.find(s=>s.id===setId).load_value,100)

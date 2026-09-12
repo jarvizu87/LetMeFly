@@ -200,7 +200,7 @@
     const load = activeRow.querySelector('.load-input')?.value
     const parts = []
     if (reps) parts.push(`${reps} reps`)
-    if (load) parts.push(`${load} lb`)
+    if (load) parts.push(`${load} ${activeRow.dataset.loadUnit === 'kg' ? 'kg' : 'lb'}`)
     return parts.join(' • ') || 'Programmed work'
   }
 
@@ -281,7 +281,8 @@
       || text(row?.querySelector('.load-field small'))
       || 'Bar loading updates from the active Load field.'
     const set = text(row?.querySelector('.set-label strong')) || '—'
-    return { load, reps, rpe, plate, set }
+    const loadUnit = row?.dataset.loadUnit === 'kg' ? 'kg' : 'lb'
+    return { load, loadUnit, reps, rpe, plate, set }
   }
 
   function sectionDetails() {
@@ -314,7 +315,7 @@
       </div>
       <div class="lmf-desktop-context-card">
         <small>Current Load</small>
-        <strong>${escapeHtml(details.load)}${details.load !== '—' ? ' lb' : ''}</strong>
+        <strong>${escapeHtml(details.load)}${details.load !== '—' ? ` ${escapeHtml(details.loadUnit)}` : ''}</strong>
         <p>Set ${escapeHtml(details.set)} • ${escapeHtml(details.reps)} reps • RPE/RIR ${escapeHtml(details.rpe)}</p>
         <div class="lmf-desktop-plate-readout">${escapeHtml(details.plate)}</div>
       </div>

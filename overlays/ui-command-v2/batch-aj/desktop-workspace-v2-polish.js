@@ -43,6 +43,7 @@
     const card = current(), row = currentRow(card), section = text(page()?.querySelector('.workout-panel-head h2')) || 'Workout'
     const actions = tools.map(([key,selector]) => ({key,node:card?.querySelector(selector)})).filter(a => a.node)
     const load = row?.querySelector('.load-input')?.value || '—'
+    const loadUnit = row?.dataset.loadUnit === 'kg' ? 'kg' : 'lb'
     const kind = row?.dataset.prescriptionKind || 'reps'
     const target = row?.querySelector('.metric-input') || row?.querySelector('.reps-input')
     const dose = target?.value || '—'
@@ -52,12 +53,12 @@
     const name = text(card?.querySelector('.exercise-title h3'))
     const prescription = text(card?.querySelector('.lmf-compact-copy small')) || text(row?.querySelector('.set-target-cell'))
     const plate = text(row?.querySelector('.lmf-plates-line')) || text(row?.querySelector('.load-field small')) || 'Bar loading follows the active Load field.'
-    const signature = JSON.stringify([card?.dataset.exerciseId,row?.dataset.setId,name,prescription,load,dose,rpe,plate,section,cards().map(complete),rows(card).map(done),actions.map(a=>[a.key,text(a.node),disabled(a.node)])])
+    const signature = JSON.stringify([card?.dataset.exerciseId,row?.dataset.setId,name,prescription,load,loadUnit,dose,rpe,plate,section,cards().map(complete),rows(card).map(done),actions.map(a=>[a.key,text(a.node),disabled(a.node)])])
     if (body.dataset.lmfDesktopV2Signature === signature && body.querySelector('[data-lmf-desktop-v2-content]')) return
     body.innerHTML = card ? `
       <div class="lmf-desktop-context-card" data-lmf-desktop-v2-content><small>Active Exercise</small><strong style="font-size:20px">${esc(name)}</strong><p>${esc(prescription)}</p></div>
       <div class="lmf-desktop-context-card"><small>Live Set</small><div class="lmf-desktop-live-set-grid">
-        <div class="lmf-desktop-live-metric"><small>Load</small><strong data-lmf-desktop-v2-load>${esc(load)}${load === '—' ? '' : ' lb'}</strong></div>
+        <div class="lmf-desktop-live-metric"><small>Load</small><strong data-lmf-desktop-v2-load>${esc(load)}${load === '—' ? '' : ` ${esc(loadUnit)}`}</strong></div>
         <div class="lmf-desktop-live-metric"><small>${esc(doseLabel)}</small><strong>${esc(dose)} ${esc(unit)}</strong></div>
         <div class="lmf-desktop-live-metric"><small>RPE</small><strong>${esc(rpe)}</strong></div></div>
         <div class="lmf-desktop-plate-readout">${esc(plate)}</div></div>
