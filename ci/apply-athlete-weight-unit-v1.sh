@@ -20,19 +20,24 @@ main = main_path.read_text()
 flow = flow_path.read_text()
 
 # Onboarding already captures the athlete's preferred unit in #onboard-unit.
-# Forward it into createLocalAthlete so the existing athlete service creates
-# the governed athletePreferences.weight_unit row and matching sync mutation.
+# Normalize the existing createLocalAthlete weightUnit argument (or add it if an
+# older source lacks one) so the governed athletePreferences row receives the
+# selector value instead of a stale/default unit.
 onboard_create_pattern = re.compile(r"(state\.athlete\s*=\s*await\s+createLocalAthlete\(\{)([^}\n]*)(\}\))")
 onboard_create_matches = list(onboard_create_pattern.finditer(main))
 if len(onboard_create_matches) != 1:
     raise SystemExit(f'Expected one onboarding athlete create call, found {len(onboard_create_matches)}')
 match = onboard_create_matches[0]
 args = match.group(2).rstrip()
-if re.search(r"\bweightUnit\s*:", args):
-    raise SystemExit('Onboarding athlete create call already supplies weightUnit; update this transform instead of double-writing it')
 unit_arg = "weightUnit: ((document.querySelector('#onboard-unit') as HTMLSelectElement | null)?.value === 'kg' ? 'kg' : 'lb')"
-separator = ', ' if args.strip() else ''
-replacement = match.group(1) + args + separator + unit_arg + match.group(3)
+if re.search(r"\bweightUnit\s*:", args):
+    args, replaced = re.subn(r"\bweightUnit\s*:\s*[^,}]+", unit_arg, args, count=1)
+    if replaced != 1:
+        raise SystemExit(f'Expected one existing onboarding weightUnit argument, replaced {replaced}')
+else:
+    separator = ', ' if args.strip() else ''
+    args = args + separator + unit_arg
+replacement = match.group(1) + args + match.group(3)
 main = main[:match.start()] + replacement + main[match.end():]
 
 # athletePreferences owns weight_unit. Hydrate that preference into the in-memory
