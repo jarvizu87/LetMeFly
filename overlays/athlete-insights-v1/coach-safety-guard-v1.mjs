@@ -23,14 +23,14 @@ export function coachSafetyResponse(kind) {
     return {
       label: 'TRAINING MODIFICATION · NOT A DIAGNOSIS',
       title: 'AVOID PROVOCATIVE DEEP HIP FLEXION TODAY',
-      body: 'Do not blindly replace a deep squat with another deep-squat variation just because it trains similar muscles. Stay out of the range that reproduces the hip pinching. If you use Substitute Today, choose an approved option that preserves the programmed movement role, muscle emphasis, stimulus, equipment context, and training phase while allowing a non-provocative range. Keep the original prescription identifiable. If symptoms are severe, worsening, or follow acute trauma, stop training and seek professional evaluation.',
+      body: 'Do not blindly replace a deep squat with another deep-squat variation just because it trains similar muscles. Stay out of the range that reproduces the hip pinching. If you use Substitute Today, choose an approved option that preserves the programmed movement role, muscle emphasis, stimulus, equipment context, and training phase while allowing a non-provocative range. Keep the original prescription identifiable. This is training-modification guidance, not a diagnosis. If symptoms are severe, worsening, or follow acute trauma, stop training and seek professional evaluation.',
     }
   }
   if (kind === 'knee-limitation') {
     return {
       label: 'TRAINING MODIFICATION · NOT A DIAGNOSIS',
       title: 'AVOID PAINFUL LOADED OR DEEP KNEE FLEXION TODAY',
-      body: 'Do not simply swap to another exercise that reproduces the same painful loaded or deep knee-flexion demand. If you use Substitute Today, choose an approved option that preserves the programmed purpose and stimulus while using a tolerable range and loading pattern. Keep the original prescription and substitution provenance intact. If weight bearing is difficult, the knee feels unstable, swelling is significant, symptoms are worsening, or there was acute trauma, stop training and seek professional evaluation.',
+      body: 'Do not simply swap to another exercise that reproduces the same painful loaded or deep knee-flexion demand. If you use Substitute Today, choose an approved option that preserves the programmed purpose and stimulus while using a tolerable range and loading pattern. Keep the original prescription and substitution provenance intact. This is training-modification guidance, not a diagnosis. If weight bearing is difficult, the knee feels unstable, swelling is significant, symptoms are worsening, or there was acute trauma, stop training and seek professional evaluation.',
     }
   }
   return null
