@@ -122,7 +122,10 @@ html[data-lmf-approved-route='coach'] .coach-workspace .active{
 }
 
 /* PROFILE — character art may retain purple lightning/runes. Character-sheet
-   chrome, tracker, and interaction states inherit the Home red language. */
+   chrome, tracker, and interaction states inherit the Home red language. The
+   legacy profile hero is hidden so the approved character sheet is the identity
+   source of truth and no duplicate circular avatar survives above it. */
+html[data-lmf-approved-route='profile'] .profile-hero{display:none!important}
 html[data-lmf-approved-route='profile'] .lmf-profile-character-sheet-v1,
 html[data-lmf-approved-route='profile'] .lmf-profile-goals-card-v1{
   border-color:rgba(227,27,47,.27)!important;
@@ -142,12 +145,26 @@ html[data-lmf-approved-route='profile'] .lmf-profile-goal-tracker-v1 span{
 html[data-lmf-approved-route='profile'] .lmf-profile-goals-card-v1 header a{border-color:rgba(255,64,80,.38)!important;background:rgba(227,27,47,.10)!important;color:#ffd7db!important}
 
 /* MORE — red menu/action language, with purple reserved for special identity
-   details rather than every border and active state. */
-html[data-lmf-approved-route='more'] .lmf-more-workspace-v1{--lmf-more-accent:var(--lmf-brand-red)!important;--lmf-more-accent-hi:var(--lmf-brand-red-hi)!important}
+   details rather than every border and active state. Correct the root selector
+   so the final palette actually reaches the approved More workspace. */
+html[data-lmf-approved-route='more'] .lmf-more-v1{--lmf-more-accent:var(--lmf-brand-red)!important;--lmf-more-accent-hi:var(--lmf-brand-red-hi)!important;--lmf-more-accent-soft:rgba(227,27,47,.16)!important;--lmf-more-border:rgba(255,64,80,.22)!important}
+html[data-lmf-approved-route='more'] .lmf-more-sidebar-nav-v1 button.is-active,
+html[data-lmf-approved-route='more'] .lmf-more-sidebar-nav-v1 a:hover,
+html[data-lmf-approved-route='more'] .lmf-more-sidebar-nav-v1 button:hover{background:linear-gradient(90deg,rgba(227,27,47,.64),rgba(125,15,29,.28))!important;box-shadow:inset 0 0 0 1px rgba(255,64,80,.24),0 0 24px rgba(227,27,47,.10)!important}
 html[data-lmf-approved-route='more'] .lmf-more-card-v1:hover,
 html[data-lmf-approved-route='more'] .lmf-more-card-v1:focus-visible{border-color:rgba(255,64,80,.35)!important;box-shadow:0 14px 36px rgba(0,0,0,.28),0 0 22px rgba(227,27,47,.05)!important}
+html[data-lmf-approved-route='more'] .lmf-more-card-icon-v1{border-color:rgba(255,64,80,.28)!important;background:linear-gradient(145deg,rgba(227,27,47,.16),rgba(7,12,18,.94))!important;color:var(--lmf-brand-red-hi)!important}
 html[data-lmf-approved-route='more'] .lmf-more-card-v1 i,
 html[data-lmf-approved-route='more'] .lmf-more-kicker-v1{color:var(--lmf-brand-red-hi)!important}
+html[data-lmf-approved-route='more'] .lmf-more-brand-v1 .lmf-official-more-logo{display:none!important}
+html[data-lmf-approved-route='more'] .lmf-more-brand-v1{
+  background:
+    linear-gradient(90deg,rgba(4,7,11,.96) 2%,rgba(4,7,11,.72) 48%,rgba(4,7,11,.34)),
+    radial-gradient(circle at 78% 18%,rgba(227,27,47,.18),transparent 35%),
+    radial-gradient(circle at 88% 56%,rgba(168,85,247,.08),transparent 25%),
+    var(--v2-wolf) right 78%/34% auto no-repeat,
+    var(--v2-mountain) center/cover no-repeat!important;
+}
 
 /* Purple remains intentional and visible only as secondary energy/gamification. */
 .lmf-energy-accent,
@@ -167,5 +184,8 @@ body:has(.workout-panel .active-exercise) #lmf-install-banner{display:none!impor
 @media(max-width:720px){
   .lmf-progress-worldbar-v1{min-height:148px!important}
   .lmf-approved-exercises-hero-v1{min-height:168px!important}
-  html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{border-right:0!important;border-bottom:1px solid rgba(227,27,47,.16)!important}
+  html[data-lmf-approved-route='profile'] .lmf-profile-character-sheet-v1{grid-template-columns:1fr!important}
+  html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{min-height:340px!important;padding:18px!important;border-right:0!important;border-bottom:1px solid rgba(227,27,47,.16)!important;background-position:center top,center top,center center,center 18%!important}
+  html[data-lmf-approved-route='profile'] .lmf-profile-character-dossier-v1{padding:13px!important}
+  html[data-lmf-approved-route='more'] .lmf-more-brand-v1{background:linear-gradient(90deg,rgba(4,7,11,.93),rgba(4,7,11,.54)),radial-gradient(circle at 76% 22%,rgba(227,27,47,.14),transparent 35%),var(--v2-mountain) center/cover no-repeat!important}
 }
