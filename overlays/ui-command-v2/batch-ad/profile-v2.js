@@ -148,7 +148,7 @@
     if (!db) return null
     try {
       const readinessStore = ['readinessEntries','readinessChecks','readiness'].find((name) => db.objectStoreNames.contains(name))
-      const [athletes, sessions, prs, body, tms, programs, readiness] = await Promise.all([
+      const [athletes, sessions, prs, body, tms, programs, readiness, preferences] = await Promise.all([
         allFrom(db, 'athletes'),
         allFrom(db, 'workoutSessions'),
         allFrom(db, 'personalRecords'),
@@ -156,10 +156,14 @@
         allFrom(db, 'trainingMaxHistory'),
         allFrom(db, 'programInstances'),
         readinessStore ? allFrom(db, readinessStore) : Promise.resolve([]),
+        allFrom(db, 'athletePreferences'),
       ])
       const athlete = latestBy(live(athletes), ['updated_at','created_at'])
       if (!athlete) return null
       const athleteId = athlete.id
+      const preference = latestBy(owned(preferences, athleteId), ['updated_at','created_at'])
+      const weightUnit = preference?.weight_unit === 'kg' || preference?.weight_unit === 'lb'
+        ? preference.weight_unit : text(athlete.weight_unit || athlete.default_weight_unit || 'lb')
       const ownedSessions = owned(sessions, athleteId)
       const completed = ownedSessions.filter((row) => row.status === 'completed' || row.completed_at)
       const weightRows = owned(body, athleteId)
@@ -173,6 +177,7 @@
       return {
         db,
         athlete,
+        weightUnit,
         context: normalizeContext(athlete),
         name: text(athlete.display_name || athlete.name || athlete.first_name || 'Athlete'),
         bodyweight: bodyweightValue(latestWeight, athlete),
@@ -211,11 +216,11 @@
     const existing = document.getElementById(SECTION_ID)
     if (existing) existing.remove()
 
-    const { athlete, context, name, bodyweight, workouts, prs, trackedTms, activeProgram, readinessCount, strength } = vault
+    const { athlete, weightUnit, context, name, bodyweight, workouts, prs, trackedTms, activeProgram, readinessCount, strength } = vault
     const completion = completionScore(name, context)
     const program = programName(activeProgram?.program_key)
     const position = positionText(activeProgram)
-    const unit = text(athlete.weight_unit || athlete.default_weight_unit || 'lb')
+    const unit = weightUnit
 
     const section = document.createElement('section')
     section.id = SECTION_ID
