@@ -129,4 +129,8 @@ grep -Fq 'data-lmf-intel-watch' "$LIB_OUT"
 ! grep -Fq 'indexedDB' "$LIB_OUT"
 ! grep -Fq 'fetch(' "$LIB_OUT"
 
+# Keep the existing approved exercise art but give Train/library/detail surfaces
+# one consistent LetMeFly black/steel/purple treatment. This layer is presentation-only.
+bash "$ROOT_DIR/ci/install-exercise-image-theme-v1.sh" "$DIST_DIR"
+
 echo "LetMeFly full governed Exercise Intelligence catalog enhancer: PASS (112 canonical exercises)"

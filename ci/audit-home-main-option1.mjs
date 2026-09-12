@@ -135,6 +135,12 @@ try {
     const performanceSummaryEl = document.querySelector('.lmf-home-option1-performance-summary')
     const performanceSourceEl = document.querySelector('[data-lmf-performance]')
     return {
+      hero:rect('.lmf-home-option1-hero'),
+      greeting:rect('.lmf-home-v4-greeting'),
+      heroStyle:style('.lmf-home-option1-hero'),
+      greetingStyle:style('.lmf-home-v4-greeting'),
+      sharedHero:Boolean(document.querySelector('.lmf-home-option1-hero .lmf-home-v4-greeting') && document.querySelector('.lmf-home-option1-hero .lmf-home-v4-command')),
+      startCount:document.querySelectorAll('.lmf-home-option1-hero [data-lmf-start]').length,
       command:rect('.lmf-home-v4-command'),
       commandMark:rect('.lmf-home-v4-command-mark'),
       commandStyle:style('.lmf-home-v4-command'),
@@ -159,15 +165,16 @@ try {
   })
   report.layout = layout
 
-  check(Boolean(layout.command), 'Cinematic command hero is present')
-  check((layout.command?.height || 0) >= 380, 'Command hero has premium mobile depth', `${Math.round(layout.command?.height || 0)}px`)
-  check(layout.commandStyle?.backgroundImage?.includes('home-mountain-foundation-v1.svg'), 'Command hero uses approved mountain artwork', layout.commandStyle?.backgroundImage || 'missing')
+  check(Boolean(layout.hero) && layout.sharedHero, 'Greeting and workout share one cinematic hero')
+  check((layout.hero?.height || 0) >= 380, 'Combined hero has room for the greeting and workout', `${Math.round(layout.hero?.height || 0)}px`)
+  check(layout.heroStyle?.backgroundImage?.includes('home-mountain-cinematic-v2.webp') && layout.greetingStyle?.backgroundImage === 'none' && !layout.commandStyle?.backgroundImage?.includes('home-mountain'), 'One continuous mountain backdrop replaces the separate banners', layout.heroStyle?.backgroundImage || 'missing')
   check(layout.hasCommandMark, 'Command hero preserves wolf/brand identity layer')
   check((layout.commandMark?.width || 0) >= 285, 'Fenrir mobile stage keeps the face inside the hero', `${Math.round(layout.commandMark?.width || 0)}px`)
   check(layout.fenrirStyle?.backgroundImage?.includes('fenrir.webp'), 'Command hero uses clean Fenrir artwork', layout.fenrirStyle?.backgroundImage || 'missing')
   check(Number(layout.fenrirStyle?.opacity || 0) >= .75, 'Fenrir art remains visibly weighted on mobile', `opacity=${layout.fenrirStyle?.opacity || 'missing'}`)
   check(Boolean(layout.progress), 'Workout progress bar is present')
   check(Boolean(layout.start) && (layout.start?.width || 0) >= 300, 'Start Workout remains a dominant mobile action', `${Math.round(layout.start?.width || 0)}px`)
+  check(layout.startCount === 1 && layout.start?.y >= (layout.command?.y || 0) + (layout.command?.height || 0) && layout.start?.y + layout.start?.height <= layout.hero?.y + layout.hero?.height, 'Single mobile Start control sits below workout details inside the combined hero')
   check(Boolean(layout.alert), 'Compact header utility control is present')
 
   const { readiness, performance, milestone, coach } = layout
@@ -186,6 +193,68 @@ try {
   check(layout.hasStats === 4, 'Athlete metrics rail keeps four metrics', `count=${layout.hasStats}`)
   check(layout.progressMounts === 0, 'Home remains isolated from Progress dashboard', `progress mounts=${layout.progressMounts}`)
   check(layout.bodyWidth <= layout.viewportWidth + 1, 'Option 1 Home has no horizontal overflow', `${layout.bodyWidth}px / ${layout.viewportWidth}px`)
+
+  // A ready, unstarted current session must not erase completed history. Seed
+  // only this disposable CI athlete; the production account is never touched.
+  await page.waitForFunction(() => document.querySelector('[data-stat="workouts"]')?.textContent === '0' && document.querySelector('.lmf-home-option1-performance-summary')?.textContent.includes('No completed workout yet'))
+  check((await page.locator('.lmf-home-option1-performance-summary').innerText()).includes('No completed workout yet'), 'Empty history has a genuine empty state')
+  const historyBefore = await page.evaluate(async () => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('letmefly-private')
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    try {
+      const athlete = await new Promise((resolve, reject) => {
+        const request = db.transaction('athletes', 'readonly').objectStore('athletes').getAll()
+        request.onsuccess = () => resolve(request.result.find(row => !row.deleted_at))
+        request.onerror = () => reject(request.error)
+      })
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('workoutSessions', 'readwrite')
+        tx.oncomplete = resolve
+        tx.onerror = tx.onabort = () => reject(tx.error)
+        for (const [id, name, date, extra] of [
+          ['home-history-1', 'Earlier completed session', '2026-08-01T12:00:00Z', {}],
+          ['home-history-2', 'Middle completed session', '2026-08-02T12:00:00Z', {}],
+          ['home-history-3', 'Latest completed strength', '2026-08-03T12:00:00Z', {}],
+          ['home-history-deleted', 'DELETED MUST NOT APPEAR', '2026-08-04T12:00:00Z', { deleted_at:'2026-08-04T13:00:00Z' }],
+          ['home-history-foreign', 'FOREIGN MUST NOT APPEAR', '2026-08-05T12:00:00Z', { athlete_id:'another-athlete' }],
+        ]) {
+          tx.objectStore('workoutSessions').put({ id, athlete_id:athlete.id, program_key:'crownforge', week_number:1, day_key:'day-3', workout_name:name, status:'completed', completed_at:date, started_at:date, ...extra })
+        }
+      })
+      return await new Promise((resolve, reject) => {
+        const request = db.transaction('workoutSessions', 'readonly').objectStore('workoutSessions').getAll()
+        request.onsuccess = () => resolve(JSON.stringify(request.result))
+        request.onerror = () => reject(request.error)
+      })
+    } finally { db.close() }
+  })
+  await page.reload({ waitUntil:'domcontentloaded' })
+  await page.waitForFunction(() => document.querySelector('.lmf-home-option1-performance-summary')?.textContent.includes('Latest completed strength'))
+  const historyText = await page.locator('.lmf-home-option1-performance-summary').innerText()
+  check(await page.locator('[data-stat="workouts"]').innerText() === '3', 'Workout count excludes deleted and foreign sessions')
+  check(historyText.includes('Latest completed strength') && !/not started|no completed|DELETED|FOREIGN/i.test(historyText), 'Recent Performance shows the latest owned completed workout', historyText)
+  check(/Aug\s+3|3\s+Aug|08[\/-]03|03[\/-]08/.test(historyText), 'Recent Performance includes the completion date', historyText)
+  check(/Week 1.*Day 3/.test(historyText), 'Recent Performance includes the saved program position', historyText)
+  const historyAfter = await page.evaluate(async () => {
+    const db = await new Promise((resolve, reject) => { const request = indexedDB.open('letmefly-private'); request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error) })
+    try {
+      return await new Promise((resolve, reject) => { const request = db.transaction('workoutSessions', 'readonly').objectStore('workoutSessions').getAll(); request.onsuccess = () => resolve(JSON.stringify(request.result)); request.onerror = () => reject(request.error) })
+    } finally { db.close() }
+  })
+  check(historyAfter === historyBefore, 'Home history presentation leaves saved workout rows unchanged')
+  report.completedHistory = { text:historyText, workouts:3 }
+  // The unified hero reparents the existing button. Verify its delegated
+  // action still opens Train, then return Home to check remounting and capture.
+  await dismissOptionalInstall()
+  await page.locator('.lmf-home-option1-hero [data-lmf-start]').click()
+  await page.waitForFunction(() => location.hash.startsWith('#/train'))
+  check(true, 'Repositioned Start Workout preserves the Train action')
+  await page.evaluate(() => { location.hash = '#/home' })
+  await page.waitForSelector('.lmf-home-option1-hero', { state:'visible' })
+  check(await page.locator('.lmf-home-option1-hero').count() === 1 && await page.locator('.lmf-home-option1-hero [data-lmf-start]').count() === 1, 'Home remount keeps one combined hero and one Start control')
 } catch (error) {
   report.result = 'FAIL'
   report.error = error instanceof Error ? error.message : String(error)

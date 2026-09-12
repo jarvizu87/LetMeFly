@@ -9,6 +9,8 @@
   let scanQueued = false
   let reading = false
   let summaryCache = null
+  let summaryStatus = 'loading'
+  let summaryRevision = 0
 
   const esc = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))
   const clean = (value, fallback='') => String(value ?? fallback).replace(/\s+/g, ' ').trim()
@@ -102,6 +104,24 @@
     return lines
   }
 
+  function recentPerformance() {
+    if (summaryStatus === 'loading') return ['Loading recent performance…', 'Reading your saved workout history.']
+    if (summaryStatus === 'unavailable') return ['Recent performance unavailable', 'Your saved history could not be read. Reopen Home to try again.']
+    const latest = summaryCache?.latestCompleted
+    if (!latest) return ['No completed workout yet', 'Finish a session to start your performance history.']
+    const date = new Date(clean(latest.completed_at))
+    const completed = Number.isFinite(date.getTime())
+      ? `Completed ${new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric', year:'numeric' }).format(date)}`
+      : 'Completed session'
+    const program = clean(latest.program_name || latest.program_key).replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+    const week = Number(latest.week_number)
+    const day = clean(latest.day_key).match(/^(?:day[-_ ]*)?(\d+)$/i)
+    return [
+      clean(latest.workout_name, 'Completed workout') || 'Completed workout',
+      [completed, program, Number.isInteger(week) && week > 0 ? `Week ${week}` : '', day ? `Day ${Number(day[1])}` : ''].filter(Boolean).join(' · ')
+    ]
+  }
+
   function commandData(hero, grid) {
     const program = sourceText(hero, '.hero-brandline span', 'CURRENT PROGRAM').toUpperCase()
     const position = sourceText(hero, '.hero-content .page-kicker', 'CURRENT SESSION')
@@ -114,7 +134,6 @@
     const setLabel = setMatch ? `${setMatch[1]} / ${setMatch[2]} sets` : progressText
     const trainingType = tags.slice(0, 2).join(' · ') || 'Strength training'
     const readiness = parseReadiness(grid?.querySelector('.readiness-card'))
-    const performanceCard = [...(grid?.querySelectorAll('.status-card') || [])].find((card) => !card.classList.contains('readiness-card')) || null
     return {
       program,
       positionLabel,
@@ -122,7 +141,7 @@
       setLabel,
       trainingType,
       readiness,
-      performance:meaningfulLines(performanceCard, 3),
+      performance:recentPerformance(),
       milestone:meaningfulLines(grid?.querySelector('.milestone-card'), 2),
       coach:meaningfulLines(grid?.querySelector('.coach-focus-card'), 2)
     }
@@ -269,41 +288,57 @@
     setText(shell, '[data-lmf-readiness-copy]', readinessCopy(data.readiness.score))
     const performance = data.performance.length ? data.performance : ['Complete a workout to build your recent-performance feed.']
     const list = shell.querySelector('[data-lmf-performance]')
-    const html = performance.map((line) => `<li>${esc(line)}</li>`).join('')
-    if (list && list.innerHTML !== html) list.innerHTML = html
+    const rows = list ? [...list.children] : []
+    if (list && (rows.length !== performance.length || rows.some((row, index) => row.tagName !== 'LI' || row.textContent !== performance[index]))) {
+      list.innerHTML = performance.map((line) => `<li>${esc(line)}</li>`).join('')
+    }
     setText(shell, '[data-lmf-milestone]', data.milestone.length ? data.milestone.join(' · ') : 'Your next meaningful training target will appear here.')
     setText(shell, '[data-lmf-coach]', data.coach.length ? data.coach.join(' · ') : 'Execute today’s prescription cleanly. Quality before load.')
   }
 
   async function idbAll(db, storeName) {
     if (!db.objectStoreNames.contains(storeName)) return []
-    return await new Promise((resolve) => {
+    return await new Promise((resolve, reject) => {
       const tx = db.transaction(storeName, 'readonly')
       const req = tx.objectStore(storeName).getAll()
       req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : [])
-      req.onerror = () => resolve([])
+      req.onerror = () => reject(req.error || new Error('Saved history could not be read'))
+      tx.onabort = () => reject(tx.error || new Error('Saved history read was interrupted'))
     })
   }
 
   async function readSummary() {
     if (summaryCache) return summaryCache
-    if (!('indexedDB' in window)) return null
+    if (summaryStatus === 'unavailable') return null
+    const revision = summaryRevision
+    const unavailable = () => {
+      if (revision === summaryRevision) summaryStatus = 'unavailable'
+      return null
+    }
+    if (!('indexedDB' in window)) return unavailable()
     return await new Promise((resolve) => {
       let request
-      try { request = indexedDB.open(DB_NAME) } catch (_) { resolve(null); return }
+      let blocked = false
+      try { request = indexedDB.open(DB_NAME) } catch (_) { resolve(unavailable()); return }
       request.onupgradeneeded = () => { try { request.transaction.abort() } catch (_) {} }
-      request.onerror = () => resolve(null)
+      request.onerror = () => resolve(unavailable())
+      request.onblocked = () => { blocked = true; resolve(unavailable()) }
       request.onsuccess = async () => {
         const db = request.result
         try {
+          if (blocked || revision !== summaryRevision) { resolve(null); return }
+          if (!db.objectStoreNames.contains('workoutSessions')) { resolve(unavailable()); return }
           const [athletes,sessions,prs,body,tms] = await Promise.all([
             idbAll(db,'athletes'), idbAll(db,'workoutSessions'), idbAll(db,'personalRecords'), idbAll(db,'bodyweightEntries'), idbAll(db,'trainingMaxHistory')
           ])
           const live = (rows) => rows.filter((row) => row && !row.deleted_at)
-          const athlete = live(athletes).sort((a,b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0))[0] || null
+          // Match the app's getActiveAthlete() selection and keep history
+          // strictly scoped to that athlete.
+          const athlete = live(athletes)[0] || null
+          if (!athlete) { resolve(unavailable()); return }
           const athleteId = athlete?.id
           const owned = (rows) => live(rows).filter((row) => !athleteId || !row.athlete_id || row.athlete_id === athleteId)
-          const completed = owned(sessions).filter((row) => row.status === 'completed' || row.completed_at)
+          const completed = live(sessions).filter((row) => row.athlete_id === athleteId && (row.status === 'completed' || row.completed_at))
           const tmRows = owned(tms)
           const weights = owned(body).map((row) => ({
             date:new Date(row.measured_at || row.recorded_at || row.created_at || 0),
@@ -311,16 +346,20 @@
             unit:String(row.unit || row.bodyweight_unit || row.weight_unit || athlete?.default_weight_unit || 'lb')
           })).filter((row) => Number.isFinite(row.value) && row.value > 0).sort((a,b) => b.date - a.date)
           const name = athlete?.display_name || athlete?.name || athlete?.first_name || 'Athlete'
+          if (revision !== summaryRevision) { resolve(null); return }
+          const completedTime = (row) => Date.parse(row.completed_at || '') || 0
           summaryCache = {
             name,
             initials:initials(name),
             tracked:new Set(tmRows.map((row) => row.exercise_key).filter(Boolean)).size,
             workouts:completed.length,
+            latestCompleted:[...completed].sort((a,b) => completedTime(b) - completedTime(a))[0] || null,
             prs:owned(prs).length,
             bodyweight:weights[0] ? `${Math.round(weights[0].value * 10) / 10} ${weights[0].unit}` : '—'
           }
+          summaryStatus = 'ready'
           resolve(summaryCache)
-        } catch (_) { resolve(null) }
+        } catch (_) { resolve(unavailable()) }
         finally { try { db.close() } catch (_) {} }
       }
     })
@@ -333,10 +372,12 @@
   async function hydratePrivateSummary() {
     if (reading) return
     reading = true
+    const revision = summaryRevision
+    const previousStatus = summaryStatus
+    const shell = document.querySelector(`.${HOME_SHELL_CLASS}`)
     try {
       const data = await readSummary()
-      const shell = document.querySelector(`.${HOME_SHELL_CLASS}`)
-      if (!data || !shell || !document.body.classList.contains(ROOT_CLASS)) return
+      if (!data || revision !== summaryRevision || !shell?.isConnected || shell !== document.querySelector(`.${HOME_SHELL_CLASS}`) || !document.body.classList.contains(ROOT_CLASS)) return
       setIfChanged(shell.querySelector('[data-lmf-greeting]'), `${timeGreeting()}, ${data.name}.`)
       setIfChanged(shell.querySelector('[data-lmf-avatar]'), data.initials)
       const setStat = (key, value) => setIfChanged(shell.querySelector(`[data-stat="${key}"]`), String(value ?? '—'))
@@ -344,7 +385,10 @@
       setStat('workouts', data.workouts)
       setStat('prs', data.prs)
       setStat('bodyweight', data.bodyweight)
-    } finally { reading = false }
+    } finally {
+      reading = false
+      if (isHomeRoute() && (revision !== summaryRevision || previousStatus !== summaryStatus)) queue()
+    }
   }
 
   function mount() {
@@ -382,9 +426,10 @@
   function boot() {
     queue()
     new MutationObserver(queue).observe(document.body, { childList:true, subtree:true })
-    window.addEventListener('hashchange', () => { summaryCache = null; queue() })
+    const refreshSummary = () => { summaryRevision++; summaryCache = null; summaryStatus = 'loading'; queue() }
+    window.addEventListener('hashchange', refreshSummary)
     window.addEventListener('popstate', queue)
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) { summaryCache = null; queue() } })
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshSummary() })
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true })

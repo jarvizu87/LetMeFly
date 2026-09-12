@@ -7,6 +7,12 @@ const { chromium } = createRequire(path.join(target, 'package.json'))('playwrigh
 const out = path.join(target, 'ATHLETE_INSIGHTS_AUDIT'); fs.mkdirSync(out, { recursive: true })
 const report = { result: 'PASS', checks: [] }
 const browser = await chromium.launch({ executablePath: process.env.CHROME_BIN, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
+async function openCoachPanels(coach, keys = ['profile', 'history', 'evidence']) {
+  for (const key of keys) {
+    const detail = coach.locator(`[data-ai-coach-detail="workspace-${key}"]`)
+    if (!(await detail.evaluate(node => node.open))) await detail.locator(':scope > summary').click()
+  }
+}
 async function snapshot(page) {
   return page.evaluate(async () => {
     const db = await new Promise((resolve, reject) => { const r = indexedDB.open('letmefly-private'); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error) })
@@ -99,7 +105,7 @@ try {
     await page.locator('[data-pg-tab="conditioning"]').click(); assert.equal(await page.locator('#lmf-advanced-progress').count(), 0)
     await page.locator('[data-pg-tab="strength"]').click(); await panel.waitFor({ state: 'visible' })
     await page.goto('http://127.0.0.1:4173/#/coach', { waitUntil: 'domcontentloaded' })
-    const coach = page.locator('#lmf-athlete-coach'); await coach.waitFor({ state: 'visible' })
+    const coach = page.locator('#lmf-athlete-coach'); await coach.waitFor({ state: 'visible' }); await openCoachPanels(coach)
     assert.match(await coach.innerText(), /Priority B QA/); assert.doesNotMatch(await coach.innerText(), /FOREIGN ATHLETE/)
     assert.match(await coach.innerText(), /Your primary goal is not saved yet/)
     assert.match(await coach.innerText(), /0 of 9 coaching details saved/)
@@ -110,7 +116,7 @@ try {
     assert.match(await coach.innerText(), /keep long-term plan unchanged/)
     if (await dismiss.isVisible()) await dismiss.click()
     await coach.screenshot({ path: path.join(out, `coach-${width}.png`) })
-    await page.reload(); await coach.waitFor({ state: 'visible' })
+    await page.reload(); await coach.waitFor({ state: 'visible' }); await openCoachPanels(coach)
     assert.deepEqual(await snapshot(page), before, 'Read-only views must preserve all source and outbox rows')
     await coach.getByRole('link', { name: 'Add athlete details' }).click()
     const goal = page.locator('[data-profile-key="primaryGoal"]'); await goal.waitFor({ state: 'visible' })
@@ -121,7 +127,7 @@ try {
     await page.waitForFunction(() => document.querySelector('[data-profile-save-status]')?.textContent.includes('Saved privately'))
     const savedProfile = await snapshot(page)
     await page.goto('http://127.0.0.1:4173/#/coach', { waitUntil: 'domcontentloaded' })
-    await coach.waitFor({ state: 'visible' })
+    await coach.waitFor({ state: 'visible' }); await openCoachPanels(coach)
     assert.match(await coach.innerText(), /2 of 9 coaching details saved/)
     assert.ok((await coach.innerText()).includes(goalText), 'Saved text must be rendered literally')
     assert.equal(await coach.locator('[data-ai-profile] img').count(), 0)
@@ -130,7 +136,7 @@ try {
     if (await dismiss.isVisible()) await dismiss.click()
     await coach.locator('[data-ai-profile]').evaluate(el => el.scrollIntoView({ block: 'center' }))
     await coach.locator('[data-ai-profile]').screenshot({ path: path.join(out, `coach-profile-${width}.png`) })
-    await page.reload(); await coach.waitFor({ state: 'visible' })
+    await page.reload(); await coach.waitFor({ state: 'visible' }); await openCoachPanels(coach)
     assert.ok((await coach.innerText()).includes(goalText), 'Profile context survives reload')
     assert.deepEqual(await snapshot(page), savedProfile, 'Coach must not write profile or outbox rows')
     await page.goto('http://127.0.0.1:4173/#/home', { waitUntil: 'domcontentloaded' })

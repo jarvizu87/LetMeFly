@@ -1,0 +1,82 @@
+/* LetMeFly Home + Coach mockup fidelity v1.
+   Final presentation-only overrides after the Option 1 desktop bridge. */
+
+/* Keep a wide invisible Fenrir stage for layout safety while the actual wolf art
+   stays deliberately compact so the mountain landscape remains dominant. */
+body.lmf-home-ref3-active .lmf-home-v4-command-mark{width:44%!important}
+body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{
+  /* Reset all four edges: the earlier fidelity layer left `left:0` in force,
+     so the later right offset could not anchor this portrait to the right. */
+  inset:50% 1.5% auto auto!important;
+  width:clamp(170px,18vw,230px)!important;
+  height:clamp(190px,22vw,260px)!important;
+  transform:translateY(-48%)!important;
+  background:url('/ui/fenrir.webp') right 28%/cover no-repeat!important;
+  background-blend-mode:normal!important;
+  mix-blend-mode:screen!important;
+  opacity:.88!important;
+  filter:saturate(.8) contrast(1.15) brightness(1.55)!important;
+}
+
+/* The source is an opaque portrait. Feather every edge, including the top and
+   bottom, instead of exposing its rectangular background against the mountains. */
+body.lmf-home-ref3-active .lmf-home-v4-command-mark::before,
+.coach-banner::before{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 28%,#000 88%,transparent),linear-gradient(180deg,transparent,#000 15%,#000 72%,transparent)!important;
+  mask-image:linear-gradient(90deg,transparent,#000 28%,#000 88%,transparent),linear-gradient(180deg,transparent,#000 15%,#000 72%,transparent)!important;
+  -webkit-mask-composite:source-in!important;
+  mask-composite:intersect!important;
+}
+
+/* Reveal more of the approved cinematic landscape without sacrificing copy contrast. */
+body.lmf-home-ref3-active .lmf-home-v4-greeting{
+  background:
+    linear-gradient(90deg,rgba(2,6,9,.78) 0%,rgba(2,6,9,.32) 48%,rgba(2,6,9,.02) 100%),
+    url('/ui/home-mountain-cinematic-v2.webp') center 42%/cover no-repeat!important;
+}
+body.lmf-home-ref3-active .lmf-home-v4-command{
+  background:
+    linear-gradient(90deg,rgba(2,6,9,.94) 0%,rgba(2,6,9,.68) 42%,rgba(2,6,9,.18) 66%,rgba(2,6,9,.02) 100%),
+    linear-gradient(180deg,transparent 55%,rgba(2,5,8,.66)),
+    url('/ui/home-mountain-cinematic-v2.webp') center 48%/cover no-repeat!important;
+}
+.coach-banner{
+  background:
+    linear-gradient(90deg,rgba(2,6,9,.90) 0%,rgba(2,6,9,.42) 50%,rgba(2,6,9,.04) 100%),
+    url('/ui/home-mountain-cinematic-v2.webp') center 44%/cover no-repeat!important;
+}
+.coach-banner::before{inset:8% 1.5% auto auto!important;height:84%!important;opacity:.80!important}
+
+/* Final primary navigation: Exercises and Coach remain direct destinations while
+   More stays last for Profile/settings/secondary tools. */
+.lmf-direct-exercises-nav,.lmf-direct-coach-nav{color:#8c97a1}
+.lmf-direct-exercises-nav.active,.lmf-direct-coach-nav.active{color:#ff2438!important}
+@media(max-width:1099px){
+  .navbar.lmf-navbar-has-primary-shortcuts{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+  .navbar.lmf-navbar-has-primary-shortcuts .nav-item{min-width:0!important;font-size:9px!important;letter-spacing:.01em!important;padding-left:0!important;padding-right:0!important}
+  .navbar.lmf-navbar-has-primary-shortcuts .nav-item span{font-size:14px!important}
+}
+
+@media(max-width:700px){
+  body.lmf-home-ref3-active .lmf-home-v4-greeting{
+    background:
+      linear-gradient(90deg,rgba(2,6,9,.82) 0%,rgba(2,6,9,.34) 58%,rgba(2,6,9,.04) 100%),
+      url('/ui/home-mountain-cinematic-v2.webp') 57% 43%/cover no-repeat!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-command{
+    background:
+      linear-gradient(90deg,rgba(2,6,9,.94) 0%,rgba(2,6,9,.67) 48%,rgba(2,6,9,.16) 78%,rgba(2,6,9,.02) 100%),
+      linear-gradient(180deg,transparent 45%,#020609 82%),
+      url('/ui/home-mountain-cinematic-v2.webp') 62% 16%/auto 280px no-repeat #020609!important;
+  }
+  body.lmf-home-ref3-active .lmf-home-v4-command-mark{width:74%!important}
+  body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{
+    inset:20% 1.5% auto auto!important;
+    width:150px!important;
+    height:185px!important;
+    transform:none!important;
+    background-position:right 22%!important;
+    opacity:.88!important;
+  }
+  .coach-banner::before{width:112px!important;opacity:.72!important}
+}

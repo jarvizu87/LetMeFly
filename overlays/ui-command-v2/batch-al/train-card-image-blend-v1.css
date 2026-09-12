@@ -1,0 +1,134 @@
+/* LetMeFly Train card image blend v1
+   Presentation-only layer approved for the cinematic Home/Coach visual family.
+   Existing workout prescription, set logging, persistence, readiness, rest,
+   substitution, video, Coach, and governed-position behavior remain untouched. */
+
+/* Active exercise: keep the approved artwork, but integrate it into the card
+   rather than forcing a separate full-width square panel. */
+.exercise-stack .active-exercise.lmf-workout-flow-card{
+  position:relative!important;
+  isolation:isolate!important;
+  background:
+    linear-gradient(180deg,rgba(8,15,21,.98),rgba(5,11,16,.99))!important;
+}
+
+.exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-exercise-media{
+  position:absolute!important;
+  top:0!important;
+  right:0!important;
+  z-index:0!important;
+  order:0!important;
+  width:min(44%,220px)!important;
+  height:196px!important;
+  min-height:0!important;
+  aspect-ratio:auto!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0 15px 0 0!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  background-color:transparent!important;
+  background-size:contain!important;
+  background-position:right center!important;
+  background-repeat:no-repeat!important;
+  opacity:.92!important;
+}
+
+/* Layer dark fades over the art so text and photography read as one composition.
+   The left fade protects exercise copy; the lower fade dissolves the image into
+   the logger rather than ending at a hard rectangle. */
+.exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-exercise-media::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(90deg,#071016 0%,rgba(7,16,22,.92) 16%,rgba(7,16,22,.54) 42%,rgba(7,16,22,.08) 76%),
+    linear-gradient(180deg,rgba(7,16,22,.02) 45%,rgba(7,16,22,.62) 78%,#071016 100%)!important;
+  box-shadow:none!important;
+}
+
+/* Keep meaningful content above the blended art. The title gets enough vertical
+   room for the image treatment without creating the former square-art scroll tax. */
+.exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-compact-summary,
+.exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-title,
+.exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-actions,
+.exercise-stack .active-exercise.lmf-workout-flow-card > .set-table{
+  position:relative!important;
+  z-index:1!important;
+}
+
+.exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-title{
+  min-height:196px!important;
+  padding:16px min(42%,205px) 14px 15px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-end!important;
+  background:linear-gradient(90deg,rgba(7,16,22,.98) 0%,rgba(7,16,22,.88) 58%,rgba(7,16,22,.22) 100%)!important;
+}
+
+.exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-title h3{
+  text-shadow:0 2px 16px rgba(0,0,0,.68)!important;
+}
+
+/* Actions/logger get a deliberate seam, not an image boundary. */
+.exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-actions{
+  background:linear-gradient(180deg,rgba(7,16,22,.82),#071016 68%)!important;
+}
+.exercise-stack .active-exercise.lmf-workout-flow-card > .set-table{
+  background:#061018!important;
+}
+
+/* Upcoming/completed exercise cards retain their artwork as a compact right-side
+   visual. The full asset is fit into the available height and dissolved toward
+   the text, instead of being stretched across the entire card. */
+.exercise-stack .exercise-card:not(.active-exercise)[data-exercise-art]::before{
+  inset:0!important;
+  opacity:1!important;
+  background-image:
+    linear-gradient(90deg,#071016 0%,#071016 48%,rgba(7,16,22,.80) 64%,rgba(7,16,22,.20) 100%),
+    linear-gradient(180deg,rgba(7,16,22,.08),rgba(7,16,22,.56)),
+    var(--exercise-art,var(--v2-mountain))!important;
+  background-size:100% 100%,100% 100%,auto 92%!important;
+  background-position:center,center,right center!important;
+  background-repeat:no-repeat!important;
+}
+
+.exercise-stack .exercise-card:not(.active-exercise)[data-exercise-art] > *{
+  position:relative!important;
+  z-index:1!important;
+}
+
+/* Small phones: keep the same treatment, but reserve less card width for art so
+   exercise names and metrics never become unreadable. */
+@media (max-width:390px){
+  .exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-exercise-media{
+    width:43%!important;
+    height:178px!important;
+  }
+  .exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-title{
+    min-height:178px!important;
+    padding-right:39%!important;
+  }
+}
+
+/* Tablet/desktop: let the image breathe a little more without reverting to a
+   separate billboard. */
+@media (min-width:768px){
+  .exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-exercise-media{
+    width:min(38%,300px)!important;
+    height:236px!important;
+  }
+  .exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-title{
+    min-height:236px!important;
+    padding-right:min(36%,285px)!important;
+  }
+}
+
+/* Accessibility/print fallback: preserve information even when decorative art
+   effects are reduced. */
+@media (prefers-reduced-transparency:reduce){
+  .exercise-stack .active-exercise.lmf-workout-flow-card > .lmf-exercise-media{opacity:.72!important}
+  .exercise-stack .active-exercise.lmf-workout-flow-card > .exercise-title{background:#071016!important}
+}

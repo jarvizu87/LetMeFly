@@ -81,6 +81,7 @@ try {
     assert.equal(await section.locator('[data-profile-key="equipment"]').inputValue(), 'Rack')
     await page.goto('http://127.0.0.1:4173/#/coach', { waitUntil: 'domcontentloaded' })
     const coach = page.locator('#lmf-athlete-coach'); await coach.waitFor({ state: 'visible' })
+    await coach.locator('[data-ai-coach-detail="workspace-profile"] > summary').click()
     assert.match(await coach.innerText(), /3 of 9 coaching details saved/)
     await coach.locator('[data-ai-profile] summary').click()
     assert.ok((await coach.innerText()).includes(history)); assert.equal(await coach.locator('[data-ai-profile] img').count(), 0)

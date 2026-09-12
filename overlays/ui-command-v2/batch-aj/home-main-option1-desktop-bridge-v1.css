@@ -61,3 +61,71 @@
     grid-template-columns:repeat(4,minmax(0,1fr))!important;
   }
 }
+
+/* LetMeFly Home + Coach — cinematic mockup convergence v1.
+   Presentation only; program, workout, persistence, progression and sync logic stay untouched. */
+body.lmf-home-ref3-active{--cine-red:#ff1737;--cine-green:#35ed9c;--cine-blue:#35bfff;--cine-gold:#ffc94a}
+body.lmf-home-ref3-active .lmf-home-reference-v3{width:min(100%,1220px)!important;padding:0 16px 110px!important}
+body.lmf-home-ref3-active .topbar{min-height:70px!important;background:rgba(2,6,9,.98)!important;border-bottom:1px solid rgba(130,150,162,.12)!important;box-shadow:0 10px 28px rgba(0,0,0,.24)!important}
+body.lmf-home-ref3-active .lmf-home-brand-lockup>img{width:48px!important;height:48px!important;filter:drop-shadow(0 0 16px rgba(255,23,55,.12))!important}
+body.lmf-home-ref3-active .lmf-home-brand-lockup strong{font-size:24px!important;letter-spacing:.14em!important}
+body.lmf-home-ref3-active .lmf-home-v4-greeting{position:relative!important;overflow:hidden!important;min-height:158px!important;padding:24px 26px!important;border:1px solid rgba(125,150,164,.18)!important;border-radius:17px!important;background:linear-gradient(90deg,rgba(2,6,9,.96),rgba(2,6,9,.68) 48%,rgba(2,6,9,.20)),url('/ui/home-mountain-foundation-v1.svg') center 40%/cover no-repeat!important;box-shadow:0 18px 48px rgba(0,0,0,.30)!important}
+body.lmf-home-ref3-active .lmf-home-v4-greeting::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--cine-red),transparent 70%)}
+body.lmf-home-ref3-active .lmf-home-v4-greeting h1{max-width:72%!important;color:#fff!important;font-size:clamp(38px,5.5vw,62px)!important;line-height:.96!important;text-shadow:0 5px 26px rgba(0,0,0,.7)!important}
+body.lmf-home-ref3-active .lmf-home-v4-greeting>div:first-child>p:last-child{max-width:62%!important;color:#e4eaed!important;font-size:13px!important;font-style:italic!important}
+body.lmf-home-ref3-active .lmf-home-v4-avatar{align-self:flex-start!important;background:rgba(6,12,16,.82)!important;border-color:rgba(235,241,244,.40)!important}
+
+body.lmf-home-ref3-active .lmf-home-v4-command{isolation:isolate!important;min-height:380px!important;overflow:hidden!important;border:1px solid rgba(139,164,179,.28)!important;border-radius:17px!important;background:linear-gradient(90deg,rgba(2,6,9,.98),rgba(2,6,9,.92) 43%,rgba(2,6,9,.52) 68%,rgba(2,6,9,.16)),linear-gradient(180deg,rgba(255,23,55,.04),rgba(2,5,8,.6)),url('/ui/home-mountain-foundation-v1.svg') center 62%/cover no-repeat!important;box-shadow:0 24px 62px rgba(0,0,0,.40)!important}
+body.lmf-home-ref3-active .lmf-home-v4-command::before{background:radial-gradient(circle at 82% 38%,rgba(255,23,55,.16),transparent 27%)!important}
+body.lmf-home-ref3-active .lmf-home-v4-command-main{width:min(74%,800px)!important;padding:28px 32px!important;z-index:4!important}
+body.lmf-home-ref3-active .lmf-home-v4-kicker{color:#eef2f4!important;font-size:10px!important;letter-spacing:.19em!important}
+body.lmf-home-ref3-active .lmf-home-v4-program-row h2{color:#fff!important;font-size:clamp(40px,5.8vw,65px)!important;line-height:.94!important;text-shadow:0 7px 26px rgba(0,0,0,.72)!important}
+body.lmf-home-ref3-active .lmf-home-v4-live{border-color:rgba(255,50,75,.5)!important;background:rgba(110,8,25,.44)!important;color:#ff4a61!important}
+body.lmf-home-ref3-active .lmf-home-v4-position{margin-top:20px!important;color:#b6c0c6!important;font-size:12px!important}
+body.lmf-home-ref3-active .lmf-home-v4-command-main h3{max-width:700px!important;color:#fff!important;font-size:clamp(27px,4.2vw,43px)!important;line-height:1.02!important;text-shadow:0 6px 24px rgba(0,0,0,.72)!important}
+body.lmf-home-ref3-active .lmf-home-v4-meta{margin-top:18px!important;border:1px solid rgba(145,165,178,.12)!important;border-radius:8px!important;background:rgba(2,6,9,.58)!important;backdrop-filter:blur(5px)!important}
+body.lmf-home-ref3-active .lmf-home-option1-track{height:8px!important;background:rgba(125,145,157,.16)!important}
+body.lmf-home-ref3-active .lmf-home-option1-fill{background:linear-gradient(90deg,#e20d2d,#ff304b)!important;box-shadow:0 0 18px rgba(255,23,55,.28)!important}
+body.lmf-home-ref3-active .lmf-home-v4-start{min-height:57px!important;min-width:270px!important;border-radius:10px!important;background:linear-gradient(180deg,#ff2442,#e90c2d)!important;border-color:#ff5168!important;color:#fff!important;letter-spacing:.11em!important;box-shadow:0 14px 32px rgba(229,8,42,.25)!important}
+
+/* Current UI Fenrir, intentionally smaller so the mountains remain the hero. */
+body.lmf-home-ref3-active .lmf-home-v4-command-mark{display:block!important;position:absolute!important;inset:0 0 0 auto!important;width:30%!important;min-height:100%!important;border:0!important;background:transparent!important;opacity:1!important;z-index:3!important;pointer-events:none!important}
+body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{content:''!important;position:absolute!important;right:2%!important;top:50%!important;width:clamp(160px,18vw,230px)!important;height:80%!important;transform:translateY(-47%)!important;background:url('/ui/fenrir.webp') right center/contain no-repeat!important;mix-blend-mode:screen!important;opacity:.80!important;filter:saturate(.8) contrast(1.18) brightness(1.35) drop-shadow(0 18px 34px rgba(0,0,0,.62))!important;-webkit-mask-image:linear-gradient(90deg,transparent,rgba(0,0,0,.42) 22%,#000 52%)!important;mask-image:linear-gradient(90deg,transparent,rgba(0,0,0,.42) 22%,#000 52%)!important}
+body.lmf-home-ref3-active .lmf-home-v4-command-mark span{display:none!important}
+
+body.lmf-home-ref3-active .lmf-home-v4-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-areas:'readiness performance' 'milestone coach'!important;gap:11px!important}
+body.lmf-home-ref3-active .lmf-home-v4-panel{position:relative!important;min-height:190px!important;overflow:hidden!important;padding:18px 19px!important;border-radius:14px!important;box-shadow:0 15px 38px rgba(0,0,0,.24)!important}
+body.lmf-home-ref3-active .lmf-home-v4-readiness{border-color:rgba(53,237,156,.22)!important;background:linear-gradient(145deg,rgba(4,38,28,.82),rgba(4,13,13,.97))!important}
+body.lmf-home-ref3-active .lmf-home-v4-performance{border-color:rgba(53,191,255,.22)!important;background:linear-gradient(145deg,rgba(3,33,50,.84),rgba(3,12,18,.97))!important}
+body.lmf-home-ref3-active .lmf-home-v4-milestone{border-color:rgba(255,201,74,.22)!important;background:linear-gradient(145deg,rgba(45,33,7,.84),rgba(14,11,4,.97))!important}
+body.lmf-home-ref3-active .lmf-home-v4-coach{border-color:rgba(255,23,55,.24)!important;background:linear-gradient(145deg,rgba(49,9,16,.84),rgba(15,5,8,.97))!important}
+body.lmf-home-ref3-active .lmf-home-v4-readiness .lmf-home-v4-panel-head span{color:var(--cine-green)!important}
+body.lmf-home-ref3-active .lmf-home-v4-performance .lmf-home-v4-panel-head span{color:var(--cine-blue)!important}
+body.lmf-home-ref3-active .lmf-home-v4-milestone .lmf-home-v4-panel-head span{color:var(--cine-gold)!important}
+body.lmf-home-ref3-active .lmf-home-v4-coach .lmf-home-v4-panel-head span{color:#ff4058!important}
+body.lmf-home-ref3-active .lmf-home-v4-panel-head{padding-bottom:9px!important;border-bottom:1px solid rgba(145,165,177,.11)!important}
+body.lmf-home-ref3-active .lmf-home-v4-stats{border:1px solid rgba(64,122,150,.24)!important;border-radius:13px!important;background:linear-gradient(180deg,rgba(4,24,34,.9),rgba(4,11,16,.96))!important;box-shadow:0 14px 32px rgba(0,0,0,.22)!important}
+
+/* Coach tab: same visual family, no coaching logic changes. */
+.coach-shell{width:min(100%,1120px)!important;margin:0 auto!important;padding-bottom:110px!important}
+.coach-banner{isolation:isolate!important;position:relative!important;overflow:hidden!important;min-height:188px!important;padding:26px 28px!important;border:1px solid rgba(136,160,174,.24)!important;border-radius:17px!important;background:linear-gradient(90deg,rgba(2,6,9,.97),rgba(2,6,9,.78) 52%,rgba(2,6,9,.28)),url('/ui/home-mountain-foundation-v1.svg') center 45%/cover no-repeat!important;box-shadow:0 22px 56px rgba(0,0,0,.34)!important}
+.coach-banner::before{content:'';position:absolute;z-index:0;right:2%;top:9%;width:180px;height:82%;background:url('/ui/fenrir.webp') right center/contain no-repeat;opacity:.62;mix-blend-mode:screen;filter:saturate(.8) contrast(1.18) brightness(1.3);-webkit-mask-image:linear-gradient(90deg,transparent,rgba(0,0,0,.4) 22%,#000 55%);mask-image:linear-gradient(90deg,transparent,rgba(0,0,0,.4) 22%,#000 55%)}
+.coach-avatar{position:relative!important;z-index:2!important;width:62px!important;height:62px!important;flex:0 0 62px!important;border-radius:14px!important;color:transparent!important;font-size:0!important;background:linear-gradient(180deg,rgba(2,6,9,.2),rgba(2,6,9,.7)),url('/ui/fenrir.webp') 72% 28%/150% auto no-repeat!important}
+.coach-banner-copy,.coach-status{position:relative!important;z-index:2!important}.coach-banner-copy h1{color:#fff!important;font-size:clamp(30px,5vw,44px)!important}.coach-banner-copy p{color:#d8e0e4!important;font-style:italic!important}
+.coach-context,.coach-chat{border:1px solid rgba(137,160,174,.18)!important;border-radius:14px!important;background:linear-gradient(145deg,rgba(10,17,22,.97),rgba(4,9,13,.98))!important;box-shadow:0 15px 38px rgba(0,0,0,.22)!important}.coach-context{border-left:2px solid #ff1737!important}
+.context-grid>div,.quick-prompts button{border-color:rgba(129,153,167,.16)!important;border-radius:8px!important;background:linear-gradient(145deg,#09151c,#050c11)!important}.quick-prompts button:hover{border-color:rgba(255,23,55,.45)!important;background:linear-gradient(145deg,rgba(52,9,17,.86),#070b0f)!important}
+.coach-message{border-color:rgba(128,152,166,.16)!important;border-left:2px solid rgba(255,23,55,.62)!important;border-radius:10px!important;background:linear-gradient(135deg,rgba(11,23,31,.97),rgba(5,12,17,.98))!important}.coach-composer textarea{min-height:60px!important;border-color:rgba(129,154,169,.22)!important;border-radius:9px!important;background:#050a0e!important}.coach-shell .btn.primary{background:linear-gradient(180deg,#ff2442,#e90c2d)!important;border-color:#ff3a54!important}
+
+@media(max-width:700px){
+ body.lmf-home-ref3-active .lmf-home-reference-v3{padding:0 10px 102px!important}
+ body.lmf-home-ref3-active .lmf-home-v4-greeting{min-height:136px!important;padding:19px 15px!important;background:linear-gradient(90deg,rgba(2,6,9,.96),rgba(2,6,9,.58) 62%,rgba(2,6,9,.18)),url('/ui/home-mountain-foundation-v1.svg') 58% 44%/cover no-repeat!important}
+ body.lmf-home-ref3-active .lmf-home-v4-greeting h1{max-width:80%!important;font-size:36px!important}body.lmf-home-ref3-active .lmf-home-v4-greeting>div:first-child>p:last-child{max-width:78%!important;font-size:11px!important}
+ body.lmf-home-ref3-active .lmf-home-v4-command{min-height:420px!important;background:linear-gradient(90deg,rgba(2,6,9,.97),rgba(2,6,9,.84) 56%,rgba(2,6,9,.30)),url('/ui/home-mountain-foundation-v1.svg') 60% 60%/cover no-repeat!important}
+ body.lmf-home-ref3-active .lmf-home-v4-command-main{width:100%!important;padding:23px 17px!important}body.lmf-home-ref3-active .lmf-home-v4-program-row h2{max-width:78%!important;font-size:38px!important}body.lmf-home-ref3-active .lmf-home-v4-command-main h3{max-width:76%!important;font-size:27px!important}
+ body.lmf-home-ref3-active .lmf-home-v4-start{width:100%!important;min-width:0!important;min-height:54px!important}
+ body.lmf-home-ref3-active .lmf-home-v4-command-mark{width:42%!important}body.lmf-home-ref3-active .lmf-home-v4-command-mark::before{right:-8px!important;top:27%!important;width:150px!important;height:54%!important;transform:none!important;background-position:right top!important;opacity:.72!important}
+ body.lmf-home-ref3-active .lmf-home-v4-grid{gap:8px!important}body.lmf-home-ref3-active .lmf-home-v4-panel{min-height:194px!important;padding:14px 13px!important}
+ body.lmf-home-ref3-active .lmf-home-v4-stats{grid-template-columns:repeat(4,minmax(0,1fr))!important}body.lmf-home-ref3-active .lmf-home-v4-stats>div{min-height:68px!important;padding:10px 7px!important}
+ .coach-shell{padding:0 10px 102px!important}.coach-banner{min-height:150px!important;padding:18px 15px!important}.coach-banner::before{right:-5px;top:16%;width:118px;height:68%;opacity:.52}.coach-avatar{width:50px!important;height:50px!important;flex-basis:50px!important}.coach-status{display:none!important}
+}
+@media(max-width:370px){body.lmf-home-ref3-active .lmf-home-v4-grid{grid-template-columns:1fr!important;grid-template-areas:'readiness' 'performance' 'milestone' 'coach'!important}body.lmf-home-ref3-active .lmf-home-v4-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
