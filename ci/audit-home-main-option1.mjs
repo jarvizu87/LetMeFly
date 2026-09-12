@@ -135,6 +135,12 @@ try {
     const performanceSummaryEl = document.querySelector('.lmf-home-option1-performance-summary')
     const performanceSourceEl = document.querySelector('[data-lmf-performance]')
     return {
+      hero:rect('.lmf-home-option1-hero'),
+      greeting:rect('.lmf-home-v4-greeting'),
+      heroStyle:style('.lmf-home-option1-hero'),
+      greetingStyle:style('.lmf-home-v4-greeting'),
+      sharedHero:Boolean(document.querySelector('.lmf-home-option1-hero .lmf-home-v4-greeting') && document.querySelector('.lmf-home-option1-hero .lmf-home-v4-command')),
+      startCount:document.querySelectorAll('.lmf-home-option1-hero [data-lmf-start]').length,
       command:rect('.lmf-home-v4-command'),
       commandMark:rect('.lmf-home-v4-command-mark'),
       commandStyle:style('.lmf-home-v4-command'),
@@ -159,15 +165,16 @@ try {
   })
   report.layout = layout
 
-  check(Boolean(layout.command), 'Cinematic command hero is present')
-  check((layout.command?.height || 0) >= 380, 'Command hero has premium mobile depth', `${Math.round(layout.command?.height || 0)}px`)
-  check(layout.commandStyle?.backgroundImage?.includes('home-mountain-cinematic-v2.webp'), 'Command hero uses the reference-derived cinematic mountain asset', layout.commandStyle?.backgroundImage || 'missing')
+  check(Boolean(layout.hero) && layout.sharedHero, 'Greeting and workout share one cinematic hero')
+  check((layout.hero?.height || 0) >= 380, 'Combined hero has room for the greeting and workout', `${Math.round(layout.hero?.height || 0)}px`)
+  check(layout.heroStyle?.backgroundImage?.includes('home-mountain-cinematic-v2.webp') && layout.greetingStyle?.backgroundImage === 'none' && !layout.commandStyle?.backgroundImage?.includes('home-mountain'), 'One continuous mountain backdrop replaces the separate banners', layout.heroStyle?.backgroundImage || 'missing')
   check(layout.hasCommandMark, 'Command hero preserves wolf/brand identity layer')
   check((layout.commandMark?.width || 0) >= 285, 'Fenrir mobile stage keeps the face inside the hero', `${Math.round(layout.commandMark?.width || 0)}px`)
   check(layout.fenrirStyle?.backgroundImage?.includes('fenrir.webp'), 'Command hero uses clean Fenrir artwork', layout.fenrirStyle?.backgroundImage || 'missing')
   check(Number(layout.fenrirStyle?.opacity || 0) >= .75, 'Fenrir art remains visibly weighted on mobile', `opacity=${layout.fenrirStyle?.opacity || 'missing'}`)
   check(Boolean(layout.progress), 'Workout progress bar is present')
   check(Boolean(layout.start) && (layout.start?.width || 0) >= 300, 'Start Workout remains a dominant mobile action', `${Math.round(layout.start?.width || 0)}px`)
+  check(layout.startCount === 1 && layout.start?.y >= (layout.command?.y || 0) + (layout.command?.height || 0) && layout.start?.y + layout.start?.height <= layout.hero?.y + layout.hero?.height, 'Single mobile Start control sits below workout details inside the combined hero')
   check(Boolean(layout.alert), 'Compact header utility control is present')
 
   const { readiness, performance, milestone, coach } = layout
@@ -239,6 +246,15 @@ try {
   })
   check(historyAfter === historyBefore, 'Home history presentation leaves saved workout rows unchanged')
   report.completedHistory = { text:historyText, workouts:3 }
+  // The unified hero reparents the existing button. Verify its delegated
+  // action still opens Train, then return Home to check remounting and capture.
+  await dismissOptionalInstall()
+  await page.locator('.lmf-home-option1-hero [data-lmf-start]').click()
+  await page.waitForFunction(() => location.hash.startsWith('#/train'))
+  check(true, 'Repositioned Start Workout preserves the Train action')
+  await page.evaluate(() => { location.hash = '#/home' })
+  await page.waitForSelector('.lmf-home-option1-hero', { state:'visible' })
+  check(await page.locator('.lmf-home-option1-hero').count() === 1 && await page.locator('.lmf-home-option1-hero [data-lmf-start]').count() === 1, 'Home remount keeps one combined hero and one Start control')
 } catch (error) {
   report.result = 'FAIL'
   report.error = error instanceof Error ? error.message : String(error)

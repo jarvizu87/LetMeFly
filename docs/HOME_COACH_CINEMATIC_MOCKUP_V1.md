@@ -23,8 +23,8 @@ The live app should match the approved mockup direction:
 ## Home structure preserved
 
 1. Compact official LetMeFly header
-2. Open time-aware greeting
-3. Single dominant Your Command hero
+2. One continuous mountain hero containing the time-aware greeting and Your Command workout card
+3. A dark inset workout card below the greeting, with Fenrir at the right of the shared scene
 4. Real workout progress
 5. Dominant Start Workout action
 6. 2 x 2 intelligence grid
@@ -53,6 +53,8 @@ Rendering the card must not modify saved sessions or start a workout.
 - Do not replace the real LetMeFly logo with generated/mock branding.
 - Reset all four portrait offsets before anchoring Fenrir to the right. Feather all portrait edges so the opaque source background does not appear as a rectangle.
 - A passing asset-URL/layout audit does not establish visual fidelity. Compare rendered screenshots with the mockup before describing the design as matched.
+- The greeting and workout share one `.lmf-home-option1-hero` background. The inset card must not repeat the mountain image or create a second banner.
+- On desktop, the original Start Workout button sits to the right of the inset card. On mobile it spans the bottom of the same dark card treatment. Move the original control and retain its existing event delegation; do not clone it or duplicate workout actions.
 
 ## Coach visual alignment
 

@@ -47,6 +47,45 @@
     return { current, total, pct, label:`${current} of ${total} sets` }
   }
 
+  function ensureUnifiedHero(shell) {
+    if (shell.querySelector('.lmf-home-option1-hero')) return
+    const greeting = shell.querySelector('.lmf-home-v4-greeting')
+    const command = shell.querySelector('.lmf-home-v4-command')
+    const start = command?.querySelector('[data-lmf-start]')
+    const mark = command?.querySelector('.lmf-home-v4-command-mark')
+    if (!greeting || !command || !start) return
+
+    const hero = document.createElement('section')
+    hero.className = 'lmf-home-option1-hero'
+    hero.setAttribute('aria-label', "Today's training")
+    const row = document.createElement('div')
+    row.className = 'lmf-home-option1-workout-row'
+    shell.insertBefore(hero, greeting)
+    hero.appendChild(greeting)
+    if (mark) hero.appendChild(mark)
+    hero.appendChild(row)
+    // Move the original nodes, including the single Start control. The Home
+    // shell's existing delegated handler and read-only data bindings survive.
+    row.append(command, start)
+  }
+
+  function formatGreeting(shell) {
+    const line = shell.querySelector('[data-lmf-greeting]')
+    if (!line || line.querySelector('.lmf-home-option1-salutation')) return
+    const text = line.textContent || ''
+    const split = text.indexOf(', ')
+    if (split < 0) return
+    const salutation = document.createElement('span')
+    salutation.className = 'lmf-home-option1-salutation'
+    salutation.textContent = text.slice(0, split + 2)
+    const name = document.createElement('span')
+    name.className = 'lmf-home-option1-athlete-name'
+    name.textContent = text.slice(split + 2)
+    // Preserve the source's exact text so private-summary hydration does not
+    // fight this presentation. A new source value is formatted on the next pass.
+    line.replaceChildren(salutation, name)
+  }
+
   function ensureProgress(shell) {
     const meta = shell.querySelector('.lmf-home-v4-meta')
     const start = shell.querySelector('[data-lmf-start]')
@@ -60,7 +99,7 @@
       block.innerHTML = `
         <div class="lmf-home-option1-progress-head"><span>Workout progress</span><strong data-lmf-option1-progress-label>Session ready</strong></div>
         <div class="lmf-home-option1-track" aria-hidden="true"><span class="lmf-home-option1-fill"></span></div>`
-      start.parentElement?.insertBefore(block, start)
+      meta.insertAdjacentElement('afterend', block)
     }
     const progress = parseProgress(shell)
     const label = block.querySelector('[data-lmf-option1-progress-label]')
@@ -139,6 +178,8 @@
     if (!shell) return
     ensureHeaderTools()
     ensureProgress(shell)
+    ensureUnifiedHero(shell)
+    formatGreeting(shell)
     ensurePerformancePresentation(shell)
     tuneDenseCopy(shell)
     syncProgramTheme(shell)

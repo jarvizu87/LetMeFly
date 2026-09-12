@@ -126,6 +126,9 @@ try {
       desktopBrandDisplay:display('.lmf-desktop-brand'),
       homeTopBrandDisplay:display('.lmf-home-brand-lockup'),
       home:rect('.lmf-home-reference-v3'),
+      hero:rect('.lmf-home-option1-hero'),
+      greeting:rect('.lmf-home-v4-greeting'),
+      start:rect('.lmf-home-v4-start'),
       command:rect('.lmf-home-v4-command'),
       commandMark:rect('.lmf-home-v4-command-mark'),
       tools:rect('.lmf-home-option1-tools'),
@@ -150,7 +153,9 @@ try {
   check(layout.homeTopBrandDisplay === 'none', 'Home avoids duplicate desktop wordmark', `top Home brand display=${layout.homeTopBrandDisplay || 'missing'}`)
   check(Boolean(layout.home) && (layout.home?.width || 0) >= 1080 && (layout.home?.width || 0) <= 1245, 'Home expands into the desktop work area', `${Math.round(layout.home?.width || 0)}px`)
   check(Boolean(layout.rail) && Boolean(layout.home) && layout.home.x >= layout.rail.right, 'Home content stays clear of the desktop rail', `${Math.round(layout.home?.x || 0)}px after rail ${Math.round(layout.rail?.right || 0)}px`)
-  check(Boolean(layout.command) && (layout.command?.width || 0) >= 1000 && (layout.command?.height || 0) >= 420, 'Command hero scales as a desktop command surface', `${Math.round(layout.command?.width || 0)}×${Math.round(layout.command?.height || 0)}px`)
+  check(Boolean(layout.hero) && (layout.hero?.width || 0) >= 1000 && (layout.hero?.height || 0) >= 420, 'Combined hero scales as a desktop command surface', `${Math.round(layout.hero?.width || 0)}×${Math.round(layout.hero?.height || 0)}px`)
+  check(Boolean(layout.command) && Boolean(layout.greeting) && layout.command.y >= layout.greeting.bottom && layout.command.width < layout.hero.width * .72, 'Workout card is inset below the greeting with landscape visible beside it')
+  check(Boolean(layout.start) && layout.start.x >= layout.command.right && Math.abs(layout.start.bottom - layout.command.bottom) < 3 && layout.start.right <= layout.hero.right, 'Desktop Start action sits beside the workout card inside the hero')
   check(Boolean(layout.commandMark) && (layout.commandMark?.width || 0) >= 430, 'Fenrir stage keeps desktop visual weight', `${Math.round(layout.commandMark?.width || 0)}px`)
   check(Boolean(layout.tools) && layout.tools.right >= layout.viewportWidth - 60, 'Home utilities align to the desktop header edge', `right=${Math.round(layout.tools?.right || 0)}px`)
 

@@ -8,6 +8,7 @@ FIDELITY_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-fideli
 CARD_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-card-polish-v1.css"
 DESKTOP_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-desktop-bridge-v1.css"
 MOCKUP_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-mockup-fidelity-v1.css"
+UNIFIED_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-unified-hero-v1.css"
 JS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-v1.js"
 NAV_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/direct-coach-nav-v1.js"
 MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-foundation.svg"
@@ -23,7 +24,7 @@ FENRIR_OUT="$DIST/ui/fenrir.webp"
 INDEX="$DIST/index.html"
 SW="$DIST/service-worker.js"
 
-for required in "$CSS_SRC" "$FIDELITY_SRC" "$CARD_SRC" "$DESKTOP_SRC" "$MOCKUP_SRC" "$JS_SRC" "$NAV_SRC" "$MOUNTAIN_SRC" "$CINEMATIC_MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
+for required in "$CSS_SRC" "$FIDELITY_SRC" "$CARD_SRC" "$DESKTOP_SRC" "$MOCKUP_SRC" "$UNIFIED_SRC" "$JS_SRC" "$NAV_SRC" "$MOUNTAIN_SRC" "$CINEMATIC_MOUNTAIN_SRC" "$INDEX" "$SW" "$FENRIR_OUT"; do
   test -s "$required" || { echo "Missing Option 1 Home dependency: $required" >&2; exit 1; }
 done
 
@@ -46,6 +47,8 @@ grep -Fq 'data-lmf-direct-coach' "$NAV_SRC"
 grep -Fq "href = '#/coach'" "$NAV_SRC"
 grep -Fq "const HOME_CLASS = 'lmf-home-ref3-active'" "$JS_SRC"
 grep -Fq 'ensureProgress' "$JS_SRC"
+grep -Fq 'ensureUnifiedHero' "$JS_SRC"
+grep -Fq '.lmf-home-option1-hero' "$UNIFIED_SRC"
 grep -Fq 'ensurePerformancePresentation' "$JS_SRC"
 ! grep -Eq 'localStorage\.setItem|indexedDB\.(open|deleteDatabase)|workoutSessions.*put|programInstances.*put|fetch\(' "$JS_SRC"
 ! grep -Eq 'localStorage\.setItem|indexedDB\.(open|deleteDatabase)|fetch\(' "$NAV_SRC"
@@ -56,6 +59,7 @@ cp "$FIDELITY_SRC" "$FIDELITY_OUT"
 cp "$CARD_SRC" "$CARD_OUT"
 cp "$DESKTOP_SRC" "$DESKTOP_OUT"
 cat "$MOCKUP_SRC" >> "$DESKTOP_OUT"
+cat "$UNIFIED_SRC" >> "$DESKTOP_OUT"
 cp "$JS_SRC" "$JS_OUT"
 printf '\n;\n' >> "$JS_OUT"
 cat "$NAV_SRC" >> "$JS_OUT"
@@ -77,8 +81,8 @@ text = re.sub(r'\s*<script defer src="/ui/home-main-option1-v1\.js(?:\?v=\d+)?">
 css = '<link rel="stylesheet" href="/ui/home-main-option1-v1.css?v=1">'
 fidelity = '<link rel="stylesheet" href="/ui/home-main-option1-fidelity-v1.css?v=1">'
 card = '<link rel="stylesheet" href="/ui/home-main-option1-card-polish-v1.css?v=1">'
-desktop = '<link rel="stylesheet" href="/ui/home-main-option1-desktop-bridge-v1.css?v=2">'
-js = '<script defer src="/ui/home-main-option1-v1.js?v=1"></script>'
+desktop = '<link rel="stylesheet" href="/ui/home-main-option1-desktop-bridge-v1.css?v=3">'
+js = '<script defer src="/ui/home-main-option1-v1.js?v=2"></script>'
 if '</head>' not in text or '</body>' not in text:
     raise SystemExit('production index missing document anchors')
 text = text.replace('</head>', f'  {css}\n  {fidelity}\n  {card}\n  {desktop}\n</head>', 1)
@@ -129,8 +133,8 @@ grep -Fq 'data-lmf-direct-coach' "$JS_OUT"
 grep -Fq '/ui/home-main-option1-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-fidelity-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-card-polish-v1.css?v=1' "$INDEX"
-grep -Fq '/ui/home-main-option1-desktop-bridge-v1.css?v=2' "$INDEX"
-grep -Fq '/ui/home-main-option1-v1.js?v=1' "$INDEX"
+grep -Fq '/ui/home-main-option1-desktop-bridge-v1.css?v=3' "$INDEX"
+grep -Fq '/ui/home-main-option1-v1.js?v=2' "$INDEX"
 grep -Fq "'/ui/home-main-option1-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-fidelity-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-card-polish-v1.css'" "$SW"
