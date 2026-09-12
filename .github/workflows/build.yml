@@ -118,6 +118,27 @@ jobs:
       - name: Install adaptive desktop workspace v1
         run: bash ci/install-desktop-workspace-v1.sh
 
+      # Keep the GitHub browser artifact identical to the Netlify production UI
+      # stack. These layers are presentation/navigation only and have their own
+      # storage/network guards.
+      - name: Install More workspace + shared app consistency
+        run: bash ci/install-more-workspace-v1.sh
+
+      - name: Audit More workspace + shared app consistency
+        run: node ci/audit-more-workspace-v1.mjs .build-src/letmefly_app
+
+      - name: Install approved primary-tab redesigns
+        run: bash ci/install-approved-tab-redesigns-v1.sh
+
+      - name: Audit approved primary-tab redesigns
+        run: node ci/audit-approved-tab-redesigns-v1.mjs .build-src/letmefly_app
+
+      - name: Install final color harmonization + interaction safety
+        run: bash ci/install-color-harmonization-v1.sh
+
+      - name: Audit final color harmonization + interaction safety
+        run: node ci/audit-color-harmonization-v1.mjs .build-src/letmefly_app
+
       - name: Audit official brand v2 production assets
         run: node ci/audit-official-brand-v2.mjs .build-src/letmefly_app
 
