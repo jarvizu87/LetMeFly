@@ -51,62 +51,6 @@ new_logged = "      assert.equal(logged?.completed, true)\n      assert.equal(lo
 if source.count(old_logged) != 1:
     raise SystemExit(f'Expected one saved-unit assertion boundary, found {source.count(old_logged)}')
 source = source.replace(old_logged, new_logged, 1)
-
-# Instrument only the browser test realm. This records every programInstances.put
-# between Review & finish and the final snapshot, including the exact local version
-# and call stack, without modifying production source or IndexedDB semantics.
-old_finish = """      page.once('dialog', dialog => dialog.accept())
-      await page.locator('[data-recap-finish]').click()
-      await waitForCompletedSession(page, sessionId)
-      const afterFinish = await snapshot(page)
-"""
-new_finish = """      await page.evaluate(() => {
-        window.__LMF_PROGRAM_WRITE_TRACE__ = []
-        const proto = IDBObjectStore.prototype
-        if (!proto.__lmfOriginalProgramPut) {
-          const original = proto.put
-          Object.defineProperty(proto, '__lmfOriginalProgramPut', { value: original, configurable: true })
-          proto.put = function(value, ...args) {
-            if (this.name === 'programInstances') {
-              const pending = value?.progression_state?.pendingWorkoutCompletion
-              window.__LMF_PROGRAM_WRITE_TRACE__.push({
-                at: performance.now(),
-                id: value?.id ?? null,
-                athleteId: value?.athlete_id ?? null,
-                status: value?.status ?? null,
-                program: value?.program_key ?? null,
-                week: value?.current_week ?? null,
-                day: value?.current_day_key ?? null,
-                localVersion: value?._local?.localVersion ?? null,
-                pendingToken: pending?.token ?? null,
-                stack: new Error('programInstances.put').stack ?? '',
-              })
-            }
-            return original.call(this, value, ...args)
-          }
-        }
-      })
-      page.once('dialog', dialog => dialog.accept())
-      await page.locator('[data-recap-finish]').click()
-      await waitForCompletedSession(page, sessionId)
-      await page.waitForTimeout(250)
-      const afterFinish = await snapshot(page)
-      athleteResult.completionDiagnostics = {
-        writes: await page.evaluate(() => window.__LMF_PROGRAM_WRITE_TRACE__ ?? []),
-        programInstances: ownRows(afterFinish.programInstances, athleteId).map(row => ({
-          id: row.id, status: row.status, program: row.program_key, week: row.current_week,
-          day: row.current_day_key, localVersion: row?._local?.localVersion ?? null,
-          pendingToken: row?.progression_state?.pendingWorkoutCompletion?.token ?? null,
-          updatedAt: row.updated_at ?? null,
-        })),
-        programEvents: ownRows(afterFinish.programEvents, athleteId).map(row => ({
-          eventType: row.event_type, effectiveAt: row.effective_at, payload: row.event_payload ?? null,
-        })),
-      }
-"""
-if source.count(old_finish) != 1:
-    raise SystemExit(f'Expected one completion diagnostic boundary, found {source.count(old_finish)}')
-source = source.replace(old_finish, new_finish, 1)
 Path(os.environ['TMP']).write_text(source)
 PY
 
@@ -114,6 +58,7 @@ node --check "$TMP"
 grep -Fq "row.athlete_id === athleteId" "$TMP"
 grep -Fq "active?.current_day_key === 'day-2'" "$TMP"
 grep -Fq "saved actual load unit must follow athlete setting" "$TMP"
-grep -Fq "__LMF_PROGRAM_WRITE_TRACE__" "$TMP"
+! grep -Fq "__LMF_PROGRAM_WRITE_TRACE__" "$TMP"
+! grep -Fq "waitForTimeout(250)" "$TMP"
 grep -Fq "assert.equal(activeProgram?.current_day_key, 'day-2')" "$TMP"
 node "$TMP" "$@"
