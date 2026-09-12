@@ -8,6 +8,7 @@ on:
       - 'ci/seven-athlete-release-audit.v2.json'
       - 'ci/chaos-resilience-audit.v1.json'
       - 'ci/audit-seven-athlete-runtime.mjs'
+      - 'ci/run-seven-athlete-runtime-v2.sh'
       - '.github/workflows/seven-athlete-runtime-audit.yml'
 
 permissions:
@@ -76,7 +77,11 @@ jobs:
           npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
 
       - name: Syntax-check seven-athlete runtime gate
-        run: node --check ci/audit-seven-athlete-runtime.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check ci/audit-seven-athlete-runtime.mjs
+          bash -n ci/run-seven-athlete-runtime-v2.sh
 
       - name: Run all seven synthetic athletes through real release-candidate UI
         shell: bash
@@ -84,7 +89,7 @@ jobs:
           set -euo pipefail
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
-          node ci/audit-seven-athlete-runtime.mjs "$PWD/release-candidate/.build-src/letmefly_app"
+          bash ci/run-seven-athlete-runtime-v2.sh "$PWD/release-candidate/.build-src/letmefly_app"
 
       - name: Re-run governed substitution/safety mutation guard
         shell: bash
