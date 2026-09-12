@@ -28,8 +28,8 @@ for (const asset of ['/ui/approved-tab-redesigns-v1.js','/ui/approved-tab-redesi
 }
 assert(index.indexOf('/ui/app-consistency-v1.css') < index.indexOf('/ui/approved-tab-redesigns-v1.css'), 'Approved tab CSS must load after app consistency CSS')
 
-for (const route of ['program','progress','exercises','profile']) {
-  assert(js.includes(`'${route}'`), `Approved redesign layer missing route: ${route}`)
+for (const route of ['home','train','program','progress','exercises','coach','profile','more']) {
+  assert(js.includes(`'${route}'`), `Approved presentation layer missing primary route tag: ${route}`)
 }
 for (const marker of [
   'lmf-approved-program-tabs-v1',
@@ -59,4 +59,4 @@ for (const forbidden of ['localStorage','sessionStorage','indexedDB','fetch(','X
 assert(!/background-image:[^;]*exercise-art/.test(css), 'Approved redesign layer must not replace governed exercise art')
 assert(!/url\([^)]*exercise[^)]*\)/i.test(css), 'Approved redesign CSS must not introduce alternate exercise image sources')
 
-console.log('Approved Program + Progress + Exercises + Profile redesign audit: PASS')
+console.log('Approved primary-route presentation and redesign audit: PASS')
