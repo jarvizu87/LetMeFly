@@ -9,9 +9,10 @@ This standard connects the approved Home, Train, Program, Progress, Exercises, C
 ## Visual language
 
 - Base surfaces: near-black and charcoal/steel.
-- Primary interface accent: purple (`#a855f7` family) with lighter purple for focus/selected states.
+- Primary interface and brand accent: red, following the approved Home mockup.
+- Secondary identity/energy accent: purple (`#a855f7` family), reserved for Raizen/Fenrir energy, runes, gamification flourishes, and restrained fantasy detailing rather than every selected state.
 - Identity art: Raizen, Fenrir, mountains, storms, crowns, and Black Crown imagery.
-- Safety, destructive actions, injury/pain warnings, and danger states remain red. Purple must never erase safety semantics.
+- Safety, destructive actions, injury/pain warnings, and danger states also use red, but must remain distinguishable through explicit copy, icons, contrast, and context instead of color alone.
 - Typography keeps the established display/serif treatment for major headings and clear sans-serif text for controls, logging, and dense training information.
 
 ## Exercise imagery
@@ -21,14 +22,15 @@ Exercise imagery follows `EXERCISE_IMAGE_TREATMENT_STANDARD_V1.md`.
 - Existing approved exercise images remain the movement source of truth.
 - Do not regenerate exercise art merely to match the fantasy identity palette.
 - Train uses compact blended exercise imagery so workout logging remains dominant.
-- Exercises uses framed thumbnails/details with restrained purple/black perimeter treatment.
+- Exercises uses framed thumbnails/details with black/steel surfaces and restrained red selection/focus framing; purple may remain as a subtle secondary energy tint around identity details.
 - Shared styling must never replace `--exercise-art`, alter private exercise-art delivery, or substitute misleading movement imagery.
 
 ## Navigation
 
 - Keep the existing working desktop and mobile navigation architecture.
-- Active navigation uses the shared purple selected state.
-- Keyboard focus uses the same purple interaction language.
+- Active navigation follows the shared red selected state.
+- Keyboard focus follows the same red interaction language.
+- Purple is not the default active-navigation color; it is secondary energy/gamification styling.
 - More is the utility/secondary-command surface, not a replacement for primary training navigation.
 
 ## More workspace
@@ -76,6 +78,10 @@ UI changes may present existing information differently, but presentation is not
 - Mobile prioritizes one-column flow, readable workout controls, thumb-friendly targets, and bottom-navigation clearance.
 - Cards may simplify secondary action text on mobile, but the destination and meaning must remain unchanged.
 - No horizontal overflow is acceptable in normal supported phone widths.
+
+## Cascade and authority
+
+Some earlier component-level styles retain legacy purple-first tokens because they are still used as lower-level theme variables or secondary energy accents. The final rendered palette is governed by `COLOR_HARMONIZATION_STANDARD_V1.md` and the late-loading color-harmonization layer. Future work must treat black/steel + red primary + purple secondary as the product standard.
 
 ## Final rule
 
