@@ -89,7 +89,7 @@ text = re.sub(r'\s*<script defer src="/ui/home-main-option1-v1\.js(?:\?v=\d+)?">
 css = '<link rel="stylesheet" href="/ui/home-main-option1-v1.css?v=1">'
 fidelity = '<link rel="stylesheet" href="/ui/home-main-option1-fidelity-v1.css?v=1">'
 card = '<link rel="stylesheet" href="/ui/home-main-option1-card-polish-v1.css?v=1">'
-desktop = '<link rel="stylesheet" href="/ui/home-main-option1-desktop-bridge-v1.css?v=4">'
+desktop = '<link rel="stylesheet" href="/ui/home-main-option1-desktop-bridge-v1.css?v=5">'
 js = '<script defer src="/ui/home-main-option1-v1.js?v=3"></script>'
 if '</head>' not in text or '</body>' not in text:
     raise SystemExit('production index missing document anchors')
@@ -141,7 +141,7 @@ grep -Fq 'data-lmf-direct-coach' "$JS_OUT"
 grep -Fq '/ui/home-main-option1-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-fidelity-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-card-polish-v1.css?v=1' "$INDEX"
-grep -Fq '/ui/home-main-option1-desktop-bridge-v1.css?v=4' "$INDEX"
+grep -Fq '/ui/home-main-option1-desktop-bridge-v1.css?v=5' "$INDEX"
 grep -Fq '/ui/home-main-option1-v1.js?v=3' "$INDEX"
 grep -Fq "'/ui/home-main-option1-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-fidelity-v1.css'" "$SW"

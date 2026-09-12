@@ -78,7 +78,7 @@ try {
     assert.ok(layout.scroll <= layout.viewport + 1, 'Coach has no page overflow')
     if (width < 600) {
       assert.ok(layout.context.y < layout.conversation.y, 'Mobile focus precedes the conversation')
-      assert.ok(layout.composer.bottom <= layout.nav.y + 1, 'Mobile composer clears bottom navigation')
+      assert.ok(layout.composer.bottom <= layout.nav.y + 1, `Mobile composer clears bottom navigation: ${JSON.stringify(layout)}`)
     } else assert.ok(layout.context.x > layout.conversation.right, 'Desktop context sits beside the conversation')
     await page.screenshot({ path: path.join(out, `coach-workspace-${width}.png`) })
     await openEvidence(page)

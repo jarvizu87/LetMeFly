@@ -10,7 +10,7 @@
 .lmf-coach-workspace .coach-banner p{font-size:17px!important;font-style:normal!important;margin-top:5px!important;color:#edf3f8!important}
 .lmf-coach-workspace .coach-banner .page-kicker,.lmf-coach-workspace .coach-avatar,.lmf-coach-workspace .coach-status{display:none!important}
 .lmf-coach-workspace .coach-layout{display:block!important;margin-top:16px!important}
-.lmf-coach-workspace .coach-chat{display:grid!important;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr)!important;gap:16px!important;align-items:start!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important}
+.lmf-coach-workspace .coach-chat{overflow:visible!important;min-height:0!important;display:grid!important;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr)!important;gap:16px!important;align-items:start!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;border-radius:0!important}
 .lmf-coach-conversation,.lmf-coach-sidebar{min-width:0}
 .lmf-coach-conversation{display:flex;flex-direction:column;min-height:540px;border:1px solid var(--coach-line);border-radius:13px;background:linear-gradient(135deg,#0d1b27,#07121c);overflow:hidden}
 .lmf-coach-conversation-heading{margin:20px 20px 16px!important;font:650 22px/1.25 var(--font-body,Arial,sans-serif)!important;text-transform:none!important;letter-spacing:0!important}
@@ -79,7 +79,10 @@
   .lmf-coach-workspace .coach-banner h1{font-size:30px!important}
   .lmf-coach-workspace .coach-banner p{font-size:14px!important}
   .lmf-coach-workspace .coach-chat{display:flex!important;flex-direction:column!important;gap:12px!important}
-  .lmf-coach-conversation,.lmf-coach-sidebar{display:contents}
+  /* The legacy .card clips overflow. A sticky composer needs the page as its
+     scroll container, and controls need room above the composer when focused. */
+  .lmf-coach-conversation,.lmf-coach-sidebar{display:contents;overflow:visible!important}
+  .lmf-coach-workspace :is(summary,select,button,a){scroll-margin-top:90px;scroll-margin-bottom:170px}
   .lmf-coach-workspace .coach-context{order:1;width:100%;padding:16px!important}
   .lmf-coach-workspace .lmf-coach-intel-context{order:2;width:100%;padding:14px 16px!important}
   .lmf-coach-workspace .lmf-coach-intel-context>small{display:none}
