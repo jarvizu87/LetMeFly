@@ -161,7 +161,7 @@ try {
 
   check(Boolean(layout.command), 'Cinematic command hero is present')
   check((layout.command?.height || 0) >= 380, 'Command hero has premium mobile depth', `${Math.round(layout.command?.height || 0)}px`)
-  check(layout.commandStyle?.backgroundImage?.includes('home-mountain-foundation-v1.svg'), 'Command hero uses approved mountain artwork', layout.commandStyle?.backgroundImage || 'missing')
+  check(layout.commandStyle?.backgroundImage?.includes('home-mountain-cinematic-v2.webp'), 'Command hero uses the reference-derived cinematic mountain asset', layout.commandStyle?.backgroundImage || 'missing')
   check(layout.hasCommandMark, 'Command hero preserves wolf/brand identity layer')
   check((layout.commandMark?.width || 0) >= 285, 'Fenrir mobile stage keeps the face inside the hero', `${Math.round(layout.commandMark?.width || 0)}px`)
   check(layout.fenrirStyle?.backgroundImage?.includes('fenrir.webp'), 'Command hero uses clean Fenrir artwork', layout.fenrirStyle?.backgroundImage || 'missing')

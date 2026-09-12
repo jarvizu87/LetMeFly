@@ -11,14 +11,14 @@ MOCKUP_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-mockup-f
 JS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/home-main-option1-v1.js"
 NAV_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aj/direct-coach-nav-v1.js"
 MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-foundation.svg"
-CINEMATIC_MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-command-red-v1.svg"
+CINEMATIC_MOUNTAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mountain-command-cinematic-v2.webp"
 CSS_OUT="$DIST/ui/home-main-option1-v1.css"
 FIDELITY_OUT="$DIST/ui/home-main-option1-fidelity-v1.css"
 CARD_OUT="$DIST/ui/home-main-option1-card-polish-v1.css"
 DESKTOP_OUT="$DIST/ui/home-main-option1-desktop-bridge-v1.css"
 JS_OUT="$DIST/ui/home-main-option1-v1.js"
 MOUNTAIN_OUT="$DIST/ui/home-mountain-foundation-v1.svg"
-CINEMATIC_MOUNTAIN_OUT="$DIST/ui/home-mountain-command-v1.svg"
+CINEMATIC_MOUNTAIN_OUT="$DIST/ui/home-mountain-cinematic-v2.webp"
 FENRIR_OUT="$DIST/ui/fenrir.webp"
 INDEX="$DIST/index.html"
 SW="$DIST/service-worker.js"
@@ -41,6 +41,7 @@ grep -Fq 'data-lmf-desktop-ui="true"' "$DESKTOP_SRC"
 grep -Fq '.lmf-home-brand-lockup' "$DESKTOP_SRC"
 grep -Fq 'width:74%!important' "$MOCKUP_SRC"
 grep -Fq 'mountain landscape remains dominant' "$MOCKUP_SRC"
+grep -Fq "url('/ui/home-mountain-cinematic-v2.webp')" "$MOCKUP_SRC"
 grep -Fq 'data-lmf-direct-coach' "$NAV_SRC"
 grep -Fq "href = '#/coach'" "$NAV_SRC"
 grep -Fq "const HOME_CLASS = 'lmf-home-ref3-active'" "$JS_SRC"
@@ -58,9 +59,9 @@ cat "$MOCKUP_SRC" >> "$DESKTOP_OUT"
 cp "$JS_SRC" "$JS_OUT"
 printf '\n;\n' >> "$JS_OUT"
 cat "$NAV_SRC" >> "$JS_OUT"
-# The historic filename stays stable for the existing Home CSS contract, while
-# the bytes now come from the approved cinematic red mountain landscape.
-cp "$CINEMATIC_MOUNTAIN_SRC" "$MOUNTAIN_OUT"
+# Keep the historic fallback intact; the final presentation layer uses the
+# reference-derived raster through its own versioned URL.
+cp "$MOUNTAIN_SRC" "$MOUNTAIN_OUT"
 cp "$CINEMATIC_MOUNTAIN_SRC" "$CINEMATIC_MOUNTAIN_OUT"
 
 INDEX="$INDEX" python3 - <<'PY'
@@ -76,7 +77,7 @@ text = re.sub(r'\s*<script defer src="/ui/home-main-option1-v1\.js(?:\?v=\d+)?">
 css = '<link rel="stylesheet" href="/ui/home-main-option1-v1.css?v=1">'
 fidelity = '<link rel="stylesheet" href="/ui/home-main-option1-fidelity-v1.css?v=1">'
 card = '<link rel="stylesheet" href="/ui/home-main-option1-card-polish-v1.css?v=1">'
-desktop = '<link rel="stylesheet" href="/ui/home-main-option1-desktop-bridge-v1.css?v=1">'
+desktop = '<link rel="stylesheet" href="/ui/home-main-option1-desktop-bridge-v1.css?v=2">'
 js = '<script defer src="/ui/home-main-option1-v1.js?v=1"></script>'
 if '</head>' not in text or '</body>' not in text:
     raise SystemExit('production index missing document anchors')
@@ -101,7 +102,7 @@ required = [
     '/ui/home-main-option1-desktop-bridge-v1.css',
     '/ui/home-main-option1-v1.js',
     '/ui/home-mountain-foundation-v1.svg',
-    '/ui/home-mountain-command-v1.svg',
+    '/ui/home-mountain-cinematic-v2.webp',
     '/ui/fenrir.webp',
 ]
 assets = []
@@ -121,14 +122,14 @@ test -s "$DESKTOP_OUT"
 test -s "$MOUNTAIN_OUT"
 test -s "$CINEMATIC_MOUNTAIN_OUT"
 test -s "$FENRIR_OUT"
-cmp -s "$MOUNTAIN_OUT" "$CINEMATIC_MOUNTAIN_SRC"
+cmp -s "$MOUNTAIN_OUT" "$MOUNTAIN_SRC"
 cmp -s "$CINEMATIC_MOUNTAIN_OUT" "$CINEMATIC_MOUNTAIN_SRC"
 grep -Fq 'mountain landscape remains dominant' "$DESKTOP_OUT"
 grep -Fq 'data-lmf-direct-coach' "$JS_OUT"
 grep -Fq '/ui/home-main-option1-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-fidelity-v1.css?v=1' "$INDEX"
 grep -Fq '/ui/home-main-option1-card-polish-v1.css?v=1' "$INDEX"
-grep -Fq '/ui/home-main-option1-desktop-bridge-v1.css?v=1' "$INDEX"
+grep -Fq '/ui/home-main-option1-desktop-bridge-v1.css?v=2' "$INDEX"
 grep -Fq '/ui/home-main-option1-v1.js?v=1' "$INDEX"
 grep -Fq "'/ui/home-main-option1-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-fidelity-v1.css'" "$SW"
@@ -136,7 +137,7 @@ grep -Fq "'/ui/home-main-option1-card-polish-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-desktop-bridge-v1.css'" "$SW"
 grep -Fq "'/ui/home-main-option1-v1.js'" "$SW"
 grep -Fq "'/ui/home-mountain-foundation-v1.svg'" "$SW"
-grep -Fq "'/ui/home-mountain-command-v1.svg'" "$SW"
+grep -Fq "'/ui/home-mountain-cinematic-v2.webp'" "$SW"
 grep -Fq "'/ui/fenrir.webp'" "$SW"
 
 echo "LetMeFly approved Option 1 Home install: PASS"

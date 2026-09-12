@@ -46,11 +46,13 @@ Rendering the card must not modify saved sessions or start a workout.
 ## Hero art rules
 
 - Use `/ui/fenrir.webp` for the current UI wolf.
-- Use the existing mountain asset as the landscape stage.
+- Use `/ui/home-mountain-cinematic-v2.webp` as the landscape stage. This is a clean, text-free raster reconstruction derived from the latest dashboard mockup; it is not an exact pixel extraction. The earlier hand-drawn red SVG did not reproduce the reference's detailed mountain art.
 - Keep the wolf on the right side and substantially smaller than the landscape stage.
 - Do not allow the wolf to cover the central mountain range.
 - Preserve text readability with dark gradients instead of replacing the landscape with an opaque panel.
 - Do not replace the real LetMeFly logo with generated/mock branding.
+- Reset all four portrait offsets before anchoring Fenrir to the right. Feather all portrait edges so the opaque source background does not appear as a rectangle.
+- A passing asset-URL/layout audit does not establish visual fidelity. Compare rendered screenshots with the mockup before describing the design as matched.
 
 ## Coach visual alignment
 
