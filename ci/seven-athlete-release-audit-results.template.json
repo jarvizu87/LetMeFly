@@ -1,0 +1,31 @@
+{
+  "commitSha": "",
+  "environment": "",
+  "environmentUrl": "",
+  "auditDate": "",
+  "fixtureVersion": "2.0.0",
+  "operator": "",
+  "athleteResults": {
+    "qa_rook": {"displayName":"Pevra Soll","result":"NOT RUN","notes":"","evidence":[]},
+    "qa_forge": {"displayName":"Dain Varr","result":"NOT RUN","notes":"","evidence":[]},
+    "qa_titan": {"displayName":"Raizen","result":"NOT RUN","notes":"","evidence":[]},
+    "qa_metric": {"displayName":"Corra Bellan","result":"NOT RUN","notes":"","evidence":[]},
+    "qa_recovery": {"displayName":"Mara Venn","result":"NOT RUN","notes":"","evidence":[]},
+    "qa_substitution": {"displayName":"Rurik Hale","result":"NOT RUN","notes":"","evidence":[]},
+    "qa_history": {"displayName":"Hadrin Oss","result":"NOT RUN","notes":"","evidence":[]}
+  },
+  "rurikScenarioResults": {
+    "rurik-hip": {"result":"NOT RUN","notes":"","evidence":[]},
+    "rurik-knee": {"result":"NOT RUN","notes":"","evidence":[]},
+    "rurik-red-flag-escalation": {"result":"NOT RUN","notes":"","evidence":[]}
+  },
+  "hadrinScaleResult": {
+    "result":"NOT RUN",
+    "historyCounts": {"completedWorkouts":0,"workoutSets":0,"readinessEntries":0,"bodyweightEntries":0,"trainingMaxEvents":0,"personalRecords":0},
+    "notes":"",
+    "evidence":[]
+  },
+  "defects": [],
+  "programIntegrityResult": {"result":"NOT RUN","beforeHash":"","afterHash":"","notes":""},
+  "releaseDecision": "FAIL"
+}
