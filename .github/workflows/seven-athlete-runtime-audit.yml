@@ -1,5 +1,6 @@
 name: LetMeFly Seven-Athlete Runtime Audit
 
+# Audit-only retrigger: revalidate the current release candidate after recap unit hardening.
 on:
   workflow_dispatch:
   pull_request:
