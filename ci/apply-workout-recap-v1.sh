@@ -48,8 +48,8 @@ s+='''
     const panel = row?.closest<HTMLElement>('.swipe-page')
     const index = panel ? Array.from(document.querySelectorAll('.swipe-page')).indexOf(panel) : -1
     if (index >= 0) document.querySelector<HTMLButtonElement>(`[data-session-index="${index}"]`)?.click()
-    const card = row?.closest('.exercise-card')
-    card?.querySelector<HTMLButtonElement>('.lmf-compact-summary')?.click()
+    const card = row?.closest('.active-exercise')
+    if (!card?.classList.contains('lmf-flow-active')) card?.querySelector<HTMLButtonElement>('.lmf-compact-summary')?.click()
     const setIndex = card && row ? Array.from(card.querySelectorAll('.set-row[data-set-id]')).indexOf(row) : -1
     if (setIndex >= 0) card?.querySelectorAll<HTMLButtonElement>('.lmf-set-tab')[setIndex]?.click()
     row?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })

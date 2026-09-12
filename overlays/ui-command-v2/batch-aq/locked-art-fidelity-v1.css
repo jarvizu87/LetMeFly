@@ -4,7 +4,7 @@
    It does not replace exercise instruction art or alter training/data behavior. */
 
 :root{
-  --lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg');
+  --lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg?v=2');
 }
 
 /* PROGRESS — the approved mockup uses a strong Raizen/Fenrir cinematic hero,
@@ -143,3 +143,62 @@ html[data-lmf-approved-route='more'] .lmf-more-brand-copy-v1{
 /* Final Progress scroll ownership. This stylesheet is intentionally loaded after
    the approved UI and color layers, so no later visual layer can relock the board. */
 .progress-board{overflow-y:auto!important}
+
+/* The original portrait is a complete, sharp image. Feather it into the scene
+   at a readable size instead of dimming a broken thumbnail beyond recognition. */
+html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1::after,
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1::after,
+html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner::before{
+  opacity:.88!important;
+  filter:none!important;
+  mask-image:linear-gradient(90deg,transparent,#000 22%,#000 90%,transparent)!important;
+}
+html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1::after{
+  bottom:-145px!important;right:1%!important;width:390px!important;height:440px!important;
+  background-position:center 22%!important;
+}
+html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1>div{position:relative;z-index:1;max-width:65%}
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1::after{
+  top:-30px!important;right:2%!important;width:340px!important;height:425px!important;
+}
+html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner::before{
+  top:-35px!important;right:0!important;width:340px!important;height:425px!important;
+}
+
+/* Keep the strength summary and the actual goals together in the dossier. */
+.lmf-profile-sheet-strength-v2{min-width:0;padding:14px;border:1px solid #30313e;border-radius:9px;background:#080e15}
+.lmf-profile-sheet-strength-v2 .lmf-profile-section-title{margin:0 0 10px;padding:0;display:block}
+.lmf-profile-sheet-strength-v2 .lmf-profile-section-title small{display:block;margin-top:5px;font-size:10px;line-height:1.4}
+.lmf-profile-sheet-strength-v2 .lmf-profile-strength-card{padding:0;border:0;background:none;box-shadow:none}
+.lmf-profile-sheet-strength-v2 .lmf-profile-lifts{grid-template-columns:repeat(2,minmax(0,1fr))}
+.lmf-profile-sheet-strength-v2 .lmf-profile-empty{font-size:12px;line-height:1.5}
+.lmf-profile-character-dossier-v1 .lmf-profile-goal-tracker-v1 strong{font-size:12px;line-height:1.5;-webkit-line-clamp:3}
+.lmf-profile-character-dossier-v1 .lmf-profile-goal-tracker-v1 span{font-size:9px;line-height:1.4}
+.lmf-profile-character-dossier-v1 .lmf-profile-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.lmf-profile-character-dossier-v1 .lmf-profile-stat:nth-child(n+4){display:flex!important}
+
+/* Utilities owns the existing native loader, keeping More a nine-tile hub. */
+.lmf-more-utilities-v2{display:flex!important;flex-direction:column;align-items:stretch!important;gap:12px!important}
+.lmf-more-utilities-link-v2{display:flex;align-items:flex-start;gap:14px;min-width:0;text-decoration:none;color:inherit}
+.lmf-more-utilities-link-v2>i,.lmf-more-utilities-link-v2 em{display:none!important}
+.lmf-more-utilities-v2 .lmf-bar-loader-more-card{display:flex!important;align-items:center!important;justify-content:center;gap:8px;width:100%;min-height:38px!important;padding:9px!important;margin:0;border:1px solid rgba(255,64,80,.3);border-radius:7px;background:rgba(227,27,47,.1);text-align:left;box-shadow:none}
+.lmf-more-utilities-v2 .lmf-bar-loader-more-card small{display:none}
+.lmf-more-utilities-v2 .lmf-bar-loader-more-card strong{font-size:12px!important}
+
+html[data-lmf-approved-route='more'] .lmf-more-brand-v1{
+  min-height:240px!important;
+  background:linear-gradient(90deg,rgba(4,7,11,.96),rgba(4,7,11,.70) 44%,rgba(4,7,11,.08) 78%,rgba(4,7,11,.38)),var(--lmf-raizen-fenrir-art) right 23%/330px auto no-repeat,var(--v2-mountain) center/cover no-repeat!important;
+}
+.lmf-more-brand-quote-v1{position:relative;z-index:1;max-width:58%}
+
+@media(max-width:720px){
+  html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1::after{right:-40px!important;bottom:-114px!important;width:245px!important;height:315px!important;opacity:.74!important}
+  html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1>div{max-width:68%}
+  html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1::after{right:-40px!important;top:-15px!important;width:230px!important;height:300px!important;opacity:.74!important}
+  html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner::before{right:-45px!important;top:-15px!important;width:245px!important;height:310px!important;opacity:.74!important}
+  html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{min-height:340px!important;background-position:center top,center top,center center,center 22%!important}
+  .lmf-profile-sheet-strength-v2{padding:11px}
+  .lmf-more-utilities-v2{padding:14px!important;gap:8px!important}
+  .lmf-more-utilities-v2 .lmf-bar-loader-more-card{min-height:38px!important}
+  html[data-lmf-approved-route='more'] .lmf-more-brand-v1{min-height:180px!important;background:linear-gradient(90deg,rgba(4,7,11,.92),rgba(4,7,11,.60) 52%,rgba(4,7,11,.08)),var(--lmf-raizen-fenrir-art) 112% 20%/230px auto no-repeat,var(--v2-mountain) center/cover no-repeat!important}
+}

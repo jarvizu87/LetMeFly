@@ -17,13 +17,14 @@ done
 # Presentation/art only. No state, network, exercise-art replacement, or program logic.
 ! grep -Eq 'localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|setItem\(|workoutSessions|trainingMaxHistory|programInstances' "$CSS_SRC"
 ! grep -Eqi 'exercise[^}]*background-image|library-thumb[^}]*url\(' "$CSS_SRC"
-grep -Fq -- "--lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg')" "$CSS_SRC"
+grep -Fq -- "--lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg?v=2')" "$CSS_SRC"
 grep -Fq "data-lmf-approved-route='progress'" "$CSS_SRC"
 grep -Fq "data-lmf-approved-route='exercises'" "$CSS_SRC"
 grep -Fq "data-lmf-approved-route='coach'" "$CSS_SRC"
 grep -Fq "data-lmf-approved-route='profile'" "$CSS_SRC"
 grep -Fq "data-lmf-approved-route='more'" "$CSS_SRC"
 grep -Fq 'data:image/jpeg;base64,' "$ART_SRC"
+node "$ROOT_DIR/ci/validate-locked-art-source.mjs" "$ART_SRC"
 
 mkdir -p "$DIST_DIR/ui"
 cp "$CSS_SRC" "$CSS_OUT"
@@ -36,7 +37,7 @@ import os,re
 p=Path(os.environ['INDEX'])
 text=p.read_text()
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/locked-art-fidelity-v1\.css(?:\?v=\d+)?">\s*','\n',text)
-tag='<link rel="stylesheet" href="/ui/locked-art-fidelity-v1.css?v=1">'
+tag='<link rel="stylesheet" href="/ui/locked-art-fidelity-v1.css?v=2">'
 if not re.search(r'</head>',text,re.I): raise SystemExit('index.html missing </head>')
 text=re.sub(r'</head>',f'  {tag}\n</head>',text,count=1,flags=re.I)
 # This must be the final visual fidelity layer after color harmonization.
@@ -53,16 +54,19 @@ text=p.read_text()
 match=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not match: raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing=re.findall(r"['\"]([^'\"]+)['\"]",match.group(1))
-required=['/ui/locked-art-fidelity-v1.css','/ui/raizen-black-crown-ascension-v1.svg']
+required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=2','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
 assets=[]
 for value in [*existing,*required]:
     if value not in assets: assets.append(value)
 replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:match.start()]+replacement+text[match.end():]
+# Invalidate only the app shell cache. Athlete storage is unrelated to this cache.
+text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v2',text,count=1)
+if count != 1: raise SystemExit('service-worker.js CACHE_NAME declaration not found')
 p.write_text(text.rstrip()+'\n')
 PY
 
-grep -Fq '/ui/locked-art-fidelity-v1.css?v=1' "$INDEX"
+grep -Fq '/ui/locked-art-fidelity-v1.css?v=2' "$INDEX"
 grep -Fq "'/ui/locked-art-fidelity-v1.css'" "$SW"
 grep -Fq "'/ui/raizen-black-crown-ascension-v1.svg'" "$SW"
 

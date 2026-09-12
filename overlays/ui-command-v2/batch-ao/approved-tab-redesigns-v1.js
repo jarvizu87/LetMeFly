@@ -226,6 +226,18 @@
       goals.innerHTML = '<header><div><span>GOAL TRACKER</span><strong>What we are building toward</strong></div><button type="button" data-lmf-profile-goals-scroll>EDIT GOALS</button></header><div class="lmf-profile-goal-tracker-v1"></div>'
       dossier.appendChild(goals)
 
+      // Reuse the real strength snapshot inside the main character sheet.
+      const strength = section.querySelector(':scope > .lmf-profile-strength-card')
+      const strengthTitle = strength?.previousElementSibling
+      if (strength instanceof HTMLElement) {
+        const panel = document.createElement('section')
+        panel.className = 'lmf-profile-sheet-strength-v2'
+        panel.setAttribute('aria-label', 'Strength profile')
+        if (strengthTitle?.classList.contains('lmf-profile-section-title')) panel.append(strengthTitle)
+        panel.append(strength)
+        dossier.insertBefore(panel, goals)
+      }
+
       const goalsTitle = [...section.querySelectorAll('.lmf-profile-section-title')].find((node) => /GOALS\s*&\s*DEVELOPMENT/i.test(clean(node.textContent)))
       if (goalsTitle instanceof HTMLElement) {
         goalsTitle.id = 'lmf-profile-goals-fields-v1'

@@ -215,7 +215,7 @@
     const completion = completionScore(name, context)
     const program = programName(activeProgram?.program_key)
     const position = positionText(activeProgram)
-    const unit = text(athlete.default_weight_unit || 'lb')
+    const unit = text(athlete.weight_unit || athlete.default_weight_unit || 'lb')
 
     const section = document.createElement('section')
     section.id = SECTION_ID

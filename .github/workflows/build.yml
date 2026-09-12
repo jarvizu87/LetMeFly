@@ -197,6 +197,7 @@ jobs:
           run_browser_audit workout-mobile-scroll node ci/audit-workout-mobile-scroll-browser.mjs
           run_browser_audit workout-day3-fidelity node ci/audit-workout-day3-fidelity-browser.mjs
           run_browser_audit official-brand-browser-v2 node ci/audit-official-brand-browser-v2.mjs
+          run_browser_audit locked-ui-preview node ci/audit-locked-ui-preview-browser.mjs
           run_browser_audit desktop-workspace-v1 node ci/audit-desktop-workspace-v1.mjs
           run_browser_audit coach-decisions node ci/audit-coach-decisions-browser.mjs
           CHECK_PROGRAM_ORDER=1 run_browser_audit athlete-insights node ci/audit-athlete-insights-browser.mjs
@@ -255,6 +256,7 @@ jobs:
             .build-src/letmefly_app/WORKOUT_DAY3_FIDELITY_AUDIT
             .build-src/letmefly_app/OFFICIAL_BRAND_AUDIT
             .build-src/letmefly_app/DESKTOP_WORKSPACE_AUDIT
+            .build-src/letmefly_app/LOCKED_UI_PREVIEW_AUDIT
           if-no-files-found: warn
           retention-days: 14
 
