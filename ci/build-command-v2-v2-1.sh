@@ -61,6 +61,9 @@ bash "$ROOT_DIR/ci/apply-profile-context-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-exercise-art-context-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-barbell-settings-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-recap-v1.sh" "$TARGET"
+# Five-athlete release hardening: honor the active athlete's weight unit in Workout
+# Mode and Bar Loader without rewriting the immutable source prescription.
+bash "$ROOT_DIR/ci/apply-athlete-weight-unit-v1.sh" "$TARGET"
 
 # Assert the source-level persistence/count boundary before minification. Vite is
 # allowed to rename local identifiers such as refreshedStats in the final bundle.

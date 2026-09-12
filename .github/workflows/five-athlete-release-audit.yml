@@ -8,6 +8,9 @@ on:
       - 'ci/five-athlete-fixtures.mjs'
       - 'ci/five-athlete-seed.mjs'
       - 'ci/audit-five-athlete-release-browser.mjs'
+      - 'ci/run-five-athlete-release-audit-v2.sh'
+      - 'ci/apply-athlete-weight-unit-v1.sh'
+      - 'ci/build-command-v2-v2-1.sh'
       - '.github/workflows/five-athlete-release-audit.yml'
 
 permissions:
@@ -60,6 +63,8 @@ jobs:
           node --check ci/five-athlete-fixtures.mjs
           node --check ci/five-athlete-seed.mjs
           node --check ci/audit-five-athlete-release-browser.mjs
+          bash -n ci/run-five-athlete-release-audit-v2.sh
+          bash -n ci/apply-athlete-weight-unit-v1.sh
           node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
           node ci/audit-workout-prescription-fidelity-v1.mjs .build-src/letmefly_app
 
@@ -69,7 +74,7 @@ jobs:
           set -euo pipefail
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
-          node ci/audit-five-athlete-release-browser.mjs .build-src/letmefly_app
+          bash ci/run-five-athlete-release-audit-v2.sh .build-src/letmefly_app
 
       - name: Re-run governed workout-only substitution mutation guard
         shell: bash
