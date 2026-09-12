@@ -70,3 +70,8 @@ bash "$ROOT_DIR/ci/install-saved-set-recovery-v1.sh" "$DIST"
 # Recording-driven mobile guard: vertical day scrolling takes priority over
 # direct horizontal section swipes; section tabs/arrows remain authoritative.
 bash "$ROOT_DIR/ci/install-workout-mobile-scroll-v1.sh" "$DIST"
+
+# Approved Train visual merge: retain existing exercise artwork, shrink it into
+# the active/compact cards, and dissolve it into the text/logging surface. This
+# is presentation-only and deliberately runs after the workout-flow/mobile layers.
+bash "$ROOT_DIR/ci/install-train-card-image-blend-v1.sh" "$DIST"
