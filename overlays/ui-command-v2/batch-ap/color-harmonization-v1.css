@@ -1,0 +1,165 @@
+/* LetMeFly Color Harmonization v1
+   Home remains the visual north star: black/charcoal/steel base, red primary
+   brand/environment accent, purple secondary gamification/energy accent.
+   Presentation only. No data/program behavior lives here. */
+
+:root{
+  --lmf-brand-red:#e31b2f;
+  --lmf-brand-red-hi:#ff4050;
+  --lmf-brand-red-deep:#7d0f1d;
+  --lmf-energy-purple:#a855f7;
+  --lmf-energy-purple-hi:#c084fc;
+  --lmf-steel:#26323c;
+  --lmf-ink:#05080c;
+  --lmf-panel:#0a1016;
+}
+
+/* Shared interactive language: red is the normal brand/action signal. */
+html:not([data-lmf-approved-route='home']) .nav-item.active,
+html:not([data-lmf-approved-route='home']) .bottom-nav .active,
+html:not([data-lmf-approved-route='home']) [aria-current='page']{
+  color:#fff!important;
+  border-color:rgba(227,27,47,.46)!important;
+  box-shadow:inset 0 -2px 0 var(--lmf-brand-red)!important;
+}
+html:not([data-lmf-approved-route='home']) .btn.primary,
+html:not([data-lmf-approved-route='home']) button.primary,
+html:not([data-lmf-approved-route='home']) .primary-action{
+  border-color:rgba(255,64,80,.55)!important;
+  background:linear-gradient(180deg,#ef243a,#b81125)!important;
+  color:#fff!important;
+  box-shadow:0 10px 28px rgba(227,27,47,.18)!important;
+}
+html:not([data-lmf-approved-route='home']) :focus-visible{
+  outline-color:var(--lmf-brand-red-hi)!important;
+}
+
+/* PROGRAM — keep the cinematic purple energy in artwork, move controls and
+   selection states back to Home's red identity. */
+html[data-lmf-approved-route='program'] .lmf-approved-program-head-v1::after,
+html[data-lmf-approved-route='program'] .lmf-approved-program-hero-v1 .program-chip.active,
+html[data-lmf-approved-route='program'] .lmf-approved-program-roadmap-v1 .bc-phase span,
+html[data-lmf-approved-route='program'] .lmf-approved-program-week-v1.program-week-drawer summary span{
+  color:var(--lmf-brand-red-hi)!important;
+}
+html[data-lmf-approved-route='program'] .lmf-approved-program-tabs-v1 button:first-child,
+html[data-lmf-approved-route='program'] .program-week-nav button.active,
+html[data-lmf-approved-route='program'] .lmf-approved-program-week-v1.program-week-drawer[open],
+html[data-lmf-approved-route='program'] .lmf-approved-program-week-v1.week-day-card.active{
+  border-color:rgba(255,64,80,.42)!important;
+  background:linear-gradient(145deg,rgba(227,27,47,.13),#0a1118)!important;
+  box-shadow:inset 0 -2px 0 var(--lmf-brand-red-hi)!important;
+}
+html[data-lmf-approved-route='program'] .lmf-approved-program-hero-v1.program-hero{
+  background-image:
+    linear-gradient(90deg,rgba(3,6,10,.98) 2%,rgba(5,7,11,.88) 48%,rgba(8,8,12,.34) 76%,rgba(4,7,12,.65)),
+    radial-gradient(circle at 74% 24%,rgba(227,27,47,.22),transparent 32%),
+    radial-gradient(circle at 84% 58%,rgba(168,85,247,.10),transparent 26%),
+    var(--v2-mountain)!important;
+}
+
+/* PROGRESS — red data/selection language; purple remains a restrained world-art
+   accent so the page still feels like Raizen/Fenrir without becoming purple UI. */
+html[data-lmf-approved-route='progress'] .lmf-progress-worldbar-v1{
+  border-color:rgba(227,27,47,.24)!important;
+  background:
+    linear-gradient(90deg,rgba(3,6,10,.98) 2%,rgba(5,7,11,.84) 48%,rgba(7,8,12,.38)),
+    radial-gradient(circle at 78% 22%,rgba(227,27,47,.22),transparent 33%),
+    radial-gradient(circle at 88% 60%,rgba(168,85,247,.09),transparent 25%),
+    var(--v2-mountain) center/cover no-repeat!important;
+}
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-v1 .lmf-pg-header>div>span,
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-v1 .lmf-pg-kicker,
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-v1 .lmf-pg-milestone small,
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-v1 .lmf-pg-lift-card header span{
+  color:var(--lmf-brand-red-hi)!important;
+}
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-v1 .lmf-pg-tabs button[aria-selected='true']{
+  border-color:rgba(255,64,80,.44)!important;
+  background:rgba(227,27,47,.12)!important;
+  box-shadow:inset 0 -2px 0 var(--lmf-brand-red-hi)!important;
+}
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-v1 .lmf-pg-spark polyline{stroke:var(--lmf-brand-red-hi)!important;filter:drop-shadow(0 0 5px rgba(227,27,47,.20))!important}
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-v1 .lmf-pg-pr-badge{border-color:rgba(255,64,80,.34)!important;background:rgba(227,27,47,.09)!important;color:#ff98a3!important}
+
+/* EXERCISES — grounded exercise art + red selection framing. Purple stays only
+   as a slight identity tint in the hero/world mark. */
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-hero-v1{
+  border-color:rgba(227,27,47,.24)!important;
+  background:
+    linear-gradient(90deg,rgba(3,6,10,.98) 0%,rgba(5,7,11,.84) 50%,rgba(7,8,12,.34)),
+    radial-gradient(circle at 80% 22%,rgba(227,27,47,.22),transparent 31%),
+    radial-gradient(circle at 88% 65%,rgba(168,85,247,.08),transparent 23%),
+    var(--v2-mountain) center/cover no-repeat!important;
+}
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-sidebar-v1 button:hover,
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercises-sidebar-v1 button.is-active{
+  border-color:rgba(255,64,80,.26)!important;
+  background:linear-gradient(90deg,rgba(227,27,47,.15),rgba(227,27,47,.03))!important;
+  box-shadow:inset 2px 0 0 var(--lmf-brand-red-hi)!important;
+}
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercise-card-v1.library-card:hover{border-color:rgba(255,64,80,.34)!important;box-shadow:0 14px 38px rgba(0,0,0,.26),0 0 22px rgba(227,27,47,.05)!important}
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercise-card-v1 .library-thumb[data-exercise-art]{border-color:rgba(255,64,80,.17)!important}
+html[data-lmf-approved-route='exercises'] .lmf-approved-exercise-card-v1 .library-thumb[data-exercise-art]::after{background:linear-gradient(90deg,rgba(4,7,11,.32),transparent 56%,rgba(227,27,47,.06))!important}
+
+/* COACH — red for actionable UI and section emphasis; purple remains in the
+   Raizen/Fenrir identity illustration and occasional energy detailing. */
+html[data-lmf-approved-route='coach'] .coach-workspace,
+html[data-lmf-approved-route='coach'] .coach-shell,
+html[data-lmf-approved-route='coach'] .coach-context-card{
+  --coach-accent:var(--lmf-brand-red);
+  --coach-accent-hi:var(--lmf-brand-red-hi);
+}
+html[data-lmf-approved-route='coach'] .coach-workspace .btn.primary,
+html[data-lmf-approved-route='coach'] .coach-composer button,
+html[data-lmf-approved-route='coach'] [data-coach-quick].active{
+  border-color:rgba(255,64,80,.48)!important;
+  background:linear-gradient(180deg,#ef243a,#b81125)!important;
+}
+html[data-lmf-approved-route='coach'] .coach-workspace details[open],
+html[data-lmf-approved-route='coach'] .coach-workspace .active{
+  border-color:rgba(255,64,80,.28)!important;
+}
+
+/* PROFILE — character art may retain purple lightning/runes. Character-sheet
+   chrome, tracker, and interaction states inherit the Home red language. */
+html[data-lmf-approved-route='profile'] .lmf-profile-character-sheet-v1,
+html[data-lmf-approved-route='profile'] .lmf-profile-goals-card-v1{
+  border-color:rgba(227,27,47,.27)!important;
+}
+html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{
+  border-right-color:rgba(227,27,47,.16)!important;
+  background:
+    linear-gradient(180deg,rgba(4,7,11,.06),rgba(4,7,11,.18) 42%,rgba(4,7,11,.94) 92%),
+    radial-gradient(circle at 48% 18%,rgba(227,27,47,.22),transparent 34%),
+    radial-gradient(circle at 67% 46%,rgba(168,85,247,.10),transparent 25%),
+    var(--lmf-profile-character-art,var(--v2-wolf)) center top/cover no-repeat!important;
+}
+html[data-lmf-approved-route='profile'] .lmf-profile-goals-card-v1 header span,
+html[data-lmf-approved-route='profile'] .lmf-profile-goal-tracker-v1 span{
+  color:var(--lmf-brand-red-hi)!important;
+}
+html[data-lmf-approved-route='profile'] .lmf-profile-goals-card-v1 header a{border-color:rgba(255,64,80,.38)!important;background:rgba(227,27,47,.10)!important;color:#ffd7db!important}
+
+/* MORE — red menu/action language, with purple reserved for special identity
+   details rather than every border and active state. */
+html[data-lmf-approved-route='more'] .lmf-more-workspace-v1{--lmf-more-accent:var(--lmf-brand-red)!important;--lmf-more-accent-hi:var(--lmf-brand-red-hi)!important}
+html[data-lmf-approved-route='more'] .lmf-more-card-v1:hover,
+html[data-lmf-approved-route='more'] .lmf-more-card-v1:focus-visible{border-color:rgba(255,64,80,.35)!important;box-shadow:0 14px 36px rgba(0,0,0,.28),0 0 22px rgba(227,27,47,.05)!important}
+html[data-lmf-approved-route='more'] .lmf-more-card-v1 i,
+html[data-lmf-approved-route='more'] .lmf-more-kicker-v1{color:var(--lmf-brand-red-hi)!important}
+
+/* Purple remains intentional and visible only as secondary energy/gamification. */
+.lmf-energy-accent,
+[data-gamification='true'],
+[data-raizen-energy='true'],
+[data-fenrir-energy='true']{
+  --lmf-energy-accent:var(--lmf-energy-purple);
+  --lmf-energy-accent-hi:var(--lmf-energy-purple-hi);
+}
+
+@media(max-width:720px){
+  .lmf-progress-worldbar-v1{min-height:148px!important}
+  .lmf-approved-exercises-hero-v1{min-height:168px!important}
+  html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{border-right:0!important;border-bottom:1px solid rgba(227,27,47,.16)!important}
+}
