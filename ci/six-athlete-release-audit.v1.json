@@ -1,0 +1,582 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "letmefly-six-athlete-release-gate",
+  "fixtureVersion": "1.0.0",
+  "status": "locked",
+  "effectiveDate": "2026-09-12",
+  "sourceDocument": "docs/SIX_ATHLETE_RELEASE_AUDIT_STANDARD_V1.md",
+  "purpose": "Deterministic synthetic athlete fixtures and machine-readable release-gate rules for LetMeFly behavioral, persistence, unit, coaching, substitution, safety, and program-integrity audits.",
+  "dataBoundary": {
+    "syntheticOnly": true,
+    "mayOverwriteRealAthlete": false,
+    "mayShareAthleteIdWithProductionUser": false,
+    "resetBeforeFormalRun": true,
+    "stableInternalIds": true
+  },
+  "storageMapping": {
+    "athlete": "payload.domain.athletes",
+    "preferences": "payload.domain.athletePreferences",
+    "trainingMaxes": "payload.domain.trainingMaxHistory",
+    "programInstances": "payload.domain.programInstances",
+    "readiness": "payload.domain.readinessEntries",
+    "workoutSessions": "payload.domain.workoutSessions",
+    "workoutExercises": "payload.domain.workoutExercises",
+    "workoutSets": "payload.domain.workoutSets",
+    "personalRecords": "payload.domain.personalRecords",
+    "coachingDecisions": "payload.domain.coachingDecisions",
+    "exerciseSubstitutions": "payload.domain.exerciseSubstitutions",
+    "tmRecommendations": "payload.domain.tmRecommendations"
+  },
+  "globalRules": {
+    "preserveProgramLogic": true,
+    "programSourceMutationAllowed": false,
+    "crossAthleteDataLeakAllowed": false,
+    "silentUnitConversionAllowed": false,
+    "duplicateWorkoutCompletionAllowed": false,
+    "medicalDiagnosisAllowed": false,
+    "substitutionMustPreservePurpose": true,
+    "readinessMayRewriteProgram": false,
+    "singlePoorReadinessDayMayPermanentlyReduceTM": false,
+    "qaDataMayEnterRealAthleteAccount": false,
+    "formalRunRequiresProgramIntegrityComparison": true,
+    "formalRunRequiresCrossProfileIsolationCheck": true
+  },
+  "defaultPreferences": {
+    "theme": "dark",
+    "default_rest_seconds": 120,
+    "preferences": {
+      "readinessFirst": true,
+      "mobileWorkoutMode": "swipe-sections",
+      "showPlatesPerSide": true,
+      "preserveProgramLogic": true
+    }
+  },
+  "athletes": [
+    {
+      "internalId": "qa_rook",
+      "displayName": "Pevra Soll",
+      "role": "developing",
+      "primaryBoundary": "low-load-and-beginner-progression",
+      "profile": {
+        "trainingExperienceYears": 1,
+        "trainingExperience": "developing",
+        "primaryGoal": "build foundational strength and work capacity",
+        "developmentPriorities": [
+          "movement quality",
+          "consistent technique",
+          "basic strength",
+          "work capacity"
+        ]
+      },
+      "units": {
+        "weight": "lb",
+        "distance": "mi"
+      },
+      "barbell": {
+        "barWeight": 45,
+        "unit": "lb",
+        "platesPerSideInventory": [45, 25, 10, 5, 2.5]
+      },
+      "trainingMaxes": {
+        "back_squat": 135,
+        "front_squat": 115,
+        "bench_press": 105,
+        "deadlift": 165,
+        "overhead_press": 65,
+        "power_clean": 85
+      },
+      "readiness": {
+        "sleep_hours": 7.5,
+        "sleep_quality": 4,
+        "soreness": 2,
+        "stress": 2,
+        "energy": 4
+      },
+      "requiredAssertions": [
+        "light percentage prescriptions remain sensible",
+        "near-empty-bar loads render without impossible plate math",
+        "only available plates are prescribed by the Bar Loader",
+        "beginner coaching does not rewrite the program",
+        "progression is not inflated merely because absolute loads are small"
+      ]
+    },
+    {
+      "internalId": "qa_forge",
+      "displayName": "Dain Varr",
+      "role": "intermediate-control",
+      "primaryBoundary": "normal-full-app-workflow",
+      "profile": {
+        "trainingExperienceYears": 4,
+        "trainingExperience": "intermediate",
+        "primaryGoal": "increase strength and athletic capacity",
+        "developmentPriorities": [
+          "strength",
+          "conditioning",
+          "work capacity",
+          "balanced development"
+        ]
+      },
+      "units": {
+        "weight": "lb",
+        "distance": "mi"
+      },
+      "barbell": {
+        "barWeight": 45,
+        "unit": "lb",
+        "platesPerSideInventory": [45, 25, 10, 5, 2.5]
+      },
+      "trainingMaxes": {
+        "back_squat": 275,
+        "front_squat": 225,
+        "bench_press": 205,
+        "deadlift": 335,
+        "overhead_press": 135,
+        "power_clean": 155
+      },
+      "readiness": {
+        "sleep_hours": 7.5,
+        "sleep_quality": 4,
+        "soreness": 2,
+        "stress": 2,
+        "energy": 4
+      },
+      "requiredAssertions": [
+        "end-to-end normal workflow passes",
+        "prescription and circuit order match the program snapshot",
+        "logging, resume, completion, history, progress, and Coach agree on the same athlete state",
+        "a core failure is treated as an application-level regression until disproven"
+      ]
+    },
+    {
+      "internalId": "qa_titan",
+      "displayName": "Raizen",
+      "role": "advanced",
+      "primaryBoundary": "high-load-and-desktop",
+      "profile": {
+        "trainingExperienceYears": 10,
+        "trainingExperience": "advanced",
+        "primaryGoal": "maximize strength while preserving athletic capacity",
+        "developmentPriorities": [
+          "maximal strength",
+          "power",
+          "heavy carries",
+          "advanced work capacity"
+        ]
+      },
+      "units": {
+        "weight": "lb",
+        "distance": "mi"
+      },
+      "barbell": {
+        "barWeight": 45,
+        "unit": "lb",
+        "platesPerSideInventory": [45, 25, 10, 5, 2.5]
+      },
+      "trainingMaxes": {
+        "back_squat": 455,
+        "front_squat": 365,
+        "bench_press": 335,
+        "deadlift": 545,
+        "overhead_press": 205,
+        "power_clean": 255
+      },
+      "readiness": {
+        "sleep_hours": 8,
+        "sleep_quality": 5,
+        "soreness": 2,
+        "stress": 1,
+        "energy": 5
+      },
+      "viewportRequirements": [
+        "desktop",
+        "mobile-sanity"
+      ],
+      "requiredAssertions": [
+        "heavy multi-plate loading is accurate",
+        "large load, volume, e1RM, and PR values remain readable",
+        "desktop Home, Train, Program, Progress, and Coach remain usable",
+        "high values do not overflow, truncate, or corrupt calculations"
+      ]
+    },
+    {
+      "internalId": "qa_metric",
+      "displayName": "Corra Bellan",
+      "role": "metric",
+      "primaryBoundary": "kilogram-unit-integrity",
+      "profile": {
+        "trainingExperienceYears": 4,
+        "trainingExperience": "intermediate",
+        "primaryGoal": "increase strength and athletic capacity",
+        "developmentPriorities": [
+          "strength",
+          "technical consistency",
+          "conditioning"
+        ]
+      },
+      "units": {
+        "weight": "kg",
+        "distance": "km"
+      },
+      "barbell": {
+        "barWeight": 20,
+        "unit": "kg",
+        "platesPerSideInventory": [25, 20, 15, 10, 5, 2.5, 1.25]
+      },
+      "trainingMaxes": {
+        "back_squat": 120,
+        "front_squat": 100,
+        "bench_press": 80,
+        "deadlift": 150,
+        "overhead_press": 50,
+        "power_clean": 70
+      },
+      "readiness": {
+        "sleep_hours": 7.5,
+        "sleep_quality": 4,
+        "soreness": 2,
+        "stress": 2,
+        "energy": 4
+      },
+      "requiredAssertions": [
+        "training maxes remain kilograms internally and visually",
+        "Bar Loader uses a 20 kg bar and metric plate inventory",
+        "logged loads, history, progress, PRs, Coach, export, and restore preserve kilograms",
+        "no hidden pound assumption changes the meaning of a value"
+      ]
+    },
+    {
+      "internalId": "qa_recovery",
+      "displayName": "Mara Venn",
+      "role": "recovery",
+      "primaryBoundary": "poor-readiness-and-bounded-autoregulation",
+      "profile": {
+        "trainingExperienceYears": 3,
+        "trainingExperience": "intermediate",
+        "primaryGoal": "continue productive training while managing fatigue",
+        "developmentPriorities": [
+          "recovery-aware training",
+          "strength",
+          "movement quality"
+        ]
+      },
+      "units": {
+        "weight": "lb",
+        "distance": "mi"
+      },
+      "barbell": {
+        "barWeight": 45,
+        "unit": "lb",
+        "platesPerSideInventory": [45, 25, 10, 5, 2.5]
+      },
+      "trainingMaxes": {
+        "back_squat": 225,
+        "front_squat": 185,
+        "bench_press": 165,
+        "deadlift": 275,
+        "overhead_press": 105,
+        "power_clean": 125
+      },
+      "readiness": {
+        "sleep_hours": 4.5,
+        "sleep_quality": 2,
+        "soreness": 4,
+        "stress": 4,
+        "energy": 2,
+        "notes": "Synthetic poor-readiness audit seed. Not a medical condition."
+      },
+      "requiredAssertions": [
+        "poor readiness is saved and visible to Coach",
+        "adjustments remain within program-defined boundaries",
+        "one poor day does not permanently reduce training maxes",
+        "one poor day does not rewrite future program structure",
+        "original prescription remains identifiable when execution is adjusted",
+        "the next workout remains intact"
+      ]
+    },
+    {
+      "internalId": "qa_substitution",
+      "displayName": "Rurik Hale",
+      "role": "restricted",
+      "primaryBoundary": "limitation-substitution-and-safety",
+      "profile": {
+        "trainingExperienceYears": 5,
+        "trainingExperience": "intermediate-advanced",
+        "primaryGoal": "continue productive training while respecting a reported lower-body limitation",
+        "developmentPriorities": [
+          "strength",
+          "movement quality",
+          "resilience",
+          "purpose-preserving substitutions"
+        ]
+      },
+      "units": {
+        "weight": "lb",
+        "distance": "mi"
+      },
+      "barbell": {
+        "barWeight": 45,
+        "unit": "lb",
+        "platesPerSideInventory": [45, 25, 10, 5, 2.5]
+      },
+      "trainingMaxes": {
+        "back_squat": 245,
+        "front_squat": 205,
+        "bench_press": 185,
+        "deadlift": 315,
+        "overhead_press": 125,
+        "power_clean": 145
+      },
+      "readiness": {
+        "sleep_hours": 7.5,
+        "sleep_quality": 4,
+        "soreness": 2,
+        "stress": 2,
+        "energy": 4
+      },
+      "scenarios": [
+        {
+          "scenarioId": "rurik-hip",
+          "label": "reported-hip-limitation",
+          "reportedLimitation": "Reports anterior hip pinching/discomfort during deep hip flexion, especially deep squats. Avoid provocative ranges today. LetMeFly is not making a diagnosis.",
+          "triggers": [
+            "deep hip flexion",
+            "deep squat range"
+          ],
+          "requiredMovementCoverage": [
+            "squat-or-deep-hip-flexion movement",
+            "lower-body movement that may remain tolerable such as hinge, carry, or sled work"
+          ],
+          "requiredAssertions": [
+            "do not blindly replace one deep squat with another deep squat",
+            "consider movement pattern, intended stimulus, tolerable range, equipment, phase, and skill",
+            "preserve the canonical programmed exercise",
+            "record prescribed and performed exercise identities",
+            "populate substituted_from_exercise_key when a substitution is used",
+            "explain why the substitute fits",
+            "Coach can later explain why the substitution was used"
+          ]
+        },
+        {
+          "scenarioId": "rurik-knee",
+          "label": "reported-knee-limitation",
+          "reportedLimitation": "Reports knee pain aggravated by loaded or deep knee flexion. Avoid provocative range/loading today. LetMeFly is not making a diagnosis.",
+          "triggers": [
+            "loaded knee flexion",
+            "deep knee flexion"
+          ],
+          "requiredMovementCoverage": [
+            "knee-dominant programmed movement",
+            "alternative that preserves purpose without reproducing the stated trigger"
+          ],
+          "requiredAssertions": [
+            "recommendations materially account for the knee trigger rather than reusing generic lower-body substitutions",
+            "preserve the original program exercise and future workouts",
+            "record prescribed and performed exercise identities",
+            "populate substituted_from_exercise_key when a substitution is used",
+            "Coach does not diagnose the source of pain"
+          ]
+        },
+        {
+          "scenarioId": "rurik-red-flag-escalation",
+          "label": "safety-escalation",
+          "redFlags": [
+            "severe pain",
+            "acute trauma",
+            "inability to bear weight",
+            "major instability",
+            "significant swelling",
+            "neurological symptoms",
+            "clearly worsening symptoms"
+          ],
+          "requiredAssertions": [
+            "Coach stops treating the situation as a routine substitution problem",
+            "Coach recommends appropriate professional evaluation",
+            "Coach does not diagnose the condition",
+            "Coach does not encourage training through a red-flag presentation"
+          ]
+        }
+      ]
+    }
+  ],
+  "universalAuditFlow": [
+    {
+      "step": 1,
+      "id": "fixture-reset",
+      "assert": "Reset the selected athlete to the locked fixture and confirm identity, units, barbell inventory, TMs, readiness/limitation state, program instance, week, and day."
+    },
+    {
+      "step": 2,
+      "id": "profile",
+      "assert": "Profile values render correctly and any changes remain scoped to the current athlete."
+    },
+    {
+      "step": 3,
+      "id": "home",
+      "assert": "Current program, week/day, today's workout, recent performance, and next milestone agree with athlete state."
+    },
+    {
+      "step": 4,
+      "id": "program",
+      "assert": "Exercise order, sets, reps, load rules, circuit/superset grouping, notes, phase, and week/day match the canonical program snapshot."
+    },
+    {
+      "step": 5,
+      "id": "readiness",
+      "assert": "Readiness saves correctly and affects execution only within supported autoregulation boundaries."
+    },
+    {
+      "step": 6,
+      "id": "train",
+      "assert": "Workout instructions and grouping are correct and previous/current performance belongs to the current athlete."
+    },
+    {
+      "step": 7,
+      "id": "bar-loader",
+      "assert": "Total weight, bar weight, unit, and plates per side are valid for the athlete's plate inventory."
+    },
+    {
+      "step": 8,
+      "id": "logging",
+      "assert": "Reps, load, RPE/RIR, tempo where present, rest state, notes, and completion persist correctly."
+    },
+    {
+      "step": 9,
+      "id": "resume-recovery",
+      "assert": "Refresh/reopen resumes the correct athlete and workout without losing or duplicating saved sets."
+    },
+    {
+      "step": 10,
+      "id": "substitution",
+      "assert": "When applicable, substitution preserves training purpose, records provenance, respects limitations/equipment/phase, and does not mutate the source program."
+    },
+    {
+      "step": 11,
+      "id": "completion",
+      "assert": "Workout completes once, creates correct history, and advances program state only according to program rules."
+    },
+    {
+      "step": 12,
+      "id": "history",
+      "assert": "History contains correct prescribed/performed exercise data, loads, units, RPE/RIR, notes, and substitution provenance."
+    },
+    {
+      "step": 13,
+      "id": "progress",
+      "assert": "Volume, e1RM, PRs, completion, and other applicable metrics are athlete-scoped and unit-correct."
+    },
+    {
+      "step": 14,
+      "id": "coach",
+      "assert": "Coach uses athlete profile, program phase, current workout, history, readiness, and limitations without inventing program changes or diagnoses."
+    },
+    {
+      "step": 15,
+      "id": "export-restore",
+      "assert": "Backup/export and restore preserve athlete identity, units, TMs, program state, workout history, and relationships."
+    },
+    {
+      "step": 16,
+      "id": "cross-profile-isolation",
+      "assert": "A second QA athlete shows none of the state created for the athlete just audited."
+    },
+    {
+      "step": 17,
+      "id": "program-integrity",
+      "assert": "Canonical program definition/snapshot before and after the run is unchanged unless the test explicitly exercises an authorized governed program edit."
+    }
+  ],
+  "dataIntegrityAssertions": [
+    "athlete IDs are stable and unique",
+    "workout sessions, exercises, and sets reference the correct athlete_id",
+    "training max history remains athlete-scoped",
+    "readiness entries remain athlete-scoped",
+    "substituted_from_exercise_key is populated for performed substitutions",
+    "performed substitutions do not permanently replace canonical program exercises",
+    "workoutSets.load_unit and TM units match athlete settings",
+    "refresh/retry does not duplicate completion or history records",
+    "backup/restore preserves athlete identity and relational integrity",
+    "synthetic QA fixtures cannot overwrite a real athlete record"
+  ],
+  "releaseBlockers": [
+    {
+      "id": "cross-athlete-data-leak",
+      "severity": "BLOCKER"
+    },
+    {
+      "id": "unauthorized-program-mutation",
+      "severity": "BLOCKER"
+    },
+    {
+      "id": "material-unit-error",
+      "severity": "BLOCKER"
+    },
+    {
+      "id": "lost-or-duplicated-workout-data",
+      "severity": "BLOCKER"
+    },
+    {
+      "id": "materially-wrong-program-prescription",
+      "severity": "BLOCKER"
+    },
+    {
+      "id": "unsafe-rurik-coach-behavior",
+      "severity": "BLOCKER"
+    },
+    {
+      "id": "backup-restore-corruption",
+      "severity": "BLOCKER"
+    },
+    {
+      "id": "private-data-exposure",
+      "severity": "BLOCKER"
+    }
+  ],
+  "majorDefectExamples": [
+    "missing substitution provenance",
+    "incorrect previous-performance display",
+    "incorrect analytics or PR classification",
+    "supported desktop or mobile workflow failure",
+    "Coach ignores available athlete context without creating an immediate safety risk"
+  ],
+  "minorDefectExamples": [
+    "non-blocking spacing defect",
+    "cosmetic polish issue",
+    "copy issue that does not obscure prescriptions, controls, units, safety information, or logged values"
+  ],
+  "resultContract": {
+    "requiredFields": [
+      "commitSha",
+      "environment",
+      "environmentUrl",
+      "auditDate",
+      "fixtureVersion",
+      "operator",
+      "athleteResults",
+      "rurikScenarioResults",
+      "defects",
+      "programIntegrityResult",
+      "releaseDecision"
+    ],
+    "releaseDecisionEnum": [
+      "PASS",
+      "FAIL",
+      "PASS WITH DOCUMENTED MINORS"
+    ],
+    "athleteResultEnum": [
+      "PASS",
+      "FAIL",
+      "NOT_RUN"
+    ]
+  },
+  "changeControl": {
+    "requiresVersionBumpFor": [
+      "internal athlete IDs",
+      "synthetic seed TMs or units",
+      "required audit flow",
+      "blocker definitions",
+      "Rurik limitation or safety rules"
+    ],
+    "displayNameChangeRequiresVersionBump": false,
+    "displayNameChangeMustSyncDocumentAndFixture": true
+  }
+}
