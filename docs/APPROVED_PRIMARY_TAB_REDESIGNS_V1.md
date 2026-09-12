@@ -1,6 +1,6 @@
 # LetMeFly Approved Primary Tab Redesigns v1
 
-This document locks the implementation contract for the remaining approved primary-tab mockups on PR #90. It supplements the Home/Coach cinematic standard, Train exercise-card standard, Exercise Image Treatment Standard v1, and LetMeFly UI Consistency Standard v1.
+This document locks the implementation contract for the remaining approved primary-tab mockups on PR #90. It supplements the Home/Coach cinematic standard, Train exercise-card standard, Exercise Image Treatment Standard v1, LetMeFly UI Consistency Standard v1, and Color Harmonization Standard v1.
 
 ## Scope
 
@@ -14,7 +14,7 @@ Program is a week command center rather than a generic list. It keeps the real c
 
 ## Progress
 
-Progress uses the approved analytics-command-center language on desktop and mobile. Existing live metrics, charts, bodyweight, strength, conditioning, consistency, milestones, and PR data remain the source of truth. The redesign supplies the LetMeFly identity/world surface, purple tab/action language, stronger metric hierarchy, and consistent responsive cards without rewriting history.
+Progress uses the approved analytics-command-center language on desktop and mobile. Existing live metrics, charts, bodyweight, strength, conditioning, consistency, milestones, and PR data remain the source of truth. The redesign supplies the LetMeFly identity/world surface, Home-aligned red selected/action language, stronger metric hierarchy, and consistent responsive cards without rewriting history. Purple remains a secondary Raizen/Fenrir energy accent rather than the default control color.
 
 ## Exercises
 
@@ -28,10 +28,16 @@ The main sheet includes a Goal Tracker derived from the existing Primary Goal, S
 
 ## Shared visual contract
 
-Purple is the standard identity/action accent. Red is reserved for safety, warnings, pain/injury boundaries, destructive actions, or other semantic danger states. Exercise artwork remains grounded and instructional, while Raizen/Fenrir/mountain/storm/crown visuals carry app identity and motivation.
+The final approved palette is black / charcoal / steel as the base, red as the primary brand, environmental, selection, and action accent, and purple as a secondary Raizen/Fenrir gamification and energy accent. White and gray carry information hierarchy. Red also continues to serve warning, pain/injury, destructive, and other safety-critical states, which must remain distinguishable through copy, iconography, and context rather than color alone.
+
+Exercise artwork remains grounded and instructional, while Raizen/Fenrir/mountain/storm/crown visuals carry app identity and motivation. The existing source exercise images are not recolored merely to match the app palette.
 
 Desktop and mobile are both first-class layouts. Mobile Profile remains a character sheet rather than becoming a detached hero banner. Program and Progress retain fast horizontal tabs, Exercises keeps mobile filtering uncluttered, and all primary routes continue to use the existing navigation architecture.
 
 ## Governance guards
 
 The installer and production audit reject direct use of localStorage, sessionStorage, IndexedDB, fetch/XHR, program-instance stores, training-max history, workout-session stores, personal-record stores, or bodyweight stores from this presentation bridge. It also rejects alternate exercise-image URLs. This is intentional: the redesign may arrange and style existing UI, but it must not become a competing data/program engine.
+
+## Final palette authority
+
+Where an earlier component or base stylesheet still contains legacy purple-first tokens, `COLOR_HARMONIZATION_STANDARD_V1.md` and the final color-harmonization layer are authoritative for the rendered product. Future work must not use those legacy tokens as evidence that purple is the primary LetMeFly interaction color.
