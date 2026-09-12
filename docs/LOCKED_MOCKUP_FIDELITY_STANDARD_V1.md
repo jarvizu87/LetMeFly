@@ -97,8 +97,8 @@ The SVG embeds the original 530,408-byte, 1229 × 1536 JPEG without recompressio
 `ci/validate-locked-art-source.mjs` verifies the complete decoded bytes against
 SHA-256 `1ca02d23424f2b2f2ded57f9ebce0ebd36c805cd3a778b5929790b2011911e2a`.
 Checking only that an SVG contains an image URL is insufficient: the previous
-wrapper passed that check while its embedded JPEG was corrupt. The image and
-stylesheet use revision 2, with a new shell-cache revision for existing installs.
+wrapper passed that check while its embedded JPEG was corrupt. The image uses revision 2; the final stylesheet and shell cache use revision 3
+to refresh the completed layout corrections for existing installs.
 
 This final layer loads after color harmonization so the locked artwork decisions cannot be silently watered down by earlier generic styling layers.
 

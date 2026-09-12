@@ -12,7 +12,7 @@ const origin = process.env.LMF_AUDIT_BASE_URL || 'http://127.0.0.1:4173'
 const browser = await chromium.launch({executablePath:process.env.CHROME_BIN, headless:true, args:['--no-sandbox']})
 const report = {checks:[], errors:[]}
 const screens = [
-  ['progress', '.lmf-progress-worldbar-v1', '::after'],
+  ['progress', '.lmf-approved-progress-head-v1', '::after'],
   ['exercises', '.lmf-approved-exercises-hero-v1', '::after'],
   ['coach', '.lmf-coach-workspace .coach-banner', '::before'],
   ['profile', '.lmf-profile-character-visual-v1', null],
@@ -64,10 +64,16 @@ try {
         await page.locator('.lmf-profile-character-sheet-v1 .lmf-profile-strength-card').waitFor({state:'visible'})
         assert.equal(await page.locator('[data-profile-key="unit"]').inputValue(), 'kg')
         assert.equal(await page.locator('.lmf-profile-v2-avatar').isVisible(), false)
+        const nameWidth = await page.locator('.lmf-profile-v2-identity > div:last-child').evaluate(el=>el.getBoundingClientRect().width)
+        assert.ok(nameWidth >= 150, 'Athlete identity uses the dossier width after the avatar is removed')
       }
       if (route === 'more') {
         await page.locator('.lmf-more-utilities-v2 [data-lmf-bar-loader-open="more"]').waitFor({state:'visible'})
         assert.equal(await page.locator('.command-menu-grid > *').count(), 9, 'Native utility is integrated into the nine-card hub')
+        await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))
+        assert.equal(await page.locator('.lmf-more-utilities-v2').count(), 1, 'Repeated UI refreshes must not nest utility tiles')
+        const tileHeight = await page.locator('.lmf-more-utilities-v2').evaluate(el=>el.getBoundingClientRect().height)
+        assert.ok(tileHeight < 350, 'Utilities stays within a normal card height')
         await page.locator('[data-lmf-bar-loader-open="more"]').click()
         await page.locator('.lmf-bar-modal').waitFor({state:'visible'})
         await page.keyboard.press('Escape')

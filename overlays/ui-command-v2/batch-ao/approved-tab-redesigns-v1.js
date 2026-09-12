@@ -80,6 +80,8 @@
     if (!(head instanceof HTMLElement) || !(dashboard instanceof HTMLElement)) return
 
     head.classList.add('lmf-approved-progress-head-v1')
+    const subtitle = head.querySelector('p')
+    if (subtitle && subtitle.textContent !== 'Measure • Improve • Become more.') subtitle.textContent = 'Measure • Improve • Become more.'
     dashboard.classList.add('lmf-approved-progress-v1')
 
     const parent = dashboard.parentElement

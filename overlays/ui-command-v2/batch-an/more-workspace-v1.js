@@ -171,7 +171,7 @@
 
     // Keep the native Bar Loader in the Utilities tile, preserving its owner
     // and action instead of adding an unrelated tenth tile to the locked grid.
-    const utilities = grid.querySelector('a[data-lmf-more-key="utilities"]')
+    const utilities = grid.querySelector(':scope > a[data-lmf-more-key="utilities"]')
     const loader = grid.querySelector('[data-lmf-bar-loader-open="more"]')
     if (utilities instanceof HTMLAnchorElement && loader instanceof HTMLButtonElement) {
       const tile = document.createElement('div')
