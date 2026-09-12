@@ -1,0 +1,158 @@
+/* LetMeFly Exercise Image Treatment v1
+   Visual-only bridge between the grounded exercise library and the cinematic
+   black / steel / purple LetMeFly identity. Existing exercise art remains the
+   source of truth. Do not recolor, regenerate, or replace mapped exercise art. */
+
+:root{
+  --lmf-art-purple:#9b5cff;
+  --lmf-art-purple-soft:rgba(155,92,255,.28);
+  --lmf-art-purple-faint:rgba(155,92,255,.12);
+  --lmf-art-edge:rgba(173,126,255,.40);
+  --lmf-art-panel:#070c12;
+}
+
+/* Exercise-library cards keep the original image readable while the card frame,
+   edges, and selection state carry the newer LetMeFly palette. */
+.exercise-library .library-card{
+  border-color:rgba(143,111,191,.22)!important;
+  background:linear-gradient(110deg,#090f16 0%,#071016 64%,#0a0d14 100%)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.018)!important;
+  transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease!important;
+}
+.exercise-library .library-card:hover,
+.exercise-library .library-card:focus-within{
+  border-color:var(--lmf-art-edge)!important;
+  box-shadow:inset 0 0 0 1px var(--lmf-art-purple-faint),0 0 22px rgba(109,57,195,.13)!important;
+}
+
+/* Thumbnail = practical movement clarity first. The art itself is not filtered.
+   Vignette and purple are kept at the perimeter, not across the athlete/movement. */
+.library-thumb[data-exercise-art]{
+  position:relative!important;
+  isolation:isolate!important;
+  background-image:
+    linear-gradient(180deg,rgba(1,5,8,.03) 0%,rgba(1,5,8,.08) 48%,rgba(1,5,8,.66) 100%),
+    var(--exercise-art,var(--v2-mountain))!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  filter:none!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.07),
+    inset 0 0 26px rgba(0,0,0,.36)!important;
+}
+.library-thumb[data-exercise-art]::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  pointer-events:none!important;
+  border-radius:inherit!important;
+  background:
+    linear-gradient(90deg,rgba(52,23,88,.18),transparent 27%,transparent 73%,rgba(74,34,117,.15)),
+    radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.25) 100%)!important;
+  box-shadow:inset 0 0 0 1px rgba(155,92,255,.16)!important;
+}
+.exercise-library .library-card:hover .library-thumb[data-exercise-art]::after,
+.exercise-library .library-card:focus-within .library-thumb[data-exercise-art]::after{
+  box-shadow:inset 0 0 0 1px rgba(171,118,255,.46),inset 0 0 24px rgba(107,54,187,.10)!important;
+}
+
+/* Multi-part artwork preserves every component. Theme only the frame/labels. */
+.library-thumb[data-exercise-art-parts] > .lmf-art-pair{
+  background:#04080d!important;
+  box-shadow:inset 0 0 0 1px rgba(155,92,255,.18)!important;
+}
+.library-thumb[data-exercise-art-parts] .lmf-art-part > span{
+  background:#0d1017!important;
+  color:#e9e4f4!important;
+}
+
+/* Exercise Intelligence detail media is injected by the companion presentation
+   enhancer. It reuses the same data-exercise-art slug/private-art resolver. */
+.lmf-intel-art{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  min-height:220px;
+  margin:12px 0 18px;
+  overflow:hidden;
+  border:1px solid rgba(155,92,255,.30);
+  border-radius:16px;
+  background-color:#03070a;
+  background-image:
+    linear-gradient(180deg,rgba(3,7,10,.02),rgba(3,7,10,.10) 60%,rgba(3,7,10,.70)),
+    var(--exercise-art,var(--v2-mountain));
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+  box-shadow:inset 0 0 40px rgba(0,0,0,.36),0 0 28px rgba(101,52,175,.09);
+}
+.lmf-intel-art::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(55,22,94,.18),transparent 22%,transparent 78%,rgba(55,22,94,.18)),
+    linear-gradient(180deg,transparent 66%,rgba(0,0,0,.36));
+  box-shadow:inset 0 0 0 1px rgba(181,131,255,.08);
+}
+.lmf-intel-art[data-exercise-art-parts] > .lmf-art-pair{
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  background:#03070a!important;
+}
+.lmf-intel-art[data-exercise-art-parts]::after{display:none!important}
+
+/* Bring the information modal into the same black/steel/purple family while
+   preserving all current exercise data, actions, and safety boundaries. */
+.lmf-intel-modal{
+  border-color:rgba(155,92,255,.26)!important;
+  background:
+    linear-gradient(180deg,rgba(93,43,160,.16),transparent 190px),
+    #0c1016!important;
+  box-shadow:0 26px 90px rgba(0,0,0,.62),0 0 46px rgba(89,42,154,.08)!important;
+}
+.lmf-intel-kicker,
+.lmf-intel-label{color:#b98cff!important}
+.lmf-intel-chip{border-color:rgba(155,92,255,.16)!important;background:rgba(144,88,230,.055)!important}
+.lmf-intel-grid>div{border-color:rgba(155,92,255,.14)!important;background:#131820!important}
+.lmf-intel-btn-primary{
+  border-color:rgba(173,117,255,.48)!important;
+  background:linear-gradient(180deg,#9a58ed,#5e2ea4)!important;
+}
+.lmf-intel-boundary{
+  border-left-color:#9b5cff!important;
+  background:rgba(108,57,180,.09)!important;
+}
+.lmf-intel-close:focus-visible,
+.lmf-intel-btn:focus-visible{outline-color:#b986ff!important}
+
+/* Shared compact artwork surfaces across Train previews, substitutions, and
+   desktop flow get the same edge language without changing their image source. */
+:is(.lmf-compact-thumb,.lmf-next-thumb,.lmf-desktop-flow-thumb)[data-exercise-art]{
+  position:relative!important;
+  box-shadow:inset 0 0 0 1px rgba(155,92,255,.17),inset 0 0 22px rgba(0,0,0,.28)!important;
+}
+
+/* The active Train card has its own approved blended composition. Only add the
+   faint purple edge so it belongs to the same family; do not override its blend. */
+.exercise-stack .active-exercise.lmf-workout-flow-card{
+  border-color:rgba(143,105,203,.30)!important;
+  box-shadow:inset 0 0 0 1px rgba(155,92,255,.035)!important;
+}
+
+@media(max-width:640px){
+  .lmf-intel-art{
+    aspect-ratio:4/3;
+    min-height:190px;
+    margin:10px 0 15px;
+    border-radius:14px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .exercise-library .library-card{transition:none!important}
+}
