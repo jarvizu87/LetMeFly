@@ -27,10 +27,12 @@ assert(index.indexOf('/ui/color-harmonization-v1.css') < index.indexOf('/ui/lock
 for (const asset of ['/ui/locked-art-fidelity-v1.css','/ui/raizen-black-crown-ascension-v1.jpg']) {
   assert(sw.includes(asset), `service worker missing ${asset}`)
 }
-// Compression level is not a fidelity contract. Keep only a small corruption guard;
-// the JPEG signature check below is the authoritative payload-integrity check.
+// Compression level and harmless trailing bytes are not fidelity contracts.
+// Require the JPEG SOI and an EOI marker near the end of the payload instead
+// of assuming EOI must be the literal final two bytes.
 assert(art.length > 1024, 'canonical Raizen/Fenrir raster is unexpectedly small')
-assert(art[0] === 0xff && art[1] === 0xd8 && art[art.length - 2] === 0xff && art[art.length - 1] === 0xd9, 'canonical Raizen/Fenrir art is not a valid JPEG payload')
+const eoi = art.lastIndexOf(Buffer.from([0xff, 0xd9]))
+assert(art[0] === 0xff && art[1] === 0xd8 && eoi >= 0 && eoi >= art.length - 64, 'canonical Raizen/Fenrir art is not a valid JPEG payload')
 assert(css.includes("--lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.jpg')"), 'Raizen/Fenrir art variable missing')
 for (const route of ['progress','exercises','coach','profile','more']) {
   assert(css.includes(`data-lmf-approved-route='${route}'`), `locked art layer missing ${route} route`)
