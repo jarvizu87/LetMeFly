@@ -151,6 +151,31 @@ if source.count(old_rows) != 1:
 source = source.replace(old_rows, new_rows, 1)
 source = source.replace("const reps=chosenRow.locator('.reps-input');if(await reps.count()) await reps.fill('5')", "const reps=chosenRow.locator('.reps-input:visible');if(await reps.count()) await reps.fill('5')", 1)
 
+# Progress re-renders while long-history analytics hydrate. Open the native
+# tools disclosure atomically in the page realm so the audit never keeps a
+# stale <summary> handle across that render. Then verify the saved session row
+# is actually visible; this preserves the release assertion without testing a
+# transient focus implementation detail.
+old_progress = '''      const progressStart=Date.now();await openApp(page,'progress');result.progressMs=Date.now()-progressStart
+      const tools=page.locator('#lmf-pg-native-tools');await tools.waitFor({state:'visible',timeout:10000})
+      if(!(await tools.evaluate(el=>el.open))){const summary=tools.locator(':scope > summary');await summary.focus();await summary.press('Enter')}
+      assert.equal(await page.locator(`.history-list [data-workout-recap="${sessionId}"]`).count(),1,`${fixture.key}: completed session absent from history`)
+'''
+new_progress = '''      const progressStart=Date.now();await openApp(page,'progress');result.progressMs=Date.now()-progressStart
+      await page.waitForFunction(()=>{
+        const tools=document.querySelector('#lmf-pg-native-tools'),summary=tools?.querySelector(':scope > summary')
+        if(!(tools instanceof HTMLDetailsElement) || !(summary instanceof HTMLElement)) return false
+        if(!tools.open) tools.open=true
+        return tools.open
+      },null,{timeout:10000})
+      const tools=page.locator('#lmf-pg-native-tools');assert.equal(await tools.evaluate(el=>el.open),true,`${fixture.key}: Progress native tools did not open`)
+      const historyRow=page.locator(`.history-list [data-workout-recap="${sessionId}"]`);await historyRow.waitFor({state:'visible',timeout:10000})
+      assert.equal(await historyRow.count(),1,`${fixture.key}: completed session absent from history`)
+'''
+if source.count(old_progress) != 1:
+    raise SystemExit(f'Expected one Progress disclosure boundary, found {source.count(old_progress)}')
+source = source.replace(old_progress, new_progress, 1)
+
 # Replace the generic Rurik marker check with all three locked safety scenarios.
 old_rurik = '''      if(fixture.key==='qa_substitution'){
         assert.match(coachText,/hip|knee|limitation|pinching|pain/i,'Rurik: Coach/profile workspace must surface limitation context')
@@ -231,6 +256,8 @@ grep -Fq "pendingWorkoutCompletion" "$TMP"
 grep -Fq "current_week:53" "$TMP"
 grep -Fq "week_number:historyWeek" "$TMP"
 grep -Fq "[data-set-id]:visible" "$TMP"
+grep -Fq "tools.open=true" "$TMP"
+grep -Fq "Progress native tools did not open" "$TMP"
 grep -Fq "rurik-red-flag-escalation" "$TMP"
 grep -Fq "all three locked safety scenarios" "$TMP"
 node "$TMP" "$@"
