@@ -19,6 +19,22 @@ flow_path = Path(os.environ['FLOW'])
 main = main_path.read_text()
 flow = flow_path.read_text()
 
+# Onboarding already captures the athlete's preferred unit in #onboard-unit.
+# Forward it into createLocalAthlete so the existing athlete service creates
+# the governed athletePreferences.weight_unit row and matching sync mutation.
+onboard_create_pattern = re.compile(r"(state\.athlete\s*=\s*await\s+createLocalAthlete\(\{)([^}\n]*)(\}\))")
+onboard_create_matches = list(onboard_create_pattern.finditer(main))
+if len(onboard_create_matches) != 1:
+    raise SystemExit(f'Expected one onboarding athlete create call, found {len(onboard_create_matches)}')
+match = onboard_create_matches[0]
+args = match.group(2).rstrip()
+if re.search(r"\bweightUnit\s*:", args):
+    raise SystemExit('Onboarding athlete create call already supplies weightUnit; update this transform instead of double-writing it')
+unit_arg = "weightUnit: ((document.querySelector('#onboard-unit') as HTMLSelectElement | null)?.value === 'kg' ? 'kg' : 'lb')"
+separator = ', ' if args.strip() else ''
+replacement = match.group(1) + args + separator + unit_arg + match.group(3)
+main = main[:match.start()] + replacement + main[match.end():]
+
 # athletePreferences owns weight_unit. Hydrate that preference into the in-memory
 # athlete view before the first governed render instead of treating the base
 # athletes row as though it owned the unit.
@@ -115,6 +131,7 @@ main_path.write_text(main)
 flow_path.write_text(flow)
 PY
 
+grep -Fq "weightUnit: ((document.querySelector('#onboard-unit') as HTMLSelectElement | null)?.value === 'kg' ? 'kg' : 'lb')" "$MAIN"
 grep -Fq "const preferredWeightUnit = row?.weight_unit === 'kg'" "$MAIN"
 grep -Fq "await refreshBarbellSettings().catch(() => undefined)" "$MAIN"
 grep -Fq "const storedUnit = set.load_unit === 'kg'" "$MAIN"
@@ -123,4 +140,4 @@ grep -Fq "row.dataset.loadUnit === 'kg' ? 'kg' : 'lb'" "$MAIN"
 grep -Fq "const savedUnit = saved && typeof saved === 'object'" "$MAIN"
 grep -Fq 'dataset?.loadUnit' "$FLOW"
 
-echo "LetMeFly athlete weight-unit preference hydration + runtime conversion + Bar Loader default: PASS"
+echo "LetMeFly athlete onboarding preference + weight-unit hydration + runtime conversion + Bar Loader default: PASS"
