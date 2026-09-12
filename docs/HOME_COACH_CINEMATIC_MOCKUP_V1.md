@@ -68,6 +68,22 @@ Presentation should use:
 - dark premium context cards and chat surfaces
 - clear focus states and readable mobile controls
 
+### Approved Coach workspace
+
+- One mountain/Fenrir banner, using the same existing raster assets as Home.
+- A conversation panel with all six original quick prompts, the actual most recent
+  submitted question, the native answer, and the native send/keyboard controls.
+- No fabricated conversation, timestamps, online indicator, or saved chat history.
+- Desktop: today's focus, exercise selector, and supporting details beside the chat.
+- Mobile: today's focus and exercise selector above quick actions, conversation,
+  supporting details, and a composer that clears the six-item bottom navigation.
+- Profile, recent workouts, and coaching evidence start collapsed. Native details
+  preserve open state and input focus through the existing insights refresh cycle.
+- Session guidance remains expandable inside the one current-workout card.
+- Context modules remain descendants of `.coach-chat`, preserving their mount and
+  refresh anchors. Controls are moved rather than cloned, so original listeners
+  remain attached. No exercise or training decision handler is replaced.
+
 ## Safety / architecture boundary
 
 This visual layer must not change:

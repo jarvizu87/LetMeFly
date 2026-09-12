@@ -17,6 +17,11 @@ async function snapshot(page) {
     const data = await new Promise((resolve, reject) => { const tx = db.transaction(stores, 'readonly'), data = {}; tx.oncomplete = () => resolve(data); tx.onerror = () => reject(tx.error); for (const name of stores) { const r = tx.objectStore(name).getAll(); r.onsuccess = () => { data[name] = r.result } } }); db.close(); return data
   })
 }
+async function openEvidence(page) {
+  const detail = page.locator('[data-ai-coach-detail="workspace-evidence"]')
+  await detail.waitFor({ state: 'visible' })
+  if (!(await detail.evaluate(node => node.open))) await detail.locator(':scope > summary').click()
+}
 async function seed(page) {
   return page.evaluate(async () => {
     const db = await new Promise((resolve, reject) => { const r = indexedDB.open('letmefly-private'); r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error) })
@@ -60,12 +65,41 @@ try {
     const ids = await seed(page)
     await page.goto(`${base}/#/coach`, { waitUntil: 'domcontentloaded' })
     const coach = page.locator('#lmf-athlete-coach'), review = coach.locator('[data-ai-current-review]'), result = review.locator('[data-ai-current-result]')
+    await coach.waitFor({ state: 'visible' })
+    await page.locator('.lmf-coach-workspace').waitFor({ state: 'visible' })
+    assert.equal(await coach.locator(':scope > details').count(), 3)
+    assert.equal(await coach.locator(':scope > details[open]').count(), 0, 'Supporting context starts collapsed')
+    assert.equal(await page.locator('.lmf-coach-question:visible').count(), 0, 'No invented conversation is seeded')
+    assert.equal(await page.locator('[data-coach-prompt]').count(), 6, 'Every original quick action is retained')
+    const layout = await page.evaluate(() => {
+      const rect = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return { x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width, height:r.height } }
+      return { context:rect('.coach-context'), conversation:rect('.lmf-coach-conversation-heading'), composer:rect('.coach-composer'), nav:rect('.navbar'), viewport:innerWidth, scroll:document.documentElement.scrollWidth }
+    })
+    assert.ok(layout.scroll <= layout.viewport + 1, 'Coach has no page overflow')
+    if (width < 600) {
+      assert.ok(layout.context.y < layout.conversation.y, 'Mobile focus precedes the conversation')
+      assert.ok(layout.composer.bottom <= layout.nav.y + 1, 'Mobile composer clears bottom navigation')
+    } else assert.ok(layout.context.x > layout.conversation.right, 'Desktop context sits beside the conversation')
+    await page.screenshot({ path: path.join(out, `coach-workspace-${width}.png`) })
+    await openEvidence(page)
     await review.waitFor({ state: 'visible' })
     if (await dismiss.isVisible()) await dismiss.click()
     assert.doesNotMatch(await coach.innerText(), /FOREIGN ATHLETE|FOREIGN GOAL/)
     assert.equal(await coach.locator('[data-ai-profile] img').count(), 0)
     const before = await snapshot(page)
     const storageBefore = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))
+    await page.getByRole('button', { name: 'Today’s plan', exact: true }).click()
+    assert.equal(await page.locator('.lmf-coach-question p').innerText(), 'What are we doing today?')
+    assert.match(await page.locator('#coach-answer').innerText(), /Crownforge|STRENGTH|Session|session|squat|Squat/)
+    const question = page.getByRole('textbox', { name: 'Ask your coach', exact: true })
+    await question.fill('Can I increase the weight?')
+    await page.getByRole('button', { name: 'Send question', exact: true }).click()
+    assert.match(await page.locator('#coach-answer').innerText(), /Load decision/)
+    await question.fill('What should I focus on? <img src=x onerror=alert(1)>')
+    await question.press('Control+Enter')
+    assert.equal(await page.locator('.lmf-coach-question img').count(), 0, 'Submitted questions are literal text')
+    assert.match(await page.locator('.lmf-coach-question p').innerText(), /<img src=x/)
+    assert.match(await page.locator('#coach-answer').innerText(), /Set focus/)
     await review.locator('[data-ai-coach-detail="checkin"] > summary').click()
     assert.match(await result.innerText(), /Start with your current situation/)
     assert.deepEqual(await review.locator('[data-ai-feedback]').evaluateAll(nodes => nodes.map(node => node.value)), Array(12).fill('unknown'))
@@ -132,6 +166,7 @@ try {
     await train.click()
     await page.waitForFunction(() => location.hash === '#/train' && !document.querySelector('#lmf-athlete-coach'))
     await page.goto(`${base}/#/coach`, { waitUntil: 'domcontentloaded' })
+    await openEvidence(page)
     await review.waitFor({ state: 'visible' })
     assert.doesNotMatch(await result.innerText(), /REVIEW FIRST/)
     assert.deepEqual(await snapshot(page), changedProgram, 'Native navigation must not apply a substitution or edit the program')
@@ -149,11 +184,11 @@ try {
     assert.deepEqual(await review.locator('[data-ai-feedback]').evaluateAll(nodes => nodes.map(node => node.value)), Array(12).fill('unknown'))
     assert.doesNotMatch(await coach.innerText(), /Old pain|Old unavailable rack|Coach decision QA/)
     const changedAthlete = await snapshot(page)
-    await page.reload(); await review.waitFor({ state: 'visible' })
+    await page.reload(); await openEvidence(page); await review.waitFor({ state: 'visible' })
     assert.doesNotMatch(await result.innerText(), /REVIEW FIRST/)
     assert.deepEqual(await snapshot(page), changedAthlete, 'Reload and changed-athlete review remain read-only')
     assert.deepEqual(errors, [])
-    report.checks.push({ viewport: width, result: 'PASS', coverage: ['explicit current feedback', 'no stale profile inference', 'source priority and provenance', 'unknown states and evidence counts', 'edit invalidates reviewed answers', '15-minute expiry', 'exercise/program/athlete invalidation', 'native Train link', 'route and reload reset', 'all-store immutability', 'no web-storage feedback', 'literal profile text', 'mobile fit and focus preservation'] })
+    report.checks.push({ viewport: width, result: 'PASS', coverage: ['explicit current feedback', 'no stale profile inference', 'source priority and provenance', 'unknown states and evidence counts', 'edit invalidates reviewed answers', '15-minute expiry', 'exercise/program/athlete invalidation', 'native Train link', 'route and reload reset', 'all-store immutability', 'no web-storage feedback', 'literal profile text', 'mobile fit and focus preservation', 'collapsed supporting panels', 'responsive Coach workspace', 'quick prompts and send/keyboard handlers', 'literal submitted questions'] })
     await context.close()
   }
 } catch (error) {
