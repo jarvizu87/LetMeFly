@@ -324,11 +324,17 @@ try {
 
   await auditProgressTabs(page)
 
-  for (const destination of ['EXERCISES', 'COACH', 'PROFILE', 'CALENDAR']) {
+  const secondaryDestinations = [
+    ['RESOURCES', 'EXERCISES'],
+    ['COACH', 'COACH'],
+    ['DATA & BACKUP', 'PROFILE'],
+    ['CALENDAR', 'CALENDAR'],
+  ]
+  for (const [controlLabel, screenName] of secondaryDestinations) {
     if (!(await clickLabel(page, 'MORE'))) continue
-    if (await clickLabel(page, destination)) {
-      await capture(page, destination)
-      await assertNoOverflow(page, destination)
+    if (await clickLabel(page, controlLabel)) {
+      await capture(page, screenName)
+      await assertNoOverflow(page, screenName)
     }
   }
 
