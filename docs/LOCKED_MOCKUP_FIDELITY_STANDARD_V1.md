@@ -87,9 +87,11 @@ Mockup sample data is illustrative only. The live athlete/program data is author
 The final locked-art correction is isolated in:
 
 - `overlays/ui-command-v2/batch-aq/locked-art-fidelity-v1.css`
-- `overlays/ui-command-v2/static/raizen-black-crown-ascension-v1.svg`
+- `overlays/ui-command-v2/static/raizen-black-crown-ascension-v1.jpg`
 - `ci/install-locked-art-fidelity-v1.sh`
 - `ci/audit-locked-art-fidelity-v1.mjs`
+
+The canonical Raizen/Fenrir raster is derived from the approved Raizen Black Crown Ascension reference rather than a generated placeholder or blurred reconstruction.
 
 This final layer loads after color harmonization so the locked artwork decisions cannot be silently watered down by earlier generic styling layers.
 
