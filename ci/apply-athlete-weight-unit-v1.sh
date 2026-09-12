@@ -12,11 +12,51 @@ done
 MAIN="$MAIN" FLOW="$FLOW" python3 - <<'PY'
 from pathlib import Path
 import os
+import re
 
 main_path = Path(os.environ['MAIN'])
 flow_path = Path(os.environ['FLOW'])
 main = main_path.read_text()
 flow = flow_path.read_text()
+
+# athletePreferences owns weight_unit. Hydrate that preference into the in-memory
+# athlete view before the first governed render instead of treating the base
+# athletes row as though it owned the unit.
+old_preference_row = """  const row = rows.filter(r => !r.deleted_at && r.athlete_id === athlete?.id).sort((a,b) => String(b.updated_at).localeCompare(String(a.updated_at)))[0] ?? null
+  const signature = JSON.stringify([athlete?.id ?? null, row])
+"""
+new_preference_row = """  const row = rows.filter(r => !r.deleted_at && r.athlete_id === athlete?.id).sort((a,b) => String(b.updated_at).localeCompare(String(a.updated_at)))[0] ?? null
+  const preferredWeightUnit = row?.weight_unit === 'kg' ? 'kg' : row?.weight_unit === 'lb' ? 'lb' : null
+  if (preferredWeightUnit && state.athlete?.id === athlete?.id) {
+    state.athlete = { ...state.athlete, weight_unit: preferredWeightUnit }
+  }
+  const signature = JSON.stringify([athlete?.id ?? null, row])
+"""
+if main.count(old_preference_row) != 1:
+    raise SystemExit(f'Expected one athlete preference hydration boundary, found {main.count(old_preference_row)}')
+main = main.replace(old_preference_row, new_preference_row, 1)
+
+old_boot = """    if (state.athlete) {
+      try {
+        const recovered = await recoverPendingWorkoutProgression(state.athlete.id)
+"""
+new_boot = """    if (state.athlete) {
+      await refreshBarbellSettings().catch(() => undefined)
+      try {
+        const recovered = await recoverPendingWorkoutProgression(state.athlete.id)
+"""
+if main.count(old_boot) != 1:
+    raise SystemExit(f'Expected one boot athlete boundary, found {main.count(old_boot)}')
+main = main.replace(old_boot, new_boot, 1)
+
+# A brand-new athlete must get the same preference hydration before the first
+# post-onboarding render. Match the create call rather than depending on local
+# variable names inside the onboarding handler.
+onboard_pattern = re.compile(r"(state\.athlete\s*=\s*await\s+createLocalAthlete\([^\n]+\)\n)(\s*state\.programInstance\s*=\s*await\s+getCurrentProgramInstance\(state\.athlete\.id\))")
+onboard_matches = list(onboard_pattern.finditer(main))
+if len(onboard_matches) != 1:
+    raise SystemExit(f'Expected one onboarding athlete boundary, found {len(onboard_matches)}')
+main = onboard_pattern.sub(r"\1  await refreshBarbellSettings().catch(() => undefined)\n\2", main, count=1)
 
 old_load = """  const load = set.load_value ?? ''
   const rpe = set.rpe ?? ''
@@ -74,10 +114,12 @@ main_path.write_text(main)
 flow_path.write_text(flow)
 PY
 
+grep -Fq "const preferredWeightUnit = row?.weight_unit === 'kg'" "$MAIN"
+grep -Fq "await refreshBarbellSettings().catch(() => undefined)" "$MAIN"
 grep -Fq "const storedUnit = set.load_unit === 'kg'" "$MAIN"
 grep -Fq 'data-load-unit="${esc(loadUnit)}"' "$MAIN"
 grep -Fq "row.dataset.loadUnit === 'kg' ? 'kg' : 'lb'" "$MAIN"
 grep -Fq "const savedUnit = saved && typeof saved === 'object'" "$MAIN"
 grep -Fq 'dataset?.loadUnit' "$FLOW"
 
-echo "LetMeFly athlete weight-unit runtime + Bar Loader default: PASS"
+echo "LetMeFly athlete weight-unit preference hydration + runtime conversion + Bar Loader default: PASS"
