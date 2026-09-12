@@ -27,8 +27,9 @@ old_preference_row = """  const row = rows.filter(r => !r.deleted_at && r.athlet
 """
 new_preference_row = """  const row = rows.filter(r => !r.deleted_at && r.athlete_id === athlete?.id).sort((a,b) => String(b.updated_at).localeCompare(String(a.updated_at)))[0] ?? null
   const preferredWeightUnit = row?.weight_unit === 'kg' ? 'kg' : row?.weight_unit === 'lb' ? 'lb' : null
-  if (preferredWeightUnit && state.athlete?.id === athlete?.id) {
-    state.athlete = { ...state.athlete, weight_unit: preferredWeightUnit }
+  if (preferredWeightUnit && athlete && state.athlete && state.athlete.id === athlete.id) {
+    const currentAthlete: LocalDomainRecord = state.athlete
+    state.athlete = { ...currentAthlete, weight_unit: preferredWeightUnit }
   }
   const signature = JSON.stringify([athlete?.id ?? null, row])
 """
