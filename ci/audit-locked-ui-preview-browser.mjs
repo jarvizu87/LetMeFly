@@ -74,6 +74,8 @@ try {
         assert.equal(await page.locator('.lmf-more-utilities-v2').count(), 1, 'Repeated UI refreshes must not nest utility tiles')
         const tileHeight = await page.locator('.lmf-more-utilities-v2').evaluate(el=>el.getBoundingClientRect().height)
         assert.ok(tileHeight < 350, 'Utilities stays within a normal card height')
+        const utilityTextWidth=await page.locator('.lmf-more-utilities-link-v2 .lmf-more-card-copy-v1').evaluate(el=>el.getBoundingClientRect().width)
+        assert.ok(utilityTextWidth >= 100, 'Utilities text must not inherit the old icon-column width')
         await page.locator('[data-lmf-bar-loader-open="more"]').click()
         await page.locator('.lmf-bar-modal').waitFor({state:'visible'})
         await page.keyboard.press('Escape')

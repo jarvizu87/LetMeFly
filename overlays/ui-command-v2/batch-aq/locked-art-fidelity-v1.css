@@ -208,7 +208,7 @@ html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner::before
 .lmf-profile-character-dossier-v1 .lmf-profile-stat:nth-child(n+4){display:flex!important}
 
 /* Utilities owns the existing native loader, keeping More a nine-tile hub. */
-.lmf-more-utilities-v2{display:flex!important;flex-direction:column;align-items:stretch!important;gap:12px!important}
+.lmf-more-grid-v1.command-menu-grid>.lmf-more-utilities-v2{display:flex!important;flex-direction:column;align-items:stretch!important;gap:12px!important}
 .lmf-more-utilities-link-v2{display:flex;align-items:flex-start;gap:14px;min-width:0;text-decoration:none;color:inherit}
 .lmf-more-utilities-link-v2>i,.lmf-more-utilities-link-v2 em{display:none!important}
 .lmf-more-utilities-v2 .lmf-bar-loader-more-card{display:flex!important;align-items:center!important;justify-content:center;gap:8px;width:100%;min-height:38px!important;padding:9px!important;margin:0;border:1px solid rgba(255,64,80,.3);border-radius:7px;background:rgba(227,27,47,.1);text-align:left;box-shadow:none}
