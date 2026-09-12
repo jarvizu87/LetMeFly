@@ -61,17 +61,34 @@ async function activeAthleteSafetyNotes() {
 
 function renderSafetyResponse(response) {
   const host = document.querySelector('#coach-answer')
-  if (!host || !response) return
+  if (!host || !response) return false
   host.dataset.coachSafetyGuard = response.title
   host.innerHTML = `<div class="coach-message-mark" aria-hidden="true">♛</div><div><span>${response.label}</span><h2>${response.title}</h2><p>${response.body}</p></div>`
+  return true
 }
 
-async function applySafetyGuard(question) {
+function handleExplicitSafetyQuestion(question, event) {
+  const kind = classifyCoachSafetyContext(question)
+  if (!kind) return false
+  const rendered = renderSafetyResponse(coachSafetyResponse(kind))
+  if (!rendered) return false
+  // Safety outranks descriptive exercise/substitution handlers. Prevent a generic
+  // downstream response from briefly or permanently replacing the safety answer.
+  event?.preventDefault?.()
+  event?.stopImmediatePropagation?.()
+  return true
+}
+
+async function applyProfileSafetyContext(question) {
   try {
+    // Explicit safety language is handled synchronously above. Profile notes are
+    // supplemental context only and never mutate program/workout/private data.
+    if (classifyCoachSafetyContext(question)) return
     const notes = await activeAthleteSafetyNotes()
-    const kind = classifyCoachSafetyContext(`${question ?? ''} ${notes}`)
+    const kind = classifyCoachSafetyContext(notes)
     if (!kind) return
-    renderSafetyResponse(coachSafetyResponse(kind))
+    const relevantQuestion = /\b(pain|hurt|discomfort|limitation|substitut|swap|replace|range|squat|knee|hip|train around)\b/i.test(String(question ?? ''))
+    if (relevantQuestion) renderSafetyResponse(coachSafetyResponse(kind))
   } catch (error) {
     console.warn('Coach safety context unavailable', error)
   }
@@ -84,17 +101,19 @@ function submittedQuestion(control) {
 }
 
 if (typeof document !== 'undefined' && typeof window !== 'undefined') {
-  // Run after native Coach handlers. This guard is read-only: it changes only the
-  // displayed safety response and never edits the program, workout, or athlete data.
+  // Window capture executes before document-level Coach interceptors. Explicit
+  // safety questions own the event; ordinary Coach questions remain untouched.
   window.addEventListener('click', event => {
     const control = event.target?.closest?.('.coach-shell [data-coach-prompt], .coach-shell [data-action="ask-coach"]')
     if (!control || control.disabled) return
     const question = submittedQuestion(control)
-    setTimeout(() => { void applySafetyGuard(question) }, 0)
+    if (handleExplicitSafetyQuestion(question, event)) return
+    setTimeout(() => { void applyProfileSafetyContext(question) }, 0)
   }, true)
   window.addEventListener('keydown', event => {
     if (event.target?.id !== 'coach-question' || event.key !== 'Enter' || !(event.ctrlKey || event.metaKey) || event.isComposing) return
     const question = event.target.value || ''
-    setTimeout(() => { void applySafetyGuard(question) }, 0)
+    if (handleExplicitSafetyQuestion(question, event)) return
+    setTimeout(() => { void applyProfileSafetyContext(question) }, 0)
   }, true)
 }
