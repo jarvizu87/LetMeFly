@@ -1,0 +1,57 @@
+name: Six-Athlete Release Gate Contract
+
+on:
+  push:
+    branches:
+      - main
+      - audit/six-athlete-release-gate-v1
+    paths:
+      - 'docs/SIX_ATHLETE_RELEASE_AUDIT_STANDARD_V1.md'
+      - 'ci/six-athlete-release-audit.v1.json'
+      - 'ci/six-athlete-release-audit-results.template.json'
+      - 'ci/validate-six-athlete-release-audit.mjs'
+      - '.github/workflows/six-athlete-release-gate.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/SIX_ATHLETE_RELEASE_AUDIT_STANDARD_V1.md'
+      - 'ci/six-athlete-release-audit.v1.json'
+      - 'ci/six-athlete-release-audit-results.template.json'
+      - 'ci/validate-six-athlete-release-audit.mjs'
+      - '.github/workflows/six-athlete-release-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: six-athlete-release-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Validate six-athlete fixture and release rules
+        run: node ci/validate-six-athlete-release-audit.mjs
+
+      - name: Validate result template JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('ci/six-athlete-release-audit-results.template.json','utf8')); console.log('six-athlete result template: PASS')"
+
+      - name: Confirm audit contract remains non-production
+        run: |
+          set -euo pipefail
+          ! grep -Rq '\[release netlify\]' docs/SIX_ATHLETE_RELEASE_AUDIT_STANDARD_V1.md ci/six-athlete-release-audit.v1.json ci/six-athlete-release-audit-results.template.json ci/validate-six-athlete-release-audit.mjs
+          echo 'six-athlete audit contract does not request a production deploy: PASS'
