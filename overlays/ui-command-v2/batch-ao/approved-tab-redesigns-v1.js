@@ -10,7 +10,11 @@
 
   const clean = (value) => String(value ?? '').trim()
   const route = () => location.hash.replace(/^#\//, '').split(/[?#]/)[0]
-  const byText = (selector, rx) => [...document.querySelectorAll(selector)].find((node) => rx.test(clean(node.textContent))) || null
+
+  function findPageHead(title) {
+    const rx = new RegExp(`^${title}$`, 'i')
+    return [...document.querySelectorAll('.page-head.cinematic-head,.page-head')].find((node) => rx.test(clean(node.querySelector('h1')?.textContent))) || null
+  }
 
   function currentRoute() {
     const value = route()
@@ -26,7 +30,7 @@
   }
 
   function mountProgram() {
-    const head = document.querySelector('.program-page-head') || byText('.page-head.cinematic-head', /^\s*PROGRAM\b/i)
+    const head = document.querySelector('.program-page-head') || findPageHead('PROGRAM')
     const hero = document.querySelector('.program-hero')
     if (!(head instanceof HTMLElement) || !(hero instanceof HTMLElement)) return
 
@@ -69,7 +73,7 @@
   }
 
   function mountProgress() {
-    const head = document.querySelector('.progress-page-head') || byText('.page-head.cinematic-head', /^\s*PROGRESS\b/i)
+    const head = document.querySelector('.progress-page-head') || findPageHead('PROGRESS')
     const dashboard = document.getElementById('lmf-progress-dashboard-v1') || document.querySelector('.lmf-progress-dashboard')
     if (!(head instanceof HTMLElement) || !(dashboard instanceof HTMLElement)) return
 
@@ -117,7 +121,7 @@
   }
 
   function mountExercises() {
-    const head = byText('.page-head.cinematic-head', /^\s*EXERCISES\b/i) || document.querySelector('.exercise-page-head')
+    const head = document.querySelector('.exercise-page-head') || findPageHead('EXERCISES')
     const search = document.querySelector('.exercise-search-card')
     const library = document.querySelector('.exercise-library')
     if (!(head instanceof HTMLElement) || !(search instanceof HTMLElement) || !(library instanceof HTMLElement)) return
@@ -164,18 +168,28 @@
   }
 
   function goalRow(label, value, empty) {
-    const div = document.createElement('div')
-    div.innerHTML = `<span>${label}</span><strong>${clean(value) || empty}</strong>`
-    return div
+    const row = document.createElement('div')
+    const heading = document.createElement('span')
+    const detail = document.createElement('strong')
+    heading.textContent = label
+    detail.textContent = clean(value) || empty
+    row.append(heading, detail)
+    return row
   }
 
   function refreshGoalTracker(section) {
     const tracker = section.querySelector('.lmf-profile-goal-tracker-v1')
     if (!(tracker instanceof HTMLElement)) return
+    const primary = profileValue('primaryGoal')
+    const strength = profileValue('strengthGoals')
+    const development = profileValue('developmentPriorities')
+    const signature = JSON.stringify([primary, strength, development])
+    if (tracker.dataset.lmfGoalSignature === signature) return
+    tracker.dataset.lmfGoalSignature = signature
     tracker.replaceChildren(
-      goalRow('Primary Goal', profileValue('primaryGoal'), 'Add your primary goal below'),
-      goalRow('Strength Targets', profileValue('strengthGoals'), 'Add strength targets below'),
-      goalRow('Development Focus', profileValue('developmentPriorities'), 'Add development priorities below')
+      goalRow('Primary Goal', primary, 'Add your primary goal below'),
+      goalRow('Strength Targets', strength, 'Add strength targets below'),
+      goalRow('Development Focus', development, 'Add development priorities below')
     )
   }
 
@@ -207,7 +221,7 @@
 
       const goals = document.createElement('article')
       goals.className = 'lmf-profile-goals-card-v1'
-      goals.innerHTML = '<header><div><span>GOAL TRACKER</span><strong>What we are building toward</strong></div><a href="#lmf-profile-goals-fields-v1">EDIT GOALS</a></header><div class="lmf-profile-goal-tracker-v1"></div>'
+      goals.innerHTML = '<header><div><span>GOAL TRACKER</span><strong>What we are building toward</strong></div><button type="button" data-lmf-profile-goals-scroll>EDIT GOALS</button></header><div class="lmf-profile-goal-tracker-v1"></div>'
       dossier.appendChild(goals)
 
       const goalsTitle = [...section.querySelectorAll('.lmf-profile-section-title')].find((node) => /GOALS\s*&\s*DEVELOPMENT/i.test(clean(node.textContent)))
@@ -250,6 +264,12 @@
       const id = scroll.dataset.lmfApprovedScroll
       const target = id ? document.getElementById(id) : null
       if (target) target.scrollIntoView({ behavior:'smooth', block:'start' })
+      return
+    }
+
+    const goalScroll = event.target instanceof Element ? event.target.closest('[data-lmf-profile-goals-scroll]') : null
+    if (goalScroll instanceof HTMLButtonElement) {
+      document.getElementById('lmf-profile-goals-fields-v1')?.scrollIntoView({ behavior:'smooth', block:'start' })
       return
     }
 
