@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET="${1:?reconstructed app root required}"
 MAIN="$TARGET/src/main.ts"
-RECAP="$TARGET/public/ui/workout-recap-ui.mjs"
+# The recap UI is installed into dist later in the release pipeline. Patch the
+# canonical overlay source now so the ordinary installer copies the fixed file.
+RECAP="$ROOT_DIR/overlays/workout-recap-v1/workout-recap-ui.mjs"
 
 for file in "$MAIN" "$RECAP"; do
   test -s "$file" || { echo "Missing recap completion target: $file" >&2; exit 1; }
