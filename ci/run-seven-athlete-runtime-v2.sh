@@ -26,6 +26,11 @@ new = "developmentPriorities: assertions.slice(0, 3).join('; '),"
 if source.count(old) != 1:
     raise SystemExit(f'Expected one seven-athlete assertion mapping boundary, found {source.count(old)}')
 source = source.replace(old, new, 1)
+old = "equipmentAvailable: row.barbell.unit === 'kg' ? 'Metric barbell and metric plate inventory' : '45 lb barbell and standard plate inventory',"
+new = "equipment: row.barbell.unit === 'kg' ? 'Metric barbell and metric plate inventory' : '45 lb barbell and standard plate inventory',"
+if source.count(old) != 1:
+    raise SystemExit(f'Expected one seven-athlete equipment profile boundary, found {source.count(old)}')
+source = source.replace(old, new, 1)
 old = """  index,
 }))
 """
@@ -42,4 +47,6 @@ PY
 node --check "$TMP"
 grep -Fq "row.scenarios?.flatMap" "$TMP"
 grep -Fq "developmentPriorities: assertions.slice" "$TMP"
+grep -Fq "equipment: row.barbell.unit" "$TMP"
+! grep -Fq "equipmentAvailable:" "$TMP"
 node "$TMP" "$@"
