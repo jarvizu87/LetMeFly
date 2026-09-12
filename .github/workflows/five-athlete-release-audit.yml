@@ -1,0 +1,116 @@
+name: LetMeFly Five-Athlete Release Audit
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ci/five-athlete-fixtures.mjs'
+      - 'ci/five-athlete-seed.mjs'
+      - 'ci/audit-five-athlete-release-browser.mjs'
+      - 'ci/run-five-athlete-release-audit-v2.sh'
+      - 'ci/apply-athlete-weight-unit-v1.sh'
+      - 'ci/apply-workout-recap-completion-await-v1.sh'
+      - 'ci/build-command-v2-v2-1.sh'
+      - '.github/workflows/five-athlete-release-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: five-athlete-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+
+jobs:
+  five-athlete-release-gate:
+    name: Five athletes — UI, isolation, mutation safety
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Reconstruct exact governed release candidate without deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > "$RUNNER_TEMP/assembly.sh"
+          import pathlib, tomllib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash "$RUNNER_TEMP/assembly.sh"
+          echo 'Production deployment remains held.'
+
+      - name: Install browser harness dependency only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+
+      - name: Validate five-athlete gate and source safety contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check ci/five-athlete-fixtures.mjs
+          node --check ci/five-athlete-seed.mjs
+          node --check ci/audit-five-athlete-release-browser.mjs
+          bash -n ci/run-five-athlete-release-audit-v2.sh
+          bash -n ci/apply-athlete-weight-unit-v1.sh
+          bash -n ci/apply-workout-recap-completion-await-v1.sh
+          node ci/audit-athlete-program-progression.mjs .build-src/letmefly_app
+          node ci/audit-workout-prescription-fidelity-v1.mjs .build-src/letmefly_app
+
+      - name: Run all five athletes through real release-candidate UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          bash ci/run-five-athlete-release-audit-v2.sh .build-src/letmefly_app
+
+      - name: Re-run governed workout-only substitution mutation guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >"$RUNNER_TEMP/five-athlete-substitution-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..40}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 0.25
+          done
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          node ci/audit-workout-substitution-today-browser-v3.mjs
+
+      - name: Confirm QA identities never ship
+        shell: bash
+        run: |
+          set -euo pipefail
+          for marker in 'QA 01 Rook' 'QA 02 Forge' 'QA 03 Titan' 'QA 04 Metric' 'QA 05 Recovery' 'QA-ROOK-COACH-MARKER' 'QA-FORGE-COACH-MARKER' 'QA-TITAN-COACH-MARKER' 'QA-METRIC-COACH-MARKER' 'QA-RECOVERY-COACH-MARKER'; do
+            if grep -R -Fq "$marker" .build-src/letmefly_app/dist; then
+              echo "Synthetic QA data leaked into dist: $marker" >&2
+              exit 1
+            fi
+          done
+          echo 'Five-athlete QA identities remain test-only: PASS'
+
+      - name: Publish five-athlete release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: five-athlete-release-audit-${{ github.run_id }}
+          path: |
+            .build-src/letmefly_app/FIVE_ATHLETE_RELEASE_AUDIT
+            .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT
+          if-no-files-found: warn
+          retention-days: 14

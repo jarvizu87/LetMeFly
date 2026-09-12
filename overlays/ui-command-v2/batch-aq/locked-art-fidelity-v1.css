@@ -139,3 +139,7 @@ html[data-lmf-approved-route='more'] .lmf-more-brand-copy-v1{
   html[data-lmf-approved-route='profile'] .lmf-profile-character-visual-v1{min-height:360px!important}
   html[data-lmf-approved-route='coach'] .lmf-coach-workspace .coach-banner-copy{max-width:58%!important}
 }
+
+/* Final Progress scroll ownership. This stylesheet is intentionally loaded after
+   the approved UI and color layers, so no later visual layer can relock the board. */
+.progress-board{overflow-y:auto!important}
