@@ -37,12 +37,22 @@ try {
     const exercise=page.locator('.active-exercise').filter({has:page.locator('h3',{hasText:/^Front Squat$/})})
     const row=exercise.locator('[data-set-id]').first()
     const setId=await row.getAttribute('data-set-id')
+    if(width===1440)await page.locator('[data-lmf-desktop-workspace] #swipe-viewport [data-set-id]').first().waitFor({state:'attached'})
     // Enter the target section through the same visible control an athlete uses.
     // Calling the review bridge during initial workout mounting can race the
     // viewport's readiness selection. The actual recap correction is tested below.
     const sectionIndex=await row.evaluate(el=>Array.from(document.querySelectorAll('#swipe-viewport > .swipe-page')).indexOf(el.closest('.swipe-page')))
     await page.locator(`#session-track [data-session-index="${sectionIndex}"]`).click()
-    await page.waitForFunction(id=>document.querySelector(`[data-set-id="${id}"]`)?.closest('.swipe-page')?.classList.contains('active-page'),setId)
+    // Native navigation sets the active class before its smooth scroll finishes.
+    // Filling a field mid-slide invokes Playwright's own scrolling and can stop
+    // the viewport on Warm-Up. Wait for the actual target pane to reach center.
+    await page.waitForFunction(id=>{
+      const pane=document.querySelector(`[data-set-id="${id}"]`)?.closest('.swipe-page')
+      const viewport=document.querySelector('#swipe-viewport')
+      if(!pane?.classList.contains('active-page')||!viewport)return false
+      const a=pane.getBoundingClientRect(),v=viewport.getBoundingClientRect()
+      return a.width>0&&Math.abs(a.left+a.width/2-v.left-v.width/2)<2
+    },setId)
     if(!await exercise.evaluate(el=>el.classList.contains('lmf-flow-active')))await exercise.locator('.lmf-compact-summary').click()
     assert.equal(await row.getAttribute('data-load-unit'),unit,'Visible load entry uses the athlete unit')
     await row.locator('.reps-input').fill('5');await row.locator('.load-input').fill('100')
