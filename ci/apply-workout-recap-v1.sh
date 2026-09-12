@@ -34,6 +34,7 @@ s+='''
     const day = Number(String(instance?.current_day_key ?? '').replace('day-', ''))
     const next = instance?.status === 'active' && !pending && program ? getProgramDay(program, week, day) : null
     return { athleteId: state.athlete?.id ?? null, sessionId: state.workout?.session.id ?? null,
+      weightUnit: state.athlete?.weight_unit === 'kg' ? 'kg' : 'lb',
       cloudLabel: document.querySelector('#sync-pill')?.textContent?.trim() ?? 'Status unavailable',
       next: next ? `${program} · Week ${week} · Day ${day} · ${next.title}` : null }
   },
