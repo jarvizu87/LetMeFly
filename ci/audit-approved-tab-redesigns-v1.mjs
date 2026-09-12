@@ -46,6 +46,8 @@ for (const marker of [
   '.lmf-approved-exercises-layout-v1',
   '.lmf-profile-character-sheet-v1',
   '.lmf-profile-v2-avatar{display:none!important}',
+  "html[data-lmf-approved-route='exercises'] .exercise-library{width:100%!important;max-width:100%!important;min-width:0!important}",
+  "html[data-lmf-approved-route='exercises'] body{overflow-x:clip}",
   '@media(max-width:720px)',
 ]) {
   assert(css.includes(marker), `Approved redesign CSS missing marker: ${marker}`)
