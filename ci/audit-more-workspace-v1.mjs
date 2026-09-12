@@ -49,6 +49,8 @@ for (const forbidden of ['localStorage','sessionStorage','indexedDB','fetch(','X
 assert(moreCss.includes('--lmf-more-accent:#a855f7'), 'More approved purple accent missing')
 assert(moreCss.includes('.lmf-more-grid-v1.command-menu-grid'), 'More desktop/mobile card grid missing')
 assert(moreCss.includes('@media(max-width:720px)'), 'More mobile behavior missing')
+assert(moreCss.includes("url('/ui/home-mountain-cinematic-v2.webp')"), 'More hero must reuse the canonical Home mountain asset')
+assert(!moreCss.includes("url('/ui/mountain-command-cinematic-v2.webp')"), 'More hero references obsolete/nonexistent mountain asset path')
 assert(consistencyCss.includes('--lmf-ui-accent:#a855f7'), 'Shared purple theme token missing')
 assert(consistencyCss.includes('.nav-item.active'), 'Shared active navigation treatment missing')
 assert(consistencyCss.includes('[data-exercise-art]'), 'Exercise-art consistency guard missing')
