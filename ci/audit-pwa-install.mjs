@@ -6,8 +6,9 @@ import fs from 'node:fs'
 const script = fs.readFileSync(new URL('../overlays/ui-command-v2/batch-s/pwa-install.js', import.meta.url), 'utf8')
 const settle = () => new Promise(resolve => setImmediate(resolve))
 
-function visit({mode = 'browser', ios = false, referrer = '', search = '', storage = new Map(), blockedStorage = false} = {}) {
+function visit({mode = 'browser', ios = false, referrer = '', search = '', storage = new Map(), blockedStorage = false, delayWrites = false} = {}) {
   const listeners = new Map(), media = new Map(), timers = [], elements = [], channelListeners = new Map()
+  const pendingWrites = []
   const node = () => {
     const children = new Map(), handlers = new Map()
     return {
@@ -35,14 +36,19 @@ function visit({mode = 'browser', ios = false, referrer = '', search = '', stora
           request.result = {
             close() {},
             transaction() {
-              return {objectStore() { return {
+              const tx = {objectStore() { return {
                 get(key) {
                   const read = {}
                   queueMicrotask(() => { read.result = storage.get(key); read.onsuccess?.() })
                   return read
                 },
-                put(value, key) { queueMicrotask(() => storage.set(key, value)) },
+                put(value, key) { queueMicrotask(() => {
+                  const commit = () => { storage.set(key, value); tx.oncomplete?.() }
+                  if (delayWrites) pendingWrites.push(commit)
+                  else commit()
+                }) },
               } }}
+              return tx
             },
           }
           request.onsuccess?.()
@@ -64,6 +70,7 @@ function visit({mode = 'browser', ios = false, referrer = '', search = '', stora
   vm.runInNewContext(script, {window, navigator, document, URLSearchParams, URL, setTimeout(fn) { timers.push(fn) }, alert() {}})
   return {
     storage, api:window.__LMF_PWA_INSTALL__,
+    commitWrites() { for (const commit of pendingWrites.splice(0)) commit() },
     async start() { await settle(); for (const fn of timers.splice(0)) fn(); await settle() },
     banner() { return elements.findLast(el => el.id === 'lmf-install-banner' && !el.removed) },
     emit(name, event = {}) { listeners.get(name)?.(event) },
@@ -101,7 +108,7 @@ test('dismissing survives reload and a late install offer; a requested install r
   const first = visit()
   await first.start()
   assert.ok(first.banner())
-  first.banner().querySelector('.lmf-install-dismiss').click()
+  await first.banner().querySelector('.lmf-install-dismiss').click()
   await settle()
   const reloaded = visit({storage:first.storage})
   await reloaded.start()
@@ -115,6 +122,21 @@ test('dismissing survives reload and a late install offer; a requested install r
   await installedReload.start()
   assert.equal(installedReload.banner(), undefined)
   assert.equal(installedReload.api.canInstall(), false)
+})
+
+test('dismissal is acknowledged only after a delayed preference commit, then survives immediate reload', async () => {
+  const page = visit({delayWrites:true})
+  await page.start()
+  const dismissal = page.banner().querySelector('.lmf-install-dismiss').click()
+  await settle()
+  assert.ok(page.banner(),'The dismissal has not been acknowledged while storage is pending')
+  assert.equal(page.storage.get('lmf-pwa-install-dismissed-v1'),undefined)
+  page.commitWrites()
+  await dismissal
+  assert.equal(page.banner(),undefined)
+  const reloaded = visit({storage:page.storage})
+  await reloaded.start()
+  assert.equal(reloaded.banner(),undefined)
 })
 
 test('installation, display-mode changes and another tab dismiss the visible banner immediately', async () => {

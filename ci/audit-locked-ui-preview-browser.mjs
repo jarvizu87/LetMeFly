@@ -95,6 +95,8 @@ try {
     const dismiss = page.getByRole('button', {name:'Dismiss install prompt',exact:true})
     await dismiss.waitFor({state:'visible',timeout:5000})
     await dismiss.click()
+    // The UI acknowledges dismissal after its IndexedDB transaction commits.
+    await page.locator('#lmf-install-banner').waitFor({state:'detached'})
     await page.reload()
     await page.waitForFunction(applicationBootState)
     // Wait past the banner's delayed invitation, proving dismissal survives a real reload.

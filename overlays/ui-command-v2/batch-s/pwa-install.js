@@ -36,11 +36,13 @@
   const writePreference = async (key, value) => {
     const db = await preferencesDB
     if (!db) return
-    try {
-      const tx = db.transaction('preferences', 'readwrite')
-      tx.objectStore('preferences').put(value, key)
-      tx.onerror = () => {} // The in-memory preference still lasts for this visit.
-    } catch { /* Restricted storage still honors the choice for this visit. */ }
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction('preferences', 'readwrite')
+        tx.oncomplete = tx.onerror = tx.onabort = () => resolve()
+        tx.objectStore('preferences').put(value, key)
+      } catch { resolve() } // Restricted storage still honors this visit's choice.
+    })
   }
   let installed = false
   let dismissed = false
@@ -55,9 +57,9 @@
     })
   let preferenceChannel = null
   try { preferenceChannel = new window.BroadcastChannel('letmefly-device-ui-v1') } catch { /* Optional cross-tab updates. */ }
-  const rememberPreference = (key, value) => {
-    void writePreference(key, value)
-    preferenceChannel?.postMessage({key, value})
+  const rememberPreference = async (key, value) => {
+    await writePreference(key, value)
+    try { preferenceChannel?.postMessage({key, value}) } catch { /* Optional cross-tab updates. */ }
   }
   const isInstalled = () => installed || isStandalone()
 
@@ -89,11 +91,14 @@
     removeBanner()
   }
 
-  const dismissBanner = () => {
+  const dismissBanner = async () => {
     dismissedChanged = true
     dismissed = true
-    rememberPreference(dismissedKey, true)
-    removeBanner()
+    const currentBanner = banner
+    currentBanner?.setAttribute('aria-busy', 'true')
+    // A disappearing banner acknowledges a completed save, so reload keeps it hidden.
+    await rememberPreference(dismissedKey, true)
+    if (banner === currentBanner) removeBanner()
   }
 
   const promptInstall = async () => {
@@ -107,7 +112,7 @@
         markInstalled()
         return true
       }
-      dismissBanner()
+      await dismissBanner()
     } catch {
       removeBanner()
     }
