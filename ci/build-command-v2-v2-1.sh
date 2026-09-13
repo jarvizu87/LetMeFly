@@ -42,6 +42,10 @@ bash "$ROOT_DIR/ci/apply-magic-link-auth-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-cloud-bootstrap-v2.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-conflict-recovery-v1.sh" "$TARGET"
 
+# Native password access uses the existing account, session and sync boundaries.
+# No email/SMS request, provider purchase or account mutation occurs at build.
+bash "$ROOT_DIR/ci/apply-password-access-v1.sh" "$TARGET"
+
 # Activate only after the SMS provider and existing account number are verified.
 # No provider subscription, phone binding or account migration occurs at build.
 if [[ "${VITE_PHONE_AUTH_ENABLED:-false}" == "true" ]]; then

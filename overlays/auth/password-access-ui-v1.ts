@@ -1,0 +1,81 @@
+// This view receives native account operations. It never stores credentials.
+export interface PasswordAccessContext {
+  configured: boolean
+  userId: string | null
+  email: string | null
+  signIn(email: string, password: string): Promise<void>
+  setPassword(userId: string, password: string, confirmation: string): Promise<void>
+}
+
+function escape(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+export function passwordAccessKey(context: PasswordAccessContext): string {
+  return context.configured ? context.userId || 'signed-out' : 'unconfigured'
+}
+
+export function passwordAccessMarkup(context: PasswordAccessContext): string {
+  if (!context.configured) return ''
+  const signedIn = Boolean(context.userId)
+  return `<section class="card lmf-password-access" data-password-account="${escape(passwordAccessKey(context))}">
+    <div class="page-kicker">LetMeFly account</div>
+    <h2>${signedIn ? 'Set your LetMeFly password' : 'Sign in with your password'}</h2>
+    <p class="muted">${signedIn ? 'Choose a password for this signed-in account. Your training history and pictures stay with the same account.' : 'Use your existing LetMeFly account. Your email address identifies the account; this form does not send email or text codes.'}</p>
+    <form data-password-form="${signedIn ? 'setup' : 'signin'}">
+      <div class="form-grid">
+        <div class="field"><label for="lmf-account-email">Account email</label><input id="lmf-account-email" class="input" type="email" autocomplete="username" value="${escape(context.email || '')}" ${signedIn ? 'readonly' : 'required'}></div>
+        <div class="field"><label for="lmf-account-password">${signedIn ? 'New password' : 'Password'}</label><input id="lmf-account-password" class="input" type="password" autocomplete="${signedIn ? 'new-password' : 'current-password'}" ${signedIn ? 'minlength="12"' : ''} required></div>
+        ${signedIn ? '<div class="field"><label for="lmf-account-password-confirm">Confirm new password</label><input id="lmf-account-password-confirm" class="input" type="password" autocomplete="new-password" minlength="12" required></div>' : ''}
+      </div>
+      ${signedIn ? '<p class="source-note">Use at least 12 characters. This is separate from your Supabase dashboard password.</p>' : '<p class="source-note">Never set a password? Open Profile on a device already signed into your LetMeFly cloud account to set one.</p>'}
+      <div class="btn-row"><button class="btn primary" type="submit" data-password-submit>${signedIn ? 'SET PASSWORD' : 'SIGN IN'}</button></div>
+      <p class="source-note" data-password-feedback role="status" aria-live="polite"></p>
+    </form>
+  </section>`
+}
+
+function failureMessage(error: unknown): string {
+  const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : ''
+  if (code === 'reauthentication_needed' || code === 'reauthentication_not_valid') {
+    return 'Your account requires a fresh identity check before changing the password. No email or text was sent. Keep this session open for account recovery.'
+  }
+  if (code === 'current_password_required' || code === 'current_password_invalid') {
+    return 'Your account requires the current password before it can be changed. Keep this session open for account recovery.'
+  }
+  if (code === 'invalid_credentials') return 'The account email or password was not accepted. Check your details and try again.'
+  return error instanceof Error ? error.message : 'The request could not be completed. Please try again.'
+}
+
+export function bindPasswordAccess(host: HTMLElement, context: PasswordAccessContext): void {
+  const form = host.querySelector<HTMLFormElement>('[data-password-form]')
+  if (!form || form.dataset.passwordBound) return
+  form.dataset.passwordBound = 'true'
+  form.addEventListener('submit', async event => {
+    event.preventDefault()
+    const button = form.querySelector<HTMLButtonElement>('[data-password-submit]')
+    const feedback = form.querySelector<HTMLElement>('[data-password-feedback]')
+    const email = form.querySelector<HTMLInputElement>('#lmf-account-email')
+    const password = form.querySelector<HTMLInputElement>('#lmf-account-password')
+    const confirmation = form.querySelector<HTMLInputElement>('#lmf-account-password-confirm')
+    if (!button || !password || !feedback || button.disabled || !form.reportValidity()) return
+    button.disabled = true
+    form.setAttribute('aria-busy', 'true')
+    feedback.textContent = context.userId ? 'Setting your password…' : 'Signing in…'
+    try {
+      if (context.userId) {
+        await context.setPassword(context.userId, password.value, confirmation?.value || '')
+        if (form.isConnected) feedback.textContent = 'Password saved. Use your account email and this password to sign in on another device.'
+      } else {
+        await context.signIn(email?.value || '', password.value)
+      }
+    } catch (error) {
+      if (form.isConnected) feedback.textContent = failureMessage(error)
+    } finally {
+      password.value = ''
+      if (confirmation) confirmation.value = ''
+      form.removeAttribute('aria-busy')
+      button.disabled = false
+    }
+  })
+}

@@ -24,7 +24,7 @@ replace(auth,'export class LetMeFlyAuthService {','''export class LetMeFlyAuthSe
 vault=root/'auth/private-vault-controller.ts'
 s=vault.read_text()
 start=s.index('  async verifyCode(')
-end=s.index('  async syncNow()',start)
+end=s.index('\n  async ',start+5)
 phone=s[start:end].replace('async verifyCode(', 'async verifyPhoneCode(',1).replace('email: string,','phone: string,',1).replace('this.auth.verifyEmailOtp(email, token)','this.auth.verifyPhoneOtp(phone, token)',1).replace('verified.user.email ?? email','verified.user.email ?? null',1)
 assert 'verifyEmailOtp' not in phone and '?? email' not in phone
 request='''  async requestPhoneCode(phone: string): Promise<void> {

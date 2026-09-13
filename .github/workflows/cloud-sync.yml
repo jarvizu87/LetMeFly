@@ -31,3 +31,4 @@ jobs:
       - run: node ci/audit-cloud-bootstrap-v2.mjs .build-src/letmefly_app
       - run: node ci/audit-profile-cloud-sync.mjs .build-src/letmefly_app
       - run: node ci/audit-conflict-recovery-v1.mjs .build-src/letmefly_app
+      - run: node ci/audit-password-vault-v1.mjs .build-src/letmefly_app
