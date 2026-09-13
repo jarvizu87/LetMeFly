@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Corrective Release — Crownforge circuit production integration
+
+- Date: 2026-09-13
+- Main SHA: `1721a81b2a2de0b616159660c6047cb0106aad5a`
+- Release scope: publish PR #97 so the Crownforge circuit-first Train JS/CSS is installed inside the authoritative shared Command V2 production artifact instead of relying on a trailing deployment-only step.
+- Required CI/audits: PR #97 exact-head suite; Command V2 full build and real browser audit; Crownforge v2.2; Black Crown v2.1; Crown Maintenance runtime load + Bar Loader; workout persistence; Workout Substitute Today; Seven-Athlete + Chaos/Resilience; Lifecycle Public UI; Home Option 1; cloud bootstrap regression; Netlify release policy; static circuit artifact assertions; and governed Crownforge Day 3 structured-round browser regression.
+- Netlify production deploy count expected: 1
+- Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes. The earlier live smoke test incorrectly expected A1/A2/A3 badges on Week 1 Day 1 even though that section is not governed as `group_type=round`. The corrective release ensures the circuit presentation layer ships consistently so true governed round sections can render their CIRCUIT strip and movement codes.
+
 ## Release — Crownforge Train + Crown Maintenance / Black Crown card fidelity
 
 - Date: 2026-09-13
