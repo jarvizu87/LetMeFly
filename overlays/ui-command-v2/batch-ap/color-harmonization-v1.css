@@ -15,13 +15,15 @@
 }
 
 /* Shared interactive language: red is the normal brand/action signal. */
-html:not([data-lmf-approved-route='home']) .nav-item.active,
+html .navbar .nav-item.active,
 html:not([data-lmf-approved-route='home']) .bottom-nav .active,
 html:not([data-lmf-approved-route='home']) [aria-current='page']{
   color:#fff!important;
   border-color:rgba(227,27,47,.46)!important;
   box-shadow:inset 0 -2px 0 var(--lmf-brand-red)!important;
 }
+html .navbar .nav-item.active{background:linear-gradient(180deg,rgba(227,27,47,.18),rgba(227,27,47,.035) 82%)!important}
+html[data-lmf-approved-route] .navbar .nav-item.active>span{color:var(--lmf-brand-red-hi)!important}
 html:not([data-lmf-approved-route='home']) .btn.primary,
 html:not([data-lmf-approved-route='home']) button.primary,
 html:not([data-lmf-approved-route='home']) .primary-action{

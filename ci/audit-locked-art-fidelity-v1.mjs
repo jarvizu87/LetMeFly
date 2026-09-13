@@ -35,7 +35,7 @@ assert(art.includes('data:image/jpeg;base64,'), 'canonical Raizen art wrapper is
 validateLockedArt(path.join(dist, 'ui/raizen-black-crown-ascension-v1.svg'))
 assert(css.includes("--lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg?v=2')"), 'current Raizen/Fenrir art variable missing')
 assert(sw.includes('/ui/raizen-black-crown-ascension-v1.svg?v=2'), 'service worker missing repaired identity image revision')
-assert(sw.includes('-locked-ui-v13'), 'service worker must refresh the previously cached UI assets')
+assert(sw.includes('-locked-ui-v14'), 'service worker must refresh the previously cached UI assets')
 for (const extension of ['js','css']) {
   const asset = `/ui/home-train-reference-v1.${extension}?v=2`
   assert(index.includes(asset) && sw.includes(asset), `Home and Train correction is installed and cached: ${asset}`)

@@ -364,6 +364,8 @@
       native.appendChild(tools)
     }
     const body=tools.querySelector('.lmf-pg-native-tools-body')
+    const maxEditor=root.querySelector('#lmf-strength-maxes')
+    if(maxEditor&&!body.contains(maxEditor))body.appendChild(maxEditor)
     const tm=native.querySelector(':scope > .tm-board')
     if(tm)body.appendChild(tm)
     const titles=[...native.querySelectorAll(':scope > .section-title')]

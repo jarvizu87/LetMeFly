@@ -56,6 +56,7 @@ try {
       await page.goto(origin+'/#/'+route)
       await page.waitForFunction(r => document.documentElement.dataset.lmfApprovedRoute === r, route)
       await page.locator(selector).waitFor({state:'visible'})
+      assert.equal(await page.locator('.navbar .nav-item.active > span').first().evaluate(el=>getComputedStyle(el).color),'rgb(255, 64, 80)','Navigation uses the approved red selection accent')
       const expectedScene=scene==='progress'&&width<768?'progress-mobile':scene
       await page.waitForFunction(([selector,scene]) => getComputedStyle(document.querySelector(selector)).backgroundImage.includes(`/ui/mockup-scenes/${scene}.svg`), [selector,expectedScene])
       const sceneResponse=await page.request.get(origin+`/ui/mockup-scenes/${expectedScene}.svg`)
@@ -109,7 +110,11 @@ try {
         assert.equal(await page.locator('#lmf-strength-maxes-progress').isVisible(),false,'Late renders cannot restore duplicate strength panels')
         await page.locator('#lmf-pg-native-tools > summary').click()
         await page.locator('#lmf-pg-native-tools .tm-board').waitFor({state:'visible'})
+        await page.locator('#lmf-pg-native-tools #lmf-strength-maxes').waitFor({state:'visible'})
         await page.locator('#lmf-pg-native-tools > summary').click()
+        assert.equal(await page.locator('#lmf-strength-maxes').isVisible(),false,'The full strength editor stays behind native training-data controls')
+        await page.locator('.lmf-reference-extra-signals > summary').waitFor({state:'visible'})
+        assert.equal(await page.locator('.lmf-reference-extra-signals').evaluate(el=>el.open),false,'Additional signals stay secondary to the six analytics cards')
       }
       if (route === 'profile') {
         await page.locator('.lmf-profile-character-sheet-v1 .lmf-profile-tm-sheet').waitFor({state:'visible'})
@@ -166,6 +171,7 @@ try {
     assert.equal(await page.locator('.lmf-reference-home-readiness > div').count(),4)
     assert.equal(await page.locator('.lmf-reference-performance-metrics > div').count(),3)
     assert.equal(await page.locator('[data-lmf-start]').count(),1)
+    assert.equal(await page.locator('.navbar .nav-item.active > span').first().evaluate(el=>getComputedStyle(el).color),'rgb(255, 64, 80)','Home shares the approved red selection accent')
     assert.equal(await page.locator('.lmf-home-v4-stats > div').count(),4)
     assert.equal(await page.locator('.lmf-home-reference-final [data-lmf-home-readiness="stress"]').innerText(),'—','A fresh athlete does not inherit mockup readiness')
     await page.screenshot({path:path.join(out,`home-${width}.png`),fullPage:true})

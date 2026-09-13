@@ -165,6 +165,14 @@
       if (raw === 'body') button.textContent = 'Body Comp'
       if (raw === 'prs') button.textContent = 'Milestones / PRs'
     })
+    const signals=dashboard.querySelector('.lmf-pg-overview-v4')
+    if(signals&&!signals.closest('.lmf-reference-extra-signals')) {
+      const details=document.createElement('details')
+      details.className='lmf-reference-extra-signals'
+      details.innerHTML='<summary>Additional training signals</summary>'
+      signals.before(details)
+      details.append(signals)
+    }
   }
 
   function exerciseSidebarMarkup() {
