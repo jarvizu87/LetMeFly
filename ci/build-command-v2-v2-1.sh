@@ -74,7 +74,7 @@ bash "$ROOT_DIR/ci/apply-workout-recap-v1.sh" "$TARGET"
 # The recap Finish action must await the governed completion/progression transaction
 # instead of firing an unawaited DOM click that can briefly re-render stale Day 1.
 bash "$ROOT_DIR/ci/apply-workout-recap-completion-await-v1.sh" "$TARGET"
-# Five-athlete release hardening: honor the active athlete's weight unit in Workout
+# Multi-athlete release hardening: honor the active athlete's weight unit in Workout
 # Mode and Bar Loader without rewriting the immutable source prescription.
 bash "$ROOT_DIR/ci/apply-athlete-weight-unit-v1.sh" "$TARGET"
 
@@ -106,6 +106,16 @@ npm run audit:ui
 npm run typecheck
 npm run build
 
+# Crownforge circuit-first Train is part of the authoritative production artifact,
+# not a Netlify-only post-build decoration. Installing it here guarantees that
+# GitHub CI artifacts, deploy previews, and production all test/publish the same
+# CIRCUIT strip, A1/A2/A3 movement codes, confirm-or-adjust presets, and blended art.
+(
+  cd "$ROOT_DIR"
+  bash "$ROOT_DIR/ci/install-crownforge-circuit-train-v1.sh" "$TARGET/dist"
+  node "$ROOT_DIR/ci/audit-crownforge-circuit-train-v1.mjs" "$TARGET"
+)
+
 node "$ROOT_DIR/ci/audit-black-crown-runtime.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-black-crown-v2-1.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-crownforge-v2-2.mjs" "$TARGET"
@@ -114,6 +124,13 @@ node "$ROOT_DIR/ci/audit-program-card-fidelity-v1.mjs" "$TARGET"
 
 test -f dist/index.html
 test -f dist/service-worker.js
+test -s dist/ui/crownforge-circuit-train-v1.js
+test -s dist/ui/crownforge-circuit-train-v1.css
+grep -Fq '/ui/crownforge-circuit-train-v1.css?v=2' dist/index.html
+grep -Fq '/ui/crownforge-circuit-train-v1.js?v=2' dist/index.html
+grep -Fq '__LMF_CIRCUIT_TRAIN_V1__' dist/ui/crownforge-circuit-train-v1.js
+grep -Fq 'lmf-circuit-strip' dist/ui/crownforge-circuit-train-v1.js
+grep -Fq 'lmf-circuit-movement-code' dist/ui/crownforge-circuit-train-v1.js
 grep -Rq 'Black Crown Revised' dist/assets
 grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
@@ -129,4 +146,4 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" di
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Crown Maintenance/Black Crown card fidelity + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"
+echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Crown Maintenance/Black Crown card fidelity + Crownforge circuit-first Train + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"
