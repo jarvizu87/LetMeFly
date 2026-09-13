@@ -78,6 +78,12 @@ bash "$ROOT_DIR/ci/apply-workout-recap-completion-await-v1.sh" "$TARGET"
 # Mode and Bar Loader without rewriting the immutable source prescription.
 bash "$ROOT_DIR/ci/apply-athlete-weight-unit-v1.sh" "$TARGET"
 
+# Program-aware card fidelity: keep the public program packages immutable while
+# making Crown Maintenance percentage references and Black Crown prescription
+# dimensions truthful in both preview and active Workout Mode cards.
+bash "$ROOT_DIR/ci/apply-program-card-fidelity-v1.sh" "$TARGET"
+node "$ROOT_DIR/ci/audit-program-card-fidelity-v1.mjs" "$TARGET"
+
 # Assert the source-level persistence/count boundary before minification. Vite is
 # allowed to rename local identifiers such as refreshedStats in the final bundle.
 grep -Fq "const refreshedStats = state.workout ? completionStats(state.workout) : null" "$TARGET/src/main.ts"
@@ -104,12 +110,15 @@ node "$ROOT_DIR/ci/audit-black-crown-runtime.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-black-crown-v2-1.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-crownforge-v2-2.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-workout-substitution-today-v1.mjs" "$TARGET"
+node "$ROOT_DIR/ci/audit-program-card-fidelity-v1.mjs" "$TARGET"
 
 test -f dist/index.html
 test -f dist/service-worker.js
 grep -Rq 'Black Crown Revised' dist/assets
 grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
+grep -Rq 'verified-clean-reference' dist/assets
+grep -Rq 'programmedRpe' dist/assets
 # User-visible save confirmation must survive minification; local variable names do not.
 grep -Rq 'Set saved locally' dist/assets
 grep -Rq 'Using .* for this workout only\|for this workout only' dist/assets
@@ -120,4 +129,4 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" di
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"
+echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Crown Maintenance/Black Crown card fidelity + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"

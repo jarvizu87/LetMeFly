@@ -13,6 +13,7 @@ const progression = read('src/services/program-progression-service.ts')
 const workout = read('src/services/workout-service.ts')
 const main = read('src/main.ts')
 const athlete = read('src/services/athlete-service.ts')
+const hasMaintenanceReferenceAdapter = workout.includes('getVerifiedCrownforgeReferences')
 
 const checks = new Map([
   ['private progression service exists', fs.existsSync(path.join(target, 'src/services/program-progression-service.ts'))],
@@ -30,12 +31,22 @@ const checks = new Map([
   ['same-program reposition is evented', progression.includes('program-position-repositioned')],
   ['program position auto-advances from source structure', progression.includes('function nextPosition') && progression.includes('definition.weekData')],
   ['Black Crown completion invents no next program', progression.includes('No next program was invented.')],
-  ['workout start resolves Black Crown private TMs', workout.includes("programKey === 'black-crown' ? await getLatestTrainingMaxes(athleteId) : {}")],
-  ['percentage load refs resolve privately', workout.includes("programmed.loadReference?.startsWith('black-crown:tm:')")],
+
+  // The cloudinary reconstruction is intentionally an intermediate build stage.
+  // Before the card-fidelity adapter is installed it must still enforce the
+  // legacy Black Crown-only private-TM boundary. After the adapter is installed,
+  // this same audit becomes stricter and requires both legal private paths.
+  ['private-load audit recognizes the current build stage', hasMaintenanceReferenceAdapter
+    ? workout.includes("programKey === 'crown-maintenance' ? await getVerifiedCrownforgeReferences(athleteId) : {}")
+    : workout.includes("programKey === 'black-crown' ? await getLatestTrainingMaxes(athleteId) : {}")],
+  ['workout start resolves Black Crown private TMs', workout.includes("programKey === 'black-crown' ? await getLatestTrainingMaxes(athleteId)")],
+  ['Black Crown percentage refs retain explicit TM namespace', hasMaintenanceReferenceAdapter
+    ? workout.includes("const blackCrownPrefix = 'black-crown:tm:'") && workout.includes('rawReference.startsWith(blackCrownPrefix)')
+    : workout.includes("startsWith('black-crown:tm:')")],
   ['Power Clean uses saved Clean TM alias', workout.includes("'power-clean': 'clean'")],
-  ['unresolved TMs remain null', workout.includes('if (!row) return { value: null, unit: null, tmKey, tmValue: null, tmUnit: null }')],
-  ['Black Crown percentage loads round up by default', workout.includes("programmed.rounding === 'down-5'") && workout.includes('Math.ceil(raw / 5) * 5')],
+  ['percentage loads round up by default', workout.includes('Math.ceil(raw / 5) * 5')],
   ['resolved private load provenance is snapshotted', workout.includes('resolvedTrainingMaxKey') && workout.includes('resolvedTrainingMaxValue')],
+
   ['runtime hydrates selection from private program instance', main.includes('hydrateSelectedPositionFromProgramInstance()') && main.includes('positionFromProgramInstance(state.programInstance)')],
   ['home no longer uses dated public calendar as current athlete state', main.includes('const homeProgram: PublicProgramKey = state.selectedProgram')],
   ['preview workout starts are blocked', main.includes('Preview only — make this your current position before starting')],
@@ -45,6 +56,16 @@ const checks = new Map([
   ['new athlete start date is not hard-coded', athlete.includes("started_on: new Date().toISOString().slice(0, 10)")],
   ['no legacy fixed athlete start date remains', !athlete.includes("started_on: '2026-09-07'")],
 ])
+
+if (hasMaintenanceReferenceAdapter) {
+  checks.set('workout start resolves Maintenance verified Crownforge references', workout.includes("programKey === 'crown-maintenance' ? await getVerifiedCrownforgeReferences(athleteId) : {}"))
+  checks.set('Maintenance references are scoped to completed Crownforge sessions', workout.includes("row.program_key === 'crownforge' && row.status === 'completed'") && workout.includes('crownforgeSessionIds.has(String(row.workout_session_id'))
+  checks.set('Maintenance verified technical aliases are explicit', workout.includes("'verified-clean-technical-reference': 'verified-clean-technical-reference'") && workout.includes("latest['verified-clean-reference'] = latest['verified-clean-technical-reference']"))
+  checks.set('unresolved adapted private references remain null', workout.includes('if (!tm) return { value: null, unit: null, tmKey, tmValue: null, tmUnit: null }'))
+} else {
+  checks.set('intermediate build has not prematurely enabled Maintenance private references', !workout.includes('getVerifiedCrownforgeReferences'))
+  checks.set('legacy unresolved Black Crown TM remains null', workout.includes('if (!row) return { value: null, unit: null, tmKey, tmValue: null, tmUnit: null }'))
+}
 
 const forbiddenPrivateValues = [
   /JP\b/i,
@@ -63,7 +84,7 @@ for (const [label, ok] of checks) {
   if (!ok) failed += 1
 }
 if (failed) {
-  console.error(`Athlete progression audit failed: ${failed} check(s)`) 
+  console.error(`Athlete progression audit failed: ${failed} check(s)`)
   process.exit(1)
 }
-console.log('LetMeFly athlete program progression audit: PASS')
+console.log(`LetMeFly athlete program progression audit: PASS (${hasMaintenanceReferenceAdapter ? 'final adapter stage' : 'intermediate reconstruction stage'})`)

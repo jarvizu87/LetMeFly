@@ -41,6 +41,11 @@ mkdir -p "$DIST_DIR/ui/mockup-scenes"
 cp "$SCENE_SRC/"*.svg "$SCENE_SRC/manifest.json" "$DIST_DIR/ui/mockup-scenes/"
 cmp -s "$ART_SRC" "$ART_OUT"
 
+# The Train reference layer is materialized here, so presentation bridges that
+# depend on that file must be applied only after the copy above.
+bash "$ROOT_DIR/ci/install-train-bar-loader-bridge-v1.sh" "$DIST_DIR"
+bash "$ROOT_DIR/ci/install-program-mixed-summary-v1.sh" "$DIST_DIR"
+
 INDEX="$INDEX" python3 - <<'PY'
 from pathlib import Path
 import os,re

@@ -53,6 +53,11 @@ assert(!/url\(/.test(trainBlocks), 'Block styling must reuse the existing exerci
 assert(trainBlocks.includes('mask-image:linear-gradient'), 'Existing pictures blend into the block card')
 const homeTrain = read('ui/home-train-reference-v1.js')
 for (const forbidden of ['localStorage','sessionStorage','indexedDB','fetch(','XMLHttpRequest','setItem(']) assert(!homeTrain.includes(forbidden), 'Home/Train presentation does not write athlete state or call external services')
+assert(homeTrain.includes('window.LetMeFlyBarLoader?.open'), 'Train reference must retain direct Bar Loader fallback after Workout Flow rerenders')
+assert(homeTrain.includes("source: 'exercise'"), 'Train reference Bar Loader fallback must preserve exercise context')
+assert(homeTrain.includes('const rowDetails = rows.map'), 'Train preview must inspect every programmed set row')
+assert(homeTrain.includes("const groupedDetail = groups.map"), 'Train preview must group distinct mixed prescriptions')
+assert(!homeTrain.includes('`${rows.length} sets · ${text(first?.querySelector'), 'Train preview must not collapse mixed prescriptions to Set 1')
 for(const item of validateMockupScenes(path.join(dist,'ui/mockup-scenes'))){
   const asset=`/ui/mockup-scenes/${item.scene}.svg`
   assert(css.includes(asset),`Scene is connected to the UI: ${asset}`)

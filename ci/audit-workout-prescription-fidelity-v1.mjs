@@ -62,7 +62,18 @@ const css = read(cssPath)
 const programSource = readTree(path.join(root, 'src'))
 
 // Source contract: structured grouping is persisted and rendered into runtime DOM.
-assert.match(service, /group_type:\s*section\.exercises\.length\s*>\s*1/)
+// The final card-fidelity adapter adds a stricter Crown Maintenance guard: every
+// exercise in a Maintenance section must be fully R-labeled before that section
+// can become a round. Earlier reconstruction stages retain the legacy detector.
+const hasMaintenanceRoundGuard = service.includes("group_type: programKey === 'crown-maintenance'")
+if (hasMaintenanceRoundGuard) {
+  assert.match(service, /group_type:\s*programKey\s*===\s*['"]crown-maintenance['"]/)
+  assert.match(service, /section\.exercises\.every\(\(candidate\)\s*=>\s*candidate\.sets\.length\s*>\s*0\s*&&\s*candidate\.sets\.every/)
+  assert.match(service, /section\.exercises\.filter\(\(candidate\)\s*=>\s*candidate\.sets\.some/)
+  assert.match(service, /\.length\s*>\s*1\s*\?\s*['"]round['"]\s*:\s*['"]section['"]/)
+} else {
+  assert.match(service, /group_type:\s*section\.exercises\.length\s*>\s*1/)
+}
 assert.match(service, /\/\^R\\d\+\$\/i/)
 assert.match(main, /data-group-type=/)
 assert.match(flow, /structured === 'round'/)
