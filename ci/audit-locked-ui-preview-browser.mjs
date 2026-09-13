@@ -188,7 +188,8 @@ try {
     assert.equal(await page.locator('.lmf-reference-train-hero img').evaluate(async img=>{await img.decode();return img.naturalWidth>0}),true)
     assert.equal(await page.locator('.lmf-reference-train-hero h1').innerText(),await page.locator('.train-header h1').innerText(),'The hero uses the current native workout title')
     assert.ok((await page.locator('#session-track [data-session-index]').count())>3,'Native workout section controls remain available')
-    await page.screenshot({path:path.join(out,`train-readiness-${width}.png`),fullPage:true})
+    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))
+    await page.screenshot({path:path.join(out,`train-readiness-${width}.png`)})
     for (const [name,value] of [['sleep-quality',4],['energy',3],['soreness',2],['stress',5]]) {
       await page.locator(`.readiness-options label:has(input[name="readiness-${name}"][value="${value}"])`).click()
     }
@@ -234,7 +235,17 @@ try {
     assert.equal(await card.locator('.set-table .set-row').count(),originalRows,'The presentation and tools do not replace native set rows')
     const trainOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)
     assert.ok(trainOverflow<=1,'Active Train has no horizontal page overflow')
-    await card.screenshot({path:path.join(out,`train-active-exercise-${width}.png`)})
+    // Full-page/element capture can temporarily resize the native carousel.
+    // Capture the real viewport without changing its size or horizontal scroll.
+    await card.evaluate(el=>window.scrollTo({top:scrollY+el.getBoundingClientRect().top-90,behavior:'instant'}))
+    await page.waitForFunction(id=>{
+      const card=document.querySelector(`.active-exercise[data-exercise-id="${id}"]`)
+      const pane=card?.closest('.swipe-page'),viewport=document.querySelector('#swipe-viewport')
+      if(!pane?.classList.contains('active-page')||!viewport)return false
+      const a=pane.getBoundingClientRect(),v=viewport.getBoundingClientRect()
+      return Math.abs(a.left+a.width/2-v.left-v.width/2)<2
+    },sourceId)
+    await page.screenshot({path:path.join(out,`train-active-exercise-${width}.png`)})
     await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))
     await page.screenshot({path:path.join(out,`train-${width}.png`)})
     await activeRow.locator('[data-action="toggle-set"]').click()
