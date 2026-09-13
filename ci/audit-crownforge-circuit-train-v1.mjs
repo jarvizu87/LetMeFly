@@ -56,11 +56,19 @@ for (const marker of [
 for (const forbidden of ['indexedDB', 'localStorage', 'logSet(', 'completeWorkout(']) {
   if (source.includes(forbidden)) throw new Error(`Circuit Train layer may not own persistence: ${forbidden}`)
 }
-for (const marker of ['width:min(50%,250px)', 'height:220px', '.lmf-circuit-panel', '.lmf-confirm-programmed-hint']) {
+for (const marker of [
+  'width:min(50%,250px)',
+  'height:220px',
+  '.lmf-circuit-panel',
+  '.lmf-confirm-programmed-hint',
+  'position:absolute!important',
+  '> :not(.lmf-exercise-media)',
+  'background-image:var(--exercise-art)!important',
+]) {
   if (!css.includes(marker)) throw new Error(`Missing visual marker: ${marker}`)
 }
-if (!html.includes('/ui/crownforge-circuit-train-v1.css?v=1') || !html.includes('/ui/crownforge-circuit-train-v1.js?v=1')) {
-  throw new Error('Circuit Train assets are not installed in production index')
+if (!html.includes('/ui/crownforge-circuit-train-v1.css?v=2') || !html.includes('/ui/crownforge-circuit-train-v1.js?v=2')) {
+  throw new Error('Circuit Train v2 assets are not installed in production index')
 }
 
 console.log('LetMeFly Crownforge circuit-first Train UX audit: PASS')
@@ -70,4 +78,4 @@ console.log('- ranges/ambiguous prescriptions remain manual')
 console.log('- lb/kg programmed loads convert to the athlete display unit')
 console.log('- substitution cards and saved actuals retain native ownership')
 console.log('- round metadata controls circuit presentation; no circuit is invented')
-console.log('- exercise art footprint is larger while retaining blended overlays')
+console.log('- active exercise art is absolutely blended behind content across card states')
