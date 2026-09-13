@@ -48,7 +48,7 @@ if not re.search(r'</head>',text,re.I): raise SystemExit('index.html missing </h
 text=re.sub(r'</head>',f'  {tag}\n</head>',text,count=1,flags=re.I)
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/home-train-reference-v1\.css(?:\?v=\d+)?">\s*','\n',text)
 text=re.sub(r'\s*<script defer src="/ui/home-train-reference-v1\.js(?:\?v=\d+)?"></script>\s*','\n',text)
-text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/home-train-reference-v1.css?v=1">\n  <script defer src="/ui/home-train-reference-v1.js?v=1"></script>\n</head>',text,count=1,flags=re.I)
+text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/home-train-reference-v1.css?v=2">\n  <script defer src="/ui/home-train-reference-v1.js?v=2"></script>\n</head>',text,count=1,flags=re.I)
 # This must be the final visual fidelity layer after color harmonization.
 if '/ui/color-harmonization-v1.css' in text and text.index('/ui/color-harmonization-v1.css') > text.index('/ui/locked-art-fidelity-v1.css'):
     raise SystemExit('locked-art-fidelity-v1.css must load after color-harmonization-v1.css')
@@ -64,7 +64,7 @@ match=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not match: raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing=re.findall(r"['\"]([^'\"]+)['\"]",match.group(1))
 required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=10','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
-required += ['/ui/home-train-reference-v1.'+ext+suffix for ext in ['css','js'] for suffix in ['', '?v=1']]
+required += ['/ui/home-train-reference-v1.'+ext+suffix for ext in ['css','js'] for suffix in ['', '?v=2']]
 required += ['/ui/mockup-scenes/'+p.name for p in sorted((p.parent/'ui/mockup-scenes').glob('*.svg'))]
 assets=[]
 for value in [*existing,*required]:
@@ -72,7 +72,7 @@ for value in [*existing,*required]:
 replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:match.start()]+replacement+text[match.end():]
 # Invalidate only the app shell cache. Athlete storage is unrelated to this cache.
-text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v12',text,count=1)
+text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v13',text,count=1)
 if count != 1: raise SystemExit('service-worker.js CACHE_NAME declaration not found')
 p.write_text(text.rstrip()+'\n')
 PY

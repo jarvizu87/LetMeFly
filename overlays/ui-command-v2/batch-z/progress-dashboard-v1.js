@@ -351,6 +351,9 @@
   function tab(id,label){return `<button type="button" role="tab" data-pg-tab="${id}" aria-selected="${activeTab===id?'true':'false'}">${label}</button>`}
 
   function organizeNativeProgress(root) {
+    // The core history render can finish after the dashboard is already loaded.
+    // Reconcile its presentation independently of the cached analytics render.
+    const legacy=root.querySelector('#lmf-strength-maxes-progress');if(legacy)legacy.hidden=true
     const native=root.querySelector('#progress-content'); if(!native)return
     native.classList.add('lmf-pg-native-content')
     native.querySelectorAll(':scope > .progress-score-grid,:scope > .strength-progress-card,:scope > .v2-analytics').forEach(el=>el.classList.add('lmf-pg-native-duplicate'))
@@ -386,7 +389,6 @@
     const rows=mergedLifts(vault)
     el.dataset.loaded='1'
     el.innerHTML=`<header class="lmf-pg-header"><div><span>ATHLETE PERFORMANCE</span><h2>PROGRESS DASHBOARD</h2><p>${vault.source==='indexeddb'?'Private vault data':'Private strength data'} first. Calculated values stay labeled and never rewrite programming.</p></div><select data-pg-range aria-label="Progress date range"><option value="7d" ${range==='7d'?'selected':''}>7 DAYS</option><option value="30d" ${range==='30d'?'selected':''}>30 DAYS</option><option value="all" ${range==='all'?'selected':''}>ALL TIME</option></select></header><nav class="lmf-pg-tabs" role="tablist" aria-label="Progress sections">${tab('overview','OVERVIEW')}${tab('strength','STRENGTH')}${tab('body','BODY')}${tab('conditioning','CONDITIONING')}${tab('prs','PRs')}</nav><div class="lmf-pg-tabbody" role="tabpanel" data-pg-panel="${activeTab}">${activeTab==='overview'?overview(vault,rows):activeTab==='strength'?strengthView(rows):activeTab==='body'?bodyView(vault):activeTab==='conditioning'?conditioningView(vault):prView(vault.events)}</div>`
-    const legacy=root.querySelector('#lmf-strength-maxes-progress');if(legacy)legacy.hidden=true
     organizeNativeProgress(root)
     el.querySelectorAll('[data-pg-tab]').forEach(button=>button.addEventListener('click',()=>{const next=button.dataset.pgTab;if(!TABS.includes(next)||next===activeTab)return;activeTab=next;writeSetting(TAB_KEY,next);queueRender(false)}))
     el.querySelector('[data-pg-range]')?.addEventListener('change',event=>{const next=event.target.value;if(!RANGES.includes(next))return;range=next;writeSetting(RANGE_KEY,next);vaultCache.at=0;queueRender(true)})
@@ -395,7 +397,13 @@
   }
 
   function queueRender(force=false){if(force)vaultCache.at=0;clearTimeout(timer);timer=setTimeout(()=>void render(force),force?30:160)}
-  function queueScan(){if(scanQueued)return;scanQueued=true;requestAnimationFrame(()=>{scanQueued=false;if(progressHeading())queueRender(false)})}
+  function queueScan(){if(scanQueued)return;scanQueued=true;requestAnimationFrame(()=>{
+    scanQueued=false
+    const heading=progressHeading();if(!heading)return
+    const root=progressRoot(heading)
+    if(root&&document.getElementById(ROOT_ID)?.dataset.loaded==='1')organizeNativeProgress(root)
+    queueRender(false)
+  })}
   function boot(){
     queueScan()
     new MutationObserver(records=>{const selfOnly=records.every(r=>r.target instanceof Element && (r.target.closest(`#${ROOT_ID}`)||r.target.closest('#lmf-pg-native-tools')));if(!selfOnly)queueScan()}).observe(document.body,{childList:true,subtree:true})

@@ -91,6 +91,23 @@ try {
         assert.equal(await page.locator('.lmf-reference-analytics-grid > article').count(),6)
         await page.waitForFunction(()=>document.querySelector('[data-reference-metric="days"] strong')?.textContent==='0')
         assert.equal(await page.locator('[data-reference-metric="volume"] strong').innerText(),'—')
+        // Simulate a late core history render replacing the native container.
+        // The loaded dashboard must restore its tools without rereading analytics.
+        await page.locator('#lmf-pg-native-tools').waitFor({state:'visible'})
+        await page.evaluate(()=>{
+          const native=document.querySelector('#progress-content')
+          const tools=native.querySelector('#lmf-pg-native-tools')
+          for(const child of [...tools.querySelector('.lmf-pg-native-tools-body').children])native.appendChild(child)
+          tools.remove()
+          native.querySelectorAll('.lmf-pg-native-duplicate').forEach(el=>el.classList.remove('lmf-pg-native-duplicate'))
+          const legacy=document.querySelector('#lmf-strength-maxes-progress');if(legacy)legacy.hidden=false
+        })
+        await page.locator('#lmf-pg-native-tools').waitFor({state:'visible'})
+        assert.equal(await page.locator('#lmf-pg-native-tools').count(),1,'Late history renders keep one native tools panel')
+        assert.equal(await page.locator('#lmf-strength-maxes-progress').isVisible(),false,'Late renders cannot restore duplicate strength panels')
+        await page.locator('#lmf-pg-native-tools > summary').click()
+        await page.locator('#lmf-pg-native-tools .tm-board').waitFor({state:'visible'})
+        await page.locator('#lmf-pg-native-tools > summary').click()
       }
       if (route === 'profile') {
         await page.locator('.lmf-profile-character-sheet-v1 .lmf-profile-tm-sheet').waitFor({state:'visible'})
@@ -125,7 +142,9 @@ try {
         await page.keyboard.press('Escape')
         await page.locator('.lmf-bar-modal').waitFor({state:'hidden'})
       }
-      await page.screenshot({path:path.join(out,`${route}-${width}.png`),fullPage:true})
+      await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))
+      await page.screenshot({path:path.join(out,`${route}-${width}.png`)})
+      if(route!=='exercises')await page.screenshot({path:path.join(out,`${route}-${width}-full.png`),fullPage:true})
       report.checks.push({route,width,geometry,result:'PASS'})
     }
     await page.goto(origin+'/#/home')
@@ -163,6 +182,12 @@ try {
     await page.locator('.readiness-panel [data-action="start-workout"]').click()
     await page.locator('.active-exercise').first().waitFor({state:'attached'})
     await page.locator('#session-track [data-session-index="2"]').click()
+    await page.waitForFunction(()=>{
+      const active=document.querySelector('.active-page')
+      if(!/Main Strength Circuit/i.test(active?.querySelector('.workout-panel-head h2')?.textContent||''))return false
+      const rect=active.getBoundingClientRect(),viewport=active.parentElement.getBoundingClientRect()
+      return Math.abs(rect.x-viewport.x)<2
+    })
     const activeCard=page.locator('.active-page .active-exercise.lmf-flow-active')
     await activeCard.locator('.lmf-reference-set-history').waitFor({state:'visible'})
     const sourceId=await activeCard.getAttribute('data-exercise-id')
@@ -190,8 +215,9 @@ try {
     assert.equal(await card.locator('.set-table .set-row').count(),originalRows,'The presentation and tools do not replace native set rows')
     const trainOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)
     assert.ok(trainOverflow<=1,'Active Train has no horizontal page overflow')
-    await page.locator('.lmf-reference-train-heading').scrollIntoViewIfNeeded()
-    await page.screenshot({path:path.join(out,`train-${width}.png`),fullPage:true})
+    await card.screenshot({path:path.join(out,`train-active-exercise-${width}.png`)})
+    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))
+    await page.screenshot({path:path.join(out,`train-${width}.png`)})
     await activeRow.locator('[data-action="toggle-set"]').click()
     await page.waitForFunction(id=>document.querySelector(`.set-row[data-set-id="${id}"] .set-check`)?.classList.contains('done'),setId)
     await page.waitForFunction(id=>document.querySelector(`[data-reference-set="${id}"]`)?.classList.contains('is-logged'),setId)
@@ -204,6 +230,53 @@ try {
     assert.equal(await page.locator('.lmf-home-reference-final [data-lmf-home-readiness="soreness"]').innerText(),'2/5')
     assert.equal(await page.locator('.lmf-reference-train-hero').count(),0,'Train presentation unmounts on Home')
     await page.screenshot({path:path.join(out,`home-saved-readiness-${width}.png`),fullPage:true})
+    // An isolated local fixture exercises the read-only Home summary across
+    // units, metric prescriptions, soft deletion and athlete boundaries.
+    const summarySnapshot = await page.evaluate(async () => {
+      const db=await new Promise((resolve,reject)=>{const request=indexedDB.open('letmefly-private');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})
+      const all=store=>new Promise((resolve,reject)=>{const request=db.transaction(store,'readonly').objectStore(store).getAll();request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})
+      const athlete=(await all('athletes')).find(row=>!row.deleted_at)
+      const session=(await all('workoutSessions')).find(row=>row.athlete_id===athlete.id)
+      const exercise=(await all('workoutExercises')).find(row=>row.athlete_id===athlete.id)
+      const sample=(await all('workoutSets')).find(row=>row.athlete_id===athlete.id)
+      const stores=['workoutSessions','workoutExercises','workoutSets','readinessEntries']
+      const tx=db.transaction(stores,'readwrite')
+      const sessionId='qa-home-summary-session',exerciseId='qa-home-summary-exercise'
+      tx.objectStore('workoutSessions').put({...session,id:sessionId,workout_name:'Summary test workout',status:'completed',completed_at:'2032-03-04T12:00:00Z'})
+      tx.objectStore('workoutExercises').put({...exercise,id:exerciseId,workout_session_id:sessionId,exercise_name_snapshot:'Summary test lift'})
+      const base={...sample,athlete_id:athlete.id,workout_session_id:sessionId,workout_exercise_id:exerciseId,completed:true,deleted_at:null,performance_data:{},rpe:null}
+      const cases=[
+        {load_value:100,load_unit:'lb',reps:5,rpe:7},
+        {load_value:50,load_unit:'kg',reps:4,rpe:9},
+        {load_value:9999,load_unit:'kg',reps:9999,performance_data:{actualMetricKind:'distance',actualMetricValue:30}},
+        {load_value:9999,load_unit:'kg',reps:9999,performance_data:{distance:'30m'}},
+        {load_value:9999,load_unit:'kg',reps:9999,performance_data:{programmedReps:'30sec'}},
+        {load_value:9999,load_unit:'kg',reps:9999,completed:false,rpe:10},
+        {load_value:9999,load_unit:'kg',reps:9999,athlete_id:'qa-other-athlete',rpe:10},
+        {load_value:9999,load_unit:'kg',reps:9999,deleted_at:'2032-03-04T12:00:00Z',rpe:10},
+      ]
+      cases.forEach((entry,index)=>tx.objectStore('workoutSets').put({...base,...entry,id:'qa-home-summary-set-'+index}))
+      tx.objectStore('readinessEntries').put({id:'qa-other-readiness',athlete_id:'qa-other-athlete',recorded_at:'2033-03-04T12:00:00Z',sleep_quality:1,energy:1,soreness:1,stress:1})
+      await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error)})
+      const snapshot=JSON.stringify(await Promise.all(stores.map(all)))
+      db.close()
+      return snapshot
+    })
+    await page.goto(origin+'/#/train')
+    await page.locator('.lmf-reference-train-hero').waitFor({state:'visible'})
+    await page.goto(origin+'/#/home')
+    await page.waitForFunction(()=>document.querySelector('[data-lmf-home-performance="volume"]')?.textContent==='426.8 kg·reps')
+    assert.equal(await page.locator('[data-lmf-home-performance="top"]').innerText(),'Summary test lift · 50 kg × 4')
+    assert.equal(await page.locator('[data-lmf-home-performance="rpe"]').innerText(),'8')
+    assert.equal(await page.locator('.lmf-home-reference-final [data-lmf-home-readiness="stress"]').innerText(),'5/5','A newer foreign readiness record never replaces this athlete’s check-in')
+    const afterSummary = await page.evaluate(async () => {
+      const db=await new Promise((resolve,reject)=>{const request=indexedDB.open('letmefly-private');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})
+      const snapshot=JSON.stringify(await Promise.all(['workoutSessions','workoutExercises','workoutSets','readinessEntries'].map(store=>new Promise((resolve,reject)=>{const request=db.transaction(store,'readonly').objectStore(store).getAll();request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)}))))
+      db.close();return snapshot
+    })
+    assert.equal(afterSummary,summarySnapshot,'Rendering the Home summary leaves all source records unchanged')
+    await page.screenshot({path:path.join(out,`home-completed-history-${width}.png`),fullPage:true})
+    report.checks.push({route:'home-data',width,result:'PASS',checks:['Completed history','Mixed-unit conversion','Distance/time exclusion','Unfinished-set exclusion','Soft-delete exclusion','Athlete isolation','No source writes']})
     await context.close()
   }
   assert.deepEqual(report.errors, [])

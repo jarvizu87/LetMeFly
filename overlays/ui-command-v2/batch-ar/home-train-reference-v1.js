@@ -45,6 +45,9 @@
     ensure(hero, '.lmf-reference-hero-motto','p','lmf-reference-hero-motto','Higher<br>Stronger<br>Further')
     ensure(shell.querySelector('.lmf-home-v4-command-main'),'.lmf-reference-command-shield','div','lmf-reference-command-shield',
       '<svg viewBox="0 0 110 148" fill="none" aria-hidden="true"><path d="m55 3 50 27v84l-50 31-50-31V30Z" fill="#12090d" stroke="#a8142d"/><path d="m55 9 44 25v76l-44 28-44-28V34Z" stroke="#ff1737"/><path d="m19 63 36-40 35 40-23-14-8 8-8-19-13 24 1-14Z" stroke="#ff2442" stroke-width="2"/><path d="M45 103h20" stroke="#ff1737" stroke-width="2"/></svg><span>Discipline<br>builds<br>freedom</span>')
+    const motto = ensure(shell.querySelector('.lmf-home-v4-command-main'),'.lmf-reference-workout-motto','p','lmf-reference-workout-motto','Build strength. Build capacity. Build resilience.')
+    const progress = shell.querySelector('.lmf-home-option1-progress')
+    if (progress && motto.nextElementSibling !== progress) progress.before(motto)
     const readiness = shell.querySelector('.lmf-home-v4-readiness')
     const readinessHead = readiness?.querySelector('.lmf-home-v4-panel-head b')
     if (readinessHead) setAttr(readinessHead,'data-lmf-home-readiness-date','')
@@ -152,6 +155,11 @@
       table.innerHTML = '<div class="lmf-reference-set-head"><span>Set</span><span>Load</span><span>Reps / work</span><span>RPE</span><span></span></div>' + values.map(row => `<button type="button" data-reference-set="${esc(row.id)}" aria-label="Review set ${esc(row.number)}${row.completed ? ', logged' : ''}" aria-pressed="${row.selected}" class="${row.completed ? 'is-logged' : ''}"><span>${esc(row.number)}</span><strong>${esc(row.load)}</strong><span>${esc(row.amount)}</span><span>${esc(row.rpe)}</span><i aria-hidden="true">${row.completed ? '✓' : '○'}</i></button>`).join('')
     }
     const active = rows.find(row => row.classList.contains('lmf-set-active')) || rows[0]
+    const title = card.querySelector('.exercise-title > div')
+    const prescription = ensure(title,'.lmf-reference-prescription','p','lmf-reference-prescription','')
+    const name = title?.querySelector('h3')
+    if (name && name.nextElementSibling !== prescription) name.after(prescription)
+    setText(prescription,`Set ${text(active.querySelector('.set-label strong'))} of ${rows.length} · ${text(active.querySelector('.set-target-cell strong'))}`)
     const load = active.querySelector('.load-input')?.value
     const plate = text(active.querySelector('.lmf-plates-line strong')) || text(active.querySelector('.load-field small'))
     const loaderSource = card.querySelector('.exercise-actions [data-lmf-bar-loader-open="exercise"]')
@@ -159,9 +167,11 @@
     setText(loader.querySelector('[data-reference-load]'),load ? `${load} ${active.dataset.loadUnit || ''}`.trim() : 'No load entered')
     setText(loader.querySelector('[data-reference-plates]'),plate || 'Choose your bar and plates in the loader.')
     loader.hidden = !loaderSource
-    const cue = text(card.querySelector('.exercise-title .muted:last-child'))
-    if (cue && !/demo|search fallback/i.test(cue)) {
+    const exerciseCue = text(card.querySelector('.exercise-title .muted:last-child'))
+    const cue = exerciseCue && !/demo|search fallback/i.test(exerciseCue) ? exerciseCue : text(card.closest('.workout-panel')?.querySelector('.workout-panel-head .muted'))
+    if (cue) {
       const block = ensure(card,'.lmf-reference-coaching-cue','div','lmf-reference-coaching-cue','<strong>Coaching cue</strong><p></p>')
+      setText(block.querySelector('strong'),cue === exerciseCue ? 'Coaching cue' : 'Block guidance')
       setText(block.querySelector('p'),cue)
     }
     for (const row of rows) {

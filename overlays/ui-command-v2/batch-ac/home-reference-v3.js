@@ -359,9 +359,10 @@
           // Distance/time prescriptions never become rep volume, even in legacy rows.
           const repSets = savedSets.filter(row => {
             const perf = row.performance_data || {}
-            const metric = [perf.actualMetricKind,perf.metricKind,perf.distance,perf.duration,perf.programmedReps].filter(Boolean).join(' ')
-            return !/distance|duration|\b(?:sec(?:onds?)?|min(?:utes?)?|hr|meters?|metres?|yards?|yd|ft|m)\b/i.test(metric)
-              && Number(row.reps) > 0 && Number(row.load_value) > 0 && exerciseMap.has(row.workout_exercise_id)
+            const metric = [perf.actualMetricKind,perf.metricKind,perf.programmedReps].filter(Boolean).join(' ')
+            return !String(perf.distance ?? '').trim() && !String(perf.duration ?? '').trim()
+              && !/distance|duration|\d\s*(?:sec(?:onds?)?|min(?:utes?)?|hrs?|meters?|metres?|yards?|yd|ft|m)\b/i.test(metric)
+              && ['kg','lb'].includes(row.load_unit) && Number(row.reps) > 0 && Number(row.load_value) > 0 && exerciseMap.has(row.workout_exercise_id)
           }).map(row => ({...row,displayLoad:Number(row.load_value) * (row.load_unit === weightUnit ? 1 : row.load_unit === 'kg' && weightUnit === 'lb' ? 2.2046226218 : row.load_unit === 'lb' && weightUnit === 'kg' ? 1 / 2.2046226218 : 1)}))
           const topSet = [...repSets].sort((a,b) => b.displayLoad - a.displayLoad || Number(b.reps) - Number(a.reps))[0]
           const rpes = savedSets.map(row => row.rpe == null || row.rpe === '' ? NaN : Number(row.rpe)).filter(value => Number.isFinite(value) && value >= 1 && value <= 10)

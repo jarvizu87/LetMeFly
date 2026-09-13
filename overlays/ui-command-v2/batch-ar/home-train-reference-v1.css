@@ -16,7 +16,8 @@ body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-spark,
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-milestone-icon{display:none!important}
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main{position:relative}
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-tagline{display:none!important}
-body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main::after{content:'Build strength. Build capacity. Build resilience.';display:block;margin-top:10px;color:#c3c6cc;font:12px/1.5 system-ui,sans-serif}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main::after{content:none!important}
+.lmf-reference-workout-motto{display:block;margin:10px 0 0;color:#c3c6cc;font:12px/1.5 system-ui,sans-serif}
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-program-row,
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main h3{max-width:calc(100% - 105px)!important}
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-program-row h2{font-size:clamp(27px,3vw,38px)!important;letter-spacing:-.025em!important}
@@ -54,7 +55,7 @@ body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-readiness-copy]{fo
 .lmf-reference-home-readiness svg{grid-row:1/3;margin-top:2px}
 .lmf-reference-home-readiness span{font-size:10px}
 .lmf-reference-home-readiness strong{font-size:13px;color:#f2f6f5}
-body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-link{order:5;padding:10px 0 0!important;margin:0!important;min-height:0!important;font:11px/1.4 system-ui!important;color:#bac5cb!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-link{position:static!important;inset:auto!important;order:5;padding:10px 0 0!important;margin:0!important;min-height:0!important;font:11px/1.4 system-ui!important;color:#bac5cb!important}
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary{margin:0 0 12px!important;display:flex!important;flex-direction:column;gap:6px;min-height:60px}
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary strong{font:600 16px/1.25 system-ui!important;color:#e3edf2}
 body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary span{font:12px/1.45 system-ui!important;color:#c1ccd4!important}
@@ -120,10 +121,11 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>
 html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button>span{width:auto!important;min-height:0!important;margin:0!important;background:none!important;justify-content:flex-start!important;color:#a2aebe!important;font-size:14px!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button>strong{font:600 12px/1.3 system-ui!important;white-space:normal!important;word-break:normal!important;color:#e0e5ed!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button>small{font:10px/1.3 system-ui!important;color:#9caab9!important}
-html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button.active{border:2px solid #9b50fb!important;background:linear-gradient(150deg,#21142f,#0c0c16)!important;box-shadow:0 0 12px #a251ff20!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button.active{border:2px solid #ed254b!important;background:linear-gradient(150deg,#2c111b,#0c0c16)!important;box-shadow:0 0 12px #ed254b20!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .day-strip{margin:0!important;gap:6px!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .day-chip{min-height:37px!important;font-size:10px!important;padding:5px 8px!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .train-rule{padding:10px 13px!important;margin:0!important;font-size:11px!important;line-height:1.5!important}
+.lmf-train-reference-final .train-rule>strong{font-size:10px!important}.lmf-train-reference-final .train-rule>span{font-size:11px!important;line-height:1.5!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .swipe-meta{display:none!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .session-nav{margin:0!important;min-height:40px!important;background:#0b1017!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel{scroll-margin-top:24px}
@@ -133,7 +135,9 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel-
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel-head .page-kicker{font-size:10px!important;color:#b99dda!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(140px,.8fr)!important;gap:0!important;position:relative!important;border:0!important;border-radius:6px!important;background:#080d13!important;overflow:hidden!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.lmf-compact-summary{display:none!important}
-html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-title{grid-column:1!important;grid-row:1!important;padding:15px 10px 12px 12px!important;z-index:1;align-self:start!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-title{grid-column:1!important;grid-row:1!important;display:block!important;min-height:0!important;height:auto!important;padding:15px 10px 12px 12px!important;z-index:1;align-self:start!important}
+.lmf-train-reference-final .lmf-flow-active>.lmf-flow-node{display:none!important}
+.lmf-train-reference-final .lmf-reference-prescription{font:12px/1.45 system-ui;color:#d4c1ed;margin:8px 0 10px}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-title h3{font:700 28px/1.1 Georgia,serif!important;letter-spacing:0!important;overflow-wrap:anywhere}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.lmf-exercise-media{grid-column:2!important;grid-row:1!important;position:relative!important;width:100%!important;min-height:150px!important;max-height:190px!important;height:auto!important;aspect-ratio:1!important;background-size:contain!important;background-color:#050a0f!important;border:0!important;align-self:center!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-actions{grid-column:1/-1!important;padding:8px 10px!important;display:flex!important;flex-wrap:wrap;gap:6px!important;order:2!important;border-color:#242735!important}
@@ -169,9 +173,10 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active
 .lmf-reference-train-footer>strong{font:700 25px/1.12 Georgia,serif;color:#e8edf1}.lmf-reference-train-footer>span{font:9px/1.9 system-ui;text-transform:uppercase;letter-spacing:.2em;color:#a9b4c4}
 
 @media(min-width:1100px){
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-workspace{grid-template-columns:190px minmax(0,1fr) 225px!important;gap:12px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-workspace{grid-template-columns:220px minmax(0,1fr) 280px!important;gap:12px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-flow-panel,
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-context-panel{top:20px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-live-metric strong{white-space:normal!important;overflow-wrap:anywhere!important;text-overflow:clip!important;font-size:16px!important;line-height:1.25!important}
 }
 @media(max-width:700px){
   body.lmf-home-ref3-active .lmf-home-reference-final{gap:9px!important}
@@ -185,7 +190,7 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active
   body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-program-row h2{font-size:26px!important}
   body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main h3{font-size:15px!important;line-height:1.3!important}
   body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-position{font-size:14px!important}
-  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main::after{font-size:10px}
+  .lmf-reference-workout-motto{font-size:10px}
   .lmf-reference-command-shield{width:76px;height:108px;right:-3px;top:3px}.lmf-reference-command-shield span{font-size:7px;top:53px}
   body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-grid{gap:8px!important}
   body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel{padding:11px!important;min-height:238px!important;border-radius:7px!important}
