@@ -30,12 +30,19 @@ const checks = new Map([
   ['same-program reposition is evented', progression.includes('program-position-repositioned')],
   ['program position auto-advances from source structure', progression.includes('function nextPosition') && progression.includes('definition.weekData')],
   ['Black Crown completion invents no next program', progression.includes('No next program was invented.')],
-  ['workout start resolves Black Crown private TMs', workout.includes("programKey === 'black-crown' ? await getLatestTrainingMaxes(athleteId) : {}")],
-  ['percentage load refs resolve privately', workout.includes("programmed.loadReference?.startsWith('black-crown:tm:')")],
+
+  // Private load resolution now has two legal, explicit paths:
+  // Black Crown TMs and Crown Maintenance verified Crownforge test references.
+  ['workout start resolves Black Crown private TMs', workout.includes("programKey === 'black-crown' ? await getLatestTrainingMaxes(athleteId)")],
+  ['workout start resolves Maintenance verified Crownforge references', workout.includes("programKey === 'crown-maintenance' ? await getVerifiedCrownforgeReferences(athleteId) : {}")],
+  ['Maintenance references are scoped to completed Crownforge sessions', workout.includes("row.program_key === 'crownforge' && row.status === 'completed'") && workout.includes('crownforgeSessionIds.has(String(row.workout_session_id'))],
+  ['Black Crown percentage refs retain explicit TM namespace', workout.includes("const blackCrownPrefix = 'black-crown:tm:'") && workout.includes('rawReference.startsWith(blackCrownPrefix)')],
+  ['Maintenance verified technical aliases are explicit', workout.includes("'verified-clean-technical-reference': 'verified-clean-technical-reference'") && workout.includes("latest['verified-clean-reference'] = latest['verified-clean-technical-reference']")],
   ['Power Clean uses saved Clean TM alias', workout.includes("'power-clean': 'clean'")],
-  ['unresolved TMs remain null', workout.includes('if (!row) return { value: null, unit: null, tmKey, tmValue: null, tmUnit: null }')],
-  ['Black Crown percentage loads round up by default', workout.includes("programmed.rounding === 'down-5'") && workout.includes('Math.ceil(raw / 5) * 5')],
+  ['unresolved private references remain null', workout.includes('if (!tm) return { value: null, unit: null, tmKey, tmValue: null, tmUnit: null }')],
+  ['percentage loads round up by default', workout.includes("programmed.rounding === 'down-5'") && workout.includes('Math.ceil(raw / 5) * 5')],
   ['resolved private load provenance is snapshotted', workout.includes('resolvedTrainingMaxKey') && workout.includes('resolvedTrainingMaxValue')],
+
   ['runtime hydrates selection from private program instance', main.includes('hydrateSelectedPositionFromProgramInstance()') && main.includes('positionFromProgramInstance(state.programInstance)')],
   ['home no longer uses dated public calendar as current athlete state', main.includes('const homeProgram: PublicProgramKey = state.selectedProgram')],
   ['preview workout starts are blocked', main.includes('Preview only — make this your current position before starting')],
@@ -63,7 +70,7 @@ for (const [label, ok] of checks) {
   if (!ok) failed += 1
 }
 if (failed) {
-  console.error(`Athlete progression audit failed: ${failed} check(s)`) 
+  console.error(`Athlete progression audit failed: ${failed} check(s)`)
   process.exit(1)
 }
 console.log('LetMeFly athlete program progression audit: PASS')
