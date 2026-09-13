@@ -11,6 +11,7 @@ const {chromium} = createRequire(path.join(app, 'package.json'))('playwright-cor
 const origin = process.env.LMF_AUDIT_BASE_URL || 'http://127.0.0.1:4173'
 const browser = await chromium.launch({executablePath:process.env.CHROME_BIN, headless:true, args:['--no-sandbox']})
 const report = {checks:[], errors:[]}
+let currentPage
 const screens = [
   ['program', '.lmf-reference-program-hero', 'program'],
   ['progress', '.lmf-approved-progress-head-v1', 'progress'],
@@ -24,6 +25,7 @@ try {
     const context = await browser.newContext({viewport:{width,height:950}, locale:'en-US', serviceWorkers:'block'})
     await context.route('**/*', r => new URL(r.request().url()).origin === origin ? r.continue() : r.abort())
     const page = await context.newPage()
+    currentPage=page
     page.setDefaultTimeout(20000)
     page.on('pageerror', e => report.errors.push(e.message))
     await page.goto(origin+'/#/home')
@@ -181,17 +183,22 @@ try {
     }
     await page.locator('.readiness-panel [data-action="start-workout"]').click()
     await page.locator('.active-exercise').first().waitFor({state:'attached'})
-    await page.locator('#session-track [data-session-index="2"]').click()
-    await page.waitForFunction(()=>{
-      const active=document.querySelector('.active-page')
-      if(!/Main Strength Circuit/i.test(active?.querySelector('.workout-panel-head h2')?.textContent||''))return false
-      const rect=active.getBoundingClientRect(),viewport=active.parentElement.getBoundingClientRect()
-      return Math.abs(rect.x-viewport.x)<2
-    })
-    const activeCard=page.locator('.active-page .active-exercise.lmf-flow-active')
-    await activeCard.locator('.lmf-reference-set-history').waitFor({state:'visible'})
-    const sourceId=await activeCard.getAttribute('data-exercise-id')
-    const card=page.locator(`.active-exercise[data-exercise-id="${sourceId}"]`)
+    const card=page.locator('.active-exercise').filter({has:page.locator('.exercise-title h3',{hasText:/^Front Squat$/})}).first()
+    const sourceId=await card.getAttribute('data-exercise-id')
+    const sectionIndex=await card.evaluate(el=>Array.from(document.querySelectorAll('#swipe-viewport > .swipe-page')).indexOf(el.closest('.swipe-page')))
+    await page.locator(`#session-track [data-session-index="${sectionIndex}"]`).click()
+    // Native panes are centered within the carousel, with responsive inset
+    // spacing. Match the exercised recap contract instead of assuming equal
+    // leading edges on phone and desktop layouts.
+    await page.waitForFunction(id=>{
+      const pane=document.querySelector(`.active-exercise[data-exercise-id="${id}"]`)?.closest('.swipe-page')
+      const viewport=document.querySelector('#swipe-viewport')
+      if(!pane?.classList.contains('active-page')||!viewport)return false
+      const a=pane.getBoundingClientRect(),v=viewport.getBoundingClientRect()
+      return a.width>0&&Math.abs(a.left+a.width/2-v.left-v.width/2)<2
+    },sourceId)
+    if(!await card.evaluate(el=>el.classList.contains('lmf-flow-active')))await card.locator('.lmf-compact-summary').click()
+    await card.locator('.lmf-reference-set-history').waitFor({state:'visible'})
     const originalRows=await card.locator('.set-table .set-row').count()
     assert.equal(await card.locator('[data-reference-set]').count(),originalRows,'Compact history reflects every native set')
     await card.locator('[data-reference-set]').last().click()
@@ -281,6 +288,13 @@ try {
   }
   assert.deepEqual(report.errors, [])
   console.log(JSON.stringify({result:'PASS',...report}))
+} catch(error) {
+  report.failure=String(error)
+  if(currentPage&&!currentPage.isClosed()) {
+    report.failureContext=await currentPage.evaluate(()=>({route:location.hash,width:innerWidth,section:document.querySelector('.active-page .workout-panel-head h2')?.textContent,panes:[...document.querySelectorAll('#swipe-viewport > .swipe-page')].map(el=>({title:el.querySelector('h2')?.textContent,active:el.classList.contains('active-page'),left:el.getBoundingClientRect().left,width:el.getBoundingClientRect().width})),viewport:document.querySelector('#swipe-viewport')?.getBoundingClientRect().toJSON()})).catch(()=>null)
+    await currentPage.screenshot({path:path.join(out,'failure.png')}).catch(()=>{})
+  }
+  throw error
 } finally {
   fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n')
   await browser.close()
