@@ -29,6 +29,7 @@ jobs:
         run: |
           mkdir -p .build-src/letmefly_app
           npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cat overlays/auth/password-access-ui-v1.ts overlays/auth/password-registration-v1.mjs ci/apply-password-access-v1.sh | sha256sum | cut -d ' ' -f 1 > /tmp/expected-password-access-version.txt
           preview_matches_head() {
             curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-train-reference-v1.js?audit=$GITHUB_SHA" -o /tmp/preview-train.js &&
             cmp -s /tmp/preview-train.js overlays/ui-command-v2/batch-ar/home-train-reference-v1.js &&
@@ -45,7 +46,9 @@ jobs:
             curl -fsS "$LMF_AUDIT_BASE_URL/ui/desktop-workspace-v2-polish.js?audit=$GITHUB_SHA" -o /tmp/preview-desktop-polish.js &&
             cmp -s /tmp/preview-desktop-polish.js overlays/ui-command-v2/batch-aj/desktop-workspace-v2-polish.js &&
             curl -fsS "$LMF_AUDIT_BASE_URL/ui/pwa-install.js?audit=$GITHUB_SHA" -o /tmp/preview-pwa-install.js &&
-            cmp -s /tmp/preview-pwa-install.js overlays/ui-command-v2/batch-s/pwa-install.js
+            cmp -s /tmp/preview-pwa-install.js overlays/ui-command-v2/batch-s/pwa-install.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/password-access-version.txt?audit=$GITHUB_SHA" -o /tmp/preview-password-access-version.txt &&
+            cmp -s /tmp/preview-password-access-version.txt /tmp/expected-password-access-version.txt
           }
           for attempt in {1..120}; do
             if preview_matches_head; then
@@ -61,6 +64,7 @@ jobs:
           cmp /tmp/preview-desktop.js overlays/ui-command-v2/batch-aj/desktop-workspace-v1.js
           cmp /tmp/preview-desktop-polish.js overlays/ui-command-v2/batch-aj/desktop-workspace-v2-polish.js
           cmp /tmp/preview-pwa-install.js overlays/ui-command-v2/batch-s/pwa-install.js
+          cmp /tmp/preview-password-access-version.txt /tmp/expected-password-access-version.txt
           export CHROME_BIN="$(command -v google-chrome || command -v chromium)"
           node ci/audit-locked-ui-preview-browser.mjs
       - uses: actions/upload-artifact@v4

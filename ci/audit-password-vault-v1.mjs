@@ -24,6 +24,7 @@ const user = { id: 'test-existing-owner', email: 'test@example.invalid' }
 const session = { user }
 const never = async () => { throw new Error('Unexpected data mutation') }
 let updates = 0
+let registrations = 0
 let signInFails = false
 const auth = {
   signInWithPassword: async () => {
@@ -31,6 +32,8 @@ const auth = {
     return { user, session }
   },
   setAccountPassword: async () => { updates += 1 },
+  registerWithPassword: async () => { registrations += 1; return { user, session } },
+  passwordRegistrationAvailability: async () => ({ available:true,message:'Ready' }),
   requestEmailOtp: never,
 }
 const mismatch = { kind: 'manual-choice-required', localAthleteId: 'local-1', cloudAthleteId: 'cloud-2' }
@@ -59,16 +62,39 @@ await assert.rejects(vault.signInWithPassword(user.email, 'wrong'), /Invalid cre
 assert.equal(vault.snapshot.localAthleteId, 'local-1')
 console.log('PASS password setup and failed login preserve the existing vault; wrong-account updates are refused')
 
+await assert.rejects(vault.registerWithPassword(user.email, 'test-password', 'test-password'), /already signed in/)
+assert.equal(registrations, 0)
+const registerVault = new PrivateVaultController(auth, bootstrap, new Proxy({}, { get: () => never }), 'test')
+assert.deepEqual(await registerVault.registerWithPassword(user.email, 'test-password', 'test-password'), mismatch)
+assert.equal(registerVault.snapshot.localAthleteId, 'local-1')
+assert.equal(registerVault.snapshot.cloudAthleteId, 'cloud-2')
+assert.match(registerVault.snapshot.lastError, /Automatic merge is blocked/)
+const emptyVault = new PrivateVaultController(auth, {
+  ...bootstrap, decideLink:async () => ({kind:'no-local-no-cloud'}),
+}, new Proxy({}, { get: () => never }), 'test')
+assert.deepEqual(await emptyVault.registerWithPassword(user.email, 'test-password', 'test-password'), {kind:'no-local-no-cloud'})
+assert.equal(emptyVault.snapshot.user.id, user.id)
+assert.equal(emptyVault.snapshot.localAthleteId, null)
+assert.equal(emptyVault.snapshot.cloudAthleteId, null)
+console.log('PASS registration retains mismatch protection and lets a new account continue to athlete creation')
+
 const context = { configured: true, userId: null, email: null, signIn: never, setPassword: never }
 const signIn = passwordAccessMarkup(context)
 assert.match(signIn, /data-password-form="signin"/)
 assert.match(signIn, /autocomplete="current-password"/)
 assert.doesNotMatch(signIn, /data-password-form="setup"/)
+assert.match(signIn, /data-password-view="register"/)
+const registration = passwordAccessMarkup(context, 'register')
+assert.match(registration, /data-password-form="register"/)
+assert.equal((registration.match(/autocomplete="new-password"/g) || []).length, 2)
+assert.match(registration, /data-password-submit disabled/)
+assert.match(registration, /data-registration-recheck/)
 const setup = passwordAccessMarkup({ ...context, userId: user.id, email: '<private>&"@example.invalid' })
 assert.match(setup, /data-password-form="setup"/)
 assert.equal((setup.match(/autocomplete="new-password"/g) || []).length, 2)
 assert.match(setup, /&lt;private&gt;&amp;&quot;/)
 assert.doesNotMatch(setup, /<private>/)
+assert.doesNotMatch(setup, /data-password-view="register"/)
 assert.equal(passwordAccessMarkup({ ...context, configured: false }), '')
 assert.equal(passwordAccessKey(context), 'signed-out')
 assert.notEqual(passwordAccessKey({ ...context, userId: user.id }), passwordAccessKey(context))
