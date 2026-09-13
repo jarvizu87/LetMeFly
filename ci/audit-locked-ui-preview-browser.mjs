@@ -25,6 +25,8 @@ try {
     const context = await browser.newContext({viewport:{width,height:950}, locale:'en-US', serviceWorkers:'block'})
     await context.route('**/*', r => new URL(r.request().url()).origin === origin ? r.continue() : r.abort())
     const page = await context.newPage()
+    let recoveryEmailRequests=0
+    page.on('request',request=>{if(new URL(request.url()).pathname==='/auth/v1/recover')recoveryEmailRequests++})
     currentPage=page
     if(process.env.LMF_AUDIT_TRACE==='1')await page.addInitScript(()=>{
       const entries=[]
@@ -71,6 +73,20 @@ try {
     await page.locator('.modal [data-password-view="signin"]').click()
     assert.equal(await page.locator('.modal [data-password-form="signin"]').isVisible(),true)
     report.checks.push({width,check:'opening-register-and-return-to-sign-in',status:'pass'})
+    await page.locator('.modal [data-password-view="recovery"]').click()
+    const recoveryForm=page.locator('.modal [data-password-form="recovery"]')
+    await recoveryForm.waitFor({state:'visible'})
+    assert.equal(await recoveryForm.locator('[data-reset-request]').isEnabled(),true)
+    assert.equal(await page.locator('.modal input[autocomplete="new-password"]').count(),0,'An unverified reset cannot set a password')
+    assert.equal(await recoveryForm.evaluate(form=>form.scrollWidth<=form.clientWidth+1),true,'Recovery fits the device width')
+    await page.locator('.modal .lmf-recovery-link-help summary').click()
+    assert.equal(await page.locator('.modal #lmf-recovery-link').isVisible(),true)
+    assert.equal(await page.locator('.modal #lmf-recovery-link').getAttribute('type'),'password','Recovery links are masked')
+    assert.equal(recoveryEmailRequests,0,'Opening Forgot password never sends an email')
+    await page.screenshot({path:path.join(out,`opening-password-recovery-${width}.png`)})
+    await page.locator('.modal [data-password-view="signin"]').click()
+    assert.equal(await page.locator('.modal [data-password-form="signin"]').isVisible(),true)
+    report.checks.push({width,check:'opening-password-recovery-without-automatic-email',status:'pass'})
     await page.screenshot({path:path.join(out,`opening-brand-${width}.png`)})
     await page.locator('#onboard-name').fill('Disposable locked UI preview')
     await page.locator('#onboard-unit').selectOption('kg')

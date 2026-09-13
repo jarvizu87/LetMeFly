@@ -29,7 +29,7 @@ jobs:
         run: |
           mkdir -p .build-src/letmefly_app
           npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
-          cat overlays/auth/password-access-ui-v1.ts overlays/auth/password-registration-v1.mjs ci/apply-password-access-v1.sh | sha256sum | cut -d ' ' -f 1 > /tmp/expected-password-access-version.txt
+          cat overlays/auth/password-access-ui-v1.ts overlays/auth/password-registration-v1.mjs overlays/auth/password-recovery-ui-v1.ts overlays/auth/password-recovery-v1.mjs ci/apply-password-access-v1.sh | sha256sum | cut -d ' ' -f 1 > /tmp/expected-password-access-version.txt
           preview_matches_head() {
             curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-train-reference-v1.js?audit=$GITHUB_SHA" -o /tmp/preview-train.js &&
             cmp -s /tmp/preview-train.js overlays/ui-command-v2/batch-ar/home-train-reference-v1.js &&

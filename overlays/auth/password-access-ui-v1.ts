@@ -1,12 +1,18 @@
+import { passwordRecoveryMarkup, bindPasswordRecovery } from './password-recovery-ui-v1'
+
 // This view receives native account operations. It never stores credentials.
 export interface PasswordAccessContext {
   configured: boolean
   userId: string | null
   email: string | null
+  recoveryActive?: boolean
+  recoveryError?: string | null
   signIn(email: string, password: string): Promise<void>
   register(email: string, password: string, confirmation: string): Promise<void>
   registrationAvailability(): Promise<{ available: boolean; message: string }>
   setPassword(userId: string, password: string, confirmation: string): Promise<void>
+  requestPasswordReset(email: string): Promise<void>
+  verifyPasswordResetLink(link: string): Promise<void>
 }
 
 function escape(value: string): string {
@@ -14,18 +20,21 @@ function escape(value: string): string {
 }
 
 export function passwordAccessKey(context: PasswordAccessContext): string {
-  return context.configured ? context.userId || 'signed-out' : 'unconfigured'
+  if (!context.configured) return 'unconfigured'
+  if (context.userId) return context.userId + (context.recoveryActive ? ':recovery' : '')
+  return context.recoveryError ? 'recovery-error' : 'signed-out'
 }
 
-export function passwordAccessMarkup(context: PasswordAccessContext, view: 'signin' | 'register' = 'signin'): string {
+export function passwordAccessMarkup(context: PasswordAccessContext, view: 'signin' | 'register' | 'recovery' = context.recoveryError ? 'recovery' : 'signin'): string {
   if (!context.configured) return ''
   const signedIn = Boolean(context.userId)
+  if (!signedIn && view === 'recovery') return passwordRecoveryMarkup(context)
   const registering = !signedIn && view === 'register'
   const newPassword = signedIn || registering
   return `<section class="card lmf-password-access" data-password-account="${escape(passwordAccessKey(context))}">
     <div class="page-kicker">LetMeFly account</div>
     ${signedIn ? '' : `<div class="btn-row" role="group" aria-label="Account access"><button type="button" class="btn ${registering ? 'ghost' : 'primary'}" data-password-view="signin" aria-pressed="${!registering}">Sign In</button><button type="button" class="btn ${registering ? 'primary' : 'ghost'}" data-password-view="register" aria-pressed="${registering}">Register</button></div>`}
-    <h2>${signedIn ? 'Set your LetMeFly password' : registering ? 'Create your LetMeFly account' : 'Sign in with your password'}</h2>
+    <h2>${signedIn ? context.recoveryActive ? 'Choose your new LetMeFly password' : 'Set your LetMeFly password' : registering ? 'Create your LetMeFly account' : 'Sign in with your password'}</h2>
     <p class="muted">${signedIn ? 'Choose a password for this signed-in account. Your training history and pictures stay with the same account.' : registering ? 'Register a new account with your email address and a password. Already have training history or pictures in an account? Choose Sign In.' : 'Use your existing LetMeFly account. Your email address identifies the account; this form does not send email or text codes.'}</p>
     <form data-password-form="${signedIn ? 'setup' : registering ? 'register' : 'signin'}">
       <div class="form-grid">
@@ -34,7 +43,7 @@ export function passwordAccessMarkup(context: PasswordAccessContext, view: 'sign
         ${newPassword ? '<div class="field"><label for="lmf-account-password-confirm">Confirm new password</label><input id="lmf-account-password-confirm" class="input" type="password" autocomplete="new-password" minlength="12" required></div>' : ''}
       </div>
       ${signedIn ? '<p class="source-note">Use at least 12 characters. This is separate from your Supabase dashboard password.</p>' : registering ? '<p class="source-note">Use at least 12 characters. Register creates a new account; it does not reset an existing password.</p>' : '<p class="source-note">Never set a password? Open Profile on a device already signed into your LetMeFly cloud account to set one.</p>'}
-      <div class="btn-row"><button class="btn primary" type="submit" data-password-submit ${registering ? 'disabled' : ''}>${signedIn ? 'SET PASSWORD' : registering ? 'CREATE ACCOUNT' : 'SIGN IN'}</button>${registering ? '<button class="btn ghost" type="button" data-registration-recheck>Check again</button>' : ''}</div>
+      <div class="btn-row"><button class="btn primary" type="submit" data-password-submit ${registering ? 'disabled' : ''}>${signedIn ? context.recoveryActive ? 'SAVE NEW PASSWORD' : 'SET PASSWORD' : registering ? 'CREATE ACCOUNT' : 'SIGN IN'}</button>${registering ? '<button class="btn ghost" type="button" data-registration-recheck>Check again</button>' : ''}${!signedIn && !registering ? '<button class="btn ghost" type="button" data-password-view="recovery">Forgot password?</button>' : ''}</div>
       <p class="source-note" data-password-feedback role="status" aria-live="polite"></p>
     </form>
   </section>`
@@ -60,7 +69,7 @@ export function bindPasswordAccess(host: HTMLElement, context: PasswordAccessCon
   host.querySelectorAll<HTMLButtonElement>('[data-password-view]').forEach(button => {
     button.addEventListener('click', () => {
       if (form.getAttribute('aria-busy') === 'true') return
-      const view = button.dataset.passwordView === 'register' ? 'register' : 'signin'
+      const view = button.dataset.passwordView === 'register' ? 'register' : button.dataset.passwordView === 'recovery' ? 'recovery' : 'signin'
       if (form.dataset.passwordForm === view) return
       const address = form.querySelector<HTMLInputElement>('#lmf-account-email')?.value || ''
       host.innerHTML = passwordAccessMarkup(context, view)
@@ -70,6 +79,10 @@ export function bindPasswordAccess(host: HTMLElement, context: PasswordAccessCon
       host.querySelector<HTMLButtonElement>(`[data-password-view="${view}"]`)?.focus()
     })
   })
+  if (form.dataset.passwordForm === 'recovery') {
+    bindPasswordRecovery(host, context)
+    return
+  }
   if (form.dataset.passwordForm === 'register') {
     const checkAvailability = async () => {
       if (form.getAttribute('aria-busy') === 'true') return

@@ -59,3 +59,45 @@ References:
 - https://supabase.com/docs/guides/auth/passwords
 - https://supabase.com/docs/guides/auth/password-security
 - https://supabase.com/docs/reference/javascript/auth-updateuser
+
+## Forgotten-password recovery
+
+Opening Sign In and signed-out Profile now include **Forgot password?**. JP
+requested this to regain access to the existing account. An existing signed-in
+device can still set a new password in Profile without requesting an email.
+Signed-out recovery uses a one-time email only after the user presses **SEND
+RESET EMAIL**; opening the form sends nothing. It does not create another account,
+change signup policy, or reset a Supabase dashboard password.
+
+The reset request uses native `resetPasswordForEmail` with this app origin and
+path, a recovery marker, and the Profile route. A marked callback exchanges its
+PKCE code and verifies the returned identity with `getUser`. The pinned client's
+`sb_flow_id` is passed through explicitly, and all callback query/fragment
+credentials are removed from the address before the exchange. Expired links and
+failed verification show recovery-specific errors and preserve local data.
+
+If a phone opens email in a different browser or a redirect goes to the wrong
+site, the optional **Having trouble opening the reset link?** section accepts the
+original, unused recovery link copied from the email. It accepts only HTTPS
+recovery links for this configured project's `/auth/v1/verify`, calls native
+`verifyOtp({ token_hash, type: 'recovery' })`, and verifies the server identity.
+It never fetches or navigates to the pasted URL or its `redirect_to` value. The
+input is masked and cleared immediately. Recovery codes, links and passwords
+are never logged or stored as application data.
+
+Only a verified session exposes **SAVE NEW PASSWORD**, using the same guarded
+password update and native athlete reconciliation as existing password access.
+Server password and reauthentication policies remain in force. Authenticated
+devices cannot replace their current session through the recovery form.
+
+Verification uses fake Auth responses and disposable local data, including
+invalid/used links, account changes, native vault mismatch protection and both
+opening-screen widths. No real recovery email was requested and no real password
+was changed. Actual email delivery depends on the project's existing email
+service; redirect URLs must be allowed by Supabase. No email templates, provider
+settings, or live production deployment were changed by this work.
+
+Recovery references:
+- https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail
+- https://supabase.com/docs/reference/javascript/auth-verifyotp
+- https://supabase.com/docs/guides/auth/passwords
