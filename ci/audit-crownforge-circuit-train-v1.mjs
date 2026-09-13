@@ -34,6 +34,8 @@ const equal = (actual, expected, label) => {
 }
 equal(api.exactRepDefault('R1 • 8 • 95 lb'), 8, 'exact circuit reps')
 equal(api.exactRepDefault('Set 1 • 10 • bodyweight'), 10, 'exact set reps')
+equal(api.exactRepDefault('R2 • 10/side • 20 lb/side'), 10, 'exact per-side reps remain 10 actual reps')
+equal(api.exactRepDefault('8 per leg • bodyweight'), 8, 'exact per-leg reps remain 8 actual reps')
 equal(api.exactRepDefault('R1 • 8–10 • 95 lb'), null, 'rep range remains manual')
 equal(api.exactRepDefault('3 • 5 • 95 lb'), null, 'ambiguous numeric prescription remains manual')
 equal(api.resolveProgrammedLoad('95:lb', '95', 'lb'), 95, 'same-unit load')
@@ -63,6 +65,7 @@ if (!html.includes('/ui/crownforge-circuit-train-v1.css?v=1') || !html.includes(
 
 console.log('LetMeFly Crownforge circuit-first Train UX audit: PASS')
 console.log('- exact reps/load may prefill blank native controls only')
+console.log('- exact per-side/per-limb reps remain the recorded rep count, never doubled')
 console.log('- ranges/ambiguous prescriptions remain manual')
 console.log('- lb/kg programmed loads convert to the athlete display unit')
 console.log('- substitution cards and saved actuals retain native ownership')
