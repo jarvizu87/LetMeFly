@@ -21,6 +21,8 @@ grep -Fq 'data-load-unit' "$ROOT_DIR/ci/apply-athlete-weight-unit-v1.sh"
 grep -Fq 'AS PROGRAMMED' "$JS_SRC"
 grep -Fq 'lmf-circuit-panel' "$CSS_SRC"
 grep -Fq 'width:min(50%,250px)' "$CSS_SRC"
+grep -Fq 'position:absolute!important' "$CSS_SRC"
+grep -Fq '> :not(.lmf-exercise-media)' "$CSS_SRC"
 
 # This layer may prefill blank native controls for confirmation, but it must not
 # persist, complete, substitute, or rewrite program data itself.
@@ -37,8 +39,8 @@ p = Path(os.environ['INDEX'])
 text = p.read_text()
 text = re.sub(r'\s*<link rel="stylesheet" href="/ui/crownforge-circuit-train-v1\.css(?:\?v=\d+)?">\s*', '\n', text)
 text = re.sub(r'\s*<script defer src="/ui/crownforge-circuit-train-v1\.js(?:\?v=\d+)?"></script>\s*', '\n', text)
-css = '<link rel="stylesheet" href="/ui/crownforge-circuit-train-v1.css?v=1">'
-js = '<script defer src="/ui/crownforge-circuit-train-v1.js?v=1"></script>'
+css = '<link rel="stylesheet" href="/ui/crownforge-circuit-train-v1.css?v=2">'
+js = '<script defer src="/ui/crownforge-circuit-train-v1.js?v=2"></script>'
 if '</head>' not in text or '</body>' not in text:
     raise SystemExit('production index missing head/body boundary')
 text = text.replace('</head>', f'  {css}\n</head>', 1)
@@ -66,8 +68,8 @@ p.write_text(text.rstrip() + '\n')
 PY
 
 node --check "$JS_OUT"
-grep -Fq '/ui/crownforge-circuit-train-v1.css?v=1' "$INDEX"
-grep -Fq '/ui/crownforge-circuit-train-v1.js?v=1' "$INDEX"
+grep -Fq '/ui/crownforge-circuit-train-v1.css?v=2' "$INDEX"
+grep -Fq '/ui/crownforge-circuit-train-v1.js?v=2' "$INDEX"
 grep -Fq "'/ui/crownforge-circuit-train-v1.css'" "$SW"
 grep -Fq "'/ui/crownforge-circuit-train-v1.js'" "$SW"
 
