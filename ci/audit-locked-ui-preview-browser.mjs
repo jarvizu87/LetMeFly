@@ -230,6 +230,7 @@ try {
     await card.locator('[data-reference-timer-toggle]').click()
     await card.locator('[data-reference-timer-reset]').click()
     assert.equal(await card.locator('.lmf-reference-rest-timer output').innerText(),'2:00')
+    assert.equal(await card.evaluate(el=>el.closest('.swipe-page').classList.contains('active-page')),true,'Rest timer updates preserve the selected workout section')
     assert.equal(await card.locator('.set-table .set-row').count(),originalRows,'The presentation and tools do not replace native set rows')
     const trainOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)
     assert.ok(trainOverflow<=1,'Active Train has no horizontal page overflow')

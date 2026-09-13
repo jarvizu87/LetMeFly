@@ -173,6 +173,9 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active
 .lmf-reference-train-footer>strong{font:700 25px/1.12 Georgia,serif;color:#e8edf1}.lmf-reference-train-footer>span{font:9px/1.9 system-ui;text-transform:uppercase;letter-spacing:.2em;color:#a9b4c4}
 
 @media(min-width:1100px){
+  /* Dynamic set/timer content must not re-snap to a different workout pane.
+     Section buttons retain the original programmatic navigation. */
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final #swipe-viewport{scroll-snap-type:none!important;overflow-anchor:none}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-workspace{grid-template-columns:220px minmax(0,1fr) 280px!important;gap:12px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-flow-panel,
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-context-panel{top:20px!important}
