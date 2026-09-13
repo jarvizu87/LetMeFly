@@ -9,9 +9,9 @@
 
   function exactRepDefault(prescription) {
     const tokens = String(prescription || '').split('•').map(value => value.trim()).filter(Boolean)
-    const numeric = tokens.filter(value => /^\d+$/.test(value))
+    const numeric = tokens.map(value => value.match(/^(\d+)(?:\s*(?:\/|per\s+)(?:side|leg|arm|hand)|\s+each\s+(?:side|leg|arm|hand))?$/i)).filter(Boolean)
     if (numeric.length !== 1) return null
-    const value = Number(numeric[0])
+    const value = Number(numeric[0][1])
     return Number.isInteger(value) && value > 0 ? value : null
   }
 
