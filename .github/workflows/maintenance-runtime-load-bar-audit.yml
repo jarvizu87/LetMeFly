@@ -12,9 +12,16 @@ on:
       - 'ci/build-command-v2-v2-1.sh'
       - 'ci/install-smart-names-bar-loader.sh'
       - 'ci/install-approved-tab-redesigns-v1.sh'
+      - 'ci/install-color-harmonization-v1.sh'
+      - 'ci/install-locked-art-fidelity-v1.sh'
       - 'ci/install-train-bar-loader-bridge-v1.sh'
+      - 'ci/install-program-mixed-summary-v1.sh'
       - 'overlays/ui-command-v2/batch-v/**'
+      - 'overlays/ui-command-v2/batch-ao/**'
+      - 'overlays/ui-command-v2/batch-ap/**'
+      - 'overlays/ui-command-v2/batch-aq/**'
       - 'overlays/ui-command-v2/batch-ar/**'
+      - 'overlays/ui-command-v2/batch-as/**'
       - '.github/workflows/maintenance-runtime-load-bar-audit.yml'
 
 permissions:
@@ -35,10 +42,12 @@ jobs:
           node-version: '22.12.0'
       - name: Build exact PR production candidate
         run: bash ci/build-command-v2-v2-1.sh
-      - name: Install Bar Loader and final approved Train bridge
+      - name: Install Bar Loader and final approved Train stack
         run: |
           bash ci/install-smart-names-bar-loader.sh
           bash ci/install-approved-tab-redesigns-v1.sh
+          bash ci/install-color-harmonization-v1.sh
+          bash ci/install-locked-art-fidelity-v1.sh
       - name: Install isolated browser harness dependency
         working-directory: .build-src/letmefly_app
         run: npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
