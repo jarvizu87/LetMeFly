@@ -82,8 +82,7 @@ async function snapshot(page) {
   })
 }
 async function chooseReadiness(page) {
-  const fields = page.locator('.readiness-field')
-  if (!(await fields.count())) return
+  if (!(await page.locator('.readiness-field').count())) return
   await page.evaluate(() => {
     for (const field of document.querySelectorAll('.readiness-field')) {
       const text=(field.textContent||'').toLowerCase()
@@ -93,21 +92,25 @@ async function chooseReadiness(page) {
     }
   })
 }
+function namedActiveCard(page, name) {
+  return page.locator('.exercise-card.lmf-flow-active').filter({hasText:name}).first()
+}
 async function activateExercise(page, name) {
-  const already = page.locator('.active-exercise .exercise-title h3').filter({hasText:name})
-  if (await already.count()) return
+  const active = namedActiveCard(page, name)
+  if (await active.count()) return active
   const clicked = await page.evaluate((needle) => {
-    const candidates=[...document.querySelectorAll('button,[role="button"],.lmf-compact-preview,.compact-exercise,.flow-preview')]
+    const candidates=[...document.querySelectorAll('button,[role="button"],.lmf-compact-preview,.compact-exercise,.flow-preview,.exercise-card.lmf-flow-compact')]
     const target=candidates.find(el => (el.textContent||'').includes(needle))
     if (!target) return false
     target.click(); return true
   }, name)
   assert.equal(clicked, true, `Could not activate ${name} from Workout Flow`)
-  await page.waitForFunction((needle) => (document.querySelector('.active-exercise .exercise-title h3')?.textContent||'').includes(needle), name, {timeout:10000})
+  await page.waitForFunction((needle) => [...document.querySelectorAll('.exercise-card.lmf-flow-active')].some(el => (el.textContent||'').includes(needle)), name, {timeout:10000})
+  return namedActiveCard(page, name)
 }
 async function auditBarLoader(page, name, target, expectedPerSide) {
-  await activateExercise(page, name)
-  const card = page.locator('.active-exercise')
+  const card = await activateExercise(page, name)
+  await card.waitFor({state:'visible', timeout:10000})
   const cardText = await card.innerText()
   assert.match(cardText, /65% of verified reference/i, `${name}: programmed percentage text missing in active Workout Mode`)
   const load = card.locator('.set-row:not([aria-hidden="true"]) .load-input').first()
@@ -116,7 +119,7 @@ async function auditBarLoader(page, name, target, expectedPerSide) {
   const button = card.locator('[data-lmf-bar-loader-open="exercise"]').first()
   await button.waitFor({state:'visible', timeout:10000})
   await button.click()
-  const modal = page.locator('.lmf-bar-loader-root')
+  const modal = page.locator('.lmf-bar-loader-root').first()
   await modal.waitFor({state:'visible',timeout:10000})
   const modalTarget = Number(await modal.locator('#lmf-bar-target').inputValue())
   const barWeight = Number(await modal.locator('#lmf-bar-weight').inputValue())
@@ -130,8 +133,7 @@ async function auditBarLoader(page, name, target, expectedPerSide) {
   assert.equal(leftSum, expectedPerSide, `${name}: left plates per side do not make the resolved total`)
   assert.equal(rightSum, expectedPerSide, `${name}: right plates per side do not make the resolved total`)
   assert.equal(barWeight + 2*leftSum, target, `${name}: Bar Loader plate math does not equal target total`)
-  const close = modal.locator('[data-lmf-bar-close="button"]')
-  await close.click()
+  await modal.locator('[data-lmf-bar-close="button"]').click()
   return { cardText, visibleLoad, target:modalTarget, unit, barWeight, platesPerSide:left, platePerSideTotal:leftSum }
 }
 
@@ -155,8 +157,7 @@ try {
       const maintenance=q.mutations.prepareLocalMutation({id:q.db.newId(),athlete_id:athlete.id,program_key:'crown-maintenance',program_name:'Crown Maintenance',program_version:'v2.1',status:'active',started_on:'2026-01-02',completed_on:null,current_phase_key:'maintenance',current_week:1,current_day_key:'day-1',progression_state:{syntheticMaintenanceRuntimeAudit:true}},ctx)
       tx.objectStore('programInstances').put(maintenance)
       const sourceSessionId=q.db.newId()
-      const sourceSession=q.mutations.prepareLocalMutation({id:sourceSessionId,athlete_id:athlete.id,program_instance_id:base.id,readiness_id:null,originating_device_id:null,program_key:'crownforge',program_version:'v2.2',phase_key:'testing',week_number:14,day_key:'day-6',workout_name:'Synthetic verified Crownforge references',scheduled_for:null,started_at:'2026-01-01T10:00:00.000Z',completed_at:'2026-01-01T11:00:00.000Z',status:'completed',notes:'Synthetic audit source only'},ctx)
-      tx.objectStore('workoutSessions').put(sourceSession)
+      tx.objectStore('workoutSessions').put(q.mutations.prepareLocalMutation({id:sourceSessionId,athlete_id:athlete.id,program_instance_id:base.id,readiness_id:null,originating_device_id:null,program_key:'crownforge',program_version:'v2.2',phase_key:'testing',week_number:14,day_key:'day-6',workout_name:'Synthetic verified Crownforge references',scheduled_for:null,started_at:'2026-01-01T10:00:00.000Z',completed_at:'2026-01-01T11:00:00.000Z',status:'completed',notes:'Synthetic audit source only'},ctx))
       for (const [reference,value] of [['verified-front-squat-1rm',203],['verified-bench-press-1rm',187]]) {
         tx.objectStore('workoutSets').put(q.mutations.prepareLocalMutation({id:q.db.newId(),athlete_id:athlete.id,workout_session_id:sourceSessionId,workout_exercise_id:`qa-${reference}`,set_number:1,completed:true,completed_at:'2026-01-01T11:00:00.000Z',load_value:value,load_unit:'lb',reps:1,rpe:8,rir:null,performance_data:{loadReference:reference,syntheticAudit:true},notes:null},ctx))
       }
