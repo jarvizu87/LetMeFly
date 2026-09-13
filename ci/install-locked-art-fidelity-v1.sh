@@ -6,12 +6,13 @@ DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 CSS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aq/locked-art-fidelity-v1.css"
 ART_SRC="$ROOT_DIR/overlays/ui-command-v2/static/raizen-black-crown-ascension-v1.svg"
 SCENE_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mockup-scenes"
+HOME_TRAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ar"
 CSS_OUT="$DIST_DIR/ui/locked-art-fidelity-v1.css"
 ART_OUT="$DIST_DIR/ui/raizen-black-crown-ascension-v1.svg"
 INDEX="$DIST_DIR/index.html"
 SW="$DIST_DIR/service-worker.js"
 
-for required in "$CSS_SRC" "$ART_SRC" "$INDEX" "$SW"; do
+for required in "$CSS_SRC" "$ART_SRC" "$INDEX" "$SW" "$HOME_TRAIN_SRC/home-train-reference-v1.css" "$HOME_TRAIN_SRC/home-train-reference-v1.js"; do
   test -s "$required" || { echo "Missing locked-art dependency: $required" >&2; exit 1; }
 done
 
@@ -31,6 +32,7 @@ node "$ROOT_DIR/ci/validate-mockup-scenes.mjs" "$SCENE_SRC"
 mkdir -p "$DIST_DIR/ui"
 cp "$CSS_SRC" "$CSS_OUT"
 cp "$ART_SRC" "$ART_OUT"
+cp "$HOME_TRAIN_SRC/home-train-reference-v1.css" "$HOME_TRAIN_SRC/home-train-reference-v1.js" "$DIST_DIR/ui/"
 mkdir -p "$DIST_DIR/ui/mockup-scenes"
 cp "$SCENE_SRC/"*.svg "$SCENE_SRC/manifest.json" "$DIST_DIR/ui/mockup-scenes/"
 cmp -s "$ART_SRC" "$ART_OUT"
@@ -44,6 +46,9 @@ text=re.sub(r'\s*<link rel="stylesheet" href="/ui/locked-art-fidelity-v1\.css(?:
 tag='<link rel="stylesheet" href="/ui/locked-art-fidelity-v1.css?v=10">'
 if not re.search(r'</head>',text,re.I): raise SystemExit('index.html missing </head>')
 text=re.sub(r'</head>',f'  {tag}\n</head>',text,count=1,flags=re.I)
+text=re.sub(r'\s*<link rel="stylesheet" href="/ui/home-train-reference-v1\.css(?:\?v=\d+)?">\s*','\n',text)
+text=re.sub(r'\s*<script defer src="/ui/home-train-reference-v1\.js(?:\?v=\d+)?"></script>\s*','\n',text)
+text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/home-train-reference-v1.css?v=1">\n  <script defer src="/ui/home-train-reference-v1.js?v=1"></script>\n</head>',text,count=1,flags=re.I)
 # This must be the final visual fidelity layer after color harmonization.
 if '/ui/color-harmonization-v1.css' in text and text.index('/ui/color-harmonization-v1.css') > text.index('/ui/locked-art-fidelity-v1.css'):
     raise SystemExit('locked-art-fidelity-v1.css must load after color-harmonization-v1.css')
@@ -59,6 +64,7 @@ match=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not match: raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing=re.findall(r"['\"]([^'\"]+)['\"]",match.group(1))
 required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=10','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
+required += ['/ui/home-train-reference-v1.'+ext+suffix for ext in ['css','js'] for suffix in ['', '?v=1']]
 required += ['/ui/mockup-scenes/'+p.name for p in sorted((p.parent/'ui/mockup-scenes').glob('*.svg'))]
 assets=[]
 for value in [*existing,*required]:
@@ -66,7 +72,7 @@ for value in [*existing,*required]:
 replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:match.start()]+replacement+text[match.end():]
 # Invalidate only the app shell cache. Athlete storage is unrelated to this cache.
-text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v11',text,count=1)
+text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v12',text,count=1)
 if count != 1: raise SystemExit('service-worker.js CACHE_NAME declaration not found')
 p.write_text(text.rstrip()+'\n')
 PY
