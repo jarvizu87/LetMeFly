@@ -30,9 +30,15 @@ assert.match(maintenance, /65%|65/)
 assert.match(maintenance, /72\.5%|72\.5/)
 assert.match(maintenance, /87\.5%|87\.5/)
 
-// Maintenance percentage loads resolve from the athlete's completed Crownforge
-// verified-result rows; no projected number or public hard-coded athlete value is used.
+// Maintenance percentage loads resolve only from this athlete's completed
+// Crownforge sessions. Completed Maintenance work must never feed back into the
+// verified-reference pool, and no projected/public athlete value may be used.
 assert.match(service, /getVerifiedCrownforgeReferences/)
+assert.match(service, /workoutSessions/)
+assert.match(service, /row\.program_key === 'crownforge'/)
+assert.match(service, /row\.status === 'completed'/)
+assert.match(service, /crownforgeSessionIds/)
+assert.match(service, /crownforgeSessionIds\.has\(String\(row\.workout_session_id/)
 assert.match(service, /workoutSets/)
 assert.match(service, /row\?\.athlete_id !== athleteId/)
 assert.match(service, /!row\?\.completed/)
@@ -78,7 +84,8 @@ assert.match(main, /\\bsets\?\\b/)
 assert.match(blackCrown, /2-3 sets|2–3 sets/)
 
 console.log('Maintenance + Black Crown card fidelity audit: PASS')
-console.log('- Crown Maintenance verified-reference percentage resolution: PASS')
+console.log('- Crown Maintenance completed-Crownforge-only reference resolution: PASS')
+console.log('- Crown Maintenance percentage resolution + round-up-to-5: PASS')
 console.log('- Maintenance mixed recovery section circuit guard: PASS')
 console.log('- Black Crown percentage/RPE/metric card details: PASS')
 console.log('- unilateral and variable-set wording visibility: PASS')
