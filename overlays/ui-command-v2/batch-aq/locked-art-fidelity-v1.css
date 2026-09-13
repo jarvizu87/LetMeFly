@@ -257,7 +257,7 @@ html[data-lmf-approved-route='more'] .lmf-more-brand-v1{
 }
 
 /* PROGRESS: full-width scene, one compact tab/range row, six metrics, 3 x 2 dashboard. */
-html[data-lmf-approved-route='progress'] .lmf-approved-progress-head-v1{height:228px!important;min-height:228px!important;padding:20px 26px!important;margin:0 -18px!important;border:0!important;border-radius:0!important;justify-content:flex-start!important;background:linear-gradient(90deg,#04090b 0%,#05090c99 26%,transparent 70%),url('/ui/mockup-scenes/progress.svg') right center/auto 100% no-repeat,url('/ui/mockup-scenes/more-mountain.svg') right top/auto 100% no-repeat!important}
+html[data-lmf-approved-route='progress'] .lmf-approved-progress-head-v1{height:228px!important;min-height:228px!important;padding:20px 26px!important;margin:0 -18px!important;border:0!important;border-radius:0!important;justify-content:flex-start!important;background:linear-gradient(90deg,#04090b 0%,#05090c99 26%,transparent 70%),url('/ui/mockup-scenes/progress.svg') right bottom/auto 134% no-repeat #04090b!important}
 html[data-lmf-approved-route='progress'] .lmf-approved-progress-head-v1::after{display:none!important}
 html[data-lmf-approved-route='progress'] .lmf-approved-progress-head-v1 .page-kicker{display:none!important}
 html[data-lmf-approved-route='progress'] .lmf-approved-progress-head-v1 h1{font-size:66px!important;text-transform:capitalize!important;margin:0!important;line-height:1.05!important}
