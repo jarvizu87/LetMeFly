@@ -35,7 +35,7 @@ const checks = new Map([
   // Black Crown TMs and Crown Maintenance verified Crownforge test references.
   ['workout start resolves Black Crown private TMs', workout.includes("programKey === 'black-crown' ? await getLatestTrainingMaxes(athleteId)")],
   ['workout start resolves Maintenance verified Crownforge references', workout.includes("programKey === 'crown-maintenance' ? await getVerifiedCrownforgeReferences(athleteId) : {}")],
-  ['Maintenance references are scoped to completed Crownforge sessions', workout.includes("row.program_key === 'crownforge' && row.status === 'completed'") && workout.includes('crownforgeSessionIds.has(String(row.workout_session_id'))],
+  ['Maintenance references are scoped to completed Crownforge sessions', workout.includes("row.program_key === 'crownforge' && row.status === 'completed'") && workout.includes('crownforgeSessionIds.has(String(row.workout_session_id')],
   ['Black Crown percentage refs retain explicit TM namespace', workout.includes("const blackCrownPrefix = 'black-crown:tm:'") && workout.includes('rawReference.startsWith(blackCrownPrefix)')],
   ['Maintenance verified technical aliases are explicit', workout.includes("'verified-clean-technical-reference': 'verified-clean-technical-reference'") && workout.includes("latest['verified-clean-reference'] = latest['verified-clean-technical-reference']")],
   ['Power Clean uses saved Clean TM alias', workout.includes("'power-clean': 'clean'")],
