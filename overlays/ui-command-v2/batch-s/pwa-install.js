@@ -120,7 +120,7 @@
         </div>
       </div>
       <div class="lmf-install-actions">
-        <button type="button" class="lmf-install-dismiss" aria-label="Dismiss install prompt">Dismiss</button>
+        <button type="button" class="lmf-install-dismiss" aria-label="Dismiss install prompt">Not now</button>
         <button type="button" class="lmf-install-confirm"></button>
       </div>
     `
