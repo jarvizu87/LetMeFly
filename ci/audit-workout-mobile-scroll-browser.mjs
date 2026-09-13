@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
+import { applicationBootState } from './browser-boot-contract.mjs'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const target = path.join(root, '.build-src', 'letmefly_app')
@@ -116,29 +117,14 @@ async function enterWorkoutSurface(page) {
 
 async function bootstrap(page) {
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded', timeout: 20000 })
-  await page.waitForSelector('body', { timeout: 10000 })
-  await page.waitForFunction(() => /LETMEFLY/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
-
-  // The public shell can render before the local-athlete modal. Wait through that
-  // asynchronous first-run boundary so a late modal is never mistaken for a missing nav.
-  let create = null
-  for (let i = 0; i < 20; i += 1) {
-    await dismissInstall(page)
-    create = await visible(page.locator('button,[role="button"]').filter({ hasText: /^\s*CREATE LOCAL ATHLETE\s*$/i }))
-    if (create) break
-    if (await findTrain(page) || await findStartWorkout(page)) break
-    await page.waitForTimeout(180)
-  }
-
-  if (create) {
-    const input = await visible(page.locator('#onboard-name,input[type="text"],input:not([type])'))
-    if (!input) throw new Error('Athlete name input missing')
-    await input.fill('Scroll QA Athlete')
-    await dismissInstall(page)
-    await create.click({ timeout: 5000 })
-    await page.waitForFunction(() => !/CREATE LOCAL ATHLETE/i.test(document.body.innerText), null, { timeout: 8000 }).catch(() => null)
-    await page.waitForTimeout(450)
-  }
+  await page.waitForFunction(applicationBootState, null, { timeout: 20000 })
+  // This context is new: opening artwork or navigation behind the first-run
+  // form is never evidence of an initialized disposable athlete.
+  const create=page.locator('[data-action="create-athlete"]')
+  await create.waitFor({state:'visible',timeout:10000})
+  await page.locator('#onboard-name').fill('Scroll QA Athlete')
+  await create.click({timeout:5000})
+  await create.waitFor({state:'detached',timeout:10000})
 
   await settlePrompts(page, 8)
 
