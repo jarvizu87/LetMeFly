@@ -27,7 +27,8 @@ const index = read('index.html')
 const sw = read('service-worker.js')
 const css = read('ui/locked-art-fidelity-v1.css')
 const art = read('ui/raizen-black-crown-ascension-v1.svg')
-assert(index.includes('/ui/brand-display-v1.css?v=1') && sw.includes('/ui/brand-display-v1.css?v=1'), 'Larger official logo presentation is installed and cached')
+assert(index.includes('/ui/brand-display-v1.css?v=2') && sw.includes('/ui/brand-display-v1.css?v=2'), 'Larger official logo presentation is installed and cached')
+assert(index.includes('/ui/home-reference-v3.js?v=5') && sw.includes('/ui/home-reference-v3.js?v=5'), 'Home loads the direct approved logo reference')
 assert(index.includes('class="lmf-app-opening"'), 'Native boot root contains the larger opening logo')
 
 assert(index.includes('/ui/locked-art-fidelity-v1.css?v=10'), 'index missing current locked art fidelity stylesheet')
@@ -39,7 +40,7 @@ assert(art.includes('data:image/jpeg;base64,'), 'canonical Raizen art wrapper is
 validateLockedArt(path.join(dist, 'ui/raizen-black-crown-ascension-v1.svg'))
 assert(css.includes("--lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg?v=2')"), 'current Raizen/Fenrir art variable missing')
 assert(sw.includes('/ui/raizen-black-crown-ascension-v1.svg?v=2'), 'service worker missing repaired identity image revision')
-assert(sw.includes('-locked-ui-v21'), 'service worker must refresh the previously cached UI assets')
+assert(sw.includes('-locked-ui-v22'), 'service worker must refresh the previously cached UI assets')
 for (const extension of ['js','css']) {
   const asset = `/ui/home-train-reference-v1.${extension}?v=4`
   assert(index.includes(asset) && sw.includes(asset), `Home and Train correction is installed and cached: ${asset}`)

@@ -227,7 +227,7 @@
     if (!topbar || topbar.querySelector('.lmf-home-topbar-shell')) return
     const shell = document.createElement('div')
     shell.className = 'lmf-home-topbar-shell'
-    shell.innerHTML = `<div class="lmf-home-brand-lockup"><img src="/app-icon-official-v6.svg?v=6" alt="" aria-hidden="true"><div><strong>LetMe<span>Fly</span></strong><small>STRENGTH BUILDS FREEDOM</small></div></div>`
+    shell.innerHTML = `<div class="lmf-home-brand-lockup"><img src="/brand/letmefly-logo-display-512.png?v=9" alt="" aria-hidden="true"><div><strong>LetMe<span>Fly</span></strong><small>STRENGTH BUILDS FREEDOM</small></div></div>`
     topbar.appendChild(shell)
   }
 

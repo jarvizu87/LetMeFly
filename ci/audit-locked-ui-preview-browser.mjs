@@ -63,8 +63,9 @@ try {
     const dismiss = page.getByRole('button', {name:'Dismiss install prompt',exact:true})
     await dismiss.waitFor({state:'visible',timeout:5000}).catch(()=>{})
     if (await dismiss.isVisible()) await dismiss.click()
-    const headerLogo=page.locator(width<1100?'.topbar .lmf-official-brand-mark img':'.navbar .lmf-official-brand-mark img')
-    assert.equal(await headerLogo.evaluate((img,min)=>img.complete&&img.naturalWidth>0&&img.getBoundingClientRect().width>=min,width<1100?52:64),true,'The header displays the larger original logo')
+    const headerLogo=page.locator(width<1100?'.lmf-home-brand-lockup > img':'.navbar .lmf-official-brand-mark img')
+    await headerLogo.waitFor({state:'visible'})
+    assert.equal(await headerLogo.evaluate(img=>img.complete&&img.naturalWidth===512&&img.getBoundingClientRect().width>=64&&img.getAttribute('src').startsWith('/brand/letmefly-logo-display-512.png')),true,'The visible Home header displays the larger original PNG directly')
 
     // An SVG may load successfully even when its embedded raster is corrupt.
     // Decode the actual delivered JPEG, not only the outer SVG element.
@@ -84,6 +85,8 @@ try {
       await page.goto(origin+'/#/'+route)
       await page.waitForFunction(r => document.documentElement.dataset.lmfApprovedRoute === r, route)
       await page.locator(selector).waitFor({state:'visible'})
+      const routeLogo=page.locator(width<1100?'.topbar .lmf-official-brand-mark img':'.navbar .lmf-official-brand-mark img')
+      assert.equal(await routeLogo.evaluate((img,min)=>img.complete&&img.naturalWidth>0&&img.getBoundingClientRect().width>=min,width<1100?52:64),true,route+' retains the larger header logo')
       assert.equal(await page.locator('.navbar .nav-item.active > span').first().evaluate(el=>getComputedStyle(el).color),'rgb(255, 64, 80)','Navigation uses the approved red selection accent')
       const expectedScene=scene==='progress'&&width<768?'progress-mobile':scene
       await page.waitForFunction(([selector,scene]) => getComputedStyle(document.querySelector(selector)).backgroundImage.includes(`/ui/mockup-scenes/${scene}.svg`), [selector,expectedScene])

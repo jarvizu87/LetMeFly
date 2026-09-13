@@ -29,13 +29,23 @@ jobs:
         run: |
           mkdir -p .build-src/letmefly_app
           npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          preview_matches_head() {
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-train-reference-v1.js?audit=$GITHUB_SHA" -o /tmp/preview-train.js &&
+            cmp -s /tmp/preview-train.js overlays/ui-command-v2/batch-ar/home-train-reference-v1.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/brand-display-v1.css?audit=$GITHUB_SHA" -o /tmp/preview-brand.css &&
+            cmp -s /tmp/preview-brand.css overlays/ui-command-v2/batch-as/brand-display-v1.css &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-reference-v3.js?audit=$GITHUB_SHA" -o /tmp/preview-home.js &&
+            cmp -s /tmp/preview-home.js overlays/ui-command-v2/batch-ac/home-reference-v3.js
+          }
           for attempt in {1..120}; do
-            if curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-train-reference-v1.js?audit=$GITHUB_SHA" -o /tmp/preview-train.js && cmp -s /tmp/preview-train.js overlays/ui-command-v2/batch-ar/home-train-reference-v1.js; then
+            if preview_matches_head; then
               break
             fi
             sleep 2
           done
           cmp /tmp/preview-train.js overlays/ui-command-v2/batch-ar/home-train-reference-v1.js
+          cmp /tmp/preview-brand.css overlays/ui-command-v2/batch-as/brand-display-v1.css
+          cmp /tmp/preview-home.js overlays/ui-command-v2/batch-ac/home-reference-v3.js
           export CHROME_BIN="$(command -v google-chrome || command -v chromium)"
           node ci/audit-locked-ui-preview-browser.mjs
       - uses: actions/upload-artifact@v4

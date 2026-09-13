@@ -7,6 +7,11 @@ html body .topbar .brand-mark.lmf-official-brand-mark img{
 }
 html body .topbar .brand{gap:10px!important;min-width:0!important}
 html body .topbar{min-height:72px!important}
+html body.lmf-home-ref3-active .lmf-home-brand-lockup>img{
+  display:block!important;width:64px!important;height:64px!important;flex:0 0 64px!important;
+  max-width:none!important;object-fit:contain!important;filter:none!important;
+}
+html body.lmf-home-ref3-active .lmf-home-brand-lockup{gap:8px!important}
 
 /* The native first-run form retains its fields and buttons. */
 html body .modal .brand:has(.lmf-official-brand-mark){

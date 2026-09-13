@@ -66,8 +66,10 @@ Circuit ordering, unequal set counts, movement dropout, readiness, prescriptions
 load/reps/RPE logging, recovery, substitutions, preview-day protections and
 completion continue through the existing workout owners and release checks.
 
-The official logo now displays at 52px in the phone header and 64px in the desktop
-header. The native first-run form uses 104px. Initial app HTML shows the same
+The official logo now displays at 52px in the shared phone header and 64px in
+Home's phone header and the desktop header. Home references the original PNG
+directly, avoiding an older external-image SVG wrapper. The native first-run form
+uses 104px. Initial app HTML shows the same
 approved image at 160–192px while startup is pending; the normal native render
 replaces it without a delay or a new dismissal action. Operating-system launch
 screens before the app HTML loads remain controlled by the phone/browser.
