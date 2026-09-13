@@ -122,6 +122,11 @@ try {
         assert.equal(await page.locator('.lmf-profile-v2-avatar').isVisible(), false)
         const nameWidth = await page.locator('.lmf-profile-v2-identity > div:last-child').evaluate(el=>el.getBoundingClientRect().width)
         assert.ok(nameWidth >= 150, 'Athlete identity uses the dossier width after the avatar is removed')
+        if(width<768){
+          const statLayout=await page.locator('.lmf-profile-character-dossier-v1 > .lmf-profile-stat-grid').evaluate(el=>({width:el.getBoundingClientRect().width,last:el.lastElementChild.getBoundingClientRect().width,labels:[...el.querySelectorAll('small')].map(label=>({width:label.clientWidth,scroll:label.scrollWidth}))}))
+          assert.ok(statLayout.last>statLayout.width*.85,'Training experience has its own full-width row on phones')
+          assert.ok(statLayout.labels.every(label=>label.scroll<=label.width+1),'Profile labels wrap within their own columns')
+        }
       }
       if(route==='exercises'){
         const card=page.locator('[data-library-card]').nth(1)
