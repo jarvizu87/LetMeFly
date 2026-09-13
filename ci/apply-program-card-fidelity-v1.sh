@@ -121,40 +121,20 @@ if perf_anchor not in service:
     raise SystemExit('programmed RPE/source-text patch point missing')
 service = service.replace(perf_anchor, perf_replace, 1)
 
-# Replace only the private load resolver body, preserving its signature and callers.
-def replace_function_body(text: str, name: str, body: str) -> str:
-    start = text.find(f'function {name}(')
-    if start < 0:
-        raise SystemExit(f'{name} function not found')
-    brace = text.find('{', start)
-    if brace < 0:
-        raise SystemExit(f'{name} opening brace not found')
-    depth = 0
-    quote = None
-    escaped = False
-    i = brace
-    while i < len(text):
-        ch = text[i]
-        if quote:
-            if escaped:
-                escaped = False
-            elif ch == '\\':
-                escaped = True
-            elif ch == quote:
-                quote = None
-        else:
-            if ch in "'\"`":
-                quote = ch
-            elif ch == '{':
-                depth += 1
-            elif ch == '}':
-                depth -= 1
-                if depth == 0:
-                    return text[:brace + 1] + '\n' + body.rstrip() + '\n' + text[i:]
-        i += 1
-    raise SystemExit(f'{name} closing brace not found')
-
-resolver_body = r'''  if (programmed.loadValue != null) {
+# Replace the exact resolver function by its stable neighboring function boundary.
+# The TypeScript signature itself contains a return-type object literal, so taking
+# the first "{" after the function name would corrupt the signature.
+resolver_start = service.find(resolver_marker)
+resolver_end_marker = '\n}\n\nfunction setRecordFromProgram('
+resolver_end = service.find(resolver_end_marker, resolver_start)
+if resolver_end < 0:
+    raise SystemExit('resolvePrivateProgrammedLoad closing boundary missing')
+resolver_end += 2
+resolver_function = r'''function resolvePrivateProgrammedLoad(
+  programmed: ProgramSet,
+  trainingMaxes: Record<string, LocalDomainRecord>,
+): { value: number | null; unit: 'lb' | 'kg' | null; tmKey: string | null; tmValue: number | null; tmUnit: string | null } {
+  if (programmed.loadValue != null) {
     return { value: programmed.loadValue, unit: programmed.loadUnit ?? null, tmKey: null, tmValue: null, tmUnit: null }
   }
   if (typeof programmed.percentage !== 'number' || !programmed.loadReference) {
@@ -194,8 +174,9 @@ resolver_body = r'''  if (programmed.loadValue != null) {
     : programmed.rounding === 'nearest-5'
       ? Math.round(raw / 5) * 5
       : Math.ceil(raw / 5) * 5
-  return { value, unit: tmUnit === 'kg' ? 'kg' : 'lb', tmKey, tmValue, tmUnit }'''
-service = replace_function_body(service, resolver_name, resolver_body)
+  return { value, unit: tmUnit === 'kg' ? 'kg' : 'lb', tmKey, tmValue, tmUnit }
+}'''
+service = service[:resolver_start] + resolver_function + service[resolver_end:]
 
 # ---------------------------------------------------------------------------
 # Card formatting: render the whole immutable program target.
