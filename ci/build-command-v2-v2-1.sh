@@ -42,6 +42,12 @@ bash "$ROOT_DIR/ci/apply-magic-link-auth-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-cloud-bootstrap-v2.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-conflict-recovery-v1.sh" "$TARGET"
 
+# Activate only after the SMS provider and existing account number are verified.
+# No provider subscription, phone binding or account migration occurs at build.
+if [[ "${VITE_PHONE_AUTH_ENABLED:-false}" == "true" ]]; then
+  bash "$ROOT_DIR/ci/apply-phone-otp-v1.sh" "$TARGET"
+fi
+
 # The foundational mobile build must already have isolated set-tab centering
 # from page-level vertical scroll. Program overlays may not regress that runtime.
 grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" "$TARGET/public/ui/workout-flow-v1.js"

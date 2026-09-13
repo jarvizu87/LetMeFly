@@ -23,6 +23,10 @@ jobs:
         with:
           node-version: '22.12.0'
       - run: bash ci/build-command-v2-v2-1.sh
+      - name: Validate prepared phone sign-in without sending messages
+        run: |
+          bash ci/apply-phone-otp-v1.sh .build-src/letmefly_app
+          npm --prefix .build-src/letmefly_app run typecheck
       - run: npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts fake-indexeddb@6.2.5
       - run: node ci/audit-cloud-bootstrap-v2.mjs .build-src/letmefly_app
       - run: node ci/audit-profile-cloud-sync.mjs .build-src/letmefly_app
