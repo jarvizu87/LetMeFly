@@ -41,10 +41,19 @@ helper_marker = 'async function getVerifiedCrownforgeReferences('
 if helper_marker not in service:
     insert_at = service.find(resolver_marker)
     helper = r'''async function getVerifiedCrownforgeReferences(athleteId: string): Promise<Record<string, any>> {
+  // Maintenance references come only from this athlete's completed Crownforge
+  // sessions. Completed Maintenance percentage sets must never become a new
+  // "verified" reference for a later bridge.
+  const sourceSessions = await getAllFromIndex<LocalDomainRecord>('workoutSessions', 'by-athlete', athleteId)
+  const crownforgeSessionIds = new Set(sourceSessions
+    .filter((row) => !row.deleted_at && row.program_key === 'crownforge' && row.status === 'completed')
+    .map((row) => String(row.id)))
+  if (!crownforgeSessionIds.size) return {}
+
   const db = await openLetMeFlyDb()
   try {
     const tx = db.transaction(['workoutSets'], 'readonly')
-    const rows = await requestToPromise<any[]>(tx.objectStore('workoutSets').getAll())
+    const rows = await requestToPromise<LocalDomainRecord[]>(tx.objectStore('workoutSets').getAll())
     const accepted = new Set([
       'verified-front-squat-1rm',
       'verified-back-squat-1rm',
@@ -57,6 +66,7 @@ if helper_marker not in service:
     const latest: Record<string, any> = {}
     for (const row of rows) {
       if (row?.athlete_id !== athleteId || row?.deleted_at || !row?.completed) continue
+      if (!crownforgeSessionIds.has(String(row.workout_session_id ?? ''))) continue
       const perf = (row.performance_data ?? {}) as Record<string, any>
       const reference = String(perf.loadReference ?? '').trim()
       if (!accepted.has(reference)) continue
@@ -239,10 +249,18 @@ function programSetPrescriptionSummary(set: any): string {
 '''
     main = main[:insert_at] + helper + main[insert_at:]
 
-active_target = "const target = [perf.programmedLabel, perf.programmedReps, perf.programmedLoadText].filter(Boolean).join(' • ')"
-if active_target not in main:
+active_variants = [
+    "const target = [perf.programmedReps, perf.programmedLoadText].filter(Boolean).join(' • ') || String(perf.programmedLabel ?? '')",
+    "const target = [perf.programmedLabel, perf.programmedReps, perf.programmedLoadText].filter(Boolean).join(' • ')",
+]
+replaced = False
+for active_target in active_variants:
+    if active_target in main:
+        main = main.replace(active_target, "const target = workoutPrescriptionSummary(perf)", 1)
+        replaced = True
+        break
+if not replaced:
     raise SystemExit('active workout prescription summary patch point missing')
-main = main.replace(active_target, "const target = workoutPrescriptionSummary(perf)", 1)
 
 old_preview = "${exercise.sets.map((set) => `<div class=\"prescription-row\"><strong>${esc(set.label)}</strong><span>${esc(String(set.reps ?? ''))}${set.loadText ? ` • ${esc(set.loadText)}` : ''}</span></div>`).join('')}"
 new_preview = "${exercise.sets.map((set) => `<div class=\"prescription-row\"><strong>${esc(set.label)}</strong><span>${esc(programSetPrescriptionSummary(set) || 'Programmed work')}</span></div>`).join('')}"
@@ -260,6 +278,8 @@ test "$CM_BEFORE" = "$(hash_tree "$TARGET/src/programs/crown-maintenance")"
 test "$BC_BEFORE" = "$(hash_tree "$TARGET/src/programs/black-crown")"
 
 grep -Fq "getVerifiedCrownforgeReferences" "$SERVICE"
+grep -Fq "row.program_key === 'crownforge'" "$SERVICE"
+grep -Fq "crownforgeSessionIds.has" "$SERVICE"
 grep -Fq "verified-clean-reference" "$SERVICE"
 grep -Fq "programKey === 'crown-maintenance' ? await getVerifiedCrownforgeReferences" "$SERVICE"
 grep -Fq "programmedRpe" "$SERVICE"
