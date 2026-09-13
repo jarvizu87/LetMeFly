@@ -234,6 +234,12 @@ try {
     },sourceId)
     if(!await card.evaluate(el=>el.classList.contains('lmf-flow-active')))await card.locator('.lmf-compact-summary').click()
     await card.locator('.lmf-reference-set-history').waitFor({state:'visible'})
+    const nativeRowsBeforePaging=await card.locator('.set-table').evaluate(table=>[...table.querySelectorAll('.set-row')].map(row=>({id:row.dataset.setId,prescription:row.querySelector('.set-target-cell')?.textContent,done:row.querySelector('.set-check')?.classList.contains('done')})))
+    await page.locator('.active-page [data-reference-exercise-step="1"]').click()
+    await page.waitForFunction(()=>document.querySelector('.active-page .lmf-flow-active .exercise-title h3')?.textContent==='Bench Press')
+    await page.locator('.active-page [data-reference-exercise-step="-1"]').click()
+    await page.waitForFunction(()=>document.querySelector('.active-page .lmf-flow-active .exercise-title h3')?.textContent==='Front Squat')
+    assert.deepEqual(await card.locator('.set-table').evaluate(table=>[...table.querySelectorAll('.set-row')].map(row=>({id:row.dataset.setId,prescription:row.querySelector('.set-target-cell')?.textContent,done:row.querySelector('.set-check')?.classList.contains('done')}))),nativeRowsBeforePaging,'Block arrows reuse native exercise selection without changing any sets')
     const originalRows=await card.locator('.set-table .set-row').count()
     const strengthBeforeReview=await page.evaluate(()=>localStorage.getItem('letmefly_private_strength_maxes_v1'))
     assert.equal(await card.locator('[data-reference-set]').count(),originalRows,'Compact history reflects every native set')
@@ -263,6 +269,35 @@ try {
     assert.equal(await card.locator('.set-table .set-row').count(),originalRows,'The presentation and tools do not replace native set rows')
     const trainOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)
     assert.ok(trainOverflow<=1,'Active Train has no horizontal page overflow')
+    const blockLayouts=[]
+    for (const size of width===412?[360,412]:[width]) {
+      if(size!==page.viewportSize().width)await page.setViewportSize({width:size,height:950})
+      await page.locator(`#session-track [data-session-index="${sectionIndex}"]`).click()
+      await page.waitForFunction(id=>{
+        const pane=document.querySelector(`.active-exercise[data-exercise-id="${id}"]`)?.closest('.swipe-page'),viewport=document.querySelector('#swipe-viewport')
+        if(!pane||!viewport)return false
+        const a=pane.getBoundingClientRect(),v=viewport.getBoundingClientRect()
+        return Math.abs(a.left+a.width/2-v.left-v.width/2)<2
+      },sourceId)
+      const geometry=await card.evaluate(el=>{
+        const rect=selector=>{const r=el.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}}
+        const media=el.querySelector('.lmf-exercise-media'),style=getComputedStyle(media)
+        return {title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
+      })
+      assert.equal(geometry.blockNumber,String(sectionIndex),'The block heading retains the real section number')
+      assert.equal(geometry.imagePosition,'absolute','The original picture blends into the composition')
+      assert.equal(geometry.imageFit,'contain','The source picture retains its proportions')
+      assert.ok(geometry.imageMask.includes('linear-gradient'),'Picture edges fade into the card')
+      assert.equal(geometry.imagePointerEvents,'none','Blended art never intercepts workout controls')
+      assert.ok(Math.abs(geometry.rest.y-geometry.title.y)<25,'Rest timer shares the title/art region')
+      assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.y-geometry.load.y)<2,'Set table and load panel share one row at every phone/desktop size')
+      assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Native logging stays below coaching guidance')
+      assert.ok(geometry.overflow<=1,`Block card has no horizontal overflow at ${size}px`)
+      await card.evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
+      await page.screenshot({path:path.join(out,`train-block-card-${size}.png`)})
+      blockLayouts.push({width:size,...geometry})
+    }
+    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,checks:['Numbered block heading','Original pictures blended without distortion','Rest timer beside title','Set table beside load panel','Native exercise paging preserves sets']})
     // Full-page/element capture can temporarily resize the native carousel.
     // Capture the real viewport without changing its size or horizontal scroll.
     await card.evaluate(el=>window.scrollTo({top:scrollY+el.getBoundingClientRect().top-90,behavior:'instant'}))
@@ -280,6 +315,7 @@ try {
     await page.waitForFunction(id=>document.querySelector(`.set-row[data-set-id="${id}"] .set-check`)?.classList.contains('done'),setId)
     await page.waitForFunction(id=>document.querySelector(`[data-reference-set="${id}"]`)?.classList.contains('is-logged'),setId)
     assert.ok((await page.locator('.lmf-reference-upcoming [data-reference-section]').count())>0,'Upcoming blocks retain native section navigation')
+    assert.match(await page.locator('.lmf-reference-upcoming [data-reference-section] strong').first().innerText(),/^Block \d+ — /,'Collapsed cards retain real numbered block headings')
     report.checks.push({route:'train',width,result:'PASS',checks:['Live workout banner','Four readiness controls','Native workout flow','Every set represented','Original set selection','Load unit follows athlete','Bar loader opens','Rest timer starts, pauses, resets','Native set logging reflected','Upcoming blocks','No overflow']})
     await page.goto(origin+'/#/home')
     await page.waitForFunction(()=>document.querySelector('.lmf-home-reference-final [data-lmf-home-readiness="stress"]')?.textContent==='5/5')

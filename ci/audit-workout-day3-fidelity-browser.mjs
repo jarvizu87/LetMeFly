@@ -247,6 +247,14 @@ async function auditRoundFlow(page) {
   const rest = await firstVisible(page.locator('.workout-panel[data-group-type="round"] [data-lmf-rest-continue]'))
   report.observations.roundTransition = { restGate: Boolean(rest) }
   if (rest) {
+    const blockPager=await page.evaluate(()=>{
+      if(!document.querySelector('[data-lmf-train-block-cards="v1"]'))return null
+      const panel=document.querySelector('.lmf-round-rest.is-active')?.closest('.workout-panel')
+      const buttons=[...panel.querySelectorAll('[data-reference-exercise-step]')]
+      return {count:buttons.length,disabled:buttons.every(button=>button.disabled)}
+    })
+    if(blockPager?.count===2 && blockPager.disabled)pass('Block arrows respect the round rest gate','Only native Start Round advances the circuit')
+    else if(blockPager)fail('Block arrows respect the round rest gate',JSON.stringify(blockPager))
     await rest.click({ timeout: 5000 })
     await page.waitForTimeout(350)
   } else {

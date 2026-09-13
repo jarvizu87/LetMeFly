@@ -18,6 +18,10 @@
     pulse:'<path d="M2 12h5l3-8 4 16 3-8h5"/>',
     chart:'<path d="M4 20V12m6 8V8m6 12V4m6 16V1"/>',
     flag:'<path d="M5 22V2m0 1c6-4 8 4 15 0v10c-7 4-9-4-15 0"/>',
+    crown:'<path d="m3 6 5 5 4-8 4 8 5-5-3 14H6Z"/>',
+    chain:'<path d="m10 14 4-4m-6 6-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 1 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0"/>',
+    mountain:'<path d="m2 21 10-18 10 18Zm5-9 5 3 5-3"/>',
+    cue:'<path d="M9 18h6m-5 3h4M8 14a7 7 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Z"/>',
   }
   const icon = key => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[key] || icons.strength}</svg>`
   const metrics = [['sleep_quality','Sleep','sleep'],['energy','Energy','energy'],['soreness','Soreness','soreness'],['stress','Stress','stress']]
@@ -148,6 +152,16 @@
       track.before(flow)
     }
     setText(flow.querySelector('span'),text(shell.querySelector('#session-position')))
+    list.forEach((panel,index) => {
+      const button = nativeSection(shell,index)
+      if (!button) return
+      const sets = [...panel.querySelectorAll('.set-row')]
+      const complete = index === 0 ? rows.length > 0 : sets.length > 0 && sets.every(row => row.querySelector('.set-check.done'))
+      setAttr(button,'data-reference-complete',complete)
+      const state = ensure(button,'.lmf-reference-flow-state','i','lmf-reference-flow-state','')
+      state.setAttribute('aria-hidden','true')
+      setText(state,complete ? '✓' : '')
+    })
     // The native readiness rule and day selector stay available without pushing
     // the actual workout flow away from its heading.
     const days = shell.querySelector('.day-strip')
@@ -184,12 +198,24 @@
     setText(loader.querySelector('[data-reference-load]'),load ? `${load} ${active.dataset.loadUnit || ''}`.trim() : 'No load entered')
     setText(loader.querySelector('[data-reference-plates]'),plate || 'Choose your bar and plates in the loader.')
     loader.hidden = !loaderSource
+    const rack = ensure(loader,'.lmf-reference-plate-rack','div','lmf-reference-plate-rack','')
+    setAttr(rack,'aria-label','Plates on each side')
+    const eachSide = plate.match(/per side:\s*([\d.\s+]+)$/i)?.[1]?.trim()
+    const plateLabels = eachSide ? eachSide.split(/\s*\+\s*/).filter(value => /^\d+(?:\.\d+)?$/.test(value) && Number(value) > 0) : []
+    const plateCounts = new Map()
+    for (const value of plateLabels) plateCounts.set(value,(plateCounts.get(value) || 0)+1)
+    const rackMarkup = [...plateCounts].map(([value,count]) => `<span class="lmf-reference-plate"><i aria-hidden="true">${esc(value)}</i><strong>${count} × ${esc(value)}<small>each side</small></strong></span>`).join('')
+    if (rack.innerHTML !== rackMarkup) rack.innerHTML = rackMarkup
+    rack.hidden = !rackMarkup
+    const loaderButton = loader.querySelector('[data-reference-load-bar]')
+    if (rack.nextElementSibling !== loaderButton) loaderButton.before(rack)
     const exerciseCue = text(card.querySelector('.exercise-title .muted:last-child'))
     const cue = exerciseCue && !/demo|search fallback/i.test(exerciseCue) ? exerciseCue : text(card.closest('.workout-panel')?.querySelector('.workout-panel-head .muted'))
     if (cue) {
       const block = ensure(card,'.lmf-reference-coaching-cue','div','lmf-reference-coaching-cue','<strong>Coaching cue</strong><p></p>')
       setText(block.querySelector('strong'),cue === exerciseCue ? 'Coaching cue' : 'Block guidance')
       setText(block.querySelector('p'),cue)
+      ensure(block,'.lmf-reference-cue-icon','span','lmf-reference-cue-icon',icon('cue'),'afterbegin')
     }
     for (const row of rows) {
       const button = row.querySelector('.set-check')
@@ -214,6 +240,25 @@
 
   function workout(shell) {
     const list = panels(shell)
+    list.forEach((panel,index) => {
+      const head = panel.querySelector('.workout-panel-head')
+      const stack = panel.querySelector('.exercise-stack')
+      if (!head || !stack) return
+      panel.classList.add('lmf-reference-block')
+      setAttr(head.querySelector('h2'),'data-reference-block-number',index)
+      ensure(head,'.lmf-reference-block-icon','span','lmf-reference-block-icon',icon('crown'),'afterbegin')
+      const cards = [...stack.querySelectorAll(':scope > .active-exercise')]
+      let pager = head.querySelector('.lmf-reference-block-pager')
+      if (cards.length) {
+        pager = ensure(head,'.lmf-reference-block-pager','div','lmf-reference-block-pager','<button type="button" data-reference-exercise-step="-1" aria-label="Previous exercise in block">‹</button><span></span><button type="button" data-reference-exercise-step="1" aria-label="Next exercise in block">›</button>')
+        const selected = Math.max(0,cards.findIndex(card => card.classList.contains('lmf-flow-active')))
+        const resting = Boolean(panel.querySelector('.lmf-round-rest.is-active'))
+        setText(pager.querySelector('span'),`${selected+1} of ${cards.length}`)
+        pager.querySelector('[data-reference-exercise-step="-1"]').disabled = resting || selected === 0
+        pager.querySelector('[data-reference-exercise-step="1"]').disabled = resting || selected === cards.length-1
+      }
+      if (pager) pager.hidden = !cards.length
+    })
     shell.querySelectorAll('.active-exercise').forEach(summary)
     const activePanel = list.find(panel => panel.classList.contains('active-page'))
     const index = list.indexOf(activePanel)
@@ -223,18 +268,27 @@
       if (!clock) {
         clock = document.createElement('section')
         clock.className = 'lmf-reference-rest-timer'
-        clock.innerHTML = '<span>Rest timer</span><output aria-label="Rest time remaining">2:00</output><label>Timer length<select aria-label="Rest timer length"><option value="60">1 min</option><option value="90">90 sec</option><option value="120" selected>2 min</option><option value="180">3 min</option><option value="300">5 min</option></select></label><div><button type="button" data-reference-timer-toggle>Start rest</button><button type="button" data-reference-timer-reset>Reset</button></div><small data-reference-timer-status role="status">Manual timer · follow your programmed rest.</small>'
+        clock.innerHTML = '<span>Rest</span><output aria-label="Rest time remaining">2:00</output><label>Timer length<select aria-label="Rest timer length"><option value="60">1 min</option><option value="90">90 sec</option><option value="120" selected>2 min</option><option value="180">3 min</option><option value="300">5 min</option></select></label><div><button type="button" data-reference-timer-toggle>Start rest</button><button type="button" data-reference-timer-reset>Reset</button></div><small data-reference-timer-status role="status">Manual timer · follow your programmed rest.</small>'
       }
       if (clock.parentElement !== activeCard) activeCard.append(clock)
       timer.element = clock
       renderTimer()
     }
     const next = ensure(shell,'.lmf-reference-upcoming','section','lmf-reference-upcoming','')
-    const nextList = list.map((panel,i) => ({i,title:text(panel.querySelector('.workout-panel-head h2')) || (panel.classList.contains('review-panel') ? 'Review' : ''),copy:[...panel.querySelectorAll('.exercise-stack > .exercise-card h3')].map(text).join(' + ')})).filter(item => item.i > index && item.title)
+    const nextList = list.map((panel,i) => {
+      const title = text(panel.querySelector('.workout-panel-head h2')) || (panel.classList.contains('review-panel') ? 'Review' : '')
+      const cards = [...panel.querySelectorAll('.exercise-stack > .exercise-card')]
+      const names = cards.map(card => text(card.querySelector('h3')))
+      const count = cards.reduce((sum,card) => sum+card.querySelectorAll('.set-row,.prescription-row').length,0)
+      const copy = names.length > 2 ? `${names.slice(0,2).join(' + ')} + ${names.length-2} more` : names.join(' + ')
+      const detail = title === 'Review' ? 'Finish strong.' : `${cards.length} ${cards.length === 1 ? 'exercise' : 'exercises'}${count ? ` · ${count} sets` : ''}`
+      const symbol = title === 'Review' ? 'trophy' : /assist|superset|circuit/i.test(title) ? 'chain' : /carry|condition/i.test(title) ? 'mountain' : 'strength'
+      return {i,title,copy,names:names.join(' + '),detail,symbol,tone:/assist|superset|review/i.test(title) ? 'purple' : 'red'}
+    }).filter(item => item.i > index && item.title)
     const signature = JSON.stringify(nextList)
     if (next.dataset.signature !== signature) {
       next.dataset.signature = signature
-      next.innerHTML = nextList.map(item => `<button type="button" data-reference-section="${item.i}">${icon(item.title === 'Review' ? 'trophy' : 'strength')}<span><strong>${esc(item.title)}</strong><small>${esc(item.copy || 'Session RPE, notes and workout completion')}</small></span><i aria-hidden="true">›</i></button>`).join('')
+      next.innerHTML = nextList.map(item => `<button type="button" data-reference-section="${item.i}" data-reference-tone="${item.tone}" title="${esc(item.names || item.title)}">${icon(item.symbol)}<span><strong>Block ${item.i} — ${esc(item.title)}</strong><small>${esc(item.copy || 'Session RPE, notes and workout completion')}</small></span><em>${esc(item.detail)}</em><i aria-hidden="true">›</i></button>`).join('')
     }
     ensure(shell,'.lmf-reference-train-footer','footer','lmf-reference-train-footer','<strong>Same work.<br>A stronger you.</strong><span>Discipline<br>builds freedom</span>')
   }
@@ -243,6 +297,7 @@
     const shell = location.hash.split('?')[0] === '#/train' ? document.querySelector('.train-shell') : null
     if (!shell) return
     shell.classList.add('lmf-train-reference-final')
+    setAttr(shell,'data-lmf-train-block-cards','v1')
     trainHeader(shell)
     workout(shell)
   }
@@ -296,6 +351,14 @@
         card.querySelectorAll('.lmf-set-tab')[index]?.click()
       }
       if (event.target.closest('[data-reference-load-bar]')) card?.querySelector('.exercise-actions [data-lmf-bar-loader-open="exercise"]')?.click()
+      const exerciseStep = event.target.closest('[data-reference-exercise-step]')
+      if (exerciseStep) {
+        const panel = exerciseStep.closest('.workout-panel')
+        if (panel.querySelector('.lmf-round-rest.is-active')) return
+        const cards = [...panel.querySelectorAll('.exercise-stack > .active-exercise')]
+        const selected = cards.findIndex(item => item.classList.contains('lmf-flow-active'))
+        cards[selected+Number(exerciseStep.dataset.referenceExerciseStep)]?.querySelector('.lmf-compact-summary')?.click()
+      }
       const section = event.target.closest('[data-reference-section]')
       if (section) openSection(shell,Number(section.dataset.referenceSection))
       const readiness = event.target.closest('[data-reference-readiness]')

@@ -50,3 +50,18 @@ workout block. The original section buttons, arrows, and native scroll listener
 continue to own section navigation. The native listener now distinguishes an
 intentional horizontal wheel, touch, scrollbar, or keyboard gesture from automatic
 control-reveal scrolling; the latter cannot change the selected block.
+
+The follow-up Train block correction uses the saved close-up mockup: one bordered
+block with a numbered heading, the original exercise picture blended behind the
+title, a rest timer at upper right, a side-by-side set table and loading panel,
+coaching guidance, and compact native logging controls. Collapsed sections retain
+their real section number and summary. Compact movements within a circuit remain
+part of that circuit; presentation never splits them into new programmed blocks.
+
+The existing picture resolver remains authoritative. The final stylesheet uses
+masks and gradients only and contains no replacement image URL. Plate illustrations
+mirror the existing Bar Loader's per-side labels. Block arrows forward to native
+exercise selection and are disabled during the native between-round rest gate.
+Circuit ordering, unequal set counts, movement dropout, readiness, prescriptions,
+load/reps/RPE logging, recovery, substitutions, preview-day protections and
+completion continue through the existing workout owners and release checks.
