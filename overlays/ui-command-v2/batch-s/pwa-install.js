@@ -1,16 +1,27 @@
 (() => {
   'use strict'
 
-  const isStandalone = () =>
-    window.matchMedia?.('(display-mode: standalone)').matches ||
-    window.matchMedia?.('(display-mode: fullscreen)').matches ||
-    window.navigator.standalone === true
-
   const params = new URLSearchParams(window.location.search)
-  const launchedFromCurrentPwa = () =>
-    isStandalone() && params.get('source') === 'pwa' && params.get('app') === 'letmefly-v2'
-
-  if (launchedFromCurrentPwa()) return
+  // Installed windows also open deep links and older shortcuts without launch parameters.
+  const displayModes = ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay']
+    .map((mode) => window.matchMedia?.(`(display-mode: ${mode})`))
+    .filter(Boolean)
+  const isStandalone = () => displayModes.some((mode) => mode.matches) ||
+    window.navigator.standalone === true || document.referrer?.startsWith('android-app://')
+  const installedKey = 'lmf-pwa-installed-v1'
+  const dismissedKey = 'lmf-pwa-install-dismissed-v1'
+  const readPreference = (key) => {
+    try { return window.localStorage.getItem(key) === '1' } catch { return false }
+  }
+  const writePreference = (key, value) => {
+    try {
+      if (value) window.localStorage.setItem(key, '1')
+      else window.localStorage.removeItem(key)
+    } catch { /* Restricted storage still honors the choice for this visit. */ }
+  }
+  let installed = readPreference(installedKey)
+  let dismissed = readPreference(dismissedKey)
+  const isInstalled = () => installed || isStandalone()
 
   const ua = navigator.userAgent || ''
   const isAndroid = /Android/i.test(ua)
@@ -28,6 +39,37 @@
   const removeBanner = () => {
     banner?.remove()
     banner = null
+  }
+
+  const markInstalled = () => {
+    installed = true
+    writePreference(installedKey, true)
+    deferredPrompt = null
+    removeBanner()
+  }
+
+  const dismissBanner = () => {
+    dismissed = true
+    writePreference(dismissedKey, true)
+    removeBanner()
+  }
+
+  const promptInstall = async () => {
+    const promptEvent = deferredPrompt
+    if (!promptEvent || isInstalled()) return false
+    deferredPrompt = null
+    try {
+      await promptEvent.prompt()
+      const choice = await promptEvent.userChoice
+      if (choice?.outcome === 'accepted') {
+        markInstalled()
+        return true
+      }
+      dismissBanner()
+    } catch {
+      removeBanner()
+    }
+    return false
   }
 
   const renderState = () => {
@@ -62,8 +104,8 @@
     confirm.dataset.mode = 'help'
   }
 
-  const showBanner = () => {
-    if (launchedFromCurrentPwa() || banner || !document.body) return
+  const showBanner = (manual = false) => {
+    if (isInstalled() || (!manual && dismissed) || banner || !document.body) return
 
     banner = document.createElement('aside')
     banner.id = 'lmf-install-banner'
@@ -78,7 +120,7 @@
         </div>
       </div>
       <div class="lmf-install-actions">
-        <button type="button" class="lmf-install-dismiss" aria-label="Dismiss install prompt">Not now</button>
+        <button type="button" class="lmf-install-dismiss" aria-label="Dismiss install prompt">Dismiss</button>
         <button type="button" class="lmf-install-confirm"></button>
       </div>
     `
@@ -99,20 +141,13 @@
     `
     if (!document.getElementById(style.id)) document.head.appendChild(style)
 
-    banner.querySelector('.lmf-install-dismiss')?.addEventListener('click', removeBanner)
+    banner.querySelector('.lmf-install-dismiss')?.addEventListener('click', dismissBanner)
     banner.querySelector('.lmf-install-confirm')?.addEventListener('click', async (event) => {
       const button = event.currentTarget
       const mode = button?.dataset?.mode
 
       if (mode === 'install' && deferredPrompt) {
-        const promptEvent = deferredPrompt
-        deferredPrompt = null
-        promptEvent.prompt()
-        try {
-          await promptEvent.userChoice
-        } finally {
-          removeBanner()
-        }
+        await promptInstall()
         return
       }
 
@@ -130,15 +165,31 @@
 
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault()
+    if (isStandalone()) { markInstalled(); return }
+    // A fresh native install offer can follow an uninstall. Keep dismissal independent.
+    installed = false
+    writePreference(installedKey, false)
     deferredPrompt = event
     showBanner()
     renderState()
   })
 
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null
-    removeBanner()
+  window.addEventListener('appinstalled', markInstalled)
+
+  const syncInstalledWindow = () => { if (isStandalone()) markInstalled() }
+  for (const mode of displayModes) {
+    if (mode.addEventListener) mode.addEventListener('change', syncInstalledWindow)
+    else mode.addListener?.(syncInstalledWindow)
+  }
+  window.addEventListener('pageshow', syncInstalledWindow)
+  window.addEventListener('storage', (event) => {
+    if (event.key === installedKey || event.key === dismissedKey) {
+      installed = readPreference(installedKey)
+      dismissed = readPreference(dismissedKey)
+      if (isInstalled() || dismissed) removeBanner()
+    }
   })
+  syncInstalledWindow()
 
   const start = () => setTimeout(showBanner, params.get('install') === '1' ? 900 : 1400)
   if (document.readyState === 'loading') {
@@ -148,21 +199,14 @@
   }
 
   window.__LMF_PWA_INSTALL__ = {
-    canInstall: () => !launchedFromCurrentPwa(),
+    canInstall: () => !isInstalled(),
     prompt: async () => {
-      if (launchedFromCurrentPwa()) return false
-      if (deferredPrompt) {
-        const promptEvent = deferredPrompt
-        deferredPrompt = null
-        promptEvent.prompt()
-        const choice = await promptEvent.userChoice
-        removeBanner()
-        return choice?.outcome === 'accepted'
-      }
+      if (isInstalled()) return false
+      if (deferredPrompt) return promptInstall()
       if (isAndroid && !isChrome) {
         window.location.href = chromeIntent()
       } else {
-        showBanner()
+        showBanner(true)
       }
       return false
     },
