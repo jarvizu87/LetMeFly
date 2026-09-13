@@ -212,6 +212,7 @@ try {
     if(!await card.evaluate(el=>el.classList.contains('lmf-flow-active')))await card.locator('.lmf-compact-summary').click()
     await card.locator('.lmf-reference-set-history').waitFor({state:'visible'})
     const originalRows=await card.locator('.set-table .set-row').count()
+    const strengthBeforeReview=await page.evaluate(()=>localStorage.getItem('letmefly_private_strength_maxes_v1'))
     assert.equal(await card.locator('[data-reference-set]').count(),originalRows,'Compact history reflects every native set')
     await card.locator('[data-reference-set]').last().click()
     assert.equal(await card.locator('.set-row.lmf-set-active').getAttribute('data-set-id'),await card.locator('[data-reference-set]').last().getAttribute('data-reference-set'),'Reviewing a set forwards to the existing set selector')
@@ -232,6 +233,10 @@ try {
     await card.locator('[data-reference-timer-reset]').click()
     assert.equal(await card.locator('.lmf-reference-rest-timer output').innerText(),'2:00')
     assert.equal(await card.evaluate(el=>el.closest('.swipe-page').classList.contains('active-page')),true,'Rest timer updates preserve the selected workout section')
+    // The legacy estimate listener defers real log events by 80 ms. Navigation
+    // and timer clicks must remain read-only after that handler could have run.
+    await page.waitForTimeout(150)
+    assert.equal(await page.evaluate(()=>localStorage.getItem('letmefly_private_strength_maxes_v1')),strengthBeforeReview,'Reviewing sets and controlling rest never records a strength estimate')
     assert.equal(await card.locator('.set-table .set-row').count(),originalRows,'The presentation and tools do not replace native set rows')
     const trainOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)
     assert.ok(trainOverflow<=1,'Active Train has no horizontal page overflow')

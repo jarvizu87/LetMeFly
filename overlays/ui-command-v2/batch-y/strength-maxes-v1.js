@@ -439,6 +439,9 @@
   function captureSetFromClick(target) {
     const button = target?.closest?.('button,[role="button"]')
     if (!button) return null
+    // In the reference workout UI, review and timer controls are navigation.
+    // Only the original logging action can supply a logged-set estimate.
+    if (button.closest('.lmf-train-reference-final') && !button.matches('.set-check[data-action="toggle-set"]')) return null
     const buttonText = `${textOf(button)} ${button.getAttribute('aria-label') || ''} ${button.className || ''}`
     if (!/(complete|completed|save|log|check|done|finish|set)/i.test(buttonText)) return null
     const row = button.closest('.set-row,.lmf-set-active,[data-set],.set-card,.exercise-card,.workout-exercise,.lmf-flow-panel,.card') || button.parentElement
