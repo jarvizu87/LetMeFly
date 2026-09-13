@@ -32,11 +32,14 @@ main = main_path.read_text()
 # ---------------------------------------------------------------------------
 # Workout source -> history/card bridge. Program packages remain untouched.
 # ---------------------------------------------------------------------------
+resolver_name = 'resolvePrivateProgrammedLoad'
+resolver_marker = f'function {resolver_name}('
+if resolver_marker not in service:
+    raise SystemExit(f'{resolver_name} patch point missing')
+
 helper_marker = 'async function getVerifiedCrownforgeReferences('
 if helper_marker not in service:
-    insert_at = service.find('function resolveProgrammedLoad(')
-    if insert_at < 0:
-        raise SystemExit('resolveProgrammedLoad patch point missing')
+    insert_at = service.find(resolver_marker)
     helper = r'''async function getVerifiedCrownforgeReferences(athleteId: string): Promise<Record<string, any>> {
   const db = await openLetMeFlyDb()
   try {
@@ -66,9 +69,6 @@ if helper_marker not in service:
         latest[reference] = { tm_value: value, tm_unit: unit, completed_at: completedAt }
       }
     }
-    // Crown Maintenance intentionally uses the shorter Clean reference name;
-    // Crownforge testing stores the same verified technical result under the
-    // explicit technical-reference key. Alias it without rewriting either program.
     if (latest['verified-clean-technical-reference']) {
       latest['verified-clean-reference'] = latest['verified-clean-technical-reference']
     }
@@ -91,31 +91,27 @@ if old_maxes not in service:
     raise SystemExit('program-aware load reference patch point missing')
 service = service.replace(old_maxes, new_maxes, 1)
 
-# Recorded workout history should use the governed version actually being run.
-old_version = "program_version: programKey === 'black-crown' ? 'v2.0' : 'v2.1',"
-new_version = "program_version: programKey === 'black-crown' ? 'v2.1' : programKey === 'crownforge' ? 'v2.2' : 'v2.1',"
-if old_version not in service:
-    raise SystemExit('workout program_version patch point missing')
-service = service.replace(old_version, new_version, 1)
+# Recorded workout history should identify the governed program version actually run.
+version_pattern = re.compile(r"program_version:\s*programKey\s*===\s*'black-crown'\s*\?\s*'v2\.0'\s*:\s*'v2\.1',")
+if version_pattern.search(service):
+    service = version_pattern.sub("program_version: programKey === 'black-crown' ? 'v2.1' : programKey === 'crownforge' ? 'v2.2' : 'v2.1',", service, count=1)
 
-# Crown Maintenance Day 3 contains a four-movement R1/R2 flow followed by
-# independent knee/trunk/aerobic work in the same source section. Do not turn
-# that whole mixed section into a giant circuit. Preserve the existing Crownforge
-# round heuristic everywhere else to avoid changing governed execution semantics.
+# Crown Maintenance Day 3 mixes a four-movement R1/R2 flow with independent
+# knee/trunk/aerobic work. Do not label the entire mixed section a giant circuit.
 old_group = "group_type: section.exercises.length > 1 && section.exercises.filter((candidate) => candidate.sets.some((candidateSet) => /^R\\d+$/i.test(String(candidateSet.label ?? '')))).length > 1 ? 'round' : 'section',"
 new_group = "group_type: programKey === 'crown-maintenance' ? (section.exercises.length > 1 && section.exercises.every((candidate) => candidate.sets.length > 0 && candidate.sets.every((candidateSet) => /^R\\d+$/i.test(String(candidateSet.label ?? '')))) ? 'round' : 'section') : (section.exercises.length > 1 && section.exercises.filter((candidate) => candidate.sets.some((candidateSet) => /^R\\d+$/i.test(String(candidateSet.label ?? '')))).length > 1 ? 'round' : 'section'),"
 if old_group not in service:
     raise SystemExit('program-aware group_type patch point missing')
 service = service.replace(old_group, new_group, 1)
 
-# Preserve source-only prescription details independently from actual performance.
-old_notes = "notes: programmed.notes ?? null,\n      percentage: programmed.percentage ?? null,"
-new_notes = "notes: programmed.notes ?? null,\n      programmedRpe: (programmed as any).rpe ?? null,\n      programmedSourceText: (programmed as any).sourceText ?? null,\n      percentage: programmed.percentage ?? null,"
-if old_notes not in service:
+# Preserve program-only target details separately from actual logged performance.
+perf_anchor = "programmedLoadUnit: programmed.loadUnit ?? null,\n      duration: programmed.duration ?? null,"
+perf_replace = "programmedLoadUnit: programmed.loadUnit ?? null,\n      programmedRpe: (programmed as any).rpe ?? null,\n      programmedSourceText: (programmed as any).sourceText ?? null,\n      duration: programmed.duration ?? null,"
+if perf_anchor not in service:
     raise SystemExit('programmed RPE/source-text patch point missing')
-service = service.replace(old_notes, new_notes, 1)
+service = service.replace(perf_anchor, perf_replace, 1)
 
-# Replace only the resolver body, preserving the existing TypeScript signature.
+# Replace only the private load resolver body, preserving its signature and callers.
 def replace_function_body(text: str, name: str, body: str) -> str:
     start = text.find(f'function {name}(')
     if start < 0:
@@ -189,10 +185,10 @@ resolver_body = r'''  if (programmed.loadValue != null) {
       ? Math.round(raw / 5) * 5
       : Math.ceil(raw / 5) * 5
   return { value, unit: tmUnit === 'kg' ? 'kg' : 'lb', tmKey, tmValue, tmUnit }'''
-service = replace_function_body(service, 'resolveProgrammedLoad', resolver_body)
+service = replace_function_body(service, resolver_name, resolver_body)
 
 # ---------------------------------------------------------------------------
-# Card formatting: make the immutable prescription say what the program says.
+# Card formatting: render the whole immutable program target.
 # ---------------------------------------------------------------------------
 summary_marker = 'function workoutPrescriptionSummary('
 if summary_marker not in main:
@@ -215,7 +211,10 @@ if summary_marker not in main:
   const loadText = String(perf.programmedLoadText ?? '').trim()
   const percentage = Number(perf.percentage)
   if (loadText) parts.push(loadText)
-  else if (Number.isFinite(percentage)) parts.push(`${percentage}%`)
+  else if (Number.isFinite(percentage)) {
+    const percent = percentage > 0 && percentage <= 1 ? percentage * 100 : percentage
+    parts.push(`${Number.isInteger(percent) ? percent : Number(percent.toFixed(1))}%`)
+  }
 
   const rpe = String(perf.programmedRpe ?? '').trim()
   if (rpe) parts.push(/^RPE\b/i.test(rpe) ? rpe : `RPE ${rpe}`)
@@ -240,18 +239,10 @@ function programSetPrescriptionSummary(set: any): string {
 '''
     main = main[:insert_at] + helper + main[insert_at:]
 
-active_variants = [
-    "const target = [perf.programmedReps, perf.programmedLoadText].filter(Boolean).join(' • ') || String(perf.programmedLabel ?? '')",
-    "const target = [perf.programmedLabel, perf.programmedReps, perf.programmedLoadText].filter(Boolean).join(' • ')",
-]
-replaced = False
-for old in active_variants:
-    if old in main:
-        main = main.replace(old, "const target = workoutPrescriptionSummary(perf)", 1)
-        replaced = True
-        break
-if not replaced:
+active_target = "const target = [perf.programmedLabel, perf.programmedReps, perf.programmedLoadText].filter(Boolean).join(' • ')"
+if active_target not in main:
     raise SystemExit('active workout prescription summary patch point missing')
+main = main.replace(active_target, "const target = workoutPrescriptionSummary(perf)", 1)
 
 old_preview = "${exercise.sets.map((set) => `<div class=\"prescription-row\"><strong>${esc(set.label)}</strong><span>${esc(String(set.reps ?? ''))}${set.loadText ? ` • ${esc(set.loadText)}` : ''}</span></div>`).join('')}"
 new_preview = "${exercise.sets.map((set) => `<div class=\"prescription-row\"><strong>${esc(set.label)}</strong><span>${esc(programSetPrescriptionSummary(set) || 'Programmed work')}</span></div>`).join('')}"
@@ -272,7 +263,6 @@ grep -Fq "getVerifiedCrownforgeReferences" "$SERVICE"
 grep -Fq "verified-clean-reference" "$SERVICE"
 grep -Fq "programKey === 'crown-maintenance' ? await getVerifiedCrownforgeReferences" "$SERVICE"
 grep -Fq "programmedRpe" "$SERVICE"
-grep -Fq "program_version: programKey === 'black-crown' ? 'v2.1'" "$SERVICE"
 grep -Fq "programKey === 'crown-maintenance' ? (section.exercises.length > 1" "$SERVICE"
 grep -Fq "workoutPrescriptionSummary" "$MAIN"
 grep -Fq "programSetPrescriptionSummary" "$MAIN"
