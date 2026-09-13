@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "letmefly-chaos-resilience-audit",
+  "fixtureVersion": "1.0.0",
+  "status": "locked",
+  "effectiveDate": "2026-09-12",
+  "sourceDocument": "docs/CHAOS_RESILIENCE_AUDIT_STANDARD_V1.md",
+  "dependsOn": "ci/seven-athlete-release-audit.v2.json",
+  "principles": [
+    "workout-persistence",
+    "program-integrity",
+    "athlete-isolation",
+    "upgrade-migration-safety",
+    "unit-integrity",
+    "coach-truthfulness-and-safety",
+    "backup-restore-integrity",
+    "deterministic-conflict-handling"
+  ],
+  "executionLevels": ["contract-check", "targeted-chaos", "full-chaos-gate"],
+  "scenarios": [
+    {"id":"C01","name":"workout-interruption-torture","primaryAthletes":["qa_forge"],"secondaryAthletes":["qa_history"],"faults":["refresh","hard-reload","browser-close-reopen","route-change","pwa-background-foreground","connection-loss-recovery"],"assertions":["no-saved-set-loss","no-duplicate-sets","no-duplicate-completion","correct-athlete-resumes","program-advances-once-only"]},
+    {"id":"C02","name":"rapid-input-duplicate-action","primaryAthletes":["qa_forge"],"faults":["double-start","double-complete-set","rapid-field-edits","rapid-navigation","rapid-bar-loader-open-close","double-readiness-save","double-complete-workout"],"assertions":["idempotent-durable-actions","no-duplicate-history","no-duplicate-program-advance","final-state-matches-last-valid-input"]},
+    {"id":"C03","name":"offline-workout","primaryAthletes":["qa_forge"],"faults":["network-drop-mid-workout","continue-local-logging","reconnect"],"assertions":["supported-offline-workout-remains-usable","logs-survive","reconnect-does-not-duplicate-or-discard","online-only-features-fail-gracefully"]},
+    {"id":"C04","name":"dirty-network-out-of-order","primaryAthletes":["qa_forge"],"secondaryAthletes":["qa_recovery"],"faults":["slow-response","failed-response","retry","delayed-response","out-of-order-response"],"assertions":["stale-response-cannot-overwrite-newer-action","retries-idempotent","failure-state-visible","completion-and-advance-not-duplicated"]},
+    {"id":"C05","name":"profile-switch-torture","primaryAthletes":["qa_rook","qa_forge","qa_titan","qa_metric","qa_recovery","qa_substitution","qa_history"],"faults":["switch-during-active-workout","switch-after-readiness","switch-after-substitution","switch-after-completion","switch-after-progress-coach"],"assertions":["no-cross-athlete-flash-or-cache","no-tm-unit-history-readiness-limitation-pr-leak","no-active-workout-or-coach-context-leak"]},
+    {"id":"C06","name":"metric-imperial-switching","primaryAthletes":["qa_metric"],"faults":["kg-to-lb","lb-to-kg","repeat-switch-cycle"],"assertions":["explicit-conversion-or-preservation-only","no-silent-numeric-reinterpretation","historical-unit-provenance-preserved","no-conversion-drift"]},
+    {"id":"C07","name":"bar-loader-edge-cases","primaryAthletes":["qa_rook","qa_titan","qa_metric"],"faults":["bar-only","below-bar-request","odd-percentage","unavailable-plate-combination","restricted-inventory","heavy-multi-plate","metric-inventory","specialty-bar-when-supported","round-up","round-down","round-nearest","impossible-target"],"assertions":["total-bar-and-plates-agree","no-invented-plates","impossible-target-explicit","unit-and-rounding-rules-explicit"]},
+    {"id":"C08","name":"program-boundary-transition","primaryAthletes":["qa_history"],"secondaryAthletes":["qa_forge"],"faults":["last-workout-of-week","deload-boundary","testing-week-boundary","phase-boundary","crownforge-completion","maintenance-handoff","black-crown-phase-change","repeat-completion","refresh-during-transition","restore-pre-boundary-backup"],"assertions":["transition-once-only","next-state-governed","source-program-unchanged","restore-does-not-skip-repeat-or-fork"]},
+    {"id":"C09","name":"long-history-scale","primaryAthletes":["qa_history"],"faults":["multi-year-history-load"],"assertions":["home-history-progress-coach-responsive","analytics-correct","no-old-record-drop-duplicate-reassignment","export-restore-complete"]},
+    {"id":"C10","name":"empty-new-athlete","primaryAthletes":["qa_rook"],"variant":"reset-new-state","faults":["no-tms","no-workouts","no-prs","no-readiness-history","no-bodyweight-history","no-active-program-where-supported"],"assertions":["useful-empty-states","coach-does-not-invent-history","no-fabricated-tm","setup-guidance-without-crash"]},
+    {"id":"C11","name":"broken-incomplete-data","primaryAthletes":["qa_rook","qa_history"],"faults":["missing-optional-fields","null-rpe-rir","missing-notes","legacy-record-without-new-fields","unknown-exercise-id","missing-media","absent-plate-settings","partial-migration-state"],"assertions":["graceful-degradation","required-integrity-violations-surfaced","optional-omissions-do-not-crash","no-silent-destructive-repair"]},
+    {"id":"C12","name":"backup-restore-torture","primaryAthletes":["qa_history","qa_metric","qa_substitution"],"faults":["restore-fresh-profile","restore-active-workout","restore-post-substitution","restore-post-completion","restore-post-tm-change","restore-metric","restore-long-history","restore-same-backup-twice","restore-older-compatible-backup","restore-malformed-backup"],"assertions":["valid-restore-complete","duplicate-restore-idempotent-or-explicitly-resolved","malformed-backup-fails-safe","units-substitutions-history-program-position-identity-survive"]},
+    {"id":"C13","name":"upgrade-migration","primaryAthletes":["qa_history","qa_metric"],"faults":["version-n-state-to-version-n-plus-one","service-worker-update","old-cache-new-schema"],"assertions":["old-state-readable-or-intentionally-migrated","active-workout-not-lost","old-js-cannot-corrupt-new-format","unit-semantics-survive","migration-repeatable-no-history-duplication"]},
+    {"id":"C14","name":"two-device-conflict","primaryAthletes":["qa_forge"],"secondaryAthletes":["qa_history"],"faults":["two-independent-clients","readiness-profile-change-vs-workout-logging","complete-on-one-while-other-stale","offline-client-reconnect"],"assertions":["deterministic-conflict-resolution","stale-client-cannot-silently-overwrite-newer-completed-state","program-advance-once","no-other-athlete-involvement"]},
+    {"id":"C15","name":"coach-hallucination-unsupported-fact","primaryAthletes":["qa_history"],"secondaryAthletes":["qa_rook"],"faults":["ask-about-nonexistent-date-workout","ask-about-tm-change-that-never-happened","ask-unsupported-causal-claim","ask-real-old-fact"],"assertions":["coach-distinguishes-known-from-unavailable","no-invented-history-pr-tm-change-or-diagnosis","real-supported-old-facts-retrievable"]},
+    {"id":"C16","name":"coach-program-integrity-attack","primaryAthletes":["qa_forge"],"secondaryAthletes":["qa_recovery"],"faults":["replace-all-squats-for-variety","skip-entire-phase","extreme-permanent-tm-increase","rewrite-week-because-bored","turn-one-bad-readiness-day-into-new-program"],"assertions":["discussion-does-not-silently-mutate-program","governed-edits-require-proper-path","readiness-remains-bounded"]},
+    {"id":"C17","name":"substitution-chain","primaryAthletes":["qa_substitution"],"faults":["programmed-a-to-sub-b-to-sub-c","hip-variant","knee-variant","red-flag-after-substitution"],"assertions":["original-programmed-exercise-retained","full-substitution-provenance-retained","coach-can-explain-chain","source-program-unchanged","safety-escalation-overrides-further-substitution"]},
+    {"id":"C18","name":"pr-invalid-input-abuse","primaryAthletes":["qa_rook"],"secondaryAthletes":["qa_history"],"faults":["zero-negative-reps","nonsensical-zero-negative-load","extreme-typo-load","implausible-reps","malformed-time-distance","duplicate-pr-submission","edit-pr-producing-data"],"assertions":["invalid-input-blocked-or-quarantined","typo-cannot-destroy-charts-or-prs","pr-recalculation-deterministic","edits-do-not-leave-orphaned-prs"]},
+    {"id":"C19","name":"calendar-date-abuse","primaryAthletes":["qa_history"],"faults":["move-workout-forward","move-workout-backward","skip-days","two-workouts-one-day","cross-midnight-active-workout","reopen-days-later","timezone-date-transition"],"assertions":["program-position-follows-intentional-workout-state","timestamps-accurate","no-duplicate-or-skipped-advance","calendar-and-program-engine-remain-distinct"]},
+    {"id":"C20","name":"ui-extreme-content","primaryAthletes":["qa_titan","qa_history"],"faults":["very-long-exercise-name","very-large-load","very-small-load","long-notes","many-sets","large-circuit","long-coach-response","maximum-text-scaling","narrow-phone","tablet","landscape","desktop"],"assertions":["critical-prescriptions-units-controls-safety-and-values-accessible","wrapping-scrolling-not-unusable-overlap","large-history-does-not-freeze-primary-workout-ui"]},
+    {"id":"C21","name":"privacy-security-boundary","primaryAthletes":["qa_rook","qa_forge","qa_titan","qa_metric","qa_recovery","qa_substitution","qa_history"],"faults":["cross-athlete-record-access","stale-cache-after-signout","account-switch","direct-route-other-athlete","wrong-athlete-id-test-request","backup-account-switch"],"assertions":["private-data-athlete-account-scoped","stale-private-cache-not-exposed","authorization-fails-closed","cross-athlete-leak-is-blocker"]}
+  ],
+  "releaseBlockers": ["data-loss","training-history-duplication","cross-athlete-leakage","unauthorized-program-mutation","semantic-unit-corruption","unsafe-coach-behavior","corrupting-migration-or-restore","nondeterministic-program-advancement"],
+  "resultContract": {
+    "requiredFields": ["commitSha", "environment", "auditDate", "chaosFixtureVersion", "scenarioId", "athletes", "injectedFault", "expectedBehavior", "actualBehavior", "result", "evidence", "defects", "releaseDecision"],
+    "scenarioResultEnum": ["PASS", "FAIL", "NOT RUN"],
+    "releaseDecisionEnum": ["PASS", "FAIL", "PASS WITH DOCUMENTED MINORS"]
+  }
+}

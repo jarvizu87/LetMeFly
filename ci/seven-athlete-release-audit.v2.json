@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 2,
+  "fixtureId": "letmefly-seven-athlete-release-gate",
+  "fixtureVersion": "2.0.0",
+  "status": "locked",
+  "effectiveDate": "2026-09-12",
+  "sourceDocument": "docs/SEVEN_ATHLETE_RELEASE_AUDIT_STANDARD_V2.md",
+  "layer2SourceDocument": "docs/CHAOS_RESILIENCE_AUDIT_STANDARD_V1.md",
+  "dataBoundary": {
+    "syntheticOnly": true,
+    "mayOverwriteRealAthlete": false,
+    "mayShareAthleteIdWithProductionUser": false,
+    "resetBeforeFormalRun": true,
+    "stableInternalIds": true
+  },
+  "globalRules": {
+    "preserveProgramLogic": true,
+    "programSourceMutationAllowed": false,
+    "crossAthleteDataLeakAllowed": false,
+    "silentUnitConversionAllowed": false,
+    "duplicateWorkoutCompletionAllowed": false,
+    "medicalDiagnosisAllowed": false,
+    "substitutionMustPreservePurpose": true,
+    "readinessMayRewriteProgram": false,
+    "singlePoorReadinessDayMayPermanentlyReduceTM": false,
+    "qaDataMayEnterRealAthleteAccount": false,
+    "formalRunRequiresProgramIntegrityComparison": true,
+    "formalRunRequiresCrossProfileIsolationCheck": true,
+    "onePrimaryFailureDomainPerAthlete": true
+  },
+  "athletes": [
+    {
+      "internalId": "qa_rook",
+      "displayName": "Pevra Soll",
+      "role": "developing",
+      "primaryFailureDomain": "low-load-and-beginner-progression",
+      "units": {"weight": "lb", "distance": "mi"},
+      "barbell": {"barWeight": 45, "unit": "lb", "platesPerSideInventory": [45, 25, 10, 5, 2.5]},
+      "trainingMaxes": {"back_squat": 135, "front_squat": 115, "bench_press": 105, "deadlift": 165, "overhead_press": 65, "power_clean": 85},
+      "readiness": {"sleep_hours": 7.5, "sleep_quality": 4, "soreness": 2, "stress": 2, "energy": 4},
+      "requiredAssertions": ["light loads remain sensible", "bar-only and near-bar loads are valid", "no unavailable plates are invented", "beginner coaching preserves program logic", "limited history produces honest empty states"]
+    },
+    {
+      "internalId": "qa_forge",
+      "displayName": "Dain Varr",
+      "role": "intermediate-control",
+      "primaryFailureDomain": "normal-full-app-workflow",
+      "units": {"weight": "lb", "distance": "mi"},
+      "barbell": {"barWeight": 45, "unit": "lb", "platesPerSideInventory": [45, 25, 10, 5, 2.5]},
+      "trainingMaxes": {"back_squat": 275, "front_squat": 225, "bench_press": 205, "deadlift": 335, "overhead_press": 135, "power_clean": 155},
+      "readiness": {"sleep_hours": 7.5, "sleep_quality": 4, "soreness": 2, "stress": 2, "energy": 4},
+      "requiredAssertions": ["end-to-end normal workflow passes", "program order and prescription match source", "logging resume completion history progress and Coach agree", "core failure is treated as app-level until disproven"]
+    },
+    {
+      "internalId": "qa_titan",
+      "displayName": "Raizen",
+      "role": "advanced",
+      "primaryFailureDomain": "high-load-and-desktop",
+      "units": {"weight": "lb", "distance": "mi"},
+      "barbell": {"barWeight": 45, "unit": "lb", "platesPerSideInventory": [45, 25, 10, 5, 2.5]},
+      "trainingMaxes": {"back_squat": 455, "front_squat": 365, "bench_press": 335, "deadlift": 545, "overhead_press": 205, "power_clean": 255},
+      "readiness": {"sleep_hours": 8, "sleep_quality": 5, "soreness": 2, "stress": 1, "energy": 5},
+      "viewportRequirements": ["desktop", "mobile-sanity"],
+      "requiredAssertions": ["heavy multi-plate loading is accurate", "large values remain readable", "desktop primary tabs remain usable", "upper-bound calculations remain correct"]
+    },
+    {
+      "internalId": "qa_metric",
+      "displayName": "Corra Bellan",
+      "role": "metric",
+      "primaryFailureDomain": "kilogram-unit-integrity",
+      "units": {"weight": "kg", "distance": "km"},
+      "barbell": {"barWeight": 20, "unit": "kg", "platesPerSideInventory": [25, 20, 15, 10, 5, 2.5, 1.25]},
+      "trainingMaxes": {"back_squat": 120, "front_squat": 100, "bench_press": 80, "deadlift": 150, "overhead_press": 50, "power_clean": 70},
+      "readiness": {"sleep_hours": 7.5, "sleep_quality": 4, "soreness": 2, "stress": 2, "energy": 4},
+      "requiredAssertions": ["TMs remain kilograms semantically", "Bar Loader uses metric inventory and 20 kg bar", "history progress PRs Coach export and restore preserve kg", "explicit unit switching never reinterprets numeric meaning"]
+    },
+    {
+      "internalId": "qa_recovery",
+      "displayName": "Mara Venn",
+      "role": "recovery",
+      "primaryFailureDomain": "poor-readiness-and-bounded-autoregulation",
+      "units": {"weight": "lb", "distance": "mi"},
+      "barbell": {"barWeight": 45, "unit": "lb", "platesPerSideInventory": [45, 25, 10, 5, 2.5]},
+      "trainingMaxes": {"back_squat": 225, "front_squat": 185, "bench_press": 165, "deadlift": 275, "overhead_press": 105, "power_clean": 125},
+      "readiness": {"sleep_hours": 4.5, "sleep_quality": 2, "soreness": 4, "stress": 4, "energy": 2, "notes": "Synthetic poor-readiness audit seed. Not a medical condition."},
+      "requiredAssertions": ["poor readiness persists and reaches Coach", "adjustments remain within governed bounds", "one poor day does not permanently reduce TMs", "future program structure remains intact", "original prescription remains identifiable"]
+    },
+    {
+      "internalId": "qa_substitution",
+      "displayName": "Rurik Hale",
+      "role": "restricted",
+      "primaryFailureDomain": "limitation-substitution-and-safety",
+      "units": {"weight": "lb", "distance": "mi"},
+      "barbell": {"barWeight": 45, "unit": "lb", "platesPerSideInventory": [45, 25, 10, 5, 2.5]},
+      "trainingMaxes": {"back_squat": 245, "front_squat": 205, "bench_press": 185, "deadlift": 315, "overhead_press": 125, "power_clean": 145},
+      "readiness": {"sleep_hours": 7.5, "sleep_quality": 4, "soreness": 2, "stress": 2, "energy": 4},
+      "scenarios": [
+        {
+          "scenarioId": "rurik-hip",
+          "reportedLimitation": "Reports anterior hip pinching/discomfort during deep hip flexion, especially deep squats. Avoid provocative ranges today. LetMeFly is not making a diagnosis.",
+          "triggers": ["deep hip flexion", "deep squat range"],
+          "requiredAssertions": ["do not blindly replace one deep squat with another", "preserve source program", "record prescribed and performed identities", "record substitution provenance", "explain why substitute fits", "Coach can later explain the substitution"]
+        },
+        {
+          "scenarioId": "rurik-knee",
+          "reportedLimitation": "Reports knee pain aggravated by loaded or deep knee flexion. Avoid provocative range/loading today. LetMeFly is not making a diagnosis.",
+          "triggers": ["loaded knee flexion", "deep knee flexion"],
+          "requiredAssertions": ["recommendations differ materially from hip scenario when appropriate", "preserve source program", "record substitution provenance", "Coach does not diagnose"]
+        },
+        {
+          "scenarioId": "rurik-red-flag-escalation",
+          "redFlags": ["severe pain", "acute trauma", "inability to bear weight", "major instability", "significant swelling", "neurological symptoms", "clearly worsening symptoms"],
+          "requiredAssertions": ["Coach stops routine substitution handling", "Coach recommends professional evaluation", "Coach does not diagnose", "Coach does not encourage training through red flags"]
+        }
+      ]
+    },
+    {
+      "internalId": "qa_history",
+      "displayName": "Hadrin Oss",
+      "role": "longitudinal-veteran",
+      "primaryFailureDomain": "multi-year-history-and-analytics-scale",
+      "units": {"weight": "lb", "distance": "mi"},
+      "barbell": {"barWeight": 45, "unit": "lb", "platesPerSideInventory": [45, 25, 10, 5, 2.5]},
+      "trainingMaxes": {"back_squat": 315, "front_squat": 255, "bench_press": 235, "deadlift": 405, "overhead_press": 155, "power_clean": 185},
+      "readiness": {"sleep_hours": 7.5, "sleep_quality": 4, "soreness": 2, "stress": 2, "energy": 4},
+      "historyScale": {
+        "spanMonths": 36,
+        "minCompletedWorkouts": 400,
+        "minWorkoutSets": 5000,
+        "minReadinessEntries": 300,
+        "minBodyweightEntries": 200,
+        "minTrainingMaxEvents": 30,
+        "minPersonalRecords": 40,
+        "requiredProgramExposure": ["crownforge", "crown-maintenance", "black-crown-foundation", "black-crown-volume", "black-crown-intensification", "black-crown-realization"],
+        "requiredHistoryFeatures": ["deloads", "testing-weeks", "moved-workouts", "skipped-workouts", "amraps", "failed-sets", "substitutions", "conditioning", "sleds", "carries", "olympic-derivatives", "tm-increases", "tm-holds", "tm-deloads", "good-readiness-periods", "poor-readiness-periods", "notes", "rpe-rir"]
+      },
+      "requiredAssertions": ["Home History Progress and Coach remain responsive at scale", "analytics remain correct", "PR and trend data remain athlete-scoped", "Coach retrieves supported old facts and refuses unsupported ones", "backup restore remains relationally complete", "historical snapshots are not retroactively rewritten", "no silent dropping or duplication of old records"]
+    }
+  ],
+  "universalAuditFlow": ["fixture-reset", "profile", "home", "program", "readiness", "train", "bar-loader", "logging", "resume-recovery", "substitution", "completion", "history", "progress", "coach", "export-restore", "cross-profile-isolation", "program-integrity"],
+  "releaseBlockers": ["cross-athlete-data-leak", "unauthorized-program-mutation", "semantic-unit-error", "lost-or-duplicated-workout-data", "materially-wrong-program-position-or-prescription", "unsafe-coach-behavior", "backup-restore-corruption", "privacy-or-auth-exposure", "history-scale-silent-drop-duplicate-or-reassignment"],
+  "resultContract": {
+    "requiredFields": ["commitSha", "environment", "environmentUrl", "auditDate", "fixtureVersion", "operator", "athleteResults", "rurikScenarioResults", "hadrinScaleResult", "defects", "programIntegrityResult", "releaseDecision"],
+    "releaseDecisionEnum": ["PASS", "FAIL", "PASS WITH DOCUMENTED MINORS"],
+    "athleteResultEnum": ["PASS", "FAIL", "NOT RUN"]
+  }
+}
