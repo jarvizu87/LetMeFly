@@ -8,6 +8,7 @@ on:
       - 'ci/audit-maintenance-runtime-load-bar-v1.mjs'
       - 'ci/apply-program-card-fidelity-v1.sh'
       - 'ci/audit-program-card-fidelity-v1.mjs'
+      - 'ci/audit-athlete-program-progression.mjs'
       - 'ci/build-command-v2-v2-1.sh'
       - 'overlays/ui-command-v2/batch-v/**'
       - '.github/workflows/maintenance-runtime-load-bar-audit.yml'
