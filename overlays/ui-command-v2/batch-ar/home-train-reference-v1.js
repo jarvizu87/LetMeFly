@@ -238,6 +238,40 @@
     }
   }
 
+  // A not-yet-started or future day uses native preview-card nodes, not live
+  // active-exercise nodes. Give those the same one-open-exercise composition.
+  // Selection is DOM-only; the original prescription and action nodes stay put.
+  function previewCards(panel) {
+    const cards = [...panel.querySelectorAll('.exercise-stack > .preview-card')]
+    if (!cards.length) return cards
+    const selected = cards.find(card => card.classList.contains('lmf-reference-preview-active')) || cards[0]
+    cards.forEach((card,index) => {
+      const name = text(card.querySelector('.exercise-title h3'))
+      const rows = [...card.querySelectorAll('.prescription-block > .prescription-row')]
+      const first = rows[0]
+      const detail = rows.length > 1 ? `${rows.length} sets · ${text(first?.querySelector('span'))}` : text(first)
+      const button = ensure(card,':scope > .lmf-reference-preview-summary','button','lmf-reference-preview-summary','<span><strong></strong><small></small></span><i aria-hidden="true">›</i>','afterbegin')
+      button.type = 'button'
+      setAttr(button,'data-reference-preview-exercise',index)
+      setAttr(button,'aria-expanded',card === selected)
+      setText(button.querySelector('strong'),name)
+      setText(button.querySelector('small'),detail)
+      card.classList.toggle('lmf-reference-preview-active',card === selected)
+      const media = ensure(card,':scope > .lmf-exercise-media','div','lmf-exercise-media','','afterbegin')
+      setAttr(media,'data-exercise-art',card.dataset.exerciseArt || '')
+      setAttr(media,'role','img')
+      setAttr(media,'aria-label',`${name} exercise picture`)
+    })
+    return cards
+  }
+
+  function selectPreview(panel,index) {
+    const cards = [...panel.querySelectorAll('.exercise-stack > .preview-card')]
+    if (!cards[index]) return
+    cards.forEach((card,i) => card.classList.toggle('lmf-reference-preview-active',i === index))
+    queue()
+  }
+
   function workout(shell) {
     const list = panels(shell)
     list.forEach((panel,index) => {
@@ -247,11 +281,12 @@
       panel.classList.add('lmf-reference-block')
       setAttr(head.querySelector('h2'),'data-reference-block-number',index)
       ensure(head,'.lmf-reference-block-icon','span','lmf-reference-block-icon',icon('crown'),'afterbegin')
-      const cards = [...stack.querySelectorAll(':scope > .active-exercise')]
+      const previews = previewCards(panel)
+      const cards = previews.length ? previews : [...stack.querySelectorAll(':scope > .active-exercise')]
       let pager = head.querySelector('.lmf-reference-block-pager')
       if (cards.length) {
         pager = ensure(head,'.lmf-reference-block-pager','div','lmf-reference-block-pager','<button type="button" data-reference-exercise-step="-1" aria-label="Previous exercise in block">‹</button><span></span><button type="button" data-reference-exercise-step="1" aria-label="Next exercise in block">›</button>')
-        const selected = Math.max(0,cards.findIndex(card => card.classList.contains('lmf-flow-active')))
+        const selected = Math.max(0,cards.findIndex(card => card.classList.contains(previews.length ? 'lmf-reference-preview-active' : 'lmf-flow-active')))
         const resting = Boolean(panel.querySelector('.lmf-round-rest.is-active'))
         setText(pager.querySelector('span'),`${selected+1} of ${cards.length}`)
         pager.querySelector('[data-reference-exercise-step="-1"]').disabled = resting || selected === 0
@@ -355,10 +390,18 @@
       if (exerciseStep) {
         const panel = exerciseStep.closest('.workout-panel')
         if (panel.querySelector('.lmf-round-rest.is-active')) return
-        const cards = [...panel.querySelectorAll('.exercise-stack > .active-exercise')]
-        const selected = cards.findIndex(item => item.classList.contains('lmf-flow-active'))
-        cards[selected+Number(exerciseStep.dataset.referenceExerciseStep)]?.querySelector('.lmf-compact-summary')?.click()
+        const previews = [...panel.querySelectorAll('.exercise-stack > .preview-card')]
+        if (previews.length) {
+          const selected = previews.findIndex(item => item.classList.contains('lmf-reference-preview-active'))
+          selectPreview(panel,selected+Number(exerciseStep.dataset.referenceExerciseStep))
+        } else {
+          const cards = [...panel.querySelectorAll('.exercise-stack > .active-exercise')]
+          const selected = cards.findIndex(item => item.classList.contains('lmf-flow-active'))
+          cards[selected+Number(exerciseStep.dataset.referenceExerciseStep)]?.querySelector('.lmf-compact-summary')?.click()
+        }
       }
+      const previewExercise = event.target.closest('[data-reference-preview-exercise]')
+      if (previewExercise) selectPreview(previewExercise.closest('.workout-panel'),Number(previewExercise.dataset.referencePreviewExercise))
       const section = event.target.closest('[data-reference-section]')
       if (section) openSection(shell,Number(section.dataset.referenceSection))
       const readiness = event.target.closest('[data-reference-readiness]')

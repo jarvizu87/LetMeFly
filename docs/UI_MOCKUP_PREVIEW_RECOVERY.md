@@ -1,5 +1,37 @@
 # Held UI preview recovery
 
+## Recording rejection — September 13
+
+The user rejected both layouts in `1000028802.mp4`. Earlier passing geometry
+checks do not establish visual acceptance. The Train recording shows native
+`preview-card` nodes before workout start still receiving the old square art
+rule from `mobile-recording-regression-v1.css`. The latest desktop reproduction
+measured that empty image region at 678 × 678 px and the first warm-up card at
+941 px tall. The previous correction covered live `active-exercise` cards only.
+
+The follow-up uses the native preview cards and prescriptions with one expanded
+movement, compact movement selectors, the same block pager, and proportional
+art in the heading region. It does not create live inputs or set-writing actions
+in previews. Live inputs remain native; their padding/height is tightened and
+the desktop Log Set button shares the input row. The optional Netlify Drawer,
+which is blocked by this app's CSP and covered the phone navigation, is hidden
+without relaxing that policy.
+
+Regression checks now cover before-start and future-day cards, preserve every
+native prescription through movement selection, and reject the obsolete square
+panel. The older smoke test's square-image requirement is superseded by Train
+Card Standard v2. Reports explicitly separate container geometry from successful
+private picture delivery. Signed-in picture loading and final visual acceptance
+remain open; the video shows placeholders. No production release is authorized
+by this correction.
+
+Billing verification: the four recent card/logo deployments ending at c689a8f
+are Netlify `deploy-preview` context, with no production `published_at` value.
+The production deployment remains 6aa48a7f3c5fea0008502f12, published September 11
+at 23:12 UTC. Netlify lists Deploy Previews at zero deployment credits; traffic
+is metered separately. Exact account traffic charges were not available through
+the connected read-only tools.
+
 PR #91 remains a development preview. The user rejected the earlier preview's
 visual match to the locked mockups. A successful build does not override that
 decision, and this change does not authorize a production release.

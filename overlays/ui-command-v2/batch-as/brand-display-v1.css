@@ -1,4 +1,7 @@
 /* Display the exact approved logo at a readable size. No new image derivative. */
+/* The optional host feedback drawer is blocked by the app's CSP. It otherwise
+   covers the bottom navigation with an error frame in installed previews. */
+body>[data-netlify-deploy-id][data-netlify-site-id]:has(iframe[title="Netlify Drawer"]){display:none!important}
 html body .topbar .brand-mark.lmf-official-brand-mark{
   width:52px!important;height:52px!important;flex:0 0 52px!important;
 }

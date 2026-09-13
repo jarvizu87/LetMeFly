@@ -224,6 +224,44 @@ try {
     const flowCardWidth=await page.evaluate(()=>{const track=document.querySelector('#session-track');return {slot:parseFloat(getComputedStyle(track).gridTemplateColumns),card:track.querySelector('button').getBoundingClientRect().width}})
     assert.ok(Math.abs(flowCardWidth.slot-flowCardWidth.card)<2,'Workout Flow cards fill their grid columns')
     await page.screenshot({path:path.join(out,`train-readiness-${width}.png`)})
+    // The recording exposed a real gap: before Start Workout the native app
+    // renders preview-card, which the previous live-only layout did not cover.
+    await page.locator('#session-track [data-session-index="1"]').click()
+    await page.locator('.active-page .lmf-reference-preview-active').waitFor({state:'visible'})
+    const beforeStart = page.locator('.active-page .preview-card')
+    const prescriptionsBefore = await beforeStart.locator('.prescription-block > .prescription-row').allTextContents()
+    assert.ok((await beforeStart.count())>=3,'Warm-up contains its original movements')
+    assert.equal(await page.locator('.active-page .lmf-reference-preview-active').count(),1,'One preview movement opens at a time')
+    assert.equal(await beforeStart.locator('[data-action="toggle-set"],.set-input').count(),0,'Before-start previews cannot log sets')
+    const previewGeometry = await beforeStart.first().evaluate(card=>{
+      const media=card.querySelector('.lmf-exercise-media'),style=getComputedStyle(media)
+      return {height:card.getBoundingClientRect().height,before:getComputedStyle(card,'::before').display,imagePosition:style.position,imageHeight:media.getBoundingClientRect().height,imageFit:style.backgroundSize}
+    })
+    assert.equal(previewGeometry.before,'none','The obsolete square panel is removed')
+    assert.equal(previewGeometry.imagePosition,'absolute','Preview art shares the exercise heading region')
+    assert.equal(previewGeometry.imageFit,'contain','Preview picture proportions are preserved')
+    assert.ok(previewGeometry.imageHeight<=210&&previewGeometry.height<450,'A simple warm-up no longer becomes a screen-sized empty card')
+    await page.locator('.active-page [data-reference-exercise-step="1"]').click()
+    await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Backward Sled Drag')
+    await page.locator('.active-page [data-reference-preview-exercise="0"]').click()
+    await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Bike / Incline Walk')
+    assert.deepEqual(await beforeStart.locator('.prescription-block > .prescription-row').allTextContents(),prescriptionsBefore,'Preview selection preserves every governed prescription')
+    assert.equal(await beforeStart.first().locator('[data-watch]').isVisible(),true,'Native exercise actions remain available')
+    await beforeStart.first().evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
+    await page.screenshot({path:path.join(out,`train-before-start-${width}.png`)})
+    const drawer=page.locator('body > [data-netlify-deploy-id]:has(iframe[title="Netlify Drawer"])')
+    if(await drawer.count())assert.equal(await drawer.isVisible(),false,'The blocked host drawer cannot cover app navigation')
+    report.checks.push({route:'train-before-start',width,result:'PASS',layout:previewGeometry,privateImages:'Not verified in disposable signed-out data'})
+    await page.locator('.day-strip .day-chip[data-day="2"]').click()
+    await page.locator('#session-track [data-session-index="1"]').click()
+    await page.locator('.active-page .lmf-reference-preview-active').waitFor({state:'visible'})
+    assert.equal(await page.locator('.active-page .preview-card').first().evaluate(el=>getComputedStyle(el,'::before').display),'none','Future days also retire the square art panel')
+    assert.equal(await page.locator('.active-page [data-action="toggle-set"],.active-page .set-input').count(),0,'Future-day cards remain read-only')
+    assert.ok((await page.locator('.active-page .lmf-reference-preview-active .prescription-block > .prescription-row').count())>0,'Future-day native prescriptions are retained')
+    await page.locator('.active-page .lmf-reference-preview-active').evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
+    await page.screenshot({path:path.join(out,`train-future-day-${width}.png`)})
+    await page.locator('.day-strip .day-chip[data-day="1"]').click()
+    await page.locator('#session-track [data-session-index="0"]').click()
     for (const [name,value] of [['sleep-quality',4],['energy',3],['soreness',2],['stress',5]]) {
       await page.locator(`.readiness-options label:has(input[name="readiness-${name}"][value="${value}"])`).click()
     }
@@ -310,7 +348,7 @@ try {
       await page.screenshot({path:path.join(out,`train-block-controls-${size}.png`)})
       blockLayouts.push({width:size,...geometry})
     }
-    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,checks:['Numbered block heading','Original pictures blended without distortion','Rest timer beside title','Set table beside load panel','Native exercise paging preserves sets']})
+    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,privateImages:'Not verified in disposable signed-out data',checks:['Numbered block heading','Art container uses proportional fit and edge masking','Rest timer beside title','Set table beside load panel','Native exercise paging preserves sets']})
     // Full-page/element capture can temporarily resize the native carousel.
     // Capture the real viewport without changing its size or horizontal scroll.
     await card.evaluate(el=>window.scrollTo({top:scrollY+el.getBoundingClientRect().top-90,behavior:'instant'}))
