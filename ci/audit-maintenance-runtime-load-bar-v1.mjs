@@ -96,19 +96,20 @@ async function chooseReadiness(page) {
   assert.ok(chosen>=4,'Maintenance runtime readiness UI missing scored fields')
 }
 function namedActiveCard(page, name) {
-  return page.locator('.exercise-card.lmf-flow-active').filter({hasText:name}).first()
+  return page.locator('.active-exercise.lmf-flow-active').filter({hasText:name}).first()
 }
 async function activateExercise(page, name) {
   const active = namedActiveCard(page, name)
   if (await active.count()) return active
   const clicked = await page.evaluate((needle) => {
-    const candidates=[...document.querySelectorAll('button,[role="button"],.lmf-compact-preview,.compact-exercise,.flow-preview,.exercise-card.lmf-flow-compact')]
-    const target=candidates.find(el => (el.textContent||'').includes(needle))
-    if (!target) return false
+    const cards=[...document.querySelectorAll('.active-exercise')]
+    const card=cards.find(el => (el.querySelector('.exercise-title h3')?.textContent||'').trim() === needle)
+    const target=card?.querySelector(':scope > .lmf-compact-summary')
+    if (!(target instanceof HTMLElement)) return false
     target.click(); return true
   }, name)
   assert.equal(clicked, true, `Could not activate ${name} from Workout Flow`)
-  await page.waitForFunction((needle) => [...document.querySelectorAll('.exercise-card.lmf-flow-active')].some(el => (el.textContent||'').includes(needle)), name, {timeout:10000})
+  await page.waitForFunction((needle) => [...document.querySelectorAll('.active-exercise.lmf-flow-active')].some(el => (el.querySelector('.exercise-title h3')?.textContent||'').trim() === needle), name, {timeout:10000})
   return namedActiveCard(page, name)
 }
 async function auditBarLoader(page, name, target, expectedPerSide) {
@@ -120,9 +121,6 @@ async function auditBarLoader(page, name, target, expectedPerSide) {
   const visibleLoad = Number(await load.inputValue())
   assert.equal(visibleLoad, target, `${name}: native load input did not receive resolved programmed load`)
 
-  // Exercise the final approved Train presentation button, not only the hidden
-  // native action. This is the bridge that previously disconnected after the
-  // Workout Flow re-render.
   const button = card.locator('[data-reference-load-bar]').first()
   await button.waitFor({state:'visible', timeout:10000})
   await button.click()
@@ -179,9 +177,6 @@ try {
   await dismissInstall(page)
   await chooseReadiness(page)
 
-  // Use the governed native start control. The approved cinematic Start/Resume
-  // button is a presentation/navigation control and is not the owner of workout
-  // creation. This mirrors the release-gate harness.
   const start = page.locator('[data-action="start-workout"]').filter({visible:true}).first()
   await start.waitFor({state:'visible',timeout:10000})
   await start.click()
@@ -219,7 +214,10 @@ try {
   console.log('Maintenance runtime resolved-load + Bar Loader audit: PASS')
   console.log(JSON.stringify(report,null,2))
 } catch (error) {
-  report.result='FAIL';report.defects.push(String(error?.stack||error));save();throw error
+  report.result='FAIL'
+  report.defects.push(String(error?.stack||error))
+  save()
+  throw error
 } finally {
   await context.close().catch(()=>{})
   await browser.close().catch(()=>{})
