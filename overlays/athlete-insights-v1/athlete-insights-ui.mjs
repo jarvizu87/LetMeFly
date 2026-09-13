@@ -121,11 +121,37 @@ function renderCoach(target, data) {
   section.dataset.signature = signature
 }
 
+function renderOverview(target, data) {
+  const {current} = summaryFor(data, selectedRange()), unit=unitFor(data)
+  const allDays=new Set(summaryFor(data,'all').current.sessions.map(row=>row.completedAt?.slice(0,10)).filter(Boolean))
+  const signature=JSON.stringify([data.athlete.id,selectedRange(),unit,current.totals,current.sessions,[...allDays]])
+  if(target.dataset.referenceSummary===signature)return
+  target.dataset.referenceSummary=signature
+  const days=new Set(current.sessions.map(row=>row.completedAt?.slice(0,10)).filter(Boolean))
+  const setMetric=(key,value)=>{const el=target.querySelector(`[data-reference-metric="${key}"] strong`);if(el)el.textContent=value}
+  setMetric('workouts',String(current.totals.completedSessions))
+  setMetric('days',String(days.size))
+  setMetric('volume',current.totals.externalLoadVolumeKg==null?'—':`${fmt(displayLoad(current.totals.externalLoadVolumeKg,unit))} ${unit}`)
+  let streak=0,day=new Date();day.setUTCHours(0,0,0,0)
+  if(!allDays.has(day.toISOString().slice(0,10)))day.setUTCDate(day.getUTCDate()-1)
+  while(allDays.has(day.toISOString().slice(0,10))){streak++;day.setUTCDate(day.getUTCDate()-1)}
+  setMetric('streak',`${streak} ${streak===1?'Day':'Days'}`)
+  const calendar=target.querySelector('.lmf-reference-calendar')
+  if(calendar){
+    const count=selectedRange()==='7d'?14:selectedRange()==='30d'?35:91,end=new Date();end.setUTCHours(0,0,0,0)
+    const cells=[]
+    for(let i=count-1;i>=0;i--){const at=new Date(end);at.setUTCDate(at.getUTCDate()-i);const key=at.toISOString().slice(0,10),done=days.has(key);cells.push(`<span class="${done?'is-complete':''}" title="${key}: ${done?'completed training':'no completed session'}" aria-label="${key}: ${done?'completed training':'no completed session'}"></span>`)}
+    calendar.innerHTML=cells.join('')
+    calendar.style.setProperty('--calendar-columns',String(count/7))
+  }
+}
+
 async function refresh(force = false) {
   const token = ++generation
   const panel = document.querySelector('#lmf-progress-dashboard-v1 [data-pg-panel="strength"]')
+  const overview = document.querySelector('#lmf-progress-dashboard-v1 .lmf-reference-overview')
   const coach = document.querySelector('#coach-answer')?.closest('.coach-chat')
-  if (!panel && !coach) return
+  if (!panel && !coach && !overview) return
   try {
     const snapshot = await history.get({ force })
     if (token !== generation) return
@@ -133,6 +159,7 @@ async function refresh(force = false) {
     panel?.querySelector('.lmf-ai-unavailable')?.remove()
     coach?.querySelector('.lmf-ai-unavailable')?.remove()
     if (panel?.isConnected && panel.dataset.pgPanel === 'strength') renderProgress(panel, snapshot)
+    if (overview?.isConnected) renderOverview(overview, snapshot)
     if (coach?.isConnected) renderCoach(coach, snapshot)
   } catch (_) {
     if (token !== generation) return
@@ -157,6 +184,8 @@ document.addEventListener('change', event => {
   schedule()
 })
 document.addEventListener('click', event => {
+  const overviewLink=event.target.closest('[data-reference-progress-view]')
+  if(overviewLink){document.querySelector(`.lmf-pg-tabs [data-pg-tab="${overviewLink.dataset.referenceProgressView}"]`)?.click();return}
   if (clickCoachDecision(event.target, () => void refresh(true))) { void refresh(true); return }
   if (event.target.closest('[data-ai-refresh]')) void refresh(true)
 })

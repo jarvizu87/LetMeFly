@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { validateLockedArt } from './validate-locked-art-source.mjs'
+import { validateMockupScenes } from './validate-mockup-scenes.mjs'
 
 const root = path.resolve(process.argv[2] || '.build-src/letmefly_app')
 const dist = path.join(root, 'dist')
@@ -23,7 +24,7 @@ const sw = read('service-worker.js')
 const css = read('ui/locked-art-fidelity-v1.css')
 const art = read('ui/raizen-black-crown-ascension-v1.svg')
 
-assert(index.includes('/ui/locked-art-fidelity-v1.css?v=4'), 'index missing current locked art fidelity stylesheet')
+assert(index.includes('/ui/locked-art-fidelity-v1.css?v=5'), 'index missing current locked art fidelity stylesheet')
 assert(index.indexOf('/ui/color-harmonization-v1.css') < index.indexOf('/ui/locked-art-fidelity-v1.css'), 'locked art fidelity must load after color harmonization')
 for (const asset of ['/ui/locked-art-fidelity-v1.css','/ui/raizen-black-crown-ascension-v1.svg']) {
   assert(sw.includes(asset), `service worker missing ${asset}`)
@@ -32,7 +33,12 @@ assert(art.includes('data:image/jpeg;base64,'), 'canonical Raizen art wrapper is
 validateLockedArt(path.join(dist, 'ui/raizen-black-crown-ascension-v1.svg'))
 assert(css.includes("--lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg?v=2')"), 'current Raizen/Fenrir art variable missing')
 assert(sw.includes('/ui/raizen-black-crown-ascension-v1.svg?v=2'), 'service worker missing repaired identity image revision')
-assert(sw.includes('-locked-ui-v5'), 'service worker must refresh the previously cached UI assets')
+assert(sw.includes('-locked-ui-v6'), 'service worker must refresh the previously cached UI assets')
+for(const item of validateMockupScenes(path.join(dist,'ui/mockup-scenes'))){
+  const asset=`/ui/mockup-scenes/${item.scene}.svg`
+  assert(css.includes(asset),`Scene is connected to the UI: ${asset}`)
+  assert(sw.includes(asset),`Scene is available offline: ${asset}`)
+}
 for (const route of ['progress','exercises','coach','profile','more']) {
   assert(css.includes(`data-lmf-approved-route='${route}'`), `locked art layer missing ${route} route`)
 }

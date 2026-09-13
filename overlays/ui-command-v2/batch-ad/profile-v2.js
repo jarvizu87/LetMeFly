@@ -185,6 +185,11 @@
         prs: owned(prs, athleteId).length,
         trackedTms,
         activeProgram,
+        latestCompleted: latestBy(completed, ['completed_at','started_at']),
+        trainingMaxes: [...new Set(tmRows.map(row => row.exercise_key || row.lift_key).filter(Boolean))].map(key => {
+          const row = latestBy(tmRows.filter(item => (item.exercise_key || item.lift_key) === key), ['effective_at','updated_at','created_at']);
+          return {name:String(key).replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), value:row?.tm_value, unit:row?.tm_unit || weightUnit};
+        }),
         readinessCount: readinessRows.length,
         strength: strengthSnapshot(),
       }
@@ -216,7 +221,7 @@
     const existing = document.getElementById(SECTION_ID)
     if (existing) existing.remove()
 
-    const { athlete, weightUnit, context, name, bodyweight, workouts, prs, trackedTms, activeProgram, readinessCount, strength } = vault
+    const { athlete, weightUnit, context, name, bodyweight, workouts, prs, trackedTms, activeProgram, readinessCount, strength, trainingMaxes, latestCompleted } = vault
     const completion = completionScore(name, context)
     const program = programName(activeProgram?.program_key)
     const position = positionText(activeProgram)
@@ -229,22 +234,25 @@
       <div class="lmf-profile-v2-head">
         <div class="lmf-profile-v2-identity">
           <div class="lmf-profile-v2-avatar">${esc(initials(name))}</div>
-          <div><span>ATHLETE INTELLIGENCE</span><h2>${esc(name)}</h2><p>Athlete context used to make LetMeFly more personal and useful.</p></div>
+          <div><span>ATHLETE</span><h2>${esc(name)}</h2><p>“The Work Continues”</p></div>
         </div>
         <div class="lmf-profile-completion" style="--profile-completion:${completion * 3.6}deg"><strong>${completion}%</strong><small>PROFILE</small></div>
       </div>
 
       <div class="lmf-profile-stat-grid">
+        ${stat('◷', 'Age', context.age || '—')}
+        ${stat('↕', 'Height', context.height || '—')}
         ${stat('▰', 'Current Bodyweight', bodyweight)}
-        ${stat('✓', 'Completed Workouts', String(workouts))}
-        ${stat('↔', 'Tracked TMs', trackedTms ? String(trackedTms) : '—')}
-        ${stat('★', 'Personal Records', String(prs))}
+        ${stat('▥', 'Training Experience', context.trainingExperience || '—')}
       </div>
 
       <article class="lmf-profile-program-card">
         <div><span>CURRENT PROGRAM</span><h3>${esc(program)}</h3><p>${esc(position)}</p></div>
         <div class="lmf-profile-program-actions"><a href="#/program">PROGRAM</a><a href="#/train">TRAIN</a></div>
       </article>
+
+      <article class="lmf-profile-tm-sheet"><h3>TRAINING MAXES</h3>${trainingMaxes?.length ? `<div class="lmf-profile-lifts">${trainingMaxes.slice(0,7).map(row=>`<div><span>${esc(row.name)}</span><strong>${row.value == null ? '—' : esc(`${row.value} ${row.unit}`)}</strong></div>`).join('')}</div>` : '<p class="lmf-profile-empty">Training Maxes appear here when recorded.</p>'}</article>
+      <section class="lmf-profile-sheet-footer"><article class="lmf-profile-quick-actions"><h3>QUICK ACTIONS</h3><div><button type="button" data-lmf-profile-edit-scroll>Edit Profile</button><a href="#/progress">Training Maxes</a><a href="#/program">Change Program</a><button type="button" data-lmf-profile-backup-scroll>Data & Backup</button></div></article><article class="lmf-profile-recent-training"><h3>RECENT TRAINING</h3><small>Last Session</small><strong>${latestCompleted ? esc(new Date(latestCompleted.completed_at || latestCompleted.started_at).toLocaleDateString()) : 'No completed session'}</strong><a href="#/progress">View History ›</a></article></section>
 
       <details class="lmf-profile-import lmf-profile-form-card">
         <summary>Import athlete details</summary>

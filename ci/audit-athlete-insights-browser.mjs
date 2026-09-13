@@ -148,7 +148,7 @@ try {
     assert.equal(await page.locator('#lmf-advanced-progress, #lmf-athlete-coach').count(), 0)
     if (process.env.CHECK_PROGRAM_ORDER === '1') {
       await page.goto('http://127.0.0.1:4173/#/program', { waitUntil: 'domcontentloaded' })
-      await page.locator('.black-crown-weeks-compact').waitFor()
+      await page.locator('.black-crown-weeks-compact').waitFor({state:'attached'})
       const ordered = await page.evaluate(() => {
         const cf = document.querySelector('[data-program-week-drawer]'), cm = document.querySelector('.maintenance-weeks-compact'), bc = document.querySelector('.black-crown-panel')
         return Boolean(cf && cm && bc && (cf.compareDocumentPosition(cm) & Node.DOCUMENT_POSITION_FOLLOWING) && (cm.compareDocumentPosition(bc) & Node.DOCUMENT_POSITION_FOLLOWING))

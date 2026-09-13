@@ -1,0 +1,148 @@
+[
+  {
+    "scene": "progress",
+    "reference": "progress",
+    "viewBox": [
+      650,
+      0,
+      1022,
+      226
+    ],
+    "originalDimensions": [
+      1672,
+      941
+    ],
+    "originalSha256": "f33b8fcd269095dac00fe7a86a74b8316f25638228f9236bd8824dba88b1690f",
+    "clipPath": "M650 0H1368V56H1672V226H650Z",
+    "sceneSha256": "db68070eb8f990931eb84927561fd406ff1ad922d2b3bc4d6a71630ef1e1baa9"
+  },
+  {
+    "scene": "progress-footer",
+    "reference": "progress",
+    "viewBox": [
+      220,
+      785,
+      1425,
+      154
+    ],
+    "originalDimensions": [
+      1672,
+      941
+    ],
+    "originalSha256": "f33b8fcd269095dac00fe7a86a74b8316f25638228f9236bd8824dba88b1690f",
+    "sceneSha256": "23059e59462b5ec9e3baf5052d3c977818d03a619b7d93236d4a77f7d7c36d88"
+  },
+  {
+    "scene": "progress-mobile",
+    "reference": "progress-mobile",
+    "viewBox": [
+      122,
+      194,
+      697,
+      236
+    ],
+    "originalDimensions": [
+      941,
+      1672
+    ],
+    "originalSha256": "f6225df6d983306352308706c273fb15f62fcbc20e3043744fc2cac6f269afcf",
+    "sceneSha256": "7c7e34ec38af6e81ae3327b9c520ce28d092f89c13fa9b2f6059f3d85c354634"
+  },
+  {
+    "scene": "exercises",
+    "reference": "exercises",
+    "viewBox": [
+      360,
+      61,
+      665,
+      232
+    ],
+    "originalDimensions": [
+      1672,
+      941
+    ],
+    "originalSha256": "aad2268636fbe35f0be2483f10ae84955391ee31d6b86d095d5fec8105a8df5e",
+    "sceneSha256": "e701c091451cc6e7184cb6ffb3f1da63d57b1ffbc3e2988aec5f9452b19bf733"
+  },
+  {
+    "scene": "coach",
+    "reference": "coach",
+    "viewBox": [
+      177,
+      72,
+      350,
+      302
+    ],
+    "originalDimensions": [
+      1536,
+      1024
+    ],
+    "originalSha256": "0823cfd3ebe57f42cec438a1416a20932f241e67c0a0e40313347f35a4eeea7b",
+    "clipPath": "M241 72H527V374H198V150H241Z",
+    "sceneSha256": "2802ba0b9947de9e4a21dd73d45d44f21c7c6a2d83619296e3f82c66146b4ff7"
+  },
+  {
+    "scene": "profile",
+    "reference": "profile",
+    "viewBox": [
+      9,
+      62,
+      461,
+      829
+    ],
+    "originalDimensions": [
+      1685,
+      934
+    ],
+    "originalSha256": "738cbfc4330f67cfbb0d0465340f44ad2edd0370108a4628938316b2004f582a",
+    "sceneSha256": "695798eb4f84860f050a28f5849b245e50cf59869212b6e3b59b4f8bf899b8ab"
+  },
+  {
+    "scene": "more",
+    "reference": "more",
+    "viewBox": [
+      568,
+      719,
+      565,
+      260
+    ],
+    "originalDimensions": [
+      1536,
+      1024
+    ],
+    "originalSha256": "55f17852cec976247895eacb8cd94f2f83d82081cc43c46134a984878326c638",
+    "sceneSha256": "95700e3b56453a9eff13481f6203a438e8bc86037c36bd7bde0dbd17899b146f"
+  },
+  {
+    "scene": "more-mountain",
+    "reference": "more",
+    "viewBox": [
+      727,
+      88,
+      225,
+      169
+    ],
+    "originalDimensions": [
+      1536,
+      1024
+    ],
+    "originalSha256": "55f17852cec976247895eacb8cd94f2f83d82081cc43c46134a984878326c638",
+    "sceneSha256": "0ed31ce42dc3a0a6b8ff15cf1ed944ee7bfe639b1efbe155ec95424435d5c43c"
+  },
+  {
+    "scene": "program",
+    "reference": "program",
+    "viewBox": [
+      355,
+      174,
+      196,
+      168
+    ],
+    "originalDimensions": [
+      1222,
+      1287
+    ],
+    "originalSha256": "d48a6549585cb1cdd95cd9bf773a4f0f8dc6608a88347da32772bd79cdf53449",
+    "sceneSha256": "7bab775b8e22021f417b65ded4ede9c7418b3e755d8575e6ab2ce7d74b5cb7d8"
+  }
+]

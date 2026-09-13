@@ -41,10 +41,18 @@
     if (!shell.classList.contains('lmf-coach-workspace')) {
       shell.classList.add('lmf-coach-workspace');
       const title = shell.querySelector('.coach-banner h1');
-      if (title) title.innerHTML = 'LETMEFLY <span>COACH</span>';
+      if (title) title.textContent = 'COACH';
+      const bannerCopy = shell.querySelector('.coach-banner-copy');
+      if (bannerCopy) {
+        const subtitle = bannerCopy.querySelector('p');
+        if (subtitle) subtitle.textContent = 'ANSWERS. GUIDANCE. PERSPECTIVE. PROGRESS.';
+        const quote = element('blockquote', 'lmf-coach-mockup-quote', '“Better questions. Stronger results.”');
+        quote.append(element('small', '', '— RAIZEN'));
+        bannerCopy.append(quote);
+      }
       const conversation = element('section', 'lmf-coach-conversation');
       conversation.setAttribute('aria-label', 'Your conversation');
-      const heading = element('h2', 'lmf-coach-conversation-heading', 'Your conversation');
+      const heading = element('h2', 'lmf-coach-conversation-heading', 'HOW CAN I HELP TODAY?');
       const thread = element('div', 'lmf-coach-thread');
       const question = element('div', 'lmf-coach-question');
       question.hidden = true;
@@ -55,7 +63,7 @@
       for (const [prompt, [label, glyph]] of Object.entries(prompts)) {
         const button = [...quick.children].find(node => node.getAttribute('data-coach-prompt') === prompt);
         if (!button) continue;
-        button.innerHTML = `${icon(glyph)}<span>${label}</span>`;
+        button.innerHTML = `${icon(glyph)}<span>${prompt}</span>`;
         button.title = prompt;
         quick.append(button);
       }
@@ -71,10 +79,14 @@
         send.setAttribute('aria-label', 'Send question');
         send.title = 'Send question (Ctrl or ⌘ + Enter)';
       }
-      conversation.append(heading, quick, thread, composer);
+      const ask = element('section', 'lmf-coach-ask-panel');
+      ask.append(heading, element('p', 'lmf-coach-ask-subtitle', 'Ask me anything about your training, progress, program, or goals.'), composer, quick);
+      conversation.append(element('div', 'lmf-coach-thread-label', 'COACH'), thread);
       const sidebar = element('aside', 'lmf-coach-sidebar');
       sidebar.setAttribute('aria-label', 'Your coaching context');
-      chat.append(conversation, sidebar);
+      const reference = element('aside', 'lmf-coach-reference');
+      reference.innerHTML = '<section><h2>QUICK REFERENCE</h2><a href="#/program">Current Program <span>›</span></a><a href="#/progress">Training Maxes <span>›</span></a><a href="#/profile">Goal Tracker <span>›</span></a><a href="#/exercises">Exercise Library <span>›</span></a><a href="#/exercises">Substitution Help <span>›</span></a><a href="#/progress">Progress Analysis <span>›</span></a></section><section><h2>COACH PRINCIPLES</h2><ol><li><strong>Safety First</strong><small>Protect your long-term progress.</small></li><li><strong>Your Profile</strong><small>Train for you, not a template.</small></li><li><strong>Program Rules</strong><small>Stay within the plan.</small></li><li><strong>Training Phase</strong><small>Context matters.</small></li><li><strong>Your History</strong><small>Learn from what you have done.</small></li><li><strong>Exercise Intelligence</strong><small>The right tool for the right job.</small></li><li><strong>Evidence-Based Coaching</strong><small>Practical, proven, and simple.</small></li></ol></section><div class="lmf-coach-reference-motto">SAME DISCIPLINE.<br>A STRONGER<br>TOMORROW.</div>';
+      chat.append(ask, sidebar, conversation, reference);
       const context = shell.querySelector('.coach-context');
       if (context) {
         const kicker = context.querySelector('.page-kicker');

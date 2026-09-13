@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 CSS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-aq/locked-art-fidelity-v1.css"
 ART_SRC="$ROOT_DIR/overlays/ui-command-v2/static/raizen-black-crown-ascension-v1.svg"
+SCENE_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mockup-scenes"
 CSS_OUT="$DIST_DIR/ui/locked-art-fidelity-v1.css"
 ART_OUT="$DIST_DIR/ui/raizen-black-crown-ascension-v1.svg"
 INDEX="$DIST_DIR/index.html"
@@ -25,10 +26,13 @@ grep -Fq "data-lmf-approved-route='profile'" "$CSS_SRC"
 grep -Fq "data-lmf-approved-route='more'" "$CSS_SRC"
 grep -Fq 'data:image/jpeg;base64,' "$ART_SRC"
 node "$ROOT_DIR/ci/validate-locked-art-source.mjs" "$ART_SRC"
+node "$ROOT_DIR/ci/validate-mockup-scenes.mjs" "$SCENE_SRC"
 
 mkdir -p "$DIST_DIR/ui"
 cp "$CSS_SRC" "$CSS_OUT"
 cp "$ART_SRC" "$ART_OUT"
+mkdir -p "$DIST_DIR/ui/mockup-scenes"
+cp "$SCENE_SRC/"*.svg "$SCENE_SRC/manifest.json" "$DIST_DIR/ui/mockup-scenes/"
 cmp -s "$ART_SRC" "$ART_OUT"
 
 INDEX="$INDEX" python3 - <<'PY'
@@ -37,7 +41,7 @@ import os,re
 p=Path(os.environ['INDEX'])
 text=p.read_text()
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/locked-art-fidelity-v1\.css(?:\?v=\d+)?">\s*','\n',text)
-tag='<link rel="stylesheet" href="/ui/locked-art-fidelity-v1.css?v=4">'
+tag='<link rel="stylesheet" href="/ui/locked-art-fidelity-v1.css?v=5">'
 if not re.search(r'</head>',text,re.I): raise SystemExit('index.html missing </head>')
 text=re.sub(r'</head>',f'  {tag}\n</head>',text,count=1,flags=re.I)
 # This must be the final visual fidelity layer after color harmonization.
@@ -54,19 +58,20 @@ text=p.read_text()
 match=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not match: raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing=re.findall(r"['\"]([^'\"]+)['\"]",match.group(1))
-required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=4','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
+required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=5','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
+required += ['/ui/mockup-scenes/'+p.name for p in sorted((p.parent/'ui/mockup-scenes').glob('*.svg'))]
 assets=[]
 for value in [*existing,*required]:
     if value not in assets: assets.append(value)
 replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:match.start()]+replacement+text[match.end():]
 # Invalidate only the app shell cache. Athlete storage is unrelated to this cache.
-text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v5',text,count=1)
+text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v6',text,count=1)
 if count != 1: raise SystemExit('service-worker.js CACHE_NAME declaration not found')
 p.write_text(text.rstrip()+'\n')
 PY
 
-grep -Fq '/ui/locked-art-fidelity-v1.css?v=4' "$INDEX"
+grep -Fq '/ui/locked-art-fidelity-v1.css?v=5' "$INDEX"
 grep -Fq "'/ui/locked-art-fidelity-v1.css'" "$SW"
 grep -Fq "'/ui/raizen-black-crown-ascension-v1.svg'" "$SW"
 
