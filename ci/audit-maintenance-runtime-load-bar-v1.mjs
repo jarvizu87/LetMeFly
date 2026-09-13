@@ -82,15 +82,18 @@ async function snapshot(page) {
   })
 }
 async function chooseReadiness(page) {
-  if (!(await page.locator('.readiness-field').count())) return
-  await page.evaluate(() => {
+  await page.waitForSelector('.readiness-field',{timeout:10000})
+  const chosen = await page.evaluate(() => {
+    let count=0
     for (const field of document.querySelectorAll('.readiness-field')) {
-      const text=(field.textContent||'').toLowerCase()
-      const desired=text.includes('soreness')||text.includes('stress') ? 2 : 4
+      const copy=(field.textContent||'').toLowerCase()
+      const desired=copy.includes('soreness')||copy.includes('stress') ? 2 : 4
       const radio=field.querySelector(`input[type="radio"][value="${desired}"]`)
-      if(radio instanceof HTMLInputElement){radio.checked=true;radio.dispatchEvent(new Event('input',{bubbles:true}));radio.dispatchEvent(new Event('change',{bubbles:true}))}
+      if(radio instanceof HTMLInputElement){radio.checked=true;radio.dispatchEvent(new Event('input',{bubbles:true}));radio.dispatchEvent(new Event('change',{bubbles:true}));count++}
     }
+    return count
   })
+  assert.ok(chosen>=4,'Maintenance runtime readiness UI missing scored fields')
 }
 function namedActiveCard(page, name) {
   return page.locator('.exercise-card.lmf-flow-active').filter({hasText:name}).first()
@@ -116,7 +119,11 @@ async function auditBarLoader(page, name, target, expectedPerSide) {
   const load = card.locator('.set-row:not([aria-hidden="true"]) .load-input').first()
   const visibleLoad = Number(await load.inputValue())
   assert.equal(visibleLoad, target, `${name}: native load input did not receive resolved programmed load`)
-  const button = card.locator('[data-lmf-bar-loader-open="exercise"]').first()
+
+  // Exercise the final approved Train presentation button, not only the hidden
+  // native action. This is the bridge that previously disconnected after the
+  // Workout Flow re-render.
+  const button = card.locator('[data-reference-load-bar]').first()
   await button.waitFor({state:'visible', timeout:10000})
   await button.click()
   const modal = page.locator('.lmf-bar-loader-root').first()
@@ -171,10 +178,14 @@ try {
   await page.waitForFunction(()=>document.querySelector('main')&&!/Loading private athlete vault/i.test(document.body.innerText),null,{timeout:20000})
   await dismissInstall(page)
   await chooseReadiness(page)
-  const start = page.getByRole('button',{name:/START WORKOUT|RESUME WORKOUT/i}).first()
-  await start.waitFor({state:'visible',timeout:15000})
+
+  // Use the governed native start control. The approved cinematic Start/Resume
+  // button is a presentation/navigation control and is not the owner of workout
+  // creation. This mirrors the release-gate harness.
+  const start = page.locator('[data-action="start-workout"]').filter({visible:true}).first()
+  await start.waitFor({state:'visible',timeout:10000})
   await start.click()
-  await page.waitForSelector('.active-exercise',{timeout:15000})
+  await page.locator('.active-exercise [data-set-id]').first().waitFor({state:'attached',timeout:12000})
 
   const state=await snapshot(page)
   const session=(state.workoutSessions||[]).find(row=>row.athlete_id===seeded.athleteId&&row.program_key==='crown-maintenance'&&row.status==='in_progress')
@@ -202,7 +213,7 @@ try {
   report.frontSquat={ persisted:fsPersisted, ui:await auditBarLoader(page,'Front Squat',135,45) }
   report.benchPress={ persisted:bpPersisted, ui:await auditBarLoader(page,'Bench Press',125,40) }
   report.checks.push('Native Workout Mode load inputs use resolved programmed loads')
-  report.checks.push('Bar Loader inherits current workout load, 45 lb bar, lb unit, and exact plates-per-side math')
+  report.checks.push('Visible Train Bar Loader bridge inherits current workout load, 45 lb bar, lb unit, and exact plates-per-side math')
   report.result='PASS'
   save()
   console.log('Maintenance runtime resolved-load + Bar Loader audit: PASS')
