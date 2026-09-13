@@ -354,7 +354,7 @@ html[data-lmf-approved-route='coach'] .lmf-coach-workspace .quick-prompts{margin
 html[data-lmf-approved-route='coach'] .lmf-coach-workspace .quick-prompts button{min-height:36px!important;padding:6px 9px!important;border-radius:5px!important;background:linear-gradient(#191827,#0c101c)!important;border-color:#3e314d!important;font:400 12px/1.25 var(--condensed,Arial,sans-serif)!important}
 html[data-lmf-approved-route='coach'] .lmf-coach-workspace .quick-prompts svg{width:18px!important;height:18px!important;flex-basis:18px!important;color:#dc6f86}
 .lmf-coach-sidebar{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:12px}
-.lmf-coach-conversation{grid-column:2;grid-row:2;min-height:620px!important;background:linear-gradient(120deg,#0b111b,#080f18)!important;border:1px solid #353144!important;border-radius:7px!important;padding:10px!important}
+.lmf-coach-conversation{display:flex!important;flex-direction:column!important;grid-column:2;grid-row:2;min-height:620px!important;background:linear-gradient(120deg,#0b111b,#080f18)!important;border:1px solid #353144!important;border-radius:7px!important;padding:10px!important}
 .lmf-coach-thread-label{font-size:11px;letter-spacing:.1em;margin:5px 7px 15px;color:#d8d0e1}
 .lmf-coach-thread{padding:0 4px 20px!important;gap:16px!important}
 html[data-lmf-approved-route='coach'] .lmf-coach-workspace #coach-answer{background:linear-gradient(130deg,#211b32,#171828)!important;border-color:#3c3152!important;border-radius:7px!important;padding:14px!important;margin-left:32px!important}
