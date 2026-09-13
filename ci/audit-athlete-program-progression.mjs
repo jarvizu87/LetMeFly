@@ -64,7 +64,7 @@ if (hasMaintenanceReferenceAdapter) {
   checks.set('unresolved adapted private references remain null', workout.includes('if (!tm) return { value: null, unit: null, tmKey, tmValue: null, tmUnit: null }'))
 } else {
   checks.set('intermediate build has not prematurely enabled Maintenance private references', !workout.includes('getVerifiedCrownforgeReferences'))
-  checks.set('legacy unresolved Black Crown TM remains null', workout.includes('if (!tm)') && workout.includes('value: null'))
+  checks.set('legacy unresolved Black Crown TM remains null', workout.includes('if (!row) return { value: null, unit: null, tmKey, tmValue: null, tmUnit: null }'))
 }
 
 const forbiddenPrivateValues = [
