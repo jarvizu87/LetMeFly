@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Release — Crownforge Train + Crown Maintenance / Black Crown card fidelity
+
+- Date: 2026-09-13
+- Main SHA: `f37bf2c720b47f01a37e09f9ba640fdf87b34529`
+- Release scope: publish the audited Crownforge circuit-first Train UX from PR #93, Crown Maintenance percentage-load/card fixes and Black Crown prescription-fidelity fixes from PR #94, and the standard Seven-Athlete + Chaos/Resilience release gate from PR #95.
+- Required CI/audits: complete 10-step program/card audit; Seven-Athlete + Chaos/Resilience gate; Command V2 full build plus real mobile/desktop browser audit; Crownforge v2.2; Black Crown v2.1; Maintenance runtime load + Bar Loader; workout persistence/recovery; Workout Substitute Today; athlete progression/program boundaries; Lifecycle Public UI; Home Option 1; cloud bootstrap regression; and Netlify release policy.
+- Netlify production deploy count expected: 1
+- Notes: governed Crownforge, Crown Maintenance, and Black Crown prescriptions remain unchanged. This release improves workout-card translation, percentage/reference load resolution, circuit grouping, prescription detail fidelity, programmed-load confirmation, exercise-art blending, and QA/release coverage. Production publication is authorized only by `[release netlify]` on the final merge commit.
+
 ## Release — approved primary-tab UI redesign
 
 - Date: 2026-09-12
