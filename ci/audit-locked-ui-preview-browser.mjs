@@ -264,6 +264,10 @@ try {
       await page.locator('[data-lmf-desktop-v2-action="info"]').click()
       await page.locator('#lmf-exercise-intelligence-modal .lmf-intel-modal').waitFor({state:'visible'})
       await page.keyboard.press('Escape')
+      assert.equal(await page.locator('[data-lmf-desktop-exercise-index="0"]').evaluate(async button=>{
+        for(let i=0;i<12;i++)await new Promise(requestAnimationFrame)
+        return button.isConnected
+      }),true,'Unchanged desktop movement and picture nodes survive presentation refreshes')
       await page.locator('[data-lmf-desktop-exercise-index="0"]').click()
       await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Bike / Incline Walk'&&document.querySelector('.lmf-desktop-context-body [data-lmf-desktop-v2-content] strong')?.textContent==='Bike / Incline Walk')
       assert.deepEqual(await beforeStart.locator('.prescription-block > .prescription-row').allTextContents(),prescriptionsBefore,'Desktop preview tools and selection preserve prescriptions')

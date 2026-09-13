@@ -235,6 +235,16 @@
     const sectionMeta = text(page?.querySelector('.workout-panel-head .muted')) || 'Current programmed section'
     const done = cards.filter(cardComplete).length
 
+    // Retain the actual buttons and picture nodes while native overlays refresh.
+    // Replacing identical markup on every class mutation interrupts both clicks
+    // and image presentation, and feeds the other presentation observers.
+    const signature = JSON.stringify([sectionTitle, sectionMeta, cards.map(card => [
+      cardName(card), cardPrescription(card), card.getAttribute('data-exercise-art'),
+      card === current, cardComplete(card), card.classList.contains('preview-card'),
+    ])])
+    if (list.dataset.lmfFlowSignature === signature) return
+    list.dataset.lmfFlowSignature = signature
+
     head.innerHTML = `
       <div><strong>Workout Flow</strong><small>${sectionTitle}${sectionMeta ? ` • ${sectionMeta}` : ''}</small></div>
       <span class="lmf-desktop-progress-pill">${current?.classList.contains('preview-card') ? 'PREVIEW' : cards.length ? `${done}/${cards.length}` : 'PROGRAM'}</span>
@@ -376,6 +386,7 @@
     const panel = state.workspace?.querySelector('.lmf-desktop-context-panel')
     const body = panel?.querySelector('.lmf-desktop-context-body')
     if (!(panel instanceof Element) || !(body instanceof Element)) return
+    if (panel.classList.contains('lmf-desktop-context-panel-v2')) return
 
     panel.querySelectorAll('[data-lmf-desktop-tab]').forEach((button) => {
       const selected = button.getAttribute('data-lmf-desktop-tab') === state.contextTab
@@ -409,8 +420,11 @@
   }
 
   function scheduleRefresh(delay = 0) {
-    window.clearTimeout(state.refreshTimer)
-    state.refreshTimer = window.setTimeout(refreshWorkspace, delay)
+    if (state.refreshTimer) return
+    state.refreshTimer = window.setTimeout(() => {
+      state.refreshTimer = 0
+      refreshWorkspace()
+    }, delay)
   }
 
   function activate() {
@@ -429,6 +443,7 @@
     if (!state.enabled) return
     state.enabled = false
     window.clearTimeout(state.refreshTimer)
+    state.refreshTimer = 0
     unmountWorkspace()
     removeRailExtras()
     delete document.documentElement.dataset.lmfDesktopUi

@@ -4,8 +4,36 @@
   const { SLUG, approvedPrivateRows } = await import('./exercise-art-contract.mjs')
   const MIN_RENDER_DIMENSION = 640
   const ready = new Map(), pending = new Map()
+  const failures = new Map(), retryTimers = new Map()
+  let queueState = { active: 0, items: [], slugs: new Set() }
+  let availability = ''
   let epoch = 0, overrides = {}, athleteId = null, scheduled = 0
   const nodes = () => document.querySelectorAll('[data-exercise-art]')
+  function renderStatus() {
+    const anchor = document.querySelector('.train-shell .train-header, .lmf-approved-exercises-hero-v1')
+    document.querySelectorAll('.lmf-exercise-art-status').forEach(el => { if (el.previousElementSibling !== anchor) el.remove() })
+    if (!anchor) return
+    let status = anchor.nextElementSibling?.matches('.lmf-exercise-art-status') ? anchor.nextElementSibling : null
+    const message = {
+      signin: 'Sign in to load your private exercise pictures.',
+      offline: 'Connect to the internet to load your exercise pictures.',
+      unconfigured: 'Exercise pictures are unavailable in this preview because cloud access is not configured.',
+      empty: 'No approved pictures are available for this athlete. Check your account on Profile.',
+      error: 'Exercise pictures could not load. Retry the connection.',
+    }[availability] || (failures.size ? 'Some exercise pictures could not load. You can retry them.' : '')
+    if (!message) { status?.remove(); return }
+    if (!status) {
+      status = document.createElement('div'); status.className = 'lmf-exercise-art-status'
+      status.setAttribute('role', 'status')
+      status.innerHTML = '<span></span><a href="#/profile">Open Profile</a><button type="button">Retry pictures</button>'
+      status.querySelector('button').addEventListener('click', schedule)
+      anchor.after(status)
+    }
+    if (status.querySelector('span').textContent !== message) status.querySelector('span').textContent = message
+    status.querySelector('a').hidden = !['signin', 'empty'].includes(availability)
+    status.querySelector('button').hidden = ['signin', 'offline', 'unconfigured'].includes(availability)
+  }
+  function setAvailability(value) { availability = value; renderStatus() }
   function clearElement(element) {
     element.style.removeProperty('--exercise-art')
     delete element.dataset.exerciseArtSource
@@ -21,8 +49,11 @@
   }
   function reset() {
     epoch += 1
+    observer?.disconnect()
     pending.forEach(release); ready.forEach(release)
     pending.clear(); ready.clear(); overrides = {}; athleteId = null
+    queueState = { active: 0, items: [], slugs: new Set() }
+    retryTimers.forEach(clearTimeout); retryTimers.clear(); failures.clear()
     nodes().forEach(clearElement)
   }
   function activate(slug, entry, token) {
@@ -72,32 +103,61 @@
       const quality = await Promise.all(entry.urls.map(url => probeImage(url, entry)))
       if (token !== epoch || pending.get(slug) !== entry) return
       if (quality.some(ok => !ok)) throw new Error('Image quality unavailable')
-      pending.delete(slug); ready.set(slug, entry); activate(slug, entry, token)
+      pending.delete(slug); failures.delete(slug); ready.set(slug, entry); activate(slug, entry, token); renderStatus()
     } catch {
       if (pending.get(slug) === entry) pending.delete(slug)
       release(entry)
+      if (token !== epoch) return
+      const attempts = (failures.get(slug) || 0) + 1
+      failures.set(slug, attempts); renderStatus()
+      // A transient failure used to leave a static library tile blank forever.
+      // Retry twice, then leave the explicit Retry action available.
+      if (attempts <= 2) retryTimers.set(slug, setTimeout(() => {
+        retryTimers.delete(slug)
+        if (token === epoch) enqueue(slug, token, id, asset)
+      }, 1000 * attempts))
     }
+  }
+  function pump(queue) {
+    while (queue === queueState && queue.active < 4 && queue.items.length) {
+      const args = queue.items.shift(); queue.slugs.delete(args[0]); queue.active += 1
+      void fetchArt(...args).finally(() => { queue.active -= 1; pump(queue) })
+    }
+  }
+  function enqueue(slug, token, id, asset) {
+    if (pending.has(slug) || queueState.slugs.has(slug)) return
+    queueState.slugs.add(slug); queueState.items.push([slug, token, id, asset]); pump(queueState)
   }
   function check(element) {
     const slug = element.dataset.exerciseArt
     if (!SLUG.test(slug || '') || !overrides[slug]) { clearElement(element); return }
     const known = ready.get(slug)
     if (known) { activate(slug, known, epoch); return }
-    if (pending.has(slug) || navigator.onLine === false) return
-    void fetchArt(slug, epoch, athleteId, overrides[slug])
+    if (pending.has(slug) || failures.has(slug) || navigator.onLine === false) return
+    enqueue(slug, epoch, athleteId, overrides[slug])
   }
-  function scan() { nodes().forEach(element => observer ? observer.observe(element) : check(element)) }
+  function watch(element) {
+    if (ready.has(element.dataset.exerciseArt)) check(element)
+    else if (observer) observer.observe(element)
+    else check(element)
+  }
+  function scan() { nodes().forEach(watch) }
   async function refresh() {
     reset()
     const token = epoch, bridge = window.LetMeFlyExerciseArt
     if (!bridge || bridge.version !== 2 || typeof bridge.readAsset !== 'function') return
     try {
       const context = await bridge.context()
-      if (token !== epoch || !context?.athleteId || navigator.onLine === false) return
+      if (token !== epoch) return
+      if (!context?.athleteId) { setAvailability(''); return }
+      if (context.configured === false) { setAvailability('unconfigured'); return }
+      if (navigator.onLine === false) { setAvailability('offline'); return }
+      if (context.hasSession === false) { setAvailability('signin'); return }
       const id = context.athleteId, rows = await bridge.readCloud(id)
       if (token !== epoch || (await bridge.context())?.athleteId !== id || token !== epoch) return
-      athleteId = id; overrides = approvedPrivateRows(rows, id); scan()
-    } catch { if (token === epoch) reset() }
+      athleteId = id; overrides = approvedPrivateRows(rows, id)
+      setAvailability(Object.keys(overrides).length ? '' : 'empty'); scan()
+    } catch { if (token === epoch) { reset(); setAvailability('error') } }
   }
   function schedule() {
     reset()
@@ -109,9 +169,10 @@
   }, { rootMargin: '240px 0px' }) : null
   new MutationObserver(records => {
     for (const record of records) {
-      if (record.type === 'attributes') { clearElement(record.target); check(record.target) }
-      else record.addedNodes.forEach(node => { if (node instanceof Element) { if (node.matches('[data-exercise-art]')) check(node); node.querySelectorAll('[data-exercise-art]').forEach(check) } })
+      if (record.type === 'attributes') { clearElement(record.target); watch(record.target) }
+      else record.addedNodes.forEach(node => { if (node instanceof Element) { if (node.matches('[data-exercise-art]')) watch(node); node.querySelectorAll('[data-exercise-art]').forEach(watch) } })
     }
+    renderStatus()
   }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-exercise-art'] })
   window.addEventListener('lmf:exercise-art-context-changed', schedule)
   window.addEventListener('lmf:exercise-art-overrides-updated', schedule)

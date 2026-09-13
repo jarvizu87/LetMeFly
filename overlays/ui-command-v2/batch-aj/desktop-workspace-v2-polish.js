@@ -33,7 +33,7 @@
       lastNativeSection = selected
     }
   }
-  function schedule() { clearTimeout(timer); timer = setTimeout(render, 35) }
+  function schedule() { if (timer) return; timer = setTimeout(() => { timer = 0; render() }, 35) }
   function bindActions(body, card, actions) {
     body.querySelectorAll('[data-lmf-desktop-v2-action]').forEach(button => {
       actionSources.set(button, {card, node:actions.find(action => action.key === button.dataset.lmfDesktopV2Action)?.node})

@@ -37,7 +37,13 @@ jobs:
             curl -fsS "$LMF_AUDIT_BASE_URL/ui/brand-display-v1.css?audit=$GITHUB_SHA" -o /tmp/preview-brand.css &&
             cmp -s /tmp/preview-brand.css overlays/ui-command-v2/batch-as/brand-display-v1.css &&
             curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-reference-v3.js?audit=$GITHUB_SHA" -o /tmp/preview-home.js &&
-            cmp -s /tmp/preview-home.js overlays/ui-command-v2/batch-ac/home-reference-v3.js
+            cmp -s /tmp/preview-home.js overlays/ui-command-v2/batch-ac/home-reference-v3.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/exercise-art-cloudinary.js?audit=$GITHUB_SHA" -o /tmp/preview-private-art.js &&
+            cmp -s /tmp/preview-private-art.js overlays/ui-command-v2/batch-n/exercise-art-cloudinary.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/desktop-workspace-v1.js?audit=$GITHUB_SHA" -o /tmp/preview-desktop.js &&
+            cmp -s /tmp/preview-desktop.js overlays/ui-command-v2/batch-aj/desktop-workspace-v1.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/desktop-workspace-v2-polish.js?audit=$GITHUB_SHA" -o /tmp/preview-desktop-polish.js &&
+            cmp -s /tmp/preview-desktop-polish.js overlays/ui-command-v2/batch-aj/desktop-workspace-v2-polish.js
           }
           for attempt in {1..120}; do
             if preview_matches_head; then
@@ -49,6 +55,9 @@ jobs:
           cmp /tmp/preview-train-cards.css overlays/ui-command-v2/batch-as/train-block-cards-v1.css
           cmp /tmp/preview-brand.css overlays/ui-command-v2/batch-as/brand-display-v1.css
           cmp /tmp/preview-home.js overlays/ui-command-v2/batch-ac/home-reference-v3.js
+          cmp /tmp/preview-private-art.js overlays/ui-command-v2/batch-n/exercise-art-cloudinary.js
+          cmp /tmp/preview-desktop.js overlays/ui-command-v2/batch-aj/desktop-workspace-v1.js
+          cmp /tmp/preview-desktop-polish.js overlays/ui-command-v2/batch-aj/desktop-workspace-v2-polish.js
           export CHROME_BIN="$(command -v google-chrome || command -v chromium)"
           node ci/audit-locked-ui-preview-browser.mjs
       - uses: actions/upload-artifact@v4

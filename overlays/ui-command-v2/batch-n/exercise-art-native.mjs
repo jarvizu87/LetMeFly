@@ -13,6 +13,7 @@ export function createPrivateArtBridge({ activeAthlete, auth, client, configured
     const user = await auth.getTrustedCurrentUser()
     if (!user || user.id !== session.user.id || !await current(id, token)) return false
     const owned = await client.from('athletes').select('id').eq('id', id).eq('owner_user_id', user.id).is('deleted_at', null)
+    if (owned.error) throw new Error('Exercise picture account check unavailable')
     return !owned.error && owned.data?.length === 1 && await current(id, token)
   }
   function query(id) {
@@ -20,13 +21,21 @@ export function createPrivateArtBridge({ activeAthlete, auth, client, configured
   }
   const bridge = Object.freeze({
     version: 2,
-    async context() { return { athleteId: (await activeAthlete())?.id ?? null } },
+    async context() {
+      const athleteId = (await activeAthlete())?.id ?? null
+      const cloudConfigured = configured()
+      // Presentation hint only; authorize() still verifies identity and ownership
+      // before issuing a mapping or delivering any private bytes.
+      const hasSession = Boolean(athleteId && cloudConfigured && await auth.getLocalSession())
+      return { athleteId, configured: cloudConfigured, hasSession }
+    },
     async readCloud(id) {
       const token = epoch, readRevision = ++revision
       issued.clear()
       if (!await authorize(id, token)) return []
       const result = await query(id)
-      if (result.error || readRevision !== revision || !await current(id, token)) return []
+      if (result.error) throw new Error('Exercise picture library unavailable')
+      if (readRevision !== revision || !await current(id, token)) return []
       const valid = approvedPrivateRows(result.data, id)
       issued = new Map(Object.entries(valid).map(([key, value]) => [key, { ...value, athleteId: id }]))
       return (result.data ?? []).filter(row => valid[row.exercise_key]?.id === row.id)

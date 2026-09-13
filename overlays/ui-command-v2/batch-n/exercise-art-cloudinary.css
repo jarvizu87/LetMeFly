@@ -21,6 +21,10 @@
 }
 
 /* Single-image private artwork keeps the established aspect-ratio-safe layout. */
+.lmf-exercise-art-status{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0;padding:12px 14px;border:1px solid #343e49;border-radius:10px;background:#101820;color:#d7dee7;font:500 13px/1.45 system-ui,sans-serif}
+.lmf-exercise-art-status>span{flex:1 1 220px}
+.lmf-exercise-art-status>a,.lmf-exercise-art-status>button{min-height:40px;display:inline-flex;align-items:center;padding:8px 12px;border:1px solid #566273;border-radius:7px;background:#19232e;color:#fff;font:600 13px/1.3 system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.lmf-exercise-art-status>[hidden]{display:none!important}
 [data-exercise-art-source="mine"],
 [data-exercise-art-source="others"]{
   image-rendering:auto;

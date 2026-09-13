@@ -143,7 +143,7 @@ meet the 640px minimum on both axes (actual minimum: 1254px), and match current
 Storage filenames by SHA-256, byte counts, and object ETags by MD5. This validates
 source integrity and the stored inventory, not a new authenticated browser download.
 
-The current rendered library has 156 entries: 152 mapped exercises, one unmapped
+The rendered library audit initially had 156 entries: 152 mapped exercises, one unmapped
 exercise (Seated Band Hip Abduction), and three intentional non-exercise entries
 (Full Rest, Black Crown Entry TM Rules, Verified Crownforge Results). The previous
 147-governed-exercise coverage count does not cover every additional library entry.
@@ -151,3 +151,30 @@ Seated Band Hip Abduction needs its own reviewed image; a machine image cannot
 silently stand in for a band exercise. Existing approved private images were not
 replaced or reuploaded. Fresh owner-authenticated Train/library image delivery is
 still a separate acceptance check; disposable preview fallback tiles do not pass it.
+
+The dedicated Seated Band Hip Abduction image was subsequently generated, reviewed,
+and uploaded after explicit user permission. Its private stored bytes and hash were
+verified before its approved mapping was activated. Coverage is now 153 of 153
+exercise entries, with 229 approved mapping keys. The three non-exercise entries
+remain intentionally unmapped.
+
+The user then reported missing pictures in the live preview. Browser inspection
+showed SIGN-IN REQUIRED in the available QA session; that does not establish the
+state of the user's browser. The picture loader now explains missing sign-in,
+offline/configuration/catalog failures, offers a native Profile link or Retry,
+limits concurrent exercise downloads, observes newly inserted tiles for proximity,
+and retries failed downloads twice. Identity, ownership, exact approved references,
+Storage RLS, quality validation and logout/athlete-switch revocation still gate
+all private bytes. No pictures become public and no private data is cached on disk.
+
+The ea45b66 main build and browser suite passed, but its fast preview audit found
+continuous replacement of identical desktop movement buttons. The desktop flow
+now retains unchanged buttons and image nodes using its rendered data signature.
+Source runtimes include their existing bounded queues/context guard directly, so
+the preview audit compares the exact emitted private-art and desktop files too.
+
+Fresh owner-authenticated delivery remains blocked: automatic approval review
+rejected initiating email sign-in without explicit account-access permission.
+The requested SMS alternative is not offered by the app, and a read-only check
+found no phone number linked to the owner account. No OTP was sent, phone linked,
+SMS provider configured, or production release performed by this follow-up.

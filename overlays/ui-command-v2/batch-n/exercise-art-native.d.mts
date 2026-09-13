@@ -3,4 +3,4 @@ export function createPrivateArtBridge(options: {
   auth: { getLocalSession: () => Promise<any>; getTrustedCurrentUser: () => Promise<any> }
   client: any
   configured: () => boolean
-}): { bridge: { version: number; context: () => Promise<{ athleteId: string | null }>; readCloud: (id: string) => Promise<any[]>; readAsset: (id: string, key: string, rowId: string, path: string) => Promise<Blob | null> }; invalidate: () => void }
+}): { bridge: { version: number; context: () => Promise<{ athleteId: string | null; configured: boolean; hasSession: boolean }>; readCloud: (id: string) => Promise<any[]>; readAsset: (id: string, key: string, rowId: string, path: string) => Promise<Blob | null> }; invalidate: () => void }

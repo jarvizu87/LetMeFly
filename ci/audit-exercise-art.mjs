@@ -47,6 +47,15 @@ function fixture() {
   const result=createPrivateArtBridge({activeAthlete:async()=>({id:state.athleteId}),auth:{getLocalSession:async()=>state.session,getTrustedCurrentUser:async()=>state.user},client,configured:()=>true})
   return{state,...result}
 }
+test('picture availability exposes session presence without exposing credentials or authorizing bytes',async()=>{
+  const {state,bridge}=fixture()
+  assert.deepEqual(await bridge.context(),{athleteId,configured:true,hasSession:true})
+  state.session=null
+  assert.deepEqual(await bridge.context(),{athleteId,configured:true,hasSession:false})
+  assert.deepEqual(await bridge.readCloud(athleteId),[])
+  assert.equal(await bridge.readAsset(athleteId,'front-squat',rowId,imagePath),null)
+  assert.equal(state.downloads.length,0)
+})
 test('three alternatives retain every distinct owner-scoped image and reject incomplete or oversized sets',()=>{
   const parts=['Bike','Row','Walk'].map((label,i)=>({path:`${athleteId}/${String(i+1).repeat(64)}.webp`,label}))
   const triple={...delivery,parts}
