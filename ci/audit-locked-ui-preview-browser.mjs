@@ -26,6 +26,28 @@ try {
     await context.route('**/*', r => new URL(r.request().url()).origin === origin ? r.continue() : r.abort())
     const page = await context.newPage()
     currentPage=page
+    if(process.env.LMF_AUDIT_TRACE==='1')await page.addInitScript(()=>{
+      const entries=[]
+      window.__LMF_UI_AUDIT_TRACE=entries
+      const record=(type,node,extra={})=>{
+        const viewport=document.querySelector('#swipe-viewport')
+        entries.push({ms:Math.round(performance.now()),type,node:node?.id||node?.className||node?.nodeName,text:node?.textContent?.trim().slice(0,90),left:viewport?.scrollLeft,top:viewport?.scrollTop,active:document.querySelector('.swipe-page.active-page h2')?.textContent,...extra})
+        if(entries.length>500)entries.shift()
+      }
+      for(const method of ['scrollIntoView','scrollTo']){
+        const original=Element.prototype[method]
+        Element.prototype[method]=function(...args){record(method,this,{args,stack:new Error().stack});return Reflect.apply(original,this,args)}
+      }
+      document.addEventListener('click',event=>record('click',event.target.closest?.('button')||event.target),true)
+      document.addEventListener('focusin',event=>record('focus',event.target),true)
+      document.addEventListener('scroll',event=>{if(event.target.id==='swipe-viewport')record('scroll',event.target)},true)
+      new MutationObserver(records=>{
+        for(const change of records){
+          const node=change.target
+          if(node.matches?.('.swipe-page')&&(change.oldValue||'').split(/\s+/).includes('active-page')!==node.classList.contains('active-page'))record('section-class',node)
+        }
+      }).observe(document,{subtree:true,attributes:true,attributeOldValue:true,attributeFilter:['class']})
+    })
     page.setDefaultTimeout(20000)
     page.on('pageerror', e => report.errors.push(e.message))
     await page.goto(origin+'/#/home')
@@ -319,6 +341,10 @@ try {
 } catch(error) {
   report.failure=String(error)
   if(currentPage&&!currentPage.isClosed()) {
+    if(process.env.LMF_AUDIT_TRACE==='1'){
+      report.trace=await currentPage.evaluate(()=>window.__LMF_UI_AUDIT_TRACE||[]).catch(()=>[])
+      console.log('TRAIN INTERACTION TRACE '+JSON.stringify(report.trace.slice(-100)))
+    }
     report.failureContext=await currentPage.evaluate(()=>({route:location.hash,width:innerWidth,section:document.querySelector('.active-page .workout-panel-head h2')?.textContent,panes:[...document.querySelectorAll('#swipe-viewport > .swipe-page')].map(el=>({title:el.querySelector('h2')?.textContent,active:el.classList.contains('active-page'),left:el.getBoundingClientRect().left,width:el.getBoundingClientRect().width})),viewport:document.querySelector('#swipe-viewport')?.getBoundingClientRect().toJSON()})).catch(()=>null)
     await currentPage.screenshot({path:path.join(out,'failure.png')}).catch(()=>{})
   }
