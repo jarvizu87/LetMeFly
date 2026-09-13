@@ -1,19 +1,7 @@
-name: LetMeFly Five-Athlete Release Audit
+name: Legacy Five-Athlete Release Audit (Manual)
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'ci/five-athlete-fixtures.mjs'
-      - 'ci/five-athlete-seed.mjs'
-      - 'ci/audit-five-athlete-release-browser.mjs'
-      - 'ci/audit-workout-recap-browser.mjs'
-      - 'ci/run-five-athlete-release-audit-v2.sh'
-      - 'ci/apply-athlete-weight-unit-v1.sh'
-      - 'ci/apply-workout-recap-completion-await-v1.sh'
-      - 'ci/build-command-v2-v2-1.sh'
-      - '.github/workflows/five-athlete-release-audit.yml'
 
 permissions:
   contents: read
@@ -28,7 +16,7 @@ env:
 
 jobs:
   five-athlete-release-gate:
-    name: Five athletes — UI, isolation, mutation safety
+    name: Five athletes — manual UI, isolation, mutation safety fallback
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:

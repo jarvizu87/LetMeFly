@@ -1,0 +1,30 @@
+{
+  "commitSha": "",
+  "environment": "",
+  "auditDate": "",
+  "chaosFixtureVersion": "1.0.0",
+  "scenarioResults": {
+    "C01":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C02":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C03":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C04":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C05":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C06":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C07":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C08":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C09":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C10":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C11":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C12":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C13":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C14":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C15":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C16":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C17":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C18":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C19":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C20":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]},
+    "C21":{"result":"NOT RUN","athletes":[],"injectedFault":"","expectedBehavior":"","actualBehavior":"","evidence":[],"defects":[]}
+  },
+  "releaseDecision": "FAIL"
+}

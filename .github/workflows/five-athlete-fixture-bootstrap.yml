@@ -1,13 +1,8 @@
-name: LetMeFly Five-Athlete Fixture Bootstrap
+name: Legacy Five-Athlete Fixture Bootstrap (Manual)
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'ci/five-athlete-fixtures.mjs'
-      - 'ci/five-athlete-seed.mjs'
-      - 'ci/audit-five-athlete-fixture-bootstrap.mjs'
-      - '.github/workflows/five-athlete-fixture-bootstrap.yml'
+
 permissions:
   contents: read
 
@@ -21,7 +16,7 @@ env:
 
 jobs:
   validate-five-athletes:
-    name: Validate reusable five-athlete QA setup
+    name: Validate reusable five-athlete QA setup manually
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
