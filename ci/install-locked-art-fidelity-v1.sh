@@ -8,12 +8,13 @@ ART_SRC="$ROOT_DIR/overlays/ui-command-v2/static/raizen-black-crown-ascension-v1
 SCENE_SRC="$ROOT_DIR/overlays/ui-command-v2/static/mockup-scenes"
 HOME_TRAIN_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-ar"
 TRAIN_BLOCKS_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-as/train-block-cards-v1.css"
+BRAND_DISPLAY_SRC="$ROOT_DIR/overlays/ui-command-v2/batch-as/brand-display-v1.css"
 CSS_OUT="$DIST_DIR/ui/locked-art-fidelity-v1.css"
 ART_OUT="$DIST_DIR/ui/raizen-black-crown-ascension-v1.svg"
 INDEX="$DIST_DIR/index.html"
 SW="$DIST_DIR/service-worker.js"
 
-for required in "$CSS_SRC" "$ART_SRC" "$INDEX" "$SW" "$HOME_TRAIN_SRC/home-train-reference-v1.css" "$HOME_TRAIN_SRC/home-train-reference-v1.js" "$TRAIN_BLOCKS_SRC"; do
+for required in "$CSS_SRC" "$ART_SRC" "$INDEX" "$SW" "$HOME_TRAIN_SRC/home-train-reference-v1.css" "$HOME_TRAIN_SRC/home-train-reference-v1.js" "$TRAIN_BLOCKS_SRC" "$BRAND_DISPLAY_SRC"; do
   test -s "$required" || { echo "Missing locked-art dependency: $required" >&2; exit 1; }
 done
 
@@ -35,6 +36,7 @@ cp "$CSS_SRC" "$CSS_OUT"
 cp "$ART_SRC" "$ART_OUT"
 cp "$HOME_TRAIN_SRC/home-train-reference-v1.css" "$HOME_TRAIN_SRC/home-train-reference-v1.js" "$DIST_DIR/ui/"
 cp "$TRAIN_BLOCKS_SRC" "$DIST_DIR/ui/train-block-cards-v1.css"
+cp "$BRAND_DISPLAY_SRC" "$DIST_DIR/ui/brand-display-v1.css"
 mkdir -p "$DIST_DIR/ui/mockup-scenes"
 cp "$SCENE_SRC/"*.svg "$SCENE_SRC/manifest.json" "$DIST_DIR/ui/mockup-scenes/"
 cmp -s "$ART_SRC" "$ART_OUT"
@@ -51,7 +53,13 @@ text=re.sub(r'</head>',f'  {tag}\n</head>',text,count=1,flags=re.I)
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/home-train-reference-v1\.css(?:\?v=\d+)?">\s*','\n',text)
 text=re.sub(r'\s*<script defer src="/ui/home-train-reference-v1\.js(?:\?v=\d+)?"></script>\s*','\n',text)
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/train-block-cards-v1\.css(?:\?v=\d+)?">\s*','\n',text)
-text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/home-train-reference-v1.css?v=3">\n  <script defer src="/ui/home-train-reference-v1.js?v=3"></script>\n  <link rel="stylesheet" href="/ui/train-block-cards-v1.css?v=1">\n</head>',text,count=1,flags=re.I)
+text=re.sub(r'\s*<link rel="stylesheet" href="/ui/brand-display-v1\.css(?:\?v=\d+)?">\s*','\n',text)
+text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/home-train-reference-v1.css?v=4">\n  <script defer src="/ui/home-train-reference-v1.js?v=4"></script>\n  <link rel="stylesheet" href="/ui/train-block-cards-v1.css?v=2">\n</head>',text,count=1,flags=re.I)
+text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/brand-display-v1.css?v=1">\n</head>',text,count=1,flags=re.I)
+opening='<div id="app"><div class="lmf-app-opening" role="status" aria-label="Opening LetMeFly"><img src="/brand/letmefly-logo-display-512.png?v=9" alt="" aria-hidden="true" fetchpriority="high"><strong>LETMEFLY</strong><span>TRAIN HARDER. BECOME MORE.</span></div></div>'
+if 'class="lmf-app-opening"' not in text:
+    if '<div id="app"></div>' not in text: raise SystemExit('Native empty app root missing')
+    text=text.replace('<div id="app"></div>',opening,1)
 # This must be the final visual fidelity layer after color harmonization.
 if '/ui/color-harmonization-v1.css' in text and text.index('/ui/color-harmonization-v1.css') > text.index('/ui/locked-art-fidelity-v1.css'):
     raise SystemExit('locked-art-fidelity-v1.css must load after color-harmonization-v1.css')
@@ -67,8 +75,9 @@ match=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not match: raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing=re.findall(r"['\"]([^'\"]+)['\"]",match.group(1))
 required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=10','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
-required += ['/ui/home-train-reference-v1.'+ext+suffix for ext in ['css','js'] for suffix in ['', '?v=3']]
-required += ['/ui/train-block-cards-v1.css','/ui/train-block-cards-v1.css?v=1']
+required += ['/ui/home-train-reference-v1.'+ext+suffix for ext in ['css','js'] for suffix in ['', '?v=4']]
+required += ['/ui/train-block-cards-v1.css','/ui/train-block-cards-v1.css?v=2']
+required += ['/ui/brand-display-v1.css','/ui/brand-display-v1.css?v=1']
 required += ['/ui/mockup-scenes/'+p.name for p in sorted((p.parent/'ui/mockup-scenes').glob('*.svg'))]
 assets=[]
 for value in [*existing,*required]:
@@ -76,7 +85,7 @@ for value in [*existing,*required]:
 replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:match.start()]+replacement+text[match.end():]
 # Invalidate only the app shell cache. Athlete storage is unrelated to this cache.
-text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v20',text,count=1)
+text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v21',text,count=1)
 if count != 1: raise SystemExit('service-worker.js CACHE_NAME declaration not found')
 p.write_text(text.rstrip()+'\n')
 PY

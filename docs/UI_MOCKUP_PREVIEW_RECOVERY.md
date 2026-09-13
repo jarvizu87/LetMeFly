@@ -65,3 +65,24 @@ exercise selection and are disabled during the native between-round rest gate.
 Circuit ordering, unequal set counts, movement dropout, readiness, prescriptions,
 load/reps/RPE logging, recovery, substitutions, preview-day protections and
 completion continue through the existing workout owners and release checks.
+
+The official logo now displays at 52px in the phone header and 64px in the desktop
+header. The native first-run form uses 104px. Initial app HTML shows the same
+approved image at 160–192px while startup is pending; the normal native render
+replaces it without a delay or a new dismissal action. Operating-system launch
+screens before the app HTML loads remain controlled by the phone/browser.
+
+The 2026-09-13 image inventory audit found all 228 active approved mappings and
+all 164 referenced private files present. All 164 recovered source images decode,
+meet the 640px minimum on both axes (actual minimum: 1254px), and match current
+Storage filenames by SHA-256, byte counts, and object ETags by MD5. This validates
+source integrity and the stored inventory, not a new authenticated browser download.
+
+The current rendered library has 156 entries: 152 mapped exercises, one unmapped
+exercise (Seated Band Hip Abduction), and three intentional non-exercise entries
+(Full Rest, Black Crown Entry TM Rules, Verified Crownforge Results). The previous
+147-governed-exercise coverage count does not cover every additional library entry.
+Seated Band Hip Abduction needs its own reviewed image; a machine image cannot
+silently stand in for a band exercise. Existing approved private images were not
+replaced or reuploaded. Fresh owner-authenticated Train/library image delivery is
+still a separate acceptance check; disposable preview fallback tiles do not pass it.

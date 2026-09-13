@@ -16,6 +16,7 @@ const required = [
   'ui/home-train-reference-v1.css',
   'ui/home-train-reference-v1.js',
   'ui/train-block-cards-v1.css',
+  'ui/brand-display-v1.css',
 ]
 for (const relative of required) {
   assert(fs.existsSync(path.join(dist, relative)), `Missing locked-art fidelity asset: ${relative}`)
@@ -26,6 +27,8 @@ const index = read('index.html')
 const sw = read('service-worker.js')
 const css = read('ui/locked-art-fidelity-v1.css')
 const art = read('ui/raizen-black-crown-ascension-v1.svg')
+assert(index.includes('/ui/brand-display-v1.css?v=1') && sw.includes('/ui/brand-display-v1.css?v=1'), 'Larger official logo presentation is installed and cached')
+assert(index.includes('class="lmf-app-opening"'), 'Native boot root contains the larger opening logo')
 
 assert(index.includes('/ui/locked-art-fidelity-v1.css?v=10'), 'index missing current locked art fidelity stylesheet')
 assert(index.indexOf('/ui/color-harmonization-v1.css') < index.indexOf('/ui/locked-art-fidelity-v1.css'), 'locked art fidelity must load after color harmonization')
@@ -36,13 +39,13 @@ assert(art.includes('data:image/jpeg;base64,'), 'canonical Raizen art wrapper is
 validateLockedArt(path.join(dist, 'ui/raizen-black-crown-ascension-v1.svg'))
 assert(css.includes("--lmf-raizen-fenrir-art:url('/ui/raizen-black-crown-ascension-v1.svg?v=2')"), 'current Raizen/Fenrir art variable missing')
 assert(sw.includes('/ui/raizen-black-crown-ascension-v1.svg?v=2'), 'service worker missing repaired identity image revision')
-assert(sw.includes('-locked-ui-v20'), 'service worker must refresh the previously cached UI assets')
+assert(sw.includes('-locked-ui-v21'), 'service worker must refresh the previously cached UI assets')
 for (const extension of ['js','css']) {
-  const asset = `/ui/home-train-reference-v1.${extension}?v=3`
+  const asset = `/ui/home-train-reference-v1.${extension}?v=4`
   assert(index.includes(asset) && sw.includes(asset), `Home and Train correction is installed and cached: ${asset}`)
 }
 assert(index.indexOf('/ui/home-train-reference-v1.css') > index.indexOf('/ui/locked-art-fidelity-v1.css'), 'Home and Train correction follows the earlier visual layers')
-assert(index.includes('/ui/train-block-cards-v1.css?v=1') && sw.includes('/ui/train-block-cards-v1.css?v=1'), 'The block-card layout is installed and cached')
+assert(index.includes('/ui/train-block-cards-v1.css?v=2') && sw.includes('/ui/train-block-cards-v1.css?v=2'), 'The block-card layout is installed and cached')
 assert(index.indexOf('/ui/train-block-cards-v1.css') > index.indexOf('/ui/home-train-reference-v1.css'), 'The final block-card composition follows the earlier card layout')
 const trainBlocks = read('ui/train-block-cards-v1.css')
 assert(!/url\(/.test(trainBlocks), 'Block styling must reuse the existing exercise pictures')

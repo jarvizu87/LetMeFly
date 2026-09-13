@@ -178,12 +178,12 @@
       const load = row.querySelector('.load-input')?.value
       const metric = row.querySelector('.metric-input') || row.querySelector('.reps-input')
       const metricLabel = row.dataset.prescriptionKind === 'reps' ? 'reps' : row.dataset.metricUnit || ''
-      return {id:row.dataset.setId,number:text(row.querySelector('.set-label strong')),load:load ? `${load} ${unit}`.trim() : '—',amount:metric?.value ? `${metric.value} ${metricLabel}` : '—',rpe:row.querySelector('.rpe-input')?.value || '—',completed,selected:row.classList.contains('lmf-set-active')}
+      return {id:row.dataset.setId,kind:row.dataset.prescriptionKind,number:text(row.querySelector('.set-label strong')),load:load ? `${load} ${unit}`.trim() : '—',amount:metric?.value ? `${metric.value}${metricLabel === 'reps' ? '' : ` ${metricLabel}`}` : '—',rpe:row.querySelector('.rpe-input')?.value || '—',completed,selected:row.classList.contains('lmf-set-active')}
     })
     const signature = JSON.stringify(values)
     if (table.dataset.signature !== signature) {
       table.dataset.signature = signature
-      table.innerHTML = '<div class="lmf-reference-set-head"><span>Set</span><span>Load</span><span>Reps / work</span><span>RPE</span><span></span></div>' + values.map(row => `<button type="button" data-reference-set="${esc(row.id)}" aria-label="Review set ${esc(row.number)}${row.completed ? ', logged' : ''}" aria-pressed="${row.selected}" class="${row.completed ? 'is-logged' : ''}"><span>${esc(row.number)}</span><strong>${esc(row.load)}</strong><span>${esc(row.amount)}</span><span>${esc(row.rpe)}</span><i aria-hidden="true">${row.completed ? '✓' : '○'}</i></button>`).join('')
+      table.innerHTML = `<div class="lmf-reference-set-head"><span>Set</span><span>Load</span><span>${values.every(row => row.kind === 'reps') ? 'Reps' : 'Work'}</span><span>RPE</span><span></span></div>` + values.map(row => `<button type="button" data-reference-set="${esc(row.id)}" aria-label="Review set ${esc(row.number)}${row.completed ? ', logged' : ''}" aria-pressed="${row.selected}" class="${row.completed ? 'is-logged' : ''}"><span>${esc(row.number)}</span><strong>${esc(row.load)}</strong><span>${esc(row.amount)}</span><span>${esc(row.rpe)}</span><i aria-hidden="true">${row.completed ? '✓' : '○'}</i></button>`).join('')
     }
     const active = rows.find(row => row.classList.contains('lmf-set-active')) || rows[0]
     const title = card.querySelector('.exercise-title > div')
@@ -194,7 +194,7 @@
     const load = active.querySelector('.load-input')?.value
     const plate = text(active.querySelector('.lmf-plates-line strong')) || text(active.querySelector('.load-field small'))
     const loaderSource = card.querySelector('.exercise-actions [data-lmf-bar-loader-open="exercise"]')
-    const loader = ensure(card,'.lmf-reference-load-card','section','lmf-reference-load-card','<span>Load the bar</span><strong data-reference-load></strong><p data-reference-plates></p><button type="button" data-reference-load-bar>Open bar loader ↗</button>')
+    const loader = ensure(card,'.lmf-reference-load-card','section','lmf-reference-load-card','<span>Load the bar</span><strong data-reference-load></strong><p data-reference-plates></p><button type="button" data-reference-load-bar>Bar Loader ↗</button>')
     setText(loader.querySelector('[data-reference-load]'),load ? `${load} ${active.dataset.loadUnit || ''}`.trim() : 'No load entered')
     setText(loader.querySelector('[data-reference-plates]'),plate || 'Choose your bar and plates in the loader.')
     loader.hidden = !loaderSource

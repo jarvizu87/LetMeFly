@@ -4,7 +4,7 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track{
   justify-content:stretch!important;grid-auto-columns:minmax(112px,1fr)!important;
 }
 html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button{
-  position:relative!important;width:100%!important;min-height:102px!important;
+  position:relative!important;width:100%!important;max-width:none!important;min-height:102px!important;
   grid-template-rows:18px 1fr auto!important;gap:6px!important;
 }
 html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button::before,
@@ -26,6 +26,7 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel.
   padding:0!important;border:1px solid #8750bb!important;border-radius:10px!important;
   background:linear-gradient(115deg,#181020,#080e14 58%)!important;overflow:hidden!important;
 }
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel.lmf-reference-block::before{content:none!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block>.workout-panel-head{
   display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:8px!important;
   padding:12px 14px!important;margin:0!important;border-bottom:1px solid #513360!important;
@@ -39,7 +40,7 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block>.workout-panel-head .page-kicker,
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block>.workout-panel-head .muted,
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block>.workout-panel-head>.section-number{display:none!important}
-.lmf-reference-block-icon{display:flex;color:#a65cf8;flex:0 0 25px}.lmf-reference-block-icon svg{width:25px;height:25px}
+.lmf-reference-block-icon{display:flex;color:#a65cf8;flex:0 0 25px}.lmf-reference-block-icon svg{width:25px;height:25px;fill:currentColor}
 .lmf-reference-block-pager{display:flex;align-items:center;gap:4px;color:#c9d0d9;flex:0 0 auto}
 .lmf-reference-block-pager[hidden]{display:none!important}
 .lmf-reference-block-pager>span{font:11px/1.2 system-ui;min-width:34px;text-align:center;white-space:nowrap}
@@ -105,7 +106,7 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-
   grid-row:1;box-sizing:border-box;width:100px;height:100px;margin:0 auto;border:6px solid #8e42de;border-left-color:#333841;
   font:700 26px/1 system-ui;padding-top:15px;background:#080d16b3;
 }
-html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-rest-timer>div{grid-row:2;display:flex!important;flex-wrap:wrap;gap:4px!important;margin:0!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-rest-timer>div{grid-row:2;display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:4px!important;margin:0!important}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-rest-timer button{
   flex:1 0 40%;min-height:34px!important;font-size:10px!important;padding:5px 3px!important;background:#0b101ad9!important;border-color:#494052!important;
 }
@@ -217,7 +218,7 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-rest-timer button{font-size:9px!important;min-height:32px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history{margin-left:7px!important;padding:4px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-head,
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history>button{grid-template-columns:13px minmax(0,1fr) minmax(0,.65fr) 20px 15px!important;gap:3px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history>button{grid-template-columns:20px minmax(0,1fr) minmax(0,.65fr) 20px 15px!important;gap:3px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-head{font-size:8px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history>button{font-size:10px!important;min-height:39px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history>button strong{font-size:11px!important}

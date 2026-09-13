@@ -52,6 +52,10 @@ try {
     page.on('pageerror', e => report.errors.push(e.message))
     await page.goto(origin+'/#/home')
     await page.waitForFunction(applicationBootState)
+    assert.equal(await page.locator('.lmf-app-opening').count(),0,'Native startup replaces its opening logo without a dismissal or delay')
+    const welcomeLogo=page.locator('.modal .lmf-official-brand-mark img')
+    assert.equal(await welcomeLogo.evaluate(img=>img.complete&&img.naturalWidth>0&&img.getBoundingClientRect().width>=104),true,'The opening form displays the larger original logo')
+    await page.screenshot({path:path.join(out,`opening-brand-${width}.png`)})
     await page.locator('#onboard-name').fill('Disposable locked UI preview')
     await page.locator('#onboard-unit').selectOption('kg')
     await page.locator('[data-action="create-athlete"]').click()
@@ -59,6 +63,8 @@ try {
     const dismiss = page.getByRole('button', {name:'Dismiss install prompt',exact:true})
     await dismiss.waitFor({state:'visible',timeout:5000}).catch(()=>{})
     if (await dismiss.isVisible()) await dismiss.click()
+    const headerLogo=page.locator(width<1100?'.topbar .lmf-official-brand-mark img':'.navbar .lmf-official-brand-mark img')
+    assert.equal(await headerLogo.evaluate((img,min)=>img.complete&&img.naturalWidth>0&&img.getBoundingClientRect().width>=min,width<1100?52:64),true,'The header displays the larger original logo')
 
     // An SVG may load successfully even when its embedded raster is corrupt.
     // Decode the actual delivered JPEG, not only the outer SVG element.
@@ -212,6 +218,8 @@ try {
     assert.equal(await page.locator('.lmf-reference-train-hero h1').innerText(),await page.locator('.train-header h1').innerText(),'The hero uses the current native workout title')
     assert.ok((await page.locator('#session-track [data-session-index]').count())>3,'Native workout section controls remain available')
     await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}))
+    const flowCardWidth=await page.evaluate(()=>{const track=document.querySelector('#session-track');return {slot:parseFloat(getComputedStyle(track).gridTemplateColumns),card:track.querySelector('button').getBoundingClientRect().width}})
+    assert.ok(Math.abs(flowCardWidth.slot-flowCardWidth.card)<2,'Workout Flow cards fill their grid columns')
     await page.screenshot({path:path.join(out,`train-readiness-${width}.png`)})
     for (const [name,value] of [['sleep-quality',4],['energy',3],['soreness',2],['stress',5]]) {
       await page.locator(`.readiness-options label:has(input[name="readiness-${name}"][value="${value}"])`).click()
@@ -295,6 +303,8 @@ try {
       assert.ok(geometry.overflow<=1,`Block card has no horizontal overflow at ${size}px`)
       await card.evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
       await page.screenshot({path:path.join(out,`train-block-card-${size}.png`)})
+      await card.evaluate(el=>window.scrollTo({top:scrollY+el.querySelector('.set-table').getBoundingClientRect().top-95,behavior:'instant'}))
+      await page.screenshot({path:path.join(out,`train-block-controls-${size}.png`)})
       blockLayouts.push({width:size,...geometry})
     }
     report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,checks:['Numbered block heading','Original pictures blended without distortion','Rest timer beside title','Set table beside load panel','Native exercise paging preserves sets']})
