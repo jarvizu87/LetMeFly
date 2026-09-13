@@ -47,4 +47,6 @@ that responsibility.
 Train control focus and clicks keep the working section centered. Revealing a
 low set or rest control must not move the horizontal carousel into another
 workout block. The original section buttons, arrows, and native scroll listener
-continue to own section navigation.
+continue to own section navigation. The native listener now distinguishes an
+intentional horizontal wheel, touch, scrollbar, or keyboard gesture from automatic
+control-reveal scrolling; the latter cannot change the selected block.

@@ -206,6 +206,7 @@ try {
 
     await page.locator('[data-lmf-start]').click()
     await page.locator('.lmf-reference-train-hero').waitFor({state:'visible'})
+    assert.equal(await page.locator('#swipe-viewport').getAttribute('data-lmf-section-navigation'),'intent-v1','Native section selection distinguishes navigation from focus scrolling')
     assert.equal(await page.locator('.lmf-reference-train-readiness > button').count(),4)
     assert.equal(await page.locator('.lmf-reference-train-hero img').evaluate(async img=>{await img.decode();return img.naturalWidth>0}),true)
     assert.equal(await page.locator('.lmf-reference-train-hero h1').innerText(),await page.locator('.train-header h1').innerText(),'The hero uses the current native workout title')

@@ -90,7 +90,7 @@
       cardAlignmentFrame = 0
       const viewport = card.closest('#swipe-viewport')
       const pane = card.closest('.swipe-page')
-      if (!card.isConnected || !viewport || !pane) return
+      if (!card.isConnected || !viewport || !pane || viewport.dataset.lmfSectionNavigation !== 'intent-v1') return
       // Focusing or revealing a low control can center that control horizontally
       // inside the native carousel. Keep the whole working section centered;
       // the native scroll listener still owns active-page and section state.
