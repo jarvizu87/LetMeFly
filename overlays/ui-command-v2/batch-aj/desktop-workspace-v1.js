@@ -139,7 +139,7 @@
       const cards = activeCards()
       const card = cards[index]
       if (!(card instanceof Element)) return
-      const summary = card.querySelector(':scope > .lmf-compact-summary')
+      const summary = card.querySelector(':scope > .lmf-compact-summary, :scope > .lmf-reference-preview-summary')
       if (summary instanceof HTMLButtonElement) summary.click()
       else {
         const firstControl = card.querySelector('button,[role="button"]')
@@ -182,7 +182,7 @@
   function activeCards() {
     const page = activePage()
     if (!(page instanceof Element)) return []
-    return [...page.querySelectorAll('.exercise-stack > .active-exercise')]
+    return [...page.querySelectorAll('.exercise-stack > .active-exercise, .exercise-stack > .preview-card')]
   }
 
   function cardName(card) {
@@ -192,6 +192,12 @@
   }
 
   function cardPrescription(card) {
+    if (card.classList.contains('preview-card')) {
+      const rows = [...card.querySelectorAll('.prescription-block > .prescription-row')]
+      const first = rows[0]
+      return rows.length > 1 ? `${rows.length} sets • ${text(first?.querySelector('span'))}`
+        : [text(first?.querySelector('strong')), text(first?.querySelector('span'))].filter(Boolean).join(' • ')
+    }
     const compact = text(card.querySelector('.lmf-compact-copy small'))
     if (compact) return compact
     const activeRow = card.querySelector('.set-row.lmf-set-active') || card.querySelector('.set-row[data-set-id]')
@@ -210,7 +216,7 @@
   }
 
   function currentCard(cards = activeCards()) {
-    return cards.find((card) => card.classList.contains('lmf-flow-active'))
+    return cards.find((card) => card.classList.contains('lmf-flow-active') || card.classList.contains('lmf-reference-preview-active'))
       || cards.find((card) => !cardComplete(card))
       || cards[0]
       || null
@@ -231,7 +237,7 @@
 
     head.innerHTML = `
       <div><strong>Workout Flow</strong><small>${sectionTitle}${sectionMeta ? ` • ${sectionMeta}` : ''}</small></div>
-      <span class="lmf-desktop-progress-pill">${cards.length ? `${done}/${cards.length}` : 'PROGRAM'}</span>
+      <span class="lmf-desktop-progress-pill">${current?.classList.contains('preview-card') ? 'PREVIEW' : cards.length ? `${done}/${cards.length}` : 'PROGRAM'}</span>
     `
 
     if (!cards.length) {

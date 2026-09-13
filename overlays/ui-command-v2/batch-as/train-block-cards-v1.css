@@ -4,11 +4,6 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track{
   justify-content:stretch!important;grid-auto-columns:minmax(112px,1fr)!important;
 }
 
-html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button{min-height:94px!important}
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-title{min-height:150px!important;padding:14px 34% 12px 12px!important}
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-title h3{font-size:24px!important}
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-exercise-media{width:47%!important;height:165px!important}
-}
 html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button{
   position:relative!important;width:100%!important;max-width:none!important;min-height:102px!important;
   grid-template-rows:18px 1fr auto!important;gap:6px!important;
@@ -291,9 +286,12 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-actions{
   position:relative!important;z-index:1!important;display:flex!important;flex-wrap:wrap!important;
   gap:6px!important;margin:0 12px 12px!important;padding:0!important;border:0!important;background:none!important;
+  width:auto!important;min-width:0!important;max-width:calc(100% - 24px)!important;
 }
 html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-actions>.btn{
-  flex:1 1 90px!important;min-height:40px!important;padding:7px!important;font-size:10px!important;border-radius:6px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  flex:1 1 90px!important;width:auto!important;min-width:0!important;max-width:100%!important;
+  min-height:40px!important;padding:7px!important;font-size:10px!important;border-radius:6px!important;white-space:normal!important;
 }
 .lmf-reference-preview-summary{
   position:relative!important;z-index:1!important;display:flex!important;justify-content:space-between!important;align-items:center!important;
@@ -328,3 +326,8 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-
   .lmf-reference-train-art{min-height:126px}
   html[data-lmf-approved-route='train'] .lmf-reference-train-hero h1{font-size:18px!important}
   .lmf-reference-train-readiness>button{min-height:80px;padding:8px 5px}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button{min-height:94px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-title{min-height:150px!important;padding:14px 34% 12px 12px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-title h3{font-size:24px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-exercise-media{width:47%!important;height:165px!important}
+}

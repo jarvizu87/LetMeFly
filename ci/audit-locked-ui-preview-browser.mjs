@@ -247,6 +247,27 @@ try {
     await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Bike / Incline Walk')
     assert.deepEqual(await beforeStart.locator('.prescription-block > .prescription-row').allTextContents(),prescriptionsBefore,'Preview selection preserves every governed prescription')
     assert.equal(await beforeStart.first().locator('[data-watch]').isVisible(),true,'Native exercise actions remain available')
+    const actionBounds = await beforeStart.first().evaluate(card=>{
+      const bounds=card.getBoundingClientRect()
+      return [...card.querySelectorAll('.exercise-actions > button')].every(button=>{
+        const r=button.getBoundingClientRect()
+        return r.width>0&&r.height>=40&&r.left>=bounds.left&&r.right<=bounds.right
+      })
+    })
+    assert.equal(actionBounds,true,'Watch, Info and Substitute fit fully inside the preview card')
+    if(width>=1100){
+      await page.waitForFunction(()=>document.querySelectorAll('.lmf-desktop-flow-item').length===document.querySelectorAll('.active-page .preview-card').length)
+      assert.deepEqual(await page.locator('.lmf-desktop-flow-copy b').allTextContents(),await beforeStart.locator('.exercise-title h3').allTextContents(),'Desktop flow shows every preview movement')
+      await page.locator('[data-lmf-desktop-exercise-index="2"]').click()
+      await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Glute Bridge ISO'&&document.querySelector('.lmf-desktop-context-body [data-lmf-desktop-v2-content] strong')?.textContent==='Glute Bridge ISO')
+      assert.equal(await page.locator('.lmf-desktop-context-body .lmf-desktop-live-set-grid').count(),0,'Preview context cannot fabricate a live set')
+      await page.locator('[data-lmf-desktop-v2-action="info"]').click()
+      await page.locator('#lmf-exercise-intelligence-modal .lmf-intel-modal').waitFor({state:'visible'})
+      await page.keyboard.press('Escape')
+      await page.locator('[data-lmf-desktop-exercise-index="0"]').click()
+      await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Bike / Incline Walk'&&document.querySelector('.lmf-desktop-context-body [data-lmf-desktop-v2-content] strong')?.textContent==='Bike / Incline Walk')
+      assert.deepEqual(await beforeStart.locator('.prescription-block > .prescription-row').allTextContents(),prescriptionsBefore,'Desktop preview tools and selection preserve prescriptions')
+    }
     await beforeStart.first().evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
     await page.screenshot({path:path.join(out,`train-before-start-${width}.png`)})
     const drawer=page.locator('body > [data-netlify-deploy-id]:has(iframe[title="Netlify Drawer"])')

@@ -54,7 +54,7 @@ text=re.sub(r'\s*<link rel="stylesheet" href="/ui/home-train-reference-v1\.css(?
 text=re.sub(r'\s*<script defer src="/ui/home-train-reference-v1\.js(?:\?v=\d+)?"></script>\s*','\n',text)
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/train-block-cards-v1\.css(?:\?v=\d+)?">\s*','\n',text)
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/brand-display-v1\.css(?:\?v=\d+)?">\s*','\n',text)
-text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/home-train-reference-v1.css?v=4">\n  <script defer src="/ui/home-train-reference-v1.js?v=5"></script>\n  <link rel="stylesheet" href="/ui/train-block-cards-v1.css?v=3">\n</head>',text,count=1,flags=re.I)
+text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/home-train-reference-v1.css?v=4">\n  <script defer src="/ui/home-train-reference-v1.js?v=6"></script>\n  <link rel="stylesheet" href="/ui/train-block-cards-v1.css?v=4">\n</head>',text,count=1,flags=re.I)
 text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/brand-display-v1.css?v=3">\n</head>',text,count=1,flags=re.I)
 text=re.sub(r'/ui/home-reference-v3\.js(?:\?v=\d+)?','/ui/home-reference-v3.js?v=5',text)
 opening='<div id="app"><div class="lmf-app-opening" role="status" aria-label="Opening LetMeFly"><img src="/brand/letmefly-logo-display-512.png?v=9" alt="" aria-hidden="true" fetchpriority="high"><strong>LETMEFLY</strong><span>TRAIN HARDER. BECOME MORE.</span></div></div>'
@@ -76,8 +76,8 @@ match=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not match: raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing=re.findall(r"['\"]([^'\"]+)['\"]",match.group(1))
 required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=10','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
-required += ['/ui/home-train-reference-v1.'+ext+suffix for ext in ['css','js'] for suffix in ['', '?v=5' if ext == 'js' else '?v=4']]
-required += ['/ui/train-block-cards-v1.css','/ui/train-block-cards-v1.css?v=3']
+required += ['/ui/home-train-reference-v1.'+ext+suffix for ext in ['css','js'] for suffix in ['', '?v=6' if ext == 'js' else '?v=4']]
+required += ['/ui/train-block-cards-v1.css','/ui/train-block-cards-v1.css?v=4']
 required += ['/ui/brand-display-v1.css','/ui/brand-display-v1.css?v=3','/ui/home-reference-v3.js?v=5']
 required += ['/ui/mockup-scenes/'+p.name for p in sorted((p.parent/'ui/mockup-scenes').glob('*.svg'))]
 assets=[]
@@ -86,7 +86,7 @@ for value in [*existing,*required]:
 replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:match.start()]+replacement+text[match.end():]
 # Invalidate only the app shell cache. Athlete storage is unrelated to this cache.
-text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v23',text,count=1)
+text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v24',text,count=1)
 if count != 1: raise SystemExit('service-worker.js CACHE_NAME declaration not found')
 p.write_text(text.rstrip()+'\n')
 PY

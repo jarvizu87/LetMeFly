@@ -25,6 +25,25 @@ private picture delivery. Signed-in picture loading and final visual acceptance
 remain open; the video shows placeholders. No production release is authorized
 by this correction.
 
+The first follow-up preview (`b31f3eb`) removed the blank phone panel, but its
+desktop audit rejected a misplaced CSS closing brace that suppressed the
+full-width flow-card rule. Visual review also caught clipped preview actions.
+The correction restores that rule and keeps Watch, Info, and Substitute inside
+the card. Desktop flow and context now read native preview movements, forward
+to the selected card's existing tools, and show programmed work without a fake
+live set. The audit exercises desktop preview selection and Info as well as
+the live logging path. The other 16 browser subaudits passed on `b31f3eb`;
+these checks do not constitute user approval of the visual result.
+
+The requested Seated Band Hip Abduction image was generated and reviewed at
+1254 × 1254 pixels (SHA-256
+`0f2efd6bd8b3fc787c9f6ded5658bb83c8e6774b0e64db405794c3695c635613`).
+It shows the existing character seated on a flat bench with a resistance loop
+above the knees. Automatic approval review blocked uploading the new image,
+requiring explicit permission for the private Supabase destination. The object
+count for that exact path is zero, no catalog mapping was added, and the
+temporary transfer endpoint was closed. This remains a pending image addition.
+
 Billing verification: the four recent card/logo deployments ending at c689a8f
 are Netlify `deploy-preview` context, with no production `published_at` value.
 The production deployment remains 6aa48a7f3c5fea0008502f12, published September 11

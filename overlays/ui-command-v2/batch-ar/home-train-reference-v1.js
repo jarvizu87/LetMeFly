@@ -249,7 +249,7 @@
       const name = text(card.querySelector('.exercise-title h3'))
       const rows = [...card.querySelectorAll('.prescription-block > .prescription-row')]
       const first = rows[0]
-      const detail = rows.length > 1 ? `${rows.length} sets · ${text(first?.querySelector('span'))}` : text(first)
+      const detail = rows.length > 1 ? `${rows.length} sets · ${text(first?.querySelector('span'))}` : [text(first?.querySelector('strong')),text(first?.querySelector('span'))].filter(Boolean).join(' · ')
       const button = ensure(card,':scope > .lmf-reference-preview-summary','button','lmf-reference-preview-summary','<span><strong></strong><small></small></span><i aria-hidden="true">›</i>','afterbegin')
       button.type = 'button'
       setAttr(button,'data-reference-preview-exercise',index)
