@@ -41,7 +41,7 @@ import os,re
 p=Path(os.environ['INDEX'])
 text=p.read_text()
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/locked-art-fidelity-v1\.css(?:\?v=\d+)?">\s*','\n',text)
-tag='<link rel="stylesheet" href="/ui/locked-art-fidelity-v1.css?v=5">'
+tag='<link rel="stylesheet" href="/ui/locked-art-fidelity-v1.css?v=6">'
 if not re.search(r'</head>',text,re.I): raise SystemExit('index.html missing </head>')
 text=re.sub(r'</head>',f'  {tag}\n</head>',text,count=1,flags=re.I)
 # This must be the final visual fidelity layer after color harmonization.
@@ -58,7 +58,7 @@ text=p.read_text()
 match=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not match: raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing=re.findall(r"['\"]([^'\"]+)['\"]",match.group(1))
-required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=5','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
+required=['/ui/locked-art-fidelity-v1.css','/ui/locked-art-fidelity-v1.css?v=6','/ui/raizen-black-crown-ascension-v1.svg','/ui/raizen-black-crown-ascension-v1.svg?v=2']
 required += ['/ui/mockup-scenes/'+p.name for p in sorted((p.parent/'ui/mockup-scenes').glob('*.svg'))]
 assets=[]
 for value in [*existing,*required]:
@@ -66,12 +66,12 @@ for value in [*existing,*required]:
 replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:match.start()]+replacement+text[match.end():]
 # Invalidate only the app shell cache. Athlete storage is unrelated to this cache.
-text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v6',text,count=1)
+text,count=re.subn(r"(const\s+CACHE_NAME\s*=\s*['\"])([^'\"]+)",lambda m:m.group(1)+re.sub(r'-locked-ui-v\d+$','',m.group(2))+'-locked-ui-v7',text,count=1)
 if count != 1: raise SystemExit('service-worker.js CACHE_NAME declaration not found')
 p.write_text(text.rstrip()+'\n')
 PY
 
-grep -Fq '/ui/locked-art-fidelity-v1.css?v=5' "$INDEX"
+grep -Fq '/ui/locked-art-fidelity-v1.css?v=6' "$INDEX"
 grep -Fq "'/ui/locked-art-fidelity-v1.css'" "$SW"
 grep -Fq "'/ui/raizen-black-crown-ascension-v1.svg'" "$SW"
 
