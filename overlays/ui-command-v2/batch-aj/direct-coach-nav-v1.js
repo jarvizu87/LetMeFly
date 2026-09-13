@@ -33,11 +33,12 @@
       className: 'lmf-direct-coach-nav', datasetKey: 'lmfDirectCoach', href: '#/coach', label: 'Coach', icon: '◉'
     })
 
-    // Final locked mobile navigation keeps Exercises and Coach as first-class
-    // destinations, with More last for Profile/settings/secondary tools.
+    // The desktop Profile shortcut may sit before More. Share that boundary
+    // with its owner so the two navigation observers never move each other.
     if (more instanceof HTMLElement) {
-      if (exercises.parentNode !== nav || exercises.nextElementSibling !== coach) nav.insertBefore(exercises, more)
-      if (coach.parentNode !== nav || coach.nextElementSibling !== more) nav.insertBefore(coach, more)
+      const tail = nav.querySelector('.lmf-reference-profile-nav') || more
+      if (coach.parentNode !== nav || coach.nextElementSibling !== tail) nav.insertBefore(coach, tail)
+      if (exercises.parentNode !== nav || exercises.nextElementSibling !== coach) nav.insertBefore(exercises, coach)
     } else {
       if (exercises.parentNode !== nav) nav.appendChild(exercises)
       if (coach.parentNode !== nav) nav.appendChild(coach)
