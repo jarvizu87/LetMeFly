@@ -6,6 +6,10 @@ decision, and this change does not authorize a production release.
 
 This batch finishes the recovered presentation work:
 
+- Home's continuous red mountain hero, inset workout card and single start action,
+  two-by-two intelligence grid, four readiness metrics, and saved performance.
+- Train's readiness-first banner, original section navigation, compact set history,
+  governed exercise art, native logging inputs, load helper, and manual rest timer.
 - Program overview, real selected week/day cards, and access to the complete
   original program catalog through the workspace tabs.
 - Progress artwork, six summary cards, analytics grid, and saved-history metrics.
@@ -30,3 +34,17 @@ Required verification: static scene and installer checks; Command V2's browser
 audits (including Progress scroll and locked UI); five-athlete release gate;
 existing full-app/lifecycle gates; Netlify policy; direct visual comparison with
 the approved references. Production remains held pending visual acceptance.
+
+The follow-up audit also corrected shared active-navigation accents to red,
+kept duplicate Progress editors behind the existing training-data disclosure,
+restored that disclosure after late history renders, and gave Training Experience
+a full-width row in the phone Profile character sheet. Home's completed-workout
+summary excludes unfinished, deleted, foreign-athlete, distance, and time records
+and converts weight units before aggregating. Reviewing sets and operating rest
+controls cannot create strength estimates; the native Log Set action retains
+that responsibility.
+
+Train control focus and clicks keep the working section centered. Revealing a
+low set or rest control must not move the horizontal carousel into another
+workout block. The original section buttons, arrows, and native scroll listener
+continue to own section navigation.

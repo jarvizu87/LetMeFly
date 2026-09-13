@@ -23,6 +23,7 @@
   const metrics = [['sleep_quality','Sleep','sleep'],['energy','Energy','energy'],['soreness','Soreness','soreness'],['stress','Stress','stress']]
   const radioNames = {sleep_quality:'sleep-quality',energy:'energy',soreness:'soreness',stress:'stress'}
   let queued = false
+  let cardAlignmentFrame = 0
   let timer = {seconds:120,remaining:120,until:0,interval:null,element:null}
 
   function ensure(parent,selector,tag,className,markup,position='beforeend') {
@@ -81,6 +82,22 @@
   function openSection(shell,index,scroll=true) {
     nativeSection(shell,index)?.click()
     if (scroll) requestAnimationFrame(() => panels(shell)[index]?.scrollIntoView({behavior:'smooth',block:'start'}))
+  }
+
+  function alignCardSection(card) {
+    cancelAnimationFrame(cardAlignmentFrame)
+    cardAlignmentFrame = requestAnimationFrame(() => {
+      cardAlignmentFrame = 0
+      const viewport = card.closest('#swipe-viewport')
+      const pane = card.closest('.swipe-page')
+      if (!card.isConnected || !viewport || !pane) return
+      // Focusing or revealing a low control can center that control horizontally
+      // inside the native carousel. Keep the whole working section centered;
+      // the native scroll listener still owns active-page and section state.
+      const a = pane.getBoundingClientRect(), v = viewport.getBoundingClientRect()
+      const drift = a.left + a.width / 2 - v.left - v.width / 2
+      if (Math.abs(drift) > 1) viewport.scrollTo({left:viewport.scrollLeft + drift,behavior:'instant'})
+    })
   }
 
   function trainHeader(shell) {
@@ -247,6 +264,10 @@
       })) queue()
     }).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeOldValue:true,attributeFilter:['class']})
     document.addEventListener('input',queue)
+    document.addEventListener('focusin',event => {
+      const card = event.target.closest?.('.lmf-train-reference-final .active-exercise')
+      if (card && !event.target.matches(':active')) alignCardSection(card)
+    })
     document.addEventListener('change',event => {
       if (event.target.matches('.lmf-reference-rest-timer select')) {
         timer.seconds = Number(event.target.value)
@@ -263,6 +284,11 @@
       const shell = event.target.closest('.lmf-train-reference-final')
       if (!shell) return
       const card = event.target.closest('.active-exercise')
+      if (card) alignCardSection(card)
+      else if (event.target.closest('[data-session-index],[data-session-step],[data-reference-section],[data-reference-readiness],[data-reference-resume]')) {
+        cancelAnimationFrame(cardAlignmentFrame)
+        cardAlignmentFrame = 0
+      }
       const targetSet = event.target.closest('[data-reference-set]')
       if (targetSet && card) {
         const rows = [...card.querySelectorAll('.set-table .set-row')]
@@ -306,6 +332,8 @@
       queue()
     })
     window.addEventListener('hashchange',() => {
+      cancelAnimationFrame(cardAlignmentFrame)
+      cardAlignmentFrame = 0
       if (location.hash.split('?')[0] !== '#/train') {
         clearInterval(timer.interval)
         timer = {seconds:120,remaining:120,until:0,interval:null,element:null}
