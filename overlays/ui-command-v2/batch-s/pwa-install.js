@@ -10,17 +10,55 @@
     window.navigator.standalone === true || document.referrer?.startsWith('android-app://')
   const installedKey = 'lmf-pwa-installed-v1'
   const dismissedKey = 'lmf-pwa-install-dismissed-v1'
-  const readPreference = (key) => {
-    try { return window.localStorage.getItem(key) === '1' } catch { return false }
-  }
-  const writePreference = (key, value) => {
+  // Device-only UI preferences use a separate database, never the athlete vault.
+  const preferencesDB = new Promise((resolve) => {
     try {
-      if (value) window.localStorage.setItem(key, '1')
-      else window.localStorage.removeItem(key)
+      const request = window.indexedDB.open('letmefly-device-ui-v1', 1)
+      request.onupgradeneeded = () => request.result.createObjectStore('preferences')
+      request.onsuccess = () => {
+        request.result.onversionchange = () => request.result.close()
+        resolve(request.result)
+      }
+      request.onerror = request.onblocked = () => resolve(null)
+    } catch { resolve(null) }
+  })
+  const readPreference = async (key) => {
+    const db = await preferencesDB
+    if (!db) return false
+    return new Promise((resolve) => {
+      try {
+        const request = db.transaction('preferences', 'readonly').objectStore('preferences').get(key)
+        request.onsuccess = () => resolve(request.result === true)
+        request.onerror = () => resolve(false)
+      } catch { resolve(false) }
+    })
+  }
+  const writePreference = async (key, value) => {
+    const db = await preferencesDB
+    if (!db) return
+    try {
+      const tx = db.transaction('preferences', 'readwrite')
+      tx.objectStore('preferences').put(value, key)
+      tx.onerror = () => {} // The in-memory preference still lasts for this visit.
     } catch { /* Restricted storage still honors the choice for this visit. */ }
   }
-  let installed = readPreference(installedKey)
-  let dismissed = readPreference(dismissedKey)
+  let installed = false
+  let dismissed = false
+  let installedChanged = false
+  let dismissedChanged = false
+  let preferencesLoaded = false
+  const preferencesReady = Promise.all([readPreference(installedKey), readPreference(dismissedKey)])
+    .then(([wasInstalled, wasDismissed]) => {
+      if (!installedChanged) installed = wasInstalled
+      if (!dismissedChanged) dismissed = wasDismissed
+      preferencesLoaded = true
+    })
+  let preferenceChannel = null
+  try { preferenceChannel = new window.BroadcastChannel('letmefly-device-ui-v1') } catch { /* Optional cross-tab updates. */ }
+  const rememberPreference = (key, value) => {
+    void writePreference(key, value)
+    preferenceChannel?.postMessage({key, value})
+  }
   const isInstalled = () => installed || isStandalone()
 
   const ua = navigator.userAgent || ''
@@ -28,6 +66,7 @@
   const isChrome = /Chrome\//i.test(ua) && !/(EdgA|OPR|SamsungBrowser)\//i.test(ua)
   let deferredPrompt = null
   let banner = null
+  let installationEvents = 0
 
   const chromeIntent = () => {
     const url = new URL(window.location.href)
@@ -42,15 +81,18 @@
   }
 
   const markInstalled = () => {
+    installationEvents++
+    installedChanged = true
     installed = true
-    writePreference(installedKey, true)
+    rememberPreference(installedKey, true)
     deferredPrompt = null
     removeBanner()
   }
 
   const dismissBanner = () => {
+    dismissedChanged = true
     dismissed = true
-    writePreference(dismissedKey, true)
+    rememberPreference(dismissedKey, true)
     removeBanner()
   }
 
@@ -105,7 +147,7 @@
   }
 
   const showBanner = (manual = false) => {
-    if (isInstalled() || (!manual && dismissed) || banner || !document.body) return
+    if (!preferencesLoaded || isInstalled() || (!manual && dismissed) || banner || !document.body) return
 
     banner = document.createElement('aside')
     banner.id = 'lmf-install-banner'
@@ -163,12 +205,16 @@
     renderState()
   }
 
-  window.addEventListener('beforeinstallprompt', (event) => {
+  window.addEventListener('beforeinstallprompt', async (event) => {
     event.preventDefault()
+    const priorInstallationEvents = installationEvents
+    await preferencesReady
+    if (installationEvents !== priorInstallationEvents) return
     if (isStandalone()) { markInstalled(); return }
     // A fresh native install offer can follow an uninstall. Keep dismissal independent.
+    installedChanged = true
     installed = false
-    writePreference(installedKey, false)
+    rememberPreference(installedKey, false)
     deferredPrompt = event
     showBanner()
     renderState()
@@ -182,16 +228,17 @@
     else mode.addListener?.(syncInstalledWindow)
   }
   window.addEventListener('pageshow', syncInstalledWindow)
-  window.addEventListener('storage', (event) => {
-    if (event.key === installedKey || event.key === dismissedKey) {
-      installed = readPreference(installedKey)
-      dismissed = readPreference(dismissedKey)
+  preferenceChannel?.addEventListener('message', ({data}) => {
+    if (typeof data?.value !== 'boolean') return
+    if (data.key === installedKey || data.key === dismissedKey) {
+      if (data.key === installedKey) { installedChanged = true; installed = data.value }
+      if (data.key === dismissedKey) { dismissedChanged = true; dismissed = data.value }
       if (isInstalled() || dismissed) removeBanner()
     }
   })
   syncInstalledWindow()
 
-  const start = () => setTimeout(showBanner, params.get('install') === '1' ? 900 : 1400)
+  const start = () => preferencesReady.then(() => setTimeout(showBanner, params.get('install') === '1' ? 900 : 1400))
   if (document.readyState === 'loading') {
     window.addEventListener('DOMContentLoaded', start, { once: true })
   } else {
@@ -199,8 +246,9 @@
   }
 
   window.__LMF_PWA_INSTALL__ = {
-    canInstall: () => !isInstalled(),
+    canInstall: () => preferencesLoaded && !isInstalled(),
     prompt: async () => {
+      await preferencesReady
       if (isInstalled()) return false
       if (deferredPrompt) return promptInstall()
       if (isAndroid && !isChrome) {

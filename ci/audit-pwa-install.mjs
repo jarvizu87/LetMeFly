@@ -4,9 +4,10 @@ import vm from 'node:vm'
 import fs from 'node:fs'
 
 const script = fs.readFileSync(new URL('../overlays/ui-command-v2/batch-s/pwa-install.js', import.meta.url), 'utf8')
+const settle = () => new Promise(resolve => setImmediate(resolve))
 
 function visit({mode = 'browser', ios = false, referrer = '', search = '', storage = new Map(), blockedStorage = false} = {}) {
-  const listeners = new Map(), media = new Map(), timers = [], elements = []
+  const listeners = new Map(), media = new Map(), timers = [], elements = [], channelListeners = new Map()
   const node = () => {
     const children = new Map(), handlers = new Map()
     return {
@@ -26,10 +27,32 @@ function visit({mode = 'browser', ios = false, referrer = '', search = '', stora
       media.set(query, item)
       return item
     },
-    localStorage: {
-      getItem(key) { if (blockedStorage) throw Error('Storage disabled'); return storage.get(key) },
-      setItem(key, value) { if (blockedStorage) throw Error('Storage disabled'); storage.set(key, value) },
-      removeItem(key) { if (blockedStorage) throw Error('Storage disabled'); storage.delete(key) },
+    indexedDB: {
+      open() {
+        if (blockedStorage) throw Error('Storage disabled')
+        const request = {}
+        queueMicrotask(() => {
+          request.result = {
+            close() {},
+            transaction() {
+              return {objectStore() { return {
+                get(key) {
+                  const read = {}
+                  queueMicrotask(() => { read.result = storage.get(key); read.onsuccess?.() })
+                  return read
+                },
+                put(value, key) { queueMicrotask(() => storage.set(key, value)) },
+              } }}
+            },
+          }
+          request.onsuccess?.()
+        })
+        return request
+      },
+    },
+    BroadcastChannel: class {
+      addEventListener(name, fn) { channelListeners.set(name, fn) }
+      postMessage() {}
     },
     addEventListener(name, fn) { listeners.set(name, fn) },
   }
@@ -41,16 +64,17 @@ function visit({mode = 'browser', ios = false, referrer = '', search = '', stora
   vm.runInNewContext(script, {window, navigator, document, URLSearchParams, URL, setTimeout(fn) { timers.push(fn) }, alert() {}})
   return {
     storage, api:window.__LMF_PWA_INSTALL__,
-    start() { for (const fn of timers.splice(0)) fn() },
+    async start() { await settle(); for (const fn of timers.splice(0)) fn(); await settle() },
     banner() { return elements.findLast(el => el.id === 'lmf-install-banner' && !el.removed) },
     emit(name, event = {}) { listeners.get(name)?.(event) },
+    message(data) { channelListeners.get('message')?.({data}) },
     displayMode(next) {
       for (const [query, item] of media) item.matches = query === `(display-mode: ${next})`
       for (const item of media.values()) item.change?.()
     },
-    offer(outcome = 'accepted') {
+    async offer(outcome = 'accepted') {
       let prompted = 0
-      listeners.get('beforeinstallprompt')({preventDefault() {}, prompt() { prompted++ }, userChoice:Promise.resolve({outcome})})
+      await listeners.get('beforeinstallprompt')({preventDefault() {}, prompt() { prompted++ }, userChoice:Promise.resolve({outcome})})
       return () => prompted
     },
   }
@@ -63,70 +87,83 @@ test('installed launches hide the banner without special URL markers, and are re
     {mode:'standalone',search:'?source=pwa&app=letmefly-v2'},
   ]) {
     const page = visit(settings)
-    page.start()
+    await page.start()
     assert.equal(page.banner(), undefined)
     assert.equal(page.api.canInstall(), false)
     assert.equal(await page.api.prompt(), false)
     const browserTab = visit({storage:page.storage})
-    browserTab.start()
+    await browserTab.start()
     assert.equal(browserTab.banner(), undefined)
   }
 })
 
 test('dismissing survives reload and a late install offer; a requested install remains possible', async () => {
   const first = visit()
-  first.start()
+  await first.start()
   assert.ok(first.banner())
   first.banner().querySelector('.lmf-install-dismiss').click()
+  await settle()
   const reloaded = visit({storage:first.storage})
-  reloaded.start()
-  const prompted = reloaded.offer()
+  await reloaded.start()
+  const prompted = await reloaded.offer()
   assert.equal(reloaded.banner(), undefined)
   assert.equal(prompted(), 0)
   assert.equal(await reloaded.api.prompt(), true)
   assert.equal(prompted(), 1)
+  await settle()
   const installedReload = visit({storage:reloaded.storage})
-  installedReload.start()
+  await installedReload.start()
   assert.equal(installedReload.banner(), undefined)
   assert.equal(installedReload.api.canInstall(), false)
 })
 
-test('installation, display-mode changes and another tab dismiss the visible banner immediately', () => {
+test('installation, display-mode changes and another tab dismiss the visible banner immediately', async () => {
   for (const transition of [page => page.emit('appinstalled'), page => page.displayMode('standalone')]) {
     const page = visit()
-    page.start()
+    await page.start()
     assert.ok(page.banner())
     transition(page)
     assert.equal(page.banner(), undefined)
     assert.equal(page.api.canInstall(), false)
   }
   const first = visit(), second = visit({storage:first.storage})
-  first.start(); second.start()
+  await first.start(); await second.start()
   first.banner().querySelector('.lmf-install-dismiss').click()
-  second.emit('storage', {key:'lmf-pwa-install-dismissed-v1'})
+  second.message({key:'lmf-pwa-install-dismissed-v1',value:true})
   assert.equal(second.banner(), undefined)
 })
 
 test('declining the native prompt is remembered and does not falsely mark the app installed', async () => {
   const page = visit()
-  page.start()
-  const prompted = page.offer('dismissed')
+  await page.start()
+  const prompted = await page.offer('dismissed')
   await page.banner().querySelector('.lmf-install-confirm').click()
   assert.equal(prompted(), 1)
   assert.equal(page.api.canInstall(), true)
+  await settle()
   const reloaded = visit({storage:page.storage})
-  reloaded.start()
-  reloaded.offer()
+  await reloaded.start()
+  await reloaded.offer()
   assert.equal(reloaded.banner(), undefined)
 })
 
-test('restricted storage still supports installed detection and dismissal for this visit', () => {
+test('restricted storage still supports installed detection and dismissal for this visit', async () => {
   const installed = visit({ios:true,blockedStorage:true})
-  installed.start()
+  await installed.start()
   assert.equal(installed.banner(), undefined)
   const page = visit({blockedStorage:true})
-  page.start()
+  await page.start()
   page.banner().querySelector('.lmf-install-dismiss').click()
-  page.offer()
+  await page.offer()
+  assert.equal(page.banner(), undefined)
+})
+
+test('installation during preference loading cannot be overwritten by an older install offer', async () => {
+  const page = visit()
+  const offer = page.offer()
+  page.emit('appinstalled')
+  await offer
+  await page.start()
+  assert.equal(page.api.canInstall(), false)
   assert.equal(page.banner(), undefined)
 })
