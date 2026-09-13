@@ -40,9 +40,21 @@ The requested Seated Band Hip Abduction image was generated and reviewed at
 `0f2efd6bd8b3fc787c9f6ded5658bb83c8e6774b0e64db405794c3695c635613`).
 It shows the existing character seated on a flat bench with a resistance loop
 above the knees. Automatic approval review blocked uploading the new image,
-requiring explicit permission for the private Supabase destination. The object
-count for that exact path is zero, no catalog mapping was added, and the
-temporary transfer endpoint was closed. This remains a pending image addition.
+requiring explicit permission for the private Supabase destination. The owner
+then replied, “i give you permission.” The exact image was uploaded, its stored
+SHA-256 and 2,086,501-byte size were verified, and the exact
+`seated-band-hip-abduction` mapping was activated. There are now 229 active
+private lookup keys. Owner access, nonowner/anonymous denial, and artwork
+exclusion from workout sync passed again. The temporary transfer endpoint is
+closed. This image addition does not require a Netlify production deployment.
+
+The `800411f` preview passed all 22 phone/desktop layout and interaction groups.
+Manual screenshot review caught inherited two-row positioning in the phone's
+collapsed circuit movements. The final CSS explicitly restores one row and
+removes the old minimum height; the audit checks the actual compact-row height.
+Future-day captures also wait for the native section transition to center,
+avoiding screenshots taken halfway through a successful animation. The preview
+audit compares the deployed Train CSS as well as JavaScript before it starts.
 
 Billing verification: the four recent card/logo deployments ending at c689a8f
 are Netlify `deploy-preview` context, with no production `published_at` value.

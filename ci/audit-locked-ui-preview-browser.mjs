@@ -279,6 +279,12 @@ try {
     assert.equal(await page.locator('.active-page .preview-card').first().evaluate(el=>getComputedStyle(el,'::before').display),'none','Future days also retire the square art panel')
     assert.equal(await page.locator('.active-page [data-action="toggle-set"],.active-page .set-input').count(),0,'Future-day cards remain read-only')
     assert.ok((await page.locator('.active-page .lmf-reference-preview-active .prescription-block > .prescription-row').count())>0,'Future-day native prescriptions are retained')
+    await page.waitForFunction(()=>{
+      const pane=document.querySelector('#swipe-viewport>.active-page'),viewport=document.querySelector('#swipe-viewport')
+      if(!pane||!viewport)return false
+      const a=pane.getBoundingClientRect(),v=viewport.getBoundingClientRect()
+      return Math.abs(a.left+a.width/2-v.left-v.width/2)<2
+    })
     await page.locator('.active-page .lmf-reference-preview-active').evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
     await page.screenshot({path:path.join(out,`train-future-day-${width}.png`)})
     await page.locator('.day-strip .day-chip[data-day="1"]').click()
@@ -363,6 +369,11 @@ try {
       assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.y-geometry.load.y)<2,'Set table and load panel share one row at every phone/desktop size')
       assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Native logging stays below coaching guidance')
       assert.ok(geometry.overflow<=1,`Block card has no horizontal overflow at ${size}px`)
+      const compactRows=await page.locator('.active-page .lmf-flow-compact').evaluateAll(cards=>cards.map(card=>{
+        const button=card.querySelector('.lmf-compact-summary'),name=button?.querySelector('.lmf-compact-copy')
+        return {height:card.getBoundingClientRect().height,rows:getComputedStyle(button).gridTemplateRows.split(' ').length,nameFits:name.scrollWidth<=name.clientWidth+1}
+      }))
+      assert.ok(compactRows.length>=5&&compactRows.every(row=>row.height<=85&&row.rows===1&&row.nameFits),'Other circuit movements retain compact single-row selectors')
       await card.evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
       await page.screenshot({path:path.join(out,`train-block-card-${size}.png`)})
       await card.evaluate(el=>window.scrollTo({top:scrollY+el.querySelector('.set-table').getBoundingClientRect().top-95,behavior:'instant'}))
