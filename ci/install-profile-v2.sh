@@ -35,8 +35,8 @@ import os, re
 root = Path(os.environ['DIST_DIR'])
 index = root / 'index.html'
 text = index.read_text()
-css = '<link rel="stylesheet" href="/ui/profile-v2.css?v=3">'
-js = '<script defer src="/ui/profile-v2.js?v=3"></script>'
+css = '<link rel="stylesheet" href="/ui/profile-v2.css?v=4">'
+js = '<script defer src="/ui/profile-v2.js?v=4"></script>'
 
 # Remove stale Profile v2 injection if an old artifact is reprocessed.
 text = re.sub(r'\s*<link rel="stylesheet" href="/ui/profile-v2\.css\?v=[^"]+">', '', text)
@@ -56,14 +56,14 @@ match = re.search(r'const\s+PRECACHE\s*=\s*\[([^\]]*)\]', text)
 if not match: raise SystemExit('Missing offline asset list')
 assets = re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
 assets = [asset for asset in assets if not re.match(r'/ui/profile-v2\.(?:css|js)(?:\?|$)', asset)]
-assets += ['/ui/profile-v2.css?v=3', '/ui/profile-v2.js?v=3']
+assets += ['/ui/profile-v2.css?v=4', '/ui/profile-v2.js?v=4']
 text = text[:match.start()] + 'const PRECACHE = [' + ', '.join(repr(a) for a in dict.fromkeys(assets)) + ']' + text[match.end():]
 worker.write_text(text)
 PY
 
 node --check "$DIST_DIR/ui/profile-v2.js"
 test -s "$DIST_DIR/ui/profile-v2.css"
-grep -Fq '/ui/profile-v2.css?v=3' "$INDEX"
-grep -Fq '/ui/profile-v2.js?v=3' "$INDEX"
+grep -Fq '/ui/profile-v2.css?v=4' "$INDEX"
+grep -Fq '/ui/profile-v2.js?v=4' "$INDEX"
 
 echo "LetMeFly private athlete Profile v2: PASS"

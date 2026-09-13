@@ -15,6 +15,7 @@ bash ci/build-command-v2-hardening.sh
 
 # Preserve saved readiness values when the active workout re-renders or reloads.
 bash ci/apply-readiness-persistence-fix.sh "$ROOT_DIR/.build-src/letmefly_app"
+bash ci/apply-workout-section-navigation-v1.sh "$ROOT_DIR/.build-src/letmefly_app"
 
 # Improve real-world phone logging ergonomics, exercise-video reliability,
 # automatic approved exercise art, locked Workout Flow v1, and Pyramid Flow v1.

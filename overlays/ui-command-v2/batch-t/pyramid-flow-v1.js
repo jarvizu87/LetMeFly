@@ -166,7 +166,7 @@
       item.querySelector('.lmf-pyramid-plan-number').textContent = String(index + 1)
       item.querySelector('.lmf-pyramid-plan-reps strong').textContent = value(row, '.reps-input')
       const load = value(row, '.load-input')
-      item.querySelector('.lmf-pyramid-plan-load strong').textContent = load === '—' ? load : `${load} lb`
+      item.querySelector('.lmf-pyramid-plan-load strong').textContent = load === '—' ? load : `${load} ${row?.dataset.loadUnit === 'kg' ? 'kg' : 'lb'}`
       item.querySelector('.lmf-pyramid-plan-rpe strong').textContent = value(row, '.rpe-input')
       item.querySelector('.lmf-pyramid-plan-state').textContent = done ? '✓' : current ? 'CURRENT' : '○'
     })

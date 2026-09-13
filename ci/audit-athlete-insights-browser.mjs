@@ -97,7 +97,12 @@ try {
     await trend.screenshot({ path: path.join(out, `progress-load-trend-${width}.png`) })
     await trend.locator('summary').click()
     assert.equal(await panel.evaluate(el => el.scrollWidth <= el.clientWidth + 1), true, 'Detail views fit the panel')
-    await panel.locator('[data-ai-session-details] > summary').click()
+    const sessionDetails = panel.locator('[data-ai-session-details]')
+    const sessionSummary = sessionDetails.locator(':scope > summary')
+    await sessionSummary.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }))
+    await sessionSummary.focus()
+    await sessionSummary.press('Enter')
+    assert.equal(await sessionDetails.getAttribute('open'), '', 'Session details opens through native keyboard interaction')
     if (await dismiss.isVisible()) await dismiss.click()
     await panel.screenshot({ path: path.join(out, `progress-${width}.png`) })
     const range = page.locator('[data-pg-range]'); await range.selectOption('7d')
@@ -143,7 +148,7 @@ try {
     assert.equal(await page.locator('#lmf-advanced-progress, #lmf-athlete-coach').count(), 0)
     if (process.env.CHECK_PROGRAM_ORDER === '1') {
       await page.goto('http://127.0.0.1:4173/#/program', { waitUntil: 'domcontentloaded' })
-      await page.locator('.black-crown-weeks-compact').waitFor()
+      await page.locator('.black-crown-weeks-compact').waitFor({state:'attached'})
       const ordered = await page.evaluate(() => {
         const cf = document.querySelector('[data-program-week-drawer]'), cm = document.querySelector('.maintenance-weeks-compact'), bc = document.querySelector('.black-crown-panel')
         return Boolean(cf && cm && bc && (cf.compareDocumentPosition(cm) & Node.DOCUMENT_POSITION_FOLLOWING) && (cm.compareDocumentPosition(bc) & Node.DOCUMENT_POSITION_FOLLOWING))

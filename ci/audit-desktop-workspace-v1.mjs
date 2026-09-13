@@ -164,10 +164,10 @@ try {
     return { position: style.position, left: style.left, width: rect.width, height: rect.height }
   })
   report.observations.desktopRail = rail
-  if (rail && rail.position === 'fixed' && rail.width >= 155 && rail.width <= 205 && rail.height >= 850) {
-    pass('Desktop navigation rail', `${Math.round(rail.width)}×${Math.round(rail.height)}px fixed rail`)
+  if (rail && rail.position === 'fixed' && rail.width >= 1535 && rail.height >= 65 && rail.height <= 85) {
+    pass('Desktop reference navigation', `${Math.round(rail.width)}×${Math.round(rail.height)}px fixed header`)
   } else {
-    fail('Desktop navigation rail', JSON.stringify(rail))
+    fail('Desktop reference navigation', JSON.stringify(rail))
   }
 
   if (await desktop.locator('.lmf-desktop-brand').isVisible().catch(() => false)) pass('Desktop LetMeFly brand reuse')
@@ -210,7 +210,7 @@ try {
     fail('Option 3 three-column Train workspace', JSON.stringify(workspace))
   }
 
-  const usableWidth = workspace ? workspace.innerWidth - (rail?.width || 0) : 0
+  const usableWidth = workspace ? workspace.innerWidth : 0
   if (workspace && usableWidth > 0 && workspace.width >= usableWidth * .82) {
     pass('Desktop Train uses the browser work area', `${Math.round(workspace.width)}px / ${Math.round(usableWidth)}px usable`)
   } else {

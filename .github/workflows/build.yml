@@ -2,7 +2,7 @@ name: LetMeFly Command V2 Build Audit
 
 on:
   push:
-    branches: [main]
+    branches: [main, release/ui-redesign-2026-09-12]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -11,6 +11,69 @@ permissions:
   contents: read
 
 jobs:
+  preview-interaction-diagnostic:
+    if: github.event_name == 'pull_request' && github.head_ref == 'release/ui-redesign-2026-09-12'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Audit the updated deploy preview with disposable browser data
+        env:
+          LMF_AUDIT_BASE_URL: https://deploy-preview-${{ github.event.number }}--let-me-fly.netlify.app
+          LMF_AUDIT_TRACE: '1'
+        run: |
+          mkdir -p .build-src/letmefly_app
+          npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+          cat overlays/auth/password-access-ui-v1.ts overlays/auth/password-registration-v1.mjs overlays/auth/password-recovery-ui-v1.ts overlays/auth/password-recovery-v1.mjs ci/apply-password-access-v1.sh | sha256sum | cut -d ' ' -f 1 > /tmp/expected-password-access-version.txt
+          preview_matches_head() {
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-train-reference-v1.js?audit=$GITHUB_SHA" -o /tmp/preview-train.js &&
+            cmp -s /tmp/preview-train.js overlays/ui-command-v2/batch-ar/home-train-reference-v1.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/train-block-cards-v1.css?audit=$GITHUB_SHA" -o /tmp/preview-train-cards.css &&
+            cmp -s /tmp/preview-train-cards.css overlays/ui-command-v2/batch-as/train-block-cards-v1.css &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/brand-display-v1.css?audit=$GITHUB_SHA" -o /tmp/preview-brand.css &&
+            cmp -s /tmp/preview-brand.css overlays/ui-command-v2/batch-as/brand-display-v1.css &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/home-reference-v3.js?audit=$GITHUB_SHA" -o /tmp/preview-home.js &&
+            cmp -s /tmp/preview-home.js overlays/ui-command-v2/batch-ac/home-reference-v3.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/exercise-art-cloudinary.js?audit=$GITHUB_SHA" -o /tmp/preview-private-art.js &&
+            cmp -s /tmp/preview-private-art.js overlays/ui-command-v2/batch-n/exercise-art-cloudinary.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/desktop-workspace-v1.js?audit=$GITHUB_SHA" -o /tmp/preview-desktop.js &&
+            cmp -s /tmp/preview-desktop.js overlays/ui-command-v2/batch-aj/desktop-workspace-v1.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/desktop-workspace-v2-polish.js?audit=$GITHUB_SHA" -o /tmp/preview-desktop-polish.js &&
+            cmp -s /tmp/preview-desktop-polish.js overlays/ui-command-v2/batch-aj/desktop-workspace-v2-polish.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/pwa-install.js?audit=$GITHUB_SHA" -o /tmp/preview-pwa-install.js &&
+            cmp -s /tmp/preview-pwa-install.js overlays/ui-command-v2/batch-s/pwa-install.js &&
+            curl -fsS "$LMF_AUDIT_BASE_URL/ui/password-access-version.txt?audit=$GITHUB_SHA" -o /tmp/preview-password-access-version.txt &&
+            cmp -s /tmp/preview-password-access-version.txt /tmp/expected-password-access-version.txt
+          }
+          for attempt in {1..120}; do
+            if preview_matches_head; then
+              break
+            fi
+            sleep 2
+          done
+          cmp /tmp/preview-train.js overlays/ui-command-v2/batch-ar/home-train-reference-v1.js
+          cmp /tmp/preview-train-cards.css overlays/ui-command-v2/batch-as/train-block-cards-v1.css
+          cmp /tmp/preview-brand.css overlays/ui-command-v2/batch-as/brand-display-v1.css
+          cmp /tmp/preview-home.js overlays/ui-command-v2/batch-ac/home-reference-v3.js
+          cmp /tmp/preview-private-art.js overlays/ui-command-v2/batch-n/exercise-art-cloudinary.js
+          cmp /tmp/preview-desktop.js overlays/ui-command-v2/batch-aj/desktop-workspace-v1.js
+          cmp /tmp/preview-desktop-polish.js overlays/ui-command-v2/batch-aj/desktop-workspace-v2-polish.js
+          cmp /tmp/preview-pwa-install.js overlays/ui-command-v2/batch-s/pwa-install.js
+          cmp /tmp/preview-password-access-version.txt /tmp/expected-password-access-version.txt
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium)"
+          node ci/audit-locked-ui-preview-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: existing-preview-interaction-diagnostic
+          path: .build-src/letmefly_app/LOCKED_UI_PREVIEW_AUDIT
+          retention-days: 7
+          if-no-files-found: warn
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -197,6 +260,7 @@ jobs:
           run_browser_audit workout-mobile-scroll node ci/audit-workout-mobile-scroll-browser.mjs
           run_browser_audit workout-day3-fidelity node ci/audit-workout-day3-fidelity-browser.mjs
           run_browser_audit official-brand-browser-v2 node ci/audit-official-brand-browser-v2.mjs
+          LMF_AUDIT_TRACE=1 run_browser_audit locked-ui-preview node ci/audit-locked-ui-preview-browser.mjs
           run_browser_audit desktop-workspace-v1 node ci/audit-desktop-workspace-v1.mjs
           run_browser_audit coach-decisions node ci/audit-coach-decisions-browser.mjs
           CHECK_PROGRAM_ORDER=1 run_browser_audit athlete-insights node ci/audit-athlete-insights-browser.mjs
@@ -255,6 +319,7 @@ jobs:
             .build-src/letmefly_app/WORKOUT_DAY3_FIDELITY_AUDIT
             .build-src/letmefly_app/OFFICIAL_BRAND_AUDIT
             .build-src/letmefly_app/DESKTOP_WORKSPACE_AUDIT
+            .build-src/letmefly_app/LOCKED_UI_PREVIEW_AUDIT
           if-no-files-found: warn
           retention-days: 14
 

@@ -151,19 +151,36 @@
 
     root.classList.add('lmf-more-v1')
     head.classList.add('lmf-more-hero-v1')
-    head.innerHTML = `
+    if (head.dataset.lmfMoreHero !== 'true') {
+      head.dataset.lmfMoreHero = 'true'
+      head.innerHTML = `
       <div class="lmf-more-hero-copy-v1">
         <div class="page-kicker">Everything else</div>
         <h1>MORE</h1>
         <p>Everything else you need to stay on course.</p>
       </div>
       <div class="lmf-more-hero-motto-v1"><strong>Same discipline.<br>More tools.<br>Stronger results.</strong><span aria-hidden="true">♛</span></div>`
+    }
 
     const sidebar = makeSidebar(root, head)
     grid.classList.add('lmf-more-grid-v1')
     if (grid.dataset.lmfMoreV1 !== 'true') {
       grid.dataset.lmfMoreV1 = 'true'
       grid.innerHTML = CARDS.map(cardMarkup).join('')
+    }
+
+    // Keep the native Bar Loader in the Utilities tile, preserving its owner
+    // and action instead of adding an unrelated tenth tile to the locked grid.
+    const utilities = grid.querySelector(':scope > a[data-lmf-more-key="utilities"]')
+    const loader = grid.querySelector('[data-lmf-bar-loader-open="more"]')
+    if (utilities instanceof HTMLAnchorElement && loader instanceof HTMLButtonElement) {
+      const tile = document.createElement('div')
+      tile.className = 'lmf-more-card-v1 lmf-more-utilities-v2'
+      tile.dataset.lmfMoreKey = 'utilities'
+      utilities.replaceWith(tile)
+      utilities.classList.remove('more-card', 'lmf-more-card-v1')
+      utilities.classList.add('lmf-more-utilities-link-v2')
+      tile.append(utilities, loader)
     }
 
     if (brand instanceof HTMLElement) {

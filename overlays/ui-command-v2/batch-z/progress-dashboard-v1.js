@@ -298,12 +298,28 @@
   }
 
   function overview(vault,rows) {
-    const body=vault.body.at(-1),latest=vault.completedSessions[0]
-    return `<div class="lmf-pg-overview">
-      <div class="lmf-pg-summary-grid">${summary('Current Program',programLabel(vault.program),vault.program?.current_phase_key ? String(vault.program.current_phase_key).replace(/-/g,' ') : 'Active training context')}${summary('Completed Sessions',String(vault.completedSessions.length),rangeLabel())}${summary('Bodyweight',body?`${formatNumber(body.value)} ${body.unit}`:'—',body?dateLabel(body.date):'No entry found')}${summary('PR / Max Events',String(vault.events.length),rangeLabel())}</div>
-      <div class="lmf-pg-two-col"><article class="lmf-pg-panel"><span class="lmf-pg-kicker">PROGRAM MOMENTUM</span><h3>Training Snapshot</h3><div class="lmf-pg-momentum"><strong>${vault.completedSessions.length}</strong><span>completed sessions</span></div><p>${latest?`Latest: ${dateLabel(latest.completed_at||latest.started_at)} · ${esc(latest.workout_name||'Workout')}${latest.week_number?` · W${esc(latest.week_number)}`:''}.`:'No completed session was found in the selected range.'}</p></article><article class="lmf-pg-panel insight"><span class="lmf-pg-kicker">COACH INSIGHT</span><h3>What the data says</h3><p>${esc(insight(rows,vault))}</p><div class="lmf-pg-milestone"><small>NEXT MILESTONE</small><strong>${esc(milestone(rows))}</strong></div></article></div>
-      <article class="lmf-pg-panel"><span class="lmf-pg-kicker">STRENGTH SNAPSHOT</span><h3>Main Lift Status</h3><div class="lmf-pg-strength-strip">${rows.slice(0,7).map(lift=>{const t=trendFor(lift);return `<span><b>${esc(lift.name)}</b><strong>${loadText(lift.displayEstimate||lift.actual1rm,lift.displayEstimate?lift.displayEstimateUnit:lift.unit)}</strong><small class="is-${t.dir}">${t.dir==='up'?'↑':t.dir==='down'?'↓':'→'} ${esc(t.label)}</small></span>`}).join('')}</div></article>
-      <div class="lmf-pg-two-col"><article class="lmf-pg-panel chart"><span class="lmf-pg-kicker">BODYWEIGHT TREND</span><h3>${esc(rangeLabel())}</h3>${bodyChart(vault.body)}</article><article class="lmf-pg-panel"><span class="lmf-pg-kicker">RECENT PRs</span><h3>Latest Performance Events</h3>${vault.events.length?`<div class="lmf-pg-mini-feed">${vault.events.slice(0,4).map(x=>`<div><span>${esc(x.liftName)}</span><b>${x.value?loadText(x.value,x.unit):esc(x.display||'PR')}</b><small>${dateLabel(x.date)}</small></div>`).join('')}</div>`:'<div class="lmf-pg-empty compact">No PR or max events in this range yet.</div>'}</article></div>
+    const body=vault.body.at(-1)
+    const metric=(key,label,value,glyph,detail='')=>`<article class="lmf-pg-summary-card" data-reference-metric="${key}"><i aria-hidden="true">${glyph}</i><div><span>${label}</span><strong>${esc(value)}</strong><small>${esc(detail)}</small></div></article>`
+    const heading=(name,tab)=>`<header><h3>${name}</h3><button type="button" data-reference-progress-view="${tab}">View Details ›</button></header>`
+    const selected=['back-squat','bench-press','deadlift','overhead-press'].map(id=>rows.find(x=>x.id===id)).filter(Boolean)
+    const conditioning=new Map();vault.conditioning.forEach(x=>conditioning.set(x.name,(conditioning.get(x.name)||0)+1))
+    return `<div class="lmf-pg-overview lmf-reference-overview">
+      <div class="lmf-pg-summary-grid">
+        ${metric('workouts','Total Workouts',String(vault.completedSessions.length),'▥',rangeLabel())}
+        ${metric('days','Training Days','—','↗','Completed training days')}
+        ${metric('volume','Total Volume','—','◉','Logged load × reps')}
+        ${metric('weight','Current Weight',body?`${formatNumber(body.value)} ${body.unit}`:'—','▣',body?dateLabel(body.date):'No entry recorded')}
+        ${metric('bodyfat','Body Fat','—','◕','Not recorded')}
+        ${metric('streak','Streak','—','♨','Consecutive training days')}
+      </div>
+      <div class="lmf-reference-analytics-grid">
+        <article class="lmf-pg-panel lmf-reference-strength">${heading('Strength Progress','strength')}<div class="lmf-pg-strength-strip">${selected.map(lift=>{const t=trendFor(lift);return `<span><b>${esc(lift.name)}</b><strong>${loadText(lift.displayEstimate||lift.actual1rm,lift.displayEstimate?lift.displayEstimateUnit:lift.unit)}</strong><small>TM ${loadText(lift.tmValue,lift.tmUnit)}</small>${spark(t.points,140,28)}</span>`}).join('')}</div><small class="lmf-reference-caption">Estimated / tested strength · program Training Maxes</small></article>
+        <article class="lmf-pg-panel lmf-reference-body">${heading('Body Composition','body')}<div class="lmf-reference-body-main"><div class="lmf-reference-weight-ring"><strong>${body?`${formatNumber(body.value)} ${body.unit}`:'—'}</strong><small>Current Weight</small></div><dl><dt>Body Fat</dt><dd data-reference-bodyfat>—</dd><dt>Lean Mass</dt><dd data-reference-leanmass>—</dd><dt>Fat Mass</dt><dd data-reference-fatmass>—</dd></dl></div><div class="lmf-reference-body-chart">${bodyChart(vault.body)}</div></article>
+        <article class="lmf-pg-panel lmf-reference-consistency">${heading('Training Consistency','overview')}<div class="lmf-reference-calendar" aria-label="Completed training days"></div><small class="lmf-reference-calendar-caption">Saved sessions in this period</small><div class="lmf-reference-calendar-legend"><span>Rest / no session</span><span>Completed workout</span></div></article>
+        <article class="lmf-pg-panel lmf-reference-conditioning">${heading('Conditioning','conditioning')}<div class="lmf-reference-conditioning-cards">${[...conditioning.entries()].slice(0,3).map(([name,count])=>`<div><span>${esc(name)}</span><strong>${count}</strong><small>logged exposures</small></div>`).join('')||'<p class="lmf-pg-empty compact">Your conditioning work will appear here as you log it.</p>'}</div></article>
+        <article class="lmf-pg-panel insight lmf-reference-milestones">${heading('Milestones & Roadmap','prs')}<div class="lmf-reference-program"><span>CURRENT PROGRAM</span><strong>${esc(programLabel(vault.program))}</strong></div><div class="lmf-pg-milestone"><small>NEXT MILESTONE</small><strong>${esc(milestone(rows))}</strong></div><details class="lmf-reference-coach-insight"><summary>COACH INSIGHT</summary><p>${esc(insight(rows,vault))}</p></details></article>
+        <article class="lmf-pg-panel lmf-reference-records">${heading('Personal Records','prs')}${vault.events.length?`<div class="lmf-pg-mini-feed">${vault.events.slice(0,4).map(x=>`<div><span>${esc(x.liftName)}</span><b>${x.value?loadText(x.value,x.unit):esc(x.display||'PR')}</b><small>${dateLabel(x.date)}</small></div>`).join('')}</div>`:'<div class="lmf-pg-empty compact">Personal records appear here when saved.</div>'}</article>
+      </div>
     </div>`
   }
   function strengthView(rows) {
@@ -335,6 +351,9 @@
   function tab(id,label){return `<button type="button" role="tab" data-pg-tab="${id}" aria-selected="${activeTab===id?'true':'false'}">${label}</button>`}
 
   function organizeNativeProgress(root) {
+    // The core history render can finish after the dashboard is already loaded.
+    // Reconcile its presentation independently of the cached analytics render.
+    const legacy=root.querySelector('#lmf-strength-maxes-progress');if(legacy)legacy.hidden=true
     const native=root.querySelector('#progress-content'); if(!native)return
     native.classList.add('lmf-pg-native-content')
     native.querySelectorAll(':scope > .progress-score-grid,:scope > .strength-progress-card,:scope > .v2-analytics').forEach(el=>el.classList.add('lmf-pg-native-duplicate'))
@@ -345,6 +364,8 @@
       native.appendChild(tools)
     }
     const body=tools.querySelector('.lmf-pg-native-tools-body')
+    const maxEditor=root.querySelector('#lmf-strength-maxes')
+    if(maxEditor&&!body.contains(maxEditor))body.appendChild(maxEditor)
     const tm=native.querySelector(':scope > .tm-board')
     if(tm)body.appendChild(tm)
     const titles=[...native.querySelectorAll(':scope > .section-title')]
@@ -370,7 +391,6 @@
     const rows=mergedLifts(vault)
     el.dataset.loaded='1'
     el.innerHTML=`<header class="lmf-pg-header"><div><span>ATHLETE PERFORMANCE</span><h2>PROGRESS DASHBOARD</h2><p>${vault.source==='indexeddb'?'Private vault data':'Private strength data'} first. Calculated values stay labeled and never rewrite programming.</p></div><select data-pg-range aria-label="Progress date range"><option value="7d" ${range==='7d'?'selected':''}>7 DAYS</option><option value="30d" ${range==='30d'?'selected':''}>30 DAYS</option><option value="all" ${range==='all'?'selected':''}>ALL TIME</option></select></header><nav class="lmf-pg-tabs" role="tablist" aria-label="Progress sections">${tab('overview','OVERVIEW')}${tab('strength','STRENGTH')}${tab('body','BODY')}${tab('conditioning','CONDITIONING')}${tab('prs','PRs')}</nav><div class="lmf-pg-tabbody" role="tabpanel" data-pg-panel="${activeTab}">${activeTab==='overview'?overview(vault,rows):activeTab==='strength'?strengthView(rows):activeTab==='body'?bodyView(vault):activeTab==='conditioning'?conditioningView(vault):prView(vault.events)}</div>`
-    const legacy=root.querySelector('#lmf-strength-maxes-progress');if(legacy)legacy.hidden=true
     organizeNativeProgress(root)
     el.querySelectorAll('[data-pg-tab]').forEach(button=>button.addEventListener('click',()=>{const next=button.dataset.pgTab;if(!TABS.includes(next)||next===activeTab)return;activeTab=next;writeSetting(TAB_KEY,next);queueRender(false)}))
     el.querySelector('[data-pg-range]')?.addEventListener('change',event=>{const next=event.target.value;if(!RANGES.includes(next))return;range=next;writeSetting(RANGE_KEY,next);vaultCache.at=0;queueRender(true)})
@@ -379,7 +399,13 @@
   }
 
   function queueRender(force=false){if(force)vaultCache.at=0;clearTimeout(timer);timer=setTimeout(()=>void render(force),force?30:160)}
-  function queueScan(){if(scanQueued)return;scanQueued=true;requestAnimationFrame(()=>{scanQueued=false;if(progressHeading())queueRender(false)})}
+  function queueScan(){if(scanQueued)return;scanQueued=true;requestAnimationFrame(()=>{
+    scanQueued=false
+    const heading=progressHeading();if(!heading)return
+    const root=progressRoot(heading)
+    if(root&&document.getElementById(ROOT_ID)?.dataset.loaded==='1')organizeNativeProgress(root)
+    queueRender(false)
+  })}
   function boot(){
     queueScan()
     new MutationObserver(records=>{const selfOnly=records.every(r=>r.target instanceof Element && (r.target.closest(`#${ROOT_ID}`)||r.target.closest('#lmf-pg-native-tools')));if(!selfOnly)queueScan()}).observe(document.body,{childList:true,subtree:true})

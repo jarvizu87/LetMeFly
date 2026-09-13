@@ -227,7 +227,7 @@
     if (!topbar || topbar.querySelector('.lmf-home-topbar-shell')) return
     const shell = document.createElement('div')
     shell.className = 'lmf-home-topbar-shell'
-    shell.innerHTML = `<div class="lmf-home-brand-lockup"><img src="/app-icon-official-v6.svg?v=6" alt="" aria-hidden="true"><div><strong>LetMe<span>Fly</span></strong><small>STRENGTH BUILDS FREEDOM</small></div></div>`
+    shell.innerHTML = `<div class="lmf-home-brand-lockup"><img src="/brand/letmefly-logo-display-512.png?v=9" alt="" aria-hidden="true"><div><strong>LetMe<span>Fly</span></strong><small>STRENGTH BUILDS FREEDOM</small></div></div>`
     topbar.appendChild(shell)
   }
 
@@ -328,8 +328,9 @@
         try {
           if (blocked || revision !== summaryRevision) { resolve(null); return }
           if (!db.objectStoreNames.contains('workoutSessions')) { resolve(unavailable()); return }
-          const [athletes,sessions,prs,body,tms] = await Promise.all([
-            idbAll(db,'athletes'), idbAll(db,'workoutSessions'), idbAll(db,'personalRecords'), idbAll(db,'bodyweightEntries'), idbAll(db,'trainingMaxHistory')
+          const [athletes,sessions,prs,body,tms,readiness,sets,exercises,prefs] = await Promise.all([
+            idbAll(db,'athletes'), idbAll(db,'workoutSessions'), idbAll(db,'personalRecords'), idbAll(db,'bodyweightEntries'), idbAll(db,'trainingMaxHistory'),
+            idbAll(db,'readinessEntries'), idbAll(db,'workoutSets'), idbAll(db,'workoutExercises'), idbAll(db,'athletePreferences')
           ])
           const live = (rows) => rows.filter((row) => row && !row.deleted_at)
           // Match the app's getActiveAthlete() selection and keep history
@@ -348,12 +349,36 @@
           const name = athlete?.display_name || athlete?.name || athlete?.first_name || 'Athlete'
           if (revision !== summaryRevision) { resolve(null); return }
           const completedTime = (row) => Date.parse(row.completed_at || '') || 0
+          const latestCompleted = [...completed].sort((a,b) => completedTime(b) - completedTime(a))[0] || null
+          const latestReadiness = live(readiness).filter(row => row.athlete_id === athleteId)
+            .sort((a,b) => (Date.parse(b.recorded_at || b.created_at) || 0) - (Date.parse(a.recorded_at || a.created_at) || 0))[0] || null
+          const weightUnit = live(prefs).find(row => row.athlete_id === athleteId)?.weight_unit === 'kg' ? 'kg' : 'lb'
+          const exerciseMap = new Map(live(exercises).filter(row => row.athlete_id === athleteId).map(row => [row.id,row]))
+          const savedSets = live(sets).filter(row => row.athlete_id === athleteId && row.workout_session_id === latestCompleted?.id && row.completed === true)
+          // Rep volume and the heaviest rep set use completed observations only.
+          // Distance/time prescriptions never become rep volume, even in legacy rows.
+          const repSets = savedSets.filter(row => {
+            const perf = row.performance_data || {}
+            const metric = [perf.actualMetricKind,perf.metricKind,perf.programmedReps].filter(Boolean).join(' ')
+            return !String(perf.distance ?? '').trim() && !String(perf.duration ?? '').trim()
+              && !/distance|duration|\d\s*(?:sec(?:onds?)?|min(?:utes?)?|hrs?|meters?|metres?|yards?|yd|ft|m)\b/i.test(metric)
+              && ['kg','lb'].includes(row.load_unit) && Number(row.reps) > 0 && Number(row.load_value) > 0 && exerciseMap.has(row.workout_exercise_id)
+          }).map(row => ({...row,displayLoad:Number(row.load_value) * (row.load_unit === weightUnit ? 1 : row.load_unit === 'kg' && weightUnit === 'lb' ? 2.2046226218 : row.load_unit === 'lb' && weightUnit === 'kg' ? 1 / 2.2046226218 : 1)}))
+          const topSet = [...repSets].sort((a,b) => b.displayLoad - a.displayLoad || Number(b.reps) - Number(a.reps))[0]
+          const rpes = savedSets.map(row => row.rpe == null || row.rpe === '' ? NaN : Number(row.rpe)).filter(value => Number.isFinite(value) && value >= 1 && value <= 10)
+          const format = value => new Intl.NumberFormat(undefined,{maximumFractionDigits:1}).format(value)
           summaryCache = {
             name,
             initials:initials(name),
             tracked:new Set(tmRows.map((row) => row.exercise_key).filter(Boolean)).size,
             workouts:completed.length,
-            latestCompleted:[...completed].sort((a,b) => completedTime(b) - completedTime(a))[0] || null,
+            latestCompleted,
+            latestReadiness,
+            performanceMetrics:{
+              volume:repSets.length ? `${format(repSets.reduce((sum,row) => sum + row.displayLoad * Number(row.reps),0))} ${weightUnit}·reps` : '—',
+              top:topSet ? `${exerciseMap.get(topSet.workout_exercise_id).exercise_name_snapshot || exerciseMap.get(topSet.workout_exercise_id).exercise_key} · ${format(topSet.displayLoad)} ${weightUnit} × ${topSet.reps}` : '—',
+              rpe:rpes.length ? format(rpes.reduce((sum,value) => sum + value,0) / rpes.length) : '—'
+            },
             prs:owned(prs).length,
             bodyweight:weights[0] ? `${Math.round(weights[0].value * 10) / 10} ${weights[0].unit}` : '—'
           }
@@ -385,6 +410,14 @@
       setStat('workouts', data.workouts)
       setStat('prs', data.prs)
       setStat('bodyweight', data.bodyweight)
+      for (const key of ['sleep_quality','energy','soreness','stress']) {
+        const value = data.latestReadiness?.[key]
+        setIfChanged(shell.querySelector(`[data-lmf-home-readiness="${key}"]`), value != null && Number.isFinite(Number(value)) ? `${value}/5` : '—')
+      }
+      const readinessDate = data.latestReadiness?.recorded_at || data.latestReadiness?.created_at
+      const date = new Date(readinessDate || '')
+      setIfChanged(shell.querySelector('[data-lmf-home-readiness-date]'), Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric'}).format(date) : 'Check in')
+      for (const key of ['volume','top','rpe']) setIfChanged(shell.querySelector(`[data-lmf-home-performance="${key}"]`),data.performanceMetrics[key])
     } finally {
       reading = false
       if (isHomeRoute() && (revision !== summaryRevision || previousStatus !== summaryStatus)) queue()

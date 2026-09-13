@@ -29,7 +29,9 @@ try {
     await enforcePolicy(context)
     await page.goto(base)
     await page.waitForFunction(() => window.LetMeFlyExerciseArt?.version === 2)
-    assert.deepEqual(await page.evaluate(() => window.LetMeFlyExerciseArt.context()), { athleteId:null })
+    const emptyContext=await page.evaluate(() => window.LetMeFlyExerciseArt.context())
+    assert.equal(emptyContext.athleteId,null)
+    assert.equal(emptyContext.hasSession,false)
     assert.deepEqual(await page.evaluate(() => window.LetMeFlyExerciseArt.readCloud('foreign')), [])
     assert.equal(await page.evaluate(() => window.LetMeFlyExerciseArt.readAsset('foreign','squat','unknown','foreign/file.webp')),null)
     report.checks.push('Compiled native private-byte bridge rejects absent/foreign athlete and unissued assets')
@@ -49,7 +51,7 @@ try {
       #media{position:relative;width:360px;height:360px;max-width:100%;background-image:var(--exercise-art);background-size:contain;background-repeat:no-repeat}
       .exercise-card{max-width:360px} .small-previews{display:flex;gap:12px;align-items:center}
       #desktop-tile{width:48px;height:48px}
-      </style></head><body><div id="fixture"><h3>Authenticated private artwork</h3>
+      </style></head><body><div id="fixture"><h3 class="lmf-approved-exercises-hero-v1" style="min-height:0;height:auto;background:none;padding:0">Authenticated private artwork</h3>
       <article class="library-card"><div id="tile" class="library-thumb" data-exercise-art="squat"></div><div class="library-copy"><h3 id="library-name">Squat</h3></div><i>›</i></article>
       <section aria-label="Itinerary previews"><h3 id="itinerary-name">Squat</h3><div class="small-previews">
       <div id="compact-tile" class="lmf-compact-thumb" aria-describedby="itinerary-name" data-exercise-art="squat"></div>
@@ -67,7 +69,7 @@ try {
       const canvas=document.createElement('canvas');canvas.width=canvas.height=1280;const ctx=canvas.getContext('2d');ctx.fillStyle='#9c1830';ctx.fillRect(0,0,1280,1280)
       window.goodBlob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp'))
       canvas.width=canvas.height=100;window.lowBlob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp'))
-      window.LetMeFlyExerciseArt={version:2,context:async()=>({athleteId:window.currentAthlete}),readCloud:async()=>window.cloudRows,readAsset:async(id,key,rowId,path)=>{window.downloads.push({id,key,rowId,path});if(window.hold)await new Promise(resolve=>window.waiting.push(resolve));if(window.missingThird&&path.endsWith('3'.repeat(64)+'.webp'))return null;return window.lowQuality?window.lowBlob:window.goodBlob}}
+      window.LetMeFlyExerciseArt={version:2,context:async()=>({athleteId:window.currentAthlete,configured:true,hasSession:!window.signedOut}),readCloud:async()=>{if(window.failCatalog)throw new Error('Temporary catalog outage');return window.cloudRows},readAsset:async(id,key,rowId,path)=>{window.downloads.push({id,key,rowId,path});if(window.transientFailures>0){window.transientFailures--;throw new Error('Temporary download outage')}if(window.hold)await new Promise(resolve=>window.waiting.push(resolve));if(window.missingThird&&path.endsWith('3'.repeat(64)+'.webp'))return null;return window.lowQuality?window.lowBlob:window.goodBlob}}
       window.snapshot=async()=>{const db=await new Promise(resolve=>{const r=indexedDB.open('letmefly-private');r.onsuccess=()=>resolve(r.result)});const data=await new Promise(resolve=>{const names=[...db.objectStoreNames],tx=db.transaction(names,'readonly'),data={};for(const name of names)tx.objectStore(name).getAll().onsuccess=e=>data[name]=e.target.result;tx.oncomplete=()=>resolve(data)});db.close();return data}
     },{a,b,legacy:envelope(a,{squat:asset('qa/legacy/squat')})})
     const before=await page.evaluate(()=>window.snapshot())
@@ -80,6 +82,21 @@ try {
     const applied=()=>page.waitForFunction(()=>document.querySelector('#tile').style.getPropertyValue('--exercise-art').includes('blob:'))
     await setRows([row(a,'squat')]);await applied()
     assert.equal(await page.evaluate(()=>window.downloads.length),1,'repeated DOM tiles share the exact asset download')
+    await page.evaluate(()=>{window.signedOut=true;window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))})
+    await page.getByText('Sign in to load your private exercise pictures.',{exact:true}).waitFor()
+    assert.equal(await page.locator('#tile').evaluate(el=>el.style.getPropertyValue('--exercise-art')),'','Signed-out state clears private pictures immediately')
+    assert.equal(await page.getByRole('link',{name:'Open Profile',exact:true}).getAttribute('href'),'#/profile')
+    assert.equal(await page.evaluate(()=>window.downloads.length),1,'The sign-in notice does not initiate private downloads')
+    await page.evaluate(()=>{window.signedOut=false;window.transientFailures=2;window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))})
+    await applied()
+    assert.equal(await page.evaluate(()=>window.downloads.length),4,'Two transient download failures recover automatically on the third attempt')
+    assert.equal(await page.locator('.lmf-exercise-art-status').count(),0,'Successful recovery removes the error notice')
+    await page.evaluate(()=>{window.failCatalog=true;window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))})
+    await page.getByText('Exercise pictures could not load. Retry the connection.',{exact:true}).waitFor()
+    await page.evaluate(()=>window.failCatalog=false)
+    await page.getByRole('button',{name:'Retry pictures',exact:true}).click()
+    await applied()
+    report.checks.push(`${width}px: signed-out state explains missing private pictures; no unauthorized downloads; transient downloads recover; catalog failures expose a working retry`)
     await page.evaluate(()=>{window.hold=true;window.dispatchEvent(new Event('lmf:exercise-art-context-changed'))})
     await page.waitForFunction(()=>window.waiting.length===1)
     await page.evaluate(({b})=>{window.currentAthlete=b;window.cloudRows=[];window.dispatchEvent(new Event('lmf:exercise-art-context-changed'));window.waiting.splice(0).forEach(resolve=>resolve());window.hold=false},{b})

@@ -42,6 +42,16 @@ bash "$ROOT_DIR/ci/apply-magic-link-auth-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-cloud-bootstrap-v2.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-conflict-recovery-v1.sh" "$TARGET"
 
+# Native password access uses the existing account, session and sync boundaries.
+# No email/SMS request, provider purchase or account mutation occurs at build.
+bash "$ROOT_DIR/ci/apply-password-access-v1.sh" "$TARGET"
+
+# Activate only after the SMS provider and existing account number are verified.
+# No provider subscription, phone binding or account migration occurs at build.
+if [[ "${VITE_PHONE_AUTH_ENABLED:-false}" == "true" ]]; then
+  bash "$ROOT_DIR/ci/apply-phone-otp-v1.sh" "$TARGET"
+fi
+
 # The foundational mobile build must already have isolated set-tab centering
 # from page-level vertical scroll. Program overlays may not regress that runtime.
 grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" "$TARGET/public/ui/workout-flow-v1.js"
@@ -61,6 +71,12 @@ bash "$ROOT_DIR/ci/apply-profile-context-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-exercise-art-context-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-barbell-settings-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-workout-recap-v1.sh" "$TARGET"
+# The recap Finish action must await the governed completion/progression transaction
+# instead of firing an unawaited DOM click that can briefly re-render stale Day 1.
+bash "$ROOT_DIR/ci/apply-workout-recap-completion-await-v1.sh" "$TARGET"
+# Five-athlete release hardening: honor the active athlete's weight unit in Workout
+# Mode and Bar Loader without rewriting the immutable source prescription.
+bash "$ROOT_DIR/ci/apply-athlete-weight-unit-v1.sh" "$TARGET"
 
 # Assert the source-level persistence/count boundary before minification. Vite is
 # allowed to rename local identifiers such as refreshedStats in the final bundle.
@@ -73,6 +89,8 @@ grep -Fq "substituted_from_exercise_key: prescribedKey" "$TARGET/src/services/wo
 grep -Fq "updateSubstitutionEquipmentProfile" "$TARGET/src/services/athlete-service.ts"
 grep -Fq "previousExercisePerformance" "$TARGET/src/services/workout-service.ts"
 grep -Fq "substitutionPerformanceLoggedAt" "$TARGET/src/services/workout-service.ts"
+grep -Fq "async finish(sessionId: string)" "$TARGET/src/main.ts"
+grep -Fq "await completeSelectedWorkout()" "$TARGET/src/main.ts"
 
 cd "$TARGET"
 npm run audit:source
@@ -102,4 +120,4 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" di
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Issue #50 workout fidelity + Issue #54 governed workout substitutions + live Review persistence refresh + vertical-scroll isolation: PASS"
+echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"

@@ -73,13 +73,16 @@ try {
     assert.equal(await page.locator('[data-coach-prompt]').count(), 6, 'Every original quick action is retained')
     const layout = await page.evaluate(() => {
       const rect = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return { x:r.x, y:r.y, right:r.right, bottom:r.bottom, width:r.width, height:r.height } }
-      return { context:rect('.coach-context'), conversation:rect('.lmf-coach-conversation-heading'), composer:rect('.coach-composer'), nav:rect('.navbar'), viewport:innerWidth, scroll:document.documentElement.scrollWidth }
+      return { context:rect('.coach-context'), conversation:rect('.lmf-coach-conversation'), reference:rect('.lmf-coach-reference'), composer:rect('.coach-composer'), nav:rect('.navbar'), viewport:innerWidth, scroll:document.documentElement.scrollWidth }
     })
     assert.ok(layout.scroll <= layout.viewport + 1, 'Coach has no page overflow')
     if (width < 600) {
       assert.ok(layout.context.y < layout.conversation.y, 'Mobile focus precedes the conversation')
       assert.ok(layout.composer.bottom <= layout.nav.y + 1, `Mobile composer clears bottom navigation: ${JSON.stringify(layout)}`)
-    } else assert.ok(layout.context.x > layout.conversation.right, 'Desktop context sits beside the conversation')
+    } else {
+      assert.ok(layout.context.right < layout.conversation.x, 'Desktop context sits to the left of the conversation')
+      assert.ok(layout.reference.x > layout.conversation.right, 'Desktop references sit to the right of the conversation')
+    }
     await page.screenshot({ path: path.join(out, `coach-workspace-${width}.png`) })
     await openEvidence(page)
     await review.waitFor({ state: 'visible' })
@@ -88,7 +91,7 @@ try {
     assert.equal(await coach.locator('[data-ai-profile] img').count(), 0)
     const before = await snapshot(page)
     const storageBefore = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))
-    await page.getByRole('button', { name: 'Today’s plan', exact: true }).click()
+    await page.getByRole('button', { name: 'What are we doing today?', exact: true }).click()
     assert.equal(await page.locator('.lmf-coach-question p').innerText(), 'What are we doing today?')
     assert.match(await page.locator('#coach-answer').innerText(), /Crownforge|STRENGTH|Session|session|squat|Squat/)
     const question = page.getByRole('textbox', { name: 'Ask your coach', exact: true })

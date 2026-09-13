@@ -1,0 +1,46 @@
+/* Display the exact approved logo at a readable size. No new image derivative. */
+/* The optional host feedback drawer is blocked by the app's CSP. It otherwise
+   covers the bottom navigation with an error frame in installed previews. */
+body>[data-netlify-deploy-id][data-netlify-site-id]:has(iframe[title="Netlify Drawer"]){display:none!important}
+html body .topbar .brand-mark.lmf-official-brand-mark{
+  width:52px!important;height:52px!important;flex:0 0 52px!important;
+}
+html body .topbar .brand-mark.lmf-official-brand-mark img{
+  width:52px!important;height:52px!important;max-width:none!important;object-fit:contain!important;
+}
+html body .topbar .brand{gap:10px!important;min-width:0!important}
+html body .topbar{min-height:72px!important}
+html body.lmf-home-ref3-active .lmf-home-brand-lockup>img{
+  display:block!important;width:64px!important;height:64px!important;flex:0 0 64px!important;
+  max-width:none!important;object-fit:contain!important;filter:none!important;
+}
+html body.lmf-home-ref3-active .lmf-home-brand-lockup{gap:8px!important}
+
+/* The native first-run form retains its fields and buttons. */
+html body .modal .brand:has(.lmf-official-brand-mark){
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  gap:10px!important;text-align:center!important;
+}
+html body .modal .brand-mark.lmf-official-brand-mark,
+html body .modal .brand-mark.lmf-official-brand-mark img{
+  width:104px!important;height:104px!important;max-width:none!important;flex:none!important;
+}
+
+/* Native app rendering replaces this initial #app content as soon as it is ready.
+   There is no timeout, overlay dismissal, or change to startup/authentication. */
+#app>.lmf-app-opening{
+  min-height:100vh;min-height:100dvh;width:100%;box-sizing:border-box;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;padding:24px;background:#090b10;color:#f2edf7;text-align:center;
+}
+.lmf-app-opening>img{display:block;width:clamp(160px,48vw,192px);height:auto;aspect-ratio:1;object-fit:contain}
+.lmf-app-opening>strong{font:750 22px/1.2 system-ui;letter-spacing:.15em}
+.lmf-app-opening>span{font:500 10px/1.5 system-ui;letter-spacing:.17em;color:#a5a2b0}
+
+@media(min-width:1100px){
+  html[data-lmf-desktop-ui="true"] .navbar .lmf-desktop-brand{width:258px!important;min-width:238px!important;min-height:76px!important}
+  html[data-lmf-desktop-ui="true"] .navbar .brand-mark.lmf-official-brand-mark,
+  html[data-lmf-desktop-ui="true"] .navbar .brand-mark.lmf-official-brand-mark img{
+    width:64px!important;height:64px!important;max-width:none!important;flex:0 0 64px!important;
+  }
+}

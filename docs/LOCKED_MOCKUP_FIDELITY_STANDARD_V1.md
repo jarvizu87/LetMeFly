@@ -87,11 +87,18 @@ Mockup sample data is illustrative only. The live athlete/program data is author
 The final locked-art correction is isolated in:
 
 - `overlays/ui-command-v2/batch-aq/locked-art-fidelity-v1.css`
-- `overlays/ui-command-v2/static/raizen-black-crown-ascension-v1.jpg`
+- `overlays/ui-command-v2/static/raizen-black-crown-ascension-v1.svg`
 - `ci/install-locked-art-fidelity-v1.sh`
 - `ci/audit-locked-art-fidelity-v1.mjs`
 
 The canonical Raizen/Fenrir raster is derived from the approved Raizen Black Crown Ascension reference rather than a generated placeholder or blurred reconstruction.
+
+The SVG embeds the original 530,408-byte, 1229 × 1536 JPEG without recompression.
+`ci/validate-locked-art-source.mjs` verifies the complete decoded bytes against
+SHA-256 `1ca02d23424f2b2f2ded57f9ebce0ebd36c805cd3a778b5929790b2011911e2a`.
+Checking only that an SVG contains an image URL is insufficient: the previous
+wrapper passed that check while its embedded JPEG was corrupt. The image uses revision 2; the final stylesheet and shell cache use revision 4
+to refresh the completed layout corrections for existing installs.
 
 This final layer loads after color harmonization so the locked artwork decisions cannot be silently watered down by earlier generic styling layers.
 

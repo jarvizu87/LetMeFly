@@ -17,8 +17,10 @@
   function profileHero() {
     const hashProfile = location.hash.replace(/^#\//, '').split(/[?#]/)[0] === 'profile'
     if (!hashProfile) return null
-    return [...document.querySelectorAll('.profile-hero')].find(visible)
-      || [...document.querySelectorAll('h1,h2,h3')].find((el) => /^profile$/i.test(text(el.textContent)) && visible(el))
+    // The compact layout hides the native title; its connected route anchor
+    // must still own the dossier so responsive styling cannot unmount the editor.
+    return document.querySelector('.profile-hero')
+      || [...document.querySelectorAll('h1,h2,h3')].find((el) => /^profile$/i.test(text(el.textContent)))
       || null
   }
 
@@ -148,7 +150,7 @@
     if (!db) return null
     try {
       const readinessStore = ['readinessEntries','readinessChecks','readiness'].find((name) => db.objectStoreNames.contains(name))
-      const [athletes, sessions, prs, body, tms, programs, readiness] = await Promise.all([
+      const [athletes, sessions, prs, body, tms, programs, readiness, preferences] = await Promise.all([
         allFrom(db, 'athletes'),
         allFrom(db, 'workoutSessions'),
         allFrom(db, 'personalRecords'),
@@ -156,10 +158,14 @@
         allFrom(db, 'trainingMaxHistory'),
         allFrom(db, 'programInstances'),
         readinessStore ? allFrom(db, readinessStore) : Promise.resolve([]),
+        allFrom(db, 'athletePreferences'),
       ])
       const athlete = latestBy(live(athletes), ['updated_at','created_at'])
       if (!athlete) return null
       const athleteId = athlete.id
+      const preference = latestBy(owned(preferences, athleteId), ['updated_at','created_at'])
+      const weightUnit = preference?.weight_unit === 'kg' || preference?.weight_unit === 'lb'
+        ? preference.weight_unit : text(athlete.weight_unit || athlete.default_weight_unit || 'lb')
       const ownedSessions = owned(sessions, athleteId)
       const completed = ownedSessions.filter((row) => row.status === 'completed' || row.completed_at)
       const weightRows = owned(body, athleteId)
@@ -173,6 +179,7 @@
       return {
         db,
         athlete,
+        weightUnit,
         context: normalizeContext(athlete),
         name: text(athlete.display_name || athlete.name || athlete.first_name || 'Athlete'),
         bodyweight: bodyweightValue(latestWeight, athlete),
@@ -180,6 +187,11 @@
         prs: owned(prs, athleteId).length,
         trackedTms,
         activeProgram,
+        latestCompleted: latestBy(completed, ['completed_at','started_at']),
+        trainingMaxes: [...new Set(tmRows.map(row => row.exercise_key || row.lift_key).filter(Boolean))].map(key => {
+          const row = latestBy(tmRows.filter(item => (item.exercise_key || item.lift_key) === key), ['effective_at','updated_at','created_at']);
+          return {name:String(key).replace(/[_-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), value:row?.tm_value, unit:row?.tm_unit || weightUnit};
+        }),
         readinessCount: readinessRows.length,
         strength: strengthSnapshot(),
       }
@@ -211,11 +223,11 @@
     const existing = document.getElementById(SECTION_ID)
     if (existing) existing.remove()
 
-    const { athlete, context, name, bodyweight, workouts, prs, trackedTms, activeProgram, readinessCount, strength } = vault
+    const { athlete, weightUnit, context, name, bodyweight, workouts, prs, trackedTms, activeProgram, readinessCount, strength, trainingMaxes, latestCompleted } = vault
     const completion = completionScore(name, context)
     const program = programName(activeProgram?.program_key)
     const position = positionText(activeProgram)
-    const unit = text(athlete.default_weight_unit || 'lb')
+    const unit = weightUnit
 
     const section = document.createElement('section')
     section.id = SECTION_ID
@@ -224,22 +236,25 @@
       <div class="lmf-profile-v2-head">
         <div class="lmf-profile-v2-identity">
           <div class="lmf-profile-v2-avatar">${esc(initials(name))}</div>
-          <div><span>ATHLETE INTELLIGENCE</span><h2>${esc(name)}</h2><p>Athlete context used to make LetMeFly more personal and useful.</p></div>
+          <div><span>ATHLETE</span><h2>${esc(name)}</h2><p>“The Work Continues”</p></div>
         </div>
         <div class="lmf-profile-completion" style="--profile-completion:${completion * 3.6}deg"><strong>${completion}%</strong><small>PROFILE</small></div>
       </div>
 
       <div class="lmf-profile-stat-grid">
+        ${stat('◷', 'Age', context.age || '—')}
+        ${stat('↕', 'Height', context.height || '—')}
         ${stat('▰', 'Current Bodyweight', bodyweight)}
-        ${stat('✓', 'Completed Workouts', String(workouts))}
-        ${stat('↔', 'Tracked TMs', trackedTms ? String(trackedTms) : '—')}
-        ${stat('★', 'Personal Records', String(prs))}
+        ${stat('▥', 'Training Experience', context.trainingExperience || '—')}
       </div>
 
       <article class="lmf-profile-program-card">
         <div><span>CURRENT PROGRAM</span><h3>${esc(program)}</h3><p>${esc(position)}</p></div>
         <div class="lmf-profile-program-actions"><a href="#/program">PROGRAM</a><a href="#/train">TRAIN</a></div>
       </article>
+
+      <article class="lmf-profile-tm-sheet"><h3>TRAINING MAXES</h3>${trainingMaxes?.length ? `<div class="lmf-profile-lifts">${trainingMaxes.slice(0,7).map(row=>`<div><span>${esc(row.name)}</span><strong>${row.value == null ? '—' : esc(`${row.value} ${row.unit}`)}</strong></div>`).join('')}</div>` : '<p class="lmf-profile-empty">Training Maxes appear here when recorded.</p>'}</article>
+      <section class="lmf-profile-sheet-footer"><article class="lmf-profile-quick-actions"><h3>QUICK ACTIONS</h3><div><button type="button" data-lmf-profile-edit-scroll>Edit Profile</button><a href="#/progress">Training Maxes</a><a href="#/program">Change Program</a><button type="button" data-lmf-profile-backup-scroll>Data & Backup</button></div></article><article class="lmf-profile-recent-training"><h3>RECENT TRAINING</h3><small>Last Session</small><strong>${latestCompleted ? esc(new Date(latestCompleted.completed_at || latestCompleted.started_at).toLocaleDateString()) : 'No completed session'}</strong><a href="#/progress">View History ›</a></article></section>
 
       <details class="lmf-profile-import lmf-profile-form-card">
         <summary>Import athlete details</summary>
@@ -436,8 +451,10 @@
     rendering = true
     try {
       const vault = await readVault()
-      if (!vault || !profileHero()) return
-      renderDossier(vault, root, anchor)
+      const currentAnchor = profileHero()
+      const currentRoot = profileRoot(currentAnchor)
+      if (!vault || !currentAnchor || !currentRoot) return
+      renderDossier(vault, currentRoot, currentAnchor)
     } finally { rendering = false }
   }
 

@@ -223,57 +223,34 @@ async function auditFuturePreview(page) {
   if (exposedEnabled) fail('Future-day write lock', 'enabled start/readiness action is visible')
   else pass('Future-day write lock')
 
-  const card = page.locator('.preview-card[data-exercise-art]').first()
+  const card = page.locator('.preview-card.lmf-reference-preview-active[data-exercise-art]').first()
   if (!(await card.isVisible().catch(() => false))) {
-    fail('Future-day Day 1 exercise card', 'preview exercise card missing')
+    fail('Future-day integrated exercise card', 'expanded preview exercise is missing')
   } else {
     const visual = await card.evaluate((el) => {
-      const pseudo = getComputedStyle(el, '::before')
-      return {
-        marker: el.getAttribute('data-lmf-preview-day1-style'),
-        width: Number.parseFloat(pseudo.width) || 0,
-        height: Number.parseFloat(pseudo.height) || 0,
-        image: pseudo.backgroundImage || '',
-      }
+      const media = el.querySelector('.lmf-exercise-media')
+      const style = media && getComputedStyle(media)
+      return {before:getComputedStyle(el,'::before').display, position:style?.position, fit:style?.backgroundSize, height:media?.getBoundingClientRect().height}
     })
     const details = card.locator(':scope > .prescription-block')
-    const detailsVisible = await details.isVisible().catch(() => false)
-    const toggleVisible = await firstVisible(card.locator(':scope > .lmf-preview-plan-toggle'))
-    const squareEnough = visual.width >= 250 && visual.height >= 250 && Math.abs(visual.width - visual.height) <= 8
-    if (visual.marker !== 'true') fail('Future-day Day 1 exercise card', `style marker=${visual.marker}`)
-    else if (!squareEnough) fail('Future-day Day 1 exercise card', `hero media ${Math.round(visual.width)}×${Math.round(visual.height)}px`)
-    else if (!visual.image || visual.image === 'none') fail('Future-day Day 1 exercise card', 'hero exercise image not applied')
-    else if (!detailsVisible) fail('Future-day Day 1 exercise card', 'governed prescription is not visible by default')
-    else if (toggleVisible) fail('Future-day Day 1 exercise card', 'legacy VIEW FULL PLAN control is still visible')
-    else pass('Future-day Day 1 exercise card', `${Math.round(visual.width)}×${Math.round(visual.height)}px hero; details open`)
-
-    const logger = card.locator('.lmf-preview-readonly-logger').first()
-    if (!(await logger.isVisible().catch(() => false))) {
-      fail('Future-day set logger parity', 'read-only Day 1-style set logger did not mount')
+    const rows = details.locator(':scope > .prescription-row')
+    const values = await rows.evaluateAll(nodes=>nodes.map(node=>({label:node.querySelector('strong')?.textContent.trim(),detail:node.querySelector('span')?.textContent.trim()})))
+    if (visual.before !== 'none' || visual.position !== 'absolute' || visual.fit !== 'contain' || visual.height > 210) {
+      fail('Future-day integrated exercise card', `unexpected art geometry: ${JSON.stringify(visual)}`)
+    } else if (!(await details.isVisible()) || !values.length || values.some(row=>!row.label||!row.detail)) {
+      fail('Future-day governed prescriptions', 'complete native set labels and prescriptions must remain visible')
     } else {
-      const metrics = await logger.locator('.lmf-preview-metric').evaluateAll((nodes) => nodes.map((node) => ({
-        label: (node.querySelector(':scope > span')?.textContent || '').trim(),
-        value: (node.querySelector('.lmf-preview-stepper strong')?.textContent || '').trim(),
-      })))
-      const labels = metrics.map((x) => x.label.toUpperCase())
-      const loadMetric = metrics.find((x) => x.label.toUpperCase() === 'LOAD')
-      if (!labels.includes('REPS') || !labels.includes('LOAD') || !labels.includes('RPE / RIR')) {
-        fail('Future-day set logger parity', `metric labels=${labels.join(', ')}`)
-      } else if (!loadMetric?.value) {
-        fail('Future-day prescribed load', 'LOAD field is empty')
-      } else {
-        pass('Future-day set logger parity', 'REPS / LOAD / RPE-RIR fields mounted')
-        pass('Future-day prescribed load', `preview shows ${loadMetric.value}`)
-      }
-
-      const steppers = logger.locator('.lmf-preview-stepper button')
-      let allDisabled = (await steppers.count()) > 0
-      for (let i = 0; i < await steppers.count(); i += 1) {
-        if (await steppers.nth(i).isEnabled().catch(() => true)) allDisabled = false
-      }
-      if (!allDisabled) fail('Future-day set logging lock', 'preview stepper control is enabled')
-      else pass('Future-day set logging lock', 'all set steppers are disabled')
+      pass('Future-day integrated exercise card', 'compact art region with native prescription table')
+      pass('Future-day governed prescriptions', `${values.length} original set rows retained`)
     }
+    const writeControls=card.locator('.set-input,[data-action="toggle-set"]')
+    if(await writeControls.count())fail('Future-day set logging lock','live set controls exist in a preview')
+    else pass('Future-day set logging lock','preview has no writable set controls')
+    const steppers=card.locator('.lmf-preview-stepper button')
+    let allDisabled=true
+    for(let i=0;i<await steppers.count();i+=1)if(await steppers.nth(i).isEnabled())allDisabled=false
+    if(!allDisabled)fail('Future-day legacy mirror lock','a hidden legacy mirror is writable')
+    else pass('Future-day legacy mirror lock','any retained legacy mirror stays disabled')
   }
 
   await capture(page, 'Train Future Day Preview')

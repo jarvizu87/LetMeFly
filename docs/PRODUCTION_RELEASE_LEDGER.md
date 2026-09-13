@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Release — approved primary-tab UI redesign
+
+- Date: 2026-09-12
+- Main SHA: `97bcdc1ce8af1dcde96db4ee8b39cd1e3b6eb374`
+- Release scope: publish the approved locked-mockup UI redesign across Home, Train, Program, Progress, Exercises, Coach, Profile, and More, including final black/steel + red-primary / purple-secondary harmonization and the approved Raizen/Fenrir identity treatment.
+- Required CI/audits: PR #90 full nine-workflow validation; integrated `main` Command V2 build/browser audit; Lifecycle Public UI; workout persistence; Home Option 1; cloud sync; Black Crown v2.1; Exercise Intelligence coverage/catalog; and Netlify release policy.
+- Netlify production deploy count expected: 1
+- Notes: release is visual/presentation-focused and preserves governed program prescriptions, workout persistence, private athlete data, Training Max ownership, Exercise Intelligence records, and Coach decision logic. Production publication must occur only through the Git-linked release gate with `[release netlify]` in the merge commit message.
+
 ## Current policy activation
 
 - Date: 2026-09-10

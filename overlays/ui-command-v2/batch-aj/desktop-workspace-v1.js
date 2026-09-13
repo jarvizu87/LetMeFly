@@ -139,7 +139,7 @@
       const cards = activeCards()
       const card = cards[index]
       if (!(card instanceof Element)) return
-      const summary = card.querySelector(':scope > .lmf-compact-summary')
+      const summary = card.querySelector(':scope > .lmf-compact-summary, :scope > .lmf-reference-preview-summary')
       if (summary instanceof HTMLButtonElement) summary.click()
       else {
         const firstControl = card.querySelector('button,[role="button"]')
@@ -182,7 +182,7 @@
   function activeCards() {
     const page = activePage()
     if (!(page instanceof Element)) return []
-    return [...page.querySelectorAll('.exercise-stack > .active-exercise')]
+    return [...page.querySelectorAll('.exercise-stack > .active-exercise, .exercise-stack > .preview-card')]
   }
 
   function cardName(card) {
@@ -192,6 +192,12 @@
   }
 
   function cardPrescription(card) {
+    if (card.classList.contains('preview-card')) {
+      const rows = [...card.querySelectorAll('.prescription-block > .prescription-row')]
+      const first = rows[0]
+      return rows.length > 1 ? `${rows.length} sets • ${text(first?.querySelector('span'))}`
+        : [text(first?.querySelector('strong')), text(first?.querySelector('span'))].filter(Boolean).join(' • ')
+    }
     const compact = text(card.querySelector('.lmf-compact-copy small'))
     if (compact) return compact
     const activeRow = card.querySelector('.set-row.lmf-set-active') || card.querySelector('.set-row[data-set-id]')
@@ -200,7 +206,7 @@
     const load = activeRow.querySelector('.load-input')?.value
     const parts = []
     if (reps) parts.push(`${reps} reps`)
-    if (load) parts.push(`${load} lb`)
+    if (load) parts.push(`${load} ${activeRow.dataset.loadUnit === 'kg' ? 'kg' : 'lb'}`)
     return parts.join(' • ') || 'Programmed work'
   }
 
@@ -210,7 +216,7 @@
   }
 
   function currentCard(cards = activeCards()) {
-    return cards.find((card) => card.classList.contains('lmf-flow-active'))
+    return cards.find((card) => card.classList.contains('lmf-flow-active') || card.classList.contains('lmf-reference-preview-active'))
       || cards.find((card) => !cardComplete(card))
       || cards[0]
       || null
@@ -229,9 +235,19 @@
     const sectionMeta = text(page?.querySelector('.workout-panel-head .muted')) || 'Current programmed section'
     const done = cards.filter(cardComplete).length
 
+    // Retain the actual buttons and picture nodes while native overlays refresh.
+    // Replacing identical markup on every class mutation interrupts both clicks
+    // and image presentation, and feeds the other presentation observers.
+    const signature = JSON.stringify([sectionTitle, sectionMeta, cards.map(card => [
+      cardName(card), cardPrescription(card), card.getAttribute('data-exercise-art'),
+      card === current, cardComplete(card), card.classList.contains('preview-card'),
+    ])])
+    if (list.dataset.lmfFlowSignature === signature) return
+    list.dataset.lmfFlowSignature = signature
+
     head.innerHTML = `
       <div><strong>Workout Flow</strong><small>${sectionTitle}${sectionMeta ? ` • ${sectionMeta}` : ''}</small></div>
-      <span class="lmf-desktop-progress-pill">${cards.length ? `${done}/${cards.length}` : 'PROGRAM'}</span>
+      <span class="lmf-desktop-progress-pill">${current?.classList.contains('preview-card') ? 'PREVIEW' : cards.length ? `${done}/${cards.length}` : 'PROGRAM'}</span>
     `
 
     if (!cards.length) {
@@ -281,7 +297,8 @@
       || text(row?.querySelector('.load-field small'))
       || 'Bar loading updates from the active Load field.'
     const set = text(row?.querySelector('.set-label strong')) || '—'
-    return { load, reps, rpe, plate, set }
+    const loadUnit = row?.dataset.loadUnit === 'kg' ? 'kg' : 'lb'
+    return { load, loadUnit, reps, rpe, plate, set }
   }
 
   function sectionDetails() {
@@ -314,7 +331,7 @@
       </div>
       <div class="lmf-desktop-context-card">
         <small>Current Load</small>
-        <strong>${escapeHtml(details.load)}${details.load !== '—' ? ' lb' : ''}</strong>
+        <strong>${escapeHtml(details.load)}${details.load !== '—' ? ` ${escapeHtml(details.loadUnit)}` : ''}</strong>
         <p>Set ${escapeHtml(details.set)} • ${escapeHtml(details.reps)} reps • RPE/RIR ${escapeHtml(details.rpe)}</p>
         <div class="lmf-desktop-plate-readout">${escapeHtml(details.plate)}</div>
       </div>
@@ -369,6 +386,7 @@
     const panel = state.workspace?.querySelector('.lmf-desktop-context-panel')
     const body = panel?.querySelector('.lmf-desktop-context-body')
     if (!(panel instanceof Element) || !(body instanceof Element)) return
+    if (panel.classList.contains('lmf-desktop-context-panel-v2')) return
 
     panel.querySelectorAll('[data-lmf-desktop-tab]').forEach((button) => {
       const selected = button.getAttribute('data-lmf-desktop-tab') === state.contextTab
@@ -402,8 +420,11 @@
   }
 
   function scheduleRefresh(delay = 0) {
-    window.clearTimeout(state.refreshTimer)
-    state.refreshTimer = window.setTimeout(refreshWorkspace, delay)
+    if (state.refreshTimer) return
+    state.refreshTimer = window.setTimeout(() => {
+      state.refreshTimer = 0
+      refreshWorkspace()
+    }, delay)
   }
 
   function activate() {
@@ -422,6 +443,7 @@
     if (!state.enabled) return
     state.enabled = false
     window.clearTimeout(state.refreshTimer)
+    state.refreshTimer = 0
     unmountWorkspace()
     removeRailExtras()
     delete document.documentElement.dataset.lmfDesktopUi

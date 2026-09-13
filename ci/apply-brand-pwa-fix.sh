@@ -205,6 +205,7 @@ SW
 node --check public/ui/pwa-install.js
 node --check public/ui/pwa-update.js
 node --test "$ROOT_DIR/ci/audit-pwa-update.mjs"
+node --test "$ROOT_DIR/ci/audit-pwa-install.mjs"
 grep -Fq '"id": "/letmefly-pwa-v2"' public/manifest.webmanifest
 grep -Fq 'source=pwa&app=letmefly-v2' public/manifest.webmanifest
 grep -Fq 'letmefly-app-icon-192-v2.png' public/manifest.webmanifest
@@ -230,6 +231,6 @@ grep -Fq "updateViaCache: 'none'" public/ui/pwa-update.js
 grep -Fq 'beforeinstallprompt' public/ui/pwa-install.js
 grep -Fq 'Open in Chrome' public/ui/pwa-install.js
 grep -Fq 'Install LetMeFly' public/ui/pwa-install.js
-grep -Fq "params.get('app') === 'letmefly-v2'" public/ui/pwa-install.js
+grep -Fq 'lmf-pwa-install-dismissed-v1' public/ui/pwa-install.js
 
 echo "LetMeFly official logo + Chromium raster install icons + visible install fallback: PASS"

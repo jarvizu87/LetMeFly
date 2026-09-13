@@ -1,0 +1,248 @@
+/* Approved Home + Train structure. Exercise artwork and all native inputs keep
+   their original sources; this layer controls placement and visual hierarchy. */
+.lmf-reference-card-icon svg,.lmf-reference-stat-icon svg,.lmf-reference-stats-title svg,
+.lmf-reference-home-readiness svg,.lmf-reference-performance-metrics svg,
+.lmf-reference-train-readiness svg,.lmf-reference-upcoming svg{width:24px;height:24px;flex:none}
+
+/* Home: one mountain scene, inset workout, two-by-two intelligence cards. */
+body.lmf-home-ref3-active .lmf-home-reference-final{gap:12px!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-hero{min-height:400px;padding:22px;gap:8px;border-color:#343134}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-hero .lmf-home-v4-greeting{min-height:150px!important;padding:8px 3px 24px!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-greeting>div:first-child>p:last-child{font-family:Georgia,serif;font-style:italic}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-meta,
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-live,
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-score,
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-spark,
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-milestone-icon{display:none!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main{position:relative}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-tagline{display:none!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main::after{content:none!important}
+.lmf-reference-workout-motto{display:block;margin:10px 0 0;color:#c3c6cc;font:12px/1.5 system-ui,sans-serif}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-program-row,
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main h3{max-width:calc(100% - 105px)!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-program-row h2{font-size:clamp(27px,3vw,38px)!important;letter-spacing:-.025em!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-position{margin-top:6px!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main h3{font-size:18px!important;line-height:1.25!important}
+.lmf-reference-command-shield{position:absolute;right:16px;top:12px;width:96px;height:130px;pointer-events:none;filter:drop-shadow(0 0 8px #df082c44)}
+.lmf-reference-command-shield svg{width:100%;height:100%}
+.lmf-reference-command-shield span{position:absolute;top:62px;left:0;right:0;text-align:center;color:#ddd;font:600 9px/1.6 system-ui;letter-spacing:.08em;text-transform:uppercase}
+.lmf-reference-hero-motto{position:absolute;right:24px;top:20px;z-index:3;padding-left:13px;border-left:2px solid #ff1737;color:#c2c8d0;font:11px/1.75 system-ui;letter-spacing:.2em;text-transform:uppercase}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-progress{display:flex;flex-direction:column-reverse;gap:8px;margin-top:16px!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-track{height:10px!important;border-radius:4px!important;background:#1c2b32!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-fill{border-radius:4px!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-progress-head{font-size:11px!important;color:#c5cbd0}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;align-items:stretch}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel{display:flex!important;flex-direction:column!important;min-width:0;min-height:230px!important;padding:16px!important;border-radius:9px!important;gap:0!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-readiness{background:linear-gradient(120deg,#03201b,#051210)!important;border:1px solid #0a493d!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-performance{background:linear-gradient(120deg,#031d2b,#03121b)!important;border:1px solid #103c50!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-milestone{background:linear-gradient(120deg,#24200a,#111109)!important;border:1px solid #514720!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-coach{background:linear-gradient(120deg,#280b10,#100b0e)!important;border:1px solid #54212c!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel::before,
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel::after{content:none!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-head{display:flex!important;gap:8px!important;align-items:center;justify-content:flex-start!important;padding:0 0 10px!important;margin:0 0 10px!important;border-bottom:1px solid #ffffff12;font:700 12px/1.3 system-ui!important;letter-spacing:.035em!important;min-height:33px}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-head>span:not(.lmf-reference-card-icon){font-size:12px!important;letter-spacing:.04em!important;min-width:0}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-head>b{margin-left:auto;font-size:10px!important;font-weight:400;color:#b7c0c5}
+.lmf-home-reference-final .lmf-reference-card-icon{display:flex;align-items:center}
+.lmf-home-reference-final .lmf-home-v4-readiness .lmf-home-v4-panel-head{color:#1ee5ce}
+.lmf-home-reference-final .lmf-home-v4-performance .lmf-home-v4-panel-head{color:#21b8e9}
+.lmf-home-reference-final .lmf-home-v4-milestone .lmf-home-v4-panel-head{color:#ecd145}
+.lmf-home-reference-final .lmf-home-v4-coach .lmf-home-v4-panel-head{color:#ff4764}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-readiness-body{display:block!important;margin:0 0 14px!important;min-height:60px}
+body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-readiness-label]{font-size:23px!important;line-height:1.15!important;margin:0 0 5px!important;color:#30e5d0!important}
+body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-readiness-copy]{font:13px/1.45 system-ui!important;max-width:42ch!important;color:#e0e5e6!important}
+.lmf-reference-home-readiness{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;border-top:1px solid #ffffff15;padding-top:12px;margin-top:auto;order:4}
+.lmf-reference-home-readiness>div{display:grid;grid-template-columns:26px 1fr;gap:3px 6px;min-width:0;color:#ccd8d7}
+.lmf-reference-home-readiness svg{grid-row:1/3;margin-top:2px}
+.lmf-reference-home-readiness span{font-size:10px}
+.lmf-reference-home-readiness strong{font-size:13px;color:#f2f6f5}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-link{position:static!important;inset:auto!important;order:5;padding:10px 0 0!important;margin:0!important;min-height:0!important;font:11px/1.4 system-ui!important;color:#bac5cb!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary{margin:0 0 12px!important;display:flex!important;flex-direction:column;gap:6px;min-height:60px}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary strong{font:600 16px/1.25 system-ui!important;color:#e3edf2}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary span{font:12px/1.45 system-ui!important;color:#c1ccd4!important}
+.lmf-reference-performance-metrics{display:grid;grid-template-columns:1fr 1.4fr .55fr;gap:10px;border-top:1px solid #ffffff15;margin-top:auto;padding-top:12px;order:4}
+.lmf-reference-performance-metrics>div{display:grid;grid-template-columns:25px 1fr;align-content:start;gap:3px 6px;min-width:0;color:#cad7df}
+.lmf-reference-performance-metrics svg{grid-row:1/3}
+.lmf-reference-performance-metrics span{font-size:10px}
+.lmf-reference-performance-metrics strong{font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-reference-milestone-title{font:600 21px/1.2 system-ui!important;color:#f2edcf;margin:2px 0 7px!important}
+body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-milestone]{font:13px/1.5 system-ui!important;color:#dddac9!important;margin:0 0 14px!important;max-height:none!important;-webkit-line-clamp:unset!important}
+.lmf-reference-milestone-road{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-top:14px;margin-top:auto;position:relative;order:4}
+.lmf-reference-milestone-road::before{content:'';position:absolute;top:21px;left:8px;right:8px;height:1px;background:#81724b}
+.lmf-reference-milestone-road>div{z-index:1;display:grid;gap:5px;align-content:start}
+.lmf-reference-milestone-road i{width:15px;height:15px;background:#e7c932;border:2px solid #e7c932;border-radius:50%;margin-bottom:3px}
+.lmf-reference-milestone-road>div:last-child i{background:#14170f;border-color:#667880}
+.lmf-reference-milestone-road span{font-size:11px;line-height:1.3}.lmf-reference-milestone-road small{font-size:10px;color:#cec49c}
+body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-coach]{font:italic 18px/1.45 Georgia,serif!important;color:#e6dadd!important;border-left:2px solid #ef2348!important;margin:3px 0 14px!important;padding:0 0 0 14px!important;max-height:none!important;-webkit-line-clamp:unset!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-coach .lmf-home-v4-panel-link{margin-top:auto!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;padding:12px 16px!important;background:#041824!important;border:1px solid #143547!important;border-radius:8px!important}
+.lmf-reference-stats-title{grid-column:1/-1;display:flex;align-items:center;gap:9px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #15313e;font:700 12px/1.3 system-ui;text-transform:uppercase}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats>div{display:grid!important;grid-template-columns:32px 1fr!important;gap:3px 9px!important;padding:0 12px!important;background:none!important;border:0!important;border-right:1px solid #173746!important;border-radius:0!important;min-width:0;min-height:0!important;text-align:left!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats>div:last-child{border-right:0!important}
+.lmf-reference-stat-icon{grid-row:1/3;align-self:center;color:#b8c9d0}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats>div>span:not(.lmf-reference-stat-icon){font:10px/1.4 system-ui!important;letter-spacing:0!important}
+body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats strong{font:600 16px/1.2 system-ui!important;color:#edf3f5!important}
+.lmf-reference-home-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 6px;color:#d7dbe0}
+.lmf-reference-home-footer>strong{font:800 24px/1.2 system-ui;letter-spacing:.12em}
+.lmf-reference-home-footer>strong>span{color:#ff1737}
+.lmf-reference-home-footer small{display:block;font:8px/1.6 system-ui;letter-spacing:.14em;text-transform:uppercase}
+.lmf-reference-home-footer p{border-left:2px solid #ec1637;padding-left:12px;text-transform:uppercase;letter-spacing:.12em;font:10px/1.7 system-ui}
+
+/* Train: compact workout banner, real readiness, native section flow, logging. */
+html[data-lmf-approved-route='train'] .lmf-train-reference-final{display:flex!important;flex-direction:column!important;gap:12px!important}
+.lmf-reference-train-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:0}
+.lmf-reference-train-heading h2{font:700 38px/1 Georgia,serif;margin:0 0 5px;color:#eef1f4}
+.lmf-reference-train-heading p{font:13px/1.4 system-ui;margin:0;color:#b8c0ca}
+.lmf-reference-train-heading>strong{font:italic 700 22px/1 Georgia,serif;text-align:right;color:#bec7d2}
+.lmf-reference-train-heading small{display:block;font:8px/1.7 system-ui;letter-spacing:.22em;text-transform:uppercase;margin-top:7px}
+html[data-lmf-approved-route='train'] .lmf-reference-train-hero{position:relative;display:grid!important;grid-template-columns:150px minmax(0,1fr) 245px!important;gap:20px!important;align-items:center!important;min-height:165px!important;padding:0 18px 0 0!important;overflow:hidden;border:1px solid #343d48!important;border-radius:10px!important;background:linear-gradient(110deg,#0d141b,#05090d)!important;box-shadow:none!important}
+.lmf-reference-train-hero>.badge,.lmf-reference-train-hero>div>.page-kicker{display:none!important}
+.lmf-reference-train-art{height:100%;min-height:165px;position:relative;align-self:stretch}
+.lmf-reference-train-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:grayscale(1) brightness(.7)}
+.lmf-reference-train-art::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 55%,#0a1017)}
+.lmf-reference-today{font:9px/1.4 system-ui;letter-spacing:.16em;color:#a7b3c0;margin:0 0 6px}
+html[data-lmf-approved-route='train'] .lmf-reference-train-hero h1{font:700 25px/1.16 Georgia,serif!important;letter-spacing:0!important;margin:0!important;text-transform:none!important;max-width:100%;overflow-wrap:anywhere}
+.lmf-reference-train-hero>div>.muted{font:11px/1.45 system-ui!important;margin:8px 0 0!important;color:#b5bfcb!important}
+.lmf-reference-train-meta{font:12px/1.4 system-ui;color:#d2d9df;margin:8px 0}
+.lmf-reference-train-resume{display:grid;gap:9px;min-width:0}
+.lmf-reference-train-resume>button{width:100%;min-height:48px;background:linear-gradient(#f40934,#bd0021);color:#fff;border:1px solid #ff3654;border-radius:8px;font:700 14px/1.2 system-ui;padding:12px 8px;cursor:pointer}
+.lmf-reference-train-resume>div{display:flex;justify-content:space-between;gap:8px;font:11px/1.3 system-ui;color:#c0c8d0}
+.lmf-reference-train-resume progress{appearance:none;display:block;width:100%;height:7px;border:0;border-radius:10px;overflow:hidden;background:#26313b}
+.lmf-reference-train-resume progress::-webkit-progress-bar{background:#26313b}.lmf-reference-train-resume progress::-webkit-progress-value{background:#f31c46;border-radius:10px}.lmf-reference-train-resume progress::-moz-progress-bar{background:#f31c46}
+.lmf-reference-train-readiness{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.lmf-reference-train-readiness>button{display:flex;align-items:center;gap:12px;min-height:88px;min-width:0;padding:13px 15px;color:#dce2ec;border:1px solid #2d3846;background:linear-gradient(120deg,#10161e,#070c11);border-radius:10px;text-align:left;cursor:pointer}
+.lmf-reference-train-readiness svg{width:32px;height:32px;color:#9b5bff}.lmf-reference-train-readiness>button:nth-child(2) svg{color:#19dbaa}.lmf-reference-train-readiness>button:nth-child(3) svg{color:#ff345c}
+.lmf-reference-train-readiness>button>span{display:flex;flex-direction:column;gap:3px;font:600 12px/1.2 system-ui;min-width:0}
+.lmf-reference-train-readiness strong{font:700 20px/1.2 system-ui}.lmf-reference-train-readiness small{color:#28d0ba;font:10px/1.3 system-ui}
+.lmf-reference-train-readiness i{margin-left:auto;font:24px/1 Georgia;color:#8e9cab}
+.lmf-reference-flow-heading{display:flex;justify-content:space-between;align-items:center;margin:4px 0 -6px}
+.lmf-reference-flow-heading h2{font:700 24px/1.2 Georgia,serif;margin:0}.lmf-reference-flow-heading>span{font:12px/1.3 system-ui;color:#b9c2cb}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track{display:grid!important;grid-auto-flow:column!important;grid-auto-columns:minmax(120px,1fr)!important;grid-template-columns:none!important;overflow-x:auto!important;gap:9px!important;scrollbar-width:thin;padding:3px 1px 9px!important;background:none!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button{min-width:0!important;min-height:112px!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:auto 1fr auto!important;align-items:start!important;padding:10px!important;background:#0a1016!important;border:1px solid #313a46!important;border-radius:7px!important;box-shadow:none!important;text-align:left!important;gap:7px!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button>span{width:auto!important;min-height:0!important;margin:0!important;background:none!important;justify-content:flex-start!important;color:#a2aebe!important;font-size:14px!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button>strong{font:600 12px/1.3 system-ui!important;white-space:normal!important;word-break:normal!important;color:#e0e5ed!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button>small{font:10px/1.3 system-ui!important;color:#9caab9!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button.active{border:2px solid #ed254b!important;background:linear-gradient(150deg,#2c111b,#0c0c16)!important;box-shadow:0 0 12px #ed254b20!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .day-strip{margin:0!important;gap:6px!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .day-chip{min-height:37px!important;font-size:10px!important;padding:5px 8px!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .train-rule{padding:10px 13px!important;margin:0!important;font-size:11px!important;line-height:1.5!important}
+.lmf-train-reference-final .train-rule>strong{font-size:10px!important}.lmf-train-reference-final .train-rule>span{font-size:11px!important;line-height:1.5!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .swipe-meta{display:none!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .session-nav{margin:0!important;min-height:40px!important;background:#0b1017!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel{scroll-margin-top:24px}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel:not(.readiness-panel):not(.review-panel){border:1px solid #8950da!important;border-radius:10px!important;background:linear-gradient(135deg,#171020,#080c11 40%)!important;padding:12px!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel-head{padding:0 0 12px!important;border-bottom:1px solid #4e2b7055!important;margin:0 0 12px!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel-head h2{font:600 18px/1.3 system-ui!important;color:#b374ff!important;margin:4px 0!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel-head .page-kicker{font-size:10px!important;color:#b99dda!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(140px,.8fr)!important;gap:0!important;position:relative!important;border:0!important;border-radius:6px!important;background:#080d13!important;overflow:hidden!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.lmf-compact-summary{display:none!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-title{grid-column:1!important;grid-row:1!important;display:block!important;min-height:0!important;height:auto!important;padding:15px 10px 12px 12px!important;z-index:1;align-self:start!important}
+.lmf-train-reference-final .lmf-flow-active>.lmf-flow-node{display:none!important}
+.lmf-train-reference-final .lmf-reference-prescription{font:12px/1.45 system-ui;color:#d4c1ed;margin:8px 0 10px}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-title h3{font:700 28px/1.1 Georgia,serif!important;letter-spacing:0!important;overflow-wrap:anywhere}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.lmf-exercise-media{grid-column:2!important;grid-row:1!important;position:relative!important;width:100%!important;min-height:150px!important;max-height:190px!important;height:auto!important;aspect-ratio:1!important;background-size:contain!important;background-color:#050a0f!important;border:0!important;align-self:center!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-actions{grid-column:1/-1!important;padding:8px 10px!important;display:flex!important;flex-wrap:wrap;gap:6px!important;order:2!important;border-color:#242735!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-actions .btn{flex:1;min-height:38px!important;font-size:9px!important;min-width:80px!important;padding:6px!important}
+.lmf-reference-set-history{order:3;grid-column:1;align-self:start;margin:10px 5px 10px 10px;border:1px solid #29343f;border-radius:7px;padding:6px;min-width:0}
+.lmf-reference-set-head,.lmf-reference-set-history>button{display:grid;grid-template-columns:24px 1fr 1fr 28px 18px;gap:6px;align-items:center;min-width:0;text-align:left}
+.lmf-reference-set-head{font:9px/1.2 system-ui;color:#a6b2c0;padding:4px 4px 7px}
+.lmf-reference-set-history>button{width:100%;min-height:35px;padding:7px 4px;background:none;border:0;border-top:1px solid #24313c;color:#c7d2de;font:11px/1.3 system-ui;cursor:pointer;border-radius:3px}
+.lmf-reference-set-history>button strong{font-size:11px;overflow-wrap:anywhere;color:#edf2f7}
+.lmf-reference-set-history>button[aria-pressed='true']{background:#222632}.lmf-reference-set-history>button.is-logged{color:#d4dee6}.lmf-reference-set-history i{font-style:normal;font-size:15px}
+.lmf-reference-load-card{order:3;grid-column:2;display:flex;flex-direction:column;gap:7px;margin:10px 10px 10px 5px;padding:11px;border:1px solid #303947;border-radius:7px;min-width:0;background:linear-gradient(125deg,#101a24,#0a0e15)}
+.lmf-reference-load-card[hidden]{display:none!important}.lmf-reference-load-card>span{font:11px/1.3 system-ui;color:#d4dde4}.lmf-reference-load-card>strong{font:700 25px/1.1 Georgia,serif;overflow-wrap:anywhere}.lmf-reference-load-card p{font:11px/1.5 system-ui;color:#b5c3d1;margin:0;overflow-wrap:anywhere}
+.lmf-reference-load-card>button{min-height:40px;margin-top:auto;background:#101826;border:1px solid #555168;border-radius:5px;color:#e4d9f6;font:600 10px/1.3 system-ui;padding:6px;cursor:pointer}
+.lmf-reference-coaching-cue{grid-column:1/-1;order:4;display:flex;flex-direction:column;gap:4px;margin:0 10px 10px;padding:10px 13px;border:1px solid #303947;border-radius:7px;background:#151b22;font:11px/1.5 system-ui;color:#c2cbd4}.lmf-reference-coaching-cue strong{font-size:11px;color:#e1e6eb}.lmf-reference-coaching-cue p{margin:0}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.set-table{grid-column:1/-1!important;order:6!important;padding:10px!important;background:#090d14!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active .lmf-set-tabs{display:none!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-areas:'target target target' 'load reps rpe' 'plates plates plates' 'set check check'!important;padding:12px!important;gap:10px!important;border-radius:8px!important;background:#111720!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .set-label{min-height:42px!important;align-items:center!important;gap:5px!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .set-label>span{position:static!important;font-size:9px!important;align-self:center!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .set-label>strong{font-size:20px!important;margin:0!important}.lmf-train-reference-final .lmf-set-total{font-size:16px!important;margin:0!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .set-check{width:100%!important;height:44px!important;min-height:44px!important;font-size:16px!important;border-radius:7px!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:10px!important;background:linear-gradient(#f10839,#bd0027)!important;border-color:#ff395c!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .set-check::after{content:'Log Set';font:700 13px/1.3 system-ui}.lmf-train-reference-final .lmf-set-active .set-check.done::after{content:'Logged · undo'!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .lmf-stepper{grid-template-columns:29px minmax(0,1fr) 29px!important;min-width:0!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .lmf-step-btn{min-width:0!important;width:auto!important;font-size:19px!important;padding:0!important}
+html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .set-input{font-size:17px!important;min-width:0!important;min-height:44px!important;padding:5px 2px!important}
+.lmf-reference-rest-timer{grid-column:1/-1;order:5;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;margin:0 10px;border:1px solid #4c3365;border-radius:7px;background:#120f1c;min-width:0}
+.lmf-reference-rest-timer>span{font:11px/1.3 system-ui;color:#c4a8e7}.lmf-reference-rest-timer output{display:flex;align-items:center;justify-content:center;border:4px solid #8f49ec;border-radius:50%;width:62px;height:62px;color:#f1e8ff;font:700 18px/1 system-ui;font-variant-numeric:tabular-nums}
+.lmf-reference-rest-timer>label{display:flex;flex-direction:column;gap:4px;color:#b6abca;font:9px/1.2 system-ui}.lmf-reference-rest-timer select{background:#080e15;border:1px solid #574967;color:#e5ddf0;padding:5px;min-height:36px;max-width:90px;font:11px/1 system-ui;border-radius:4px}
+.lmf-reference-rest-timer>div{display:flex;gap:6px}.lmf-reference-rest-timer button{min-height:38px;padding:7px 9px;border:1px solid #665071;background:#1e1529;border-radius:5px;color:#e9dafa;font:600 10px/1.3 system-ui;cursor:pointer}.lmf-reference-rest-timer>small{width:100%;font:9px/1.4 system-ui;color:#a99dbb}
+.lmf-reference-upcoming{display:grid;gap:8px}.lmf-reference-upcoming>button{display:flex;gap:13px;align-items:center;text-align:left;padding:12px 15px;min-height:66px;border:1px solid #3e344b;border-radius:7px;background:linear-gradient(110deg,#190f1b,#0a1119);color:#b483f6;cursor:pointer;min-width:0}.lmf-reference-upcoming>button:nth-child(odd){border-color:#50333e;background:linear-gradient(110deg,#200f18,#0a1119);color:#f95878}
+.lmf-reference-upcoming>button>span{display:flex;flex-direction:column;gap:5px;min-width:0}.lmf-reference-upcoming strong{font:600 13px/1.35 system-ui;overflow-wrap:anywhere}.lmf-reference-upcoming small{color:#d3dce7;font:11px/1.4 system-ui;overflow-wrap:anywhere}.lmf-reference-upcoming i{margin-left:auto;color:#aab4c4;font:24px/1 Georgia}
+.lmf-reference-train-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:30px 30px 30px 32%;min-height:130px;border:1px solid #323c49;border-radius:8px;background:linear-gradient(90deg,transparent,#050a10 42%),url('/ui/train-lifter.webp') left 30%/35% auto no-repeat #050a10}
+.lmf-reference-train-footer>strong{font:700 25px/1.12 Georgia,serif;color:#e8edf1}.lmf-reference-train-footer>span{font:9px/1.9 system-ui;text-transform:uppercase;letter-spacing:.2em;color:#a9b4c4}
+
+@media(min-width:1100px){
+  /* Dynamic set/timer content must not re-snap to a different workout pane.
+     Section buttons retain the original programmatic navigation. */
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final #swipe-viewport{scroll-snap-type:none!important;overflow-anchor:none}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-workspace{grid-template-columns:220px minmax(0,1fr) 280px!important;gap:12px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-flow-panel,
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-context-panel{top:20px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-live-metric strong{white-space:normal!important;overflow-wrap:anywhere!important;text-overflow:clip!important;font-size:16px!important;line-height:1.25!important}
+}
+@media(max-width:700px){
+  body.lmf-home-ref3-active .lmf-home-reference-final{gap:9px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-hero{padding:10px!important;min-height:390px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-hero .lmf-home-v4-greeting{min-height:142px!important;padding:10px 5px 17px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-athlete-name{font-size:36px!important}
+  .lmf-reference-hero-motto{display:none}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-workout-row{padding:15px 12px!important;gap:14px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-program-row,
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main h3{max-width:calc(100% - 77px)!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-program-row h2{font-size:26px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-command-main h3{font-size:15px!important;line-height:1.3!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-position{font-size:14px!important}
+  .lmf-reference-workout-motto{font-size:10px}
+  .lmf-reference-command-shield{width:76px;height:108px;right:-3px;top:3px}.lmf-reference-command-shield span{font-size:7px;top:53px}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-grid{gap:8px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel{padding:11px!important;min-height:238px!important;border-radius:7px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-head{gap:5px!important;padding-bottom:8px!important;margin-bottom:9px!important;flex-wrap:wrap}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-head>span:not(.lmf-reference-card-icon){font-size:10px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-head>b{display:none!important}
+  .lmf-reference-card-icon svg{width:19px;height:19px}
+  body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-readiness-label]{font-size:20px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-readiness-copy]{font-size:12px!important;line-height:1.4!important}
+  .lmf-reference-home-readiness{gap:4px;padding-top:10px}.lmf-reference-home-readiness>div{display:flex;flex-direction:column;align-items:center;gap:4px}.lmf-reference-home-readiness svg{width:20px;height:20px}.lmf-reference-home-readiness span{font-size:8px;letter-spacing:-.02em}.lmf-reference-home-readiness strong{font-size:11px}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary strong{font-size:13px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-option1-performance-summary span{font-size:11px!important;line-height:1.4!important}
+  .lmf-reference-performance-metrics{grid-template-columns:minmax(0,1fr);gap:9px}.lmf-reference-performance-metrics>div{grid-template-columns:22px 1fr;gap:1px 6px}.lmf-reference-performance-metrics svg{width:18px;height:18px}.lmf-reference-performance-metrics>div:not(:nth-child(2)){display:none}.lmf-reference-performance-metrics span{font-size:9px}.lmf-reference-performance-metrics strong{font-size:11px}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-reference-milestone-title{font-size:17px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-milestone]{font-size:12px!important;line-height:1.45!important}
+  .lmf-reference-milestone-road{gap:9px}.lmf-reference-milestone-road span{font-size:10px}.lmf-reference-milestone-road small{font-size:9px}
+  body.lmf-home-ref3-active .lmf-home-reference-final [data-lmf-coach]{font-size:15px!important;line-height:1.4!important;padding-left:9px!important;margin-top:0!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-panel-link{font-size:10px!important;padding-top:10px!important}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats{padding:10px 8px!important}
+  .lmf-reference-stats-title{font-size:11px;margin-bottom:10px;padding-bottom:8px}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats>div{grid-template-columns:20px 1fr!important;padding:0 5px!important;gap:2px 4px!important}
+  .lmf-reference-stat-icon svg{width:20px;height:20px}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats>div>span:not(.lmf-reference-stat-icon){font-size:8px!important;line-height:1.25!important;text-transform:none}
+  body.lmf-home-ref3-active .lmf-home-reference-final .lmf-home-v4-stats strong{font-size:12px!important}
+  .lmf-reference-home-footer{padding:14px 4px}.lmf-reference-home-footer>strong{font-size:18px}.lmf-reference-home-footer p{font-size:8px}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final{gap:10px!important}
+  .lmf-reference-train-heading h2{font-size:34px}.lmf-reference-train-heading p{font-size:11px}.lmf-reference-train-heading>strong{font-size:18px}.lmf-reference-train-heading small{font-size:6px}
+  html[data-lmf-approved-route='train'] .lmf-reference-train-hero{grid-template-columns:78px minmax(0,1fr)!important;gap:10px 7px!important;padding:0 10px 12px 0!important;min-height:0!important}
+  .lmf-reference-train-art{min-height:150px}.lmf-reference-train-art img{object-position:47% center}
+  html[data-lmf-approved-route='train'] .lmf-reference-train-hero h1{font-size:20px!important}
+  .lmf-reference-today{font-size:8px;margin-top:12px}.lmf-reference-train-hero>div>.muted{font-size:10px!important;line-height:1.4!important}.lmf-reference-train-meta{font-size:10px}
+  .lmf-reference-train-resume{grid-column:1/-1;grid-template-columns:1fr 1fr;gap:7px 12px;padding-left:10px;align-items:center}
+  .lmf-reference-train-resume>button{grid-row:1/3;min-height:45px;font-size:12px}.lmf-reference-train-resume>div{font-size:9px}.lmf-reference-train-resume progress{height:6px}
+  .lmf-reference-train-readiness{gap:6px}.lmf-reference-train-readiness>button{padding:9px 5px;min-height:90px;gap:5px;flex-direction:column;align-items:flex-start;position:relative}.lmf-reference-train-readiness svg{width:23px;height:23px}.lmf-reference-train-readiness>button>span{font-size:10px;gap:3px}.lmf-reference-train-readiness strong{font-size:16px}.lmf-reference-train-readiness small{font-size:9px}.lmf-reference-train-readiness i{position:absolute;right:6px;top:10px;font-size:17px}
+  .lmf-reference-flow-heading h2{font-size:22px}.lmf-reference-flow-heading>span{font-size:10px}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track{grid-auto-columns:112px!important;gap:7px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final #session-track>button{min-height:115px!important;padding:9px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel:not(.readiness-panel):not(.review-panel){padding:8px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .workout-panel-head h2{font-size:16px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active{grid-template-columns:minmax(0,1.2fr) minmax(110px,.8fr)!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-title{padding:10px 3px 7px 8px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.exercise-title h3{font-size:25px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .active-exercise.lmf-flow-active>.lmf-exercise-media{min-height:140px!important;max-height:190px!important}
+  .lmf-reference-set-history{grid-column:1/-1;margin:7px 8px}.lmf-reference-set-head,.lmf-reference-set-history>button{grid-template-columns:26px 1fr 1fr 32px 22px;gap:8px}.lmf-reference-set-history>button{min-height:37px;font-size:12px}.lmf-reference-set-history>button strong{font-size:12px}
+  .lmf-reference-load-card{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;margin:0 8px 8px;padding:10px}.lmf-reference-load-card>span{grid-column:1}.lmf-reference-load-card>strong{grid-column:1;font-size:24px}.lmf-reference-load-card>p{grid-column:1/-1;font-size:11px}.lmf-reference-load-card>button{grid-column:2;grid-row:1/3;margin:0;min-height:45px;font-size:10px}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-areas:'target target' 'load load' 'reps rpe' 'plates plates' 'set check'!important;padding:10px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-set-active .lmf-stepper{grid-template-columns:36px minmax(0,1fr) 36px!important}
+  .lmf-reference-coaching-cue{margin:0 8px 8px;font-size:11px}.lmf-reference-rest-timer{margin:0 8px;padding:10px;gap:8px}.lmf-reference-rest-timer>span{display:none}.lmf-reference-rest-timer output{width:56px;height:56px;font-size:17px}.lmf-reference-rest-timer>div{margin-left:auto;flex-direction:column;gap:3px}.lmf-reference-rest-timer button{min-height:30px;padding:5px 7px}
+  .lmf-reference-upcoming>button{padding:10px;gap:10px}.lmf-reference-upcoming svg{width:21px;height:21px}.lmf-reference-upcoming strong{font-size:12px}.lmf-reference-upcoming small{font-size:10px}
+  .lmf-reference-train-footer{padding:24px 15px 24px 28%;min-height:112px}.lmf-reference-train-footer>strong{font-size:20px}.lmf-reference-train-footer>span{font-size:7px;letter-spacing:.1em}
+}
+@media(prefers-reduced-motion:reduce){.lmf-train-reference-final *{scroll-behavior:auto!important}}

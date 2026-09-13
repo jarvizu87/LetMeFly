@@ -34,6 +34,7 @@ s+='''
     const day = Number(String(instance?.current_day_key ?? '').replace('day-', ''))
     const next = instance?.status === 'active' && !pending && program ? getProgramDay(program, week, day) : null
     return { athleteId: state.athlete?.id ?? null, sessionId: state.workout?.session.id ?? null,
+      weightUnit: state.athlete?.weight_unit === 'kg' ? 'kg' : 'lb',
       cloudLabel: document.querySelector('#sync-pill')?.textContent?.trim() ?? 'Status unavailable',
       next: next ? `${program} · Week ${week} · Day ${day} · ${next.title}` : null }
   },
@@ -47,8 +48,8 @@ s+='''
     const panel = row?.closest<HTMLElement>('.swipe-page')
     const index = panel ? Array.from(document.querySelectorAll('.swipe-page')).indexOf(panel) : -1
     if (index >= 0) document.querySelector<HTMLButtonElement>(`[data-session-index="${index}"]`)?.click()
-    const card = row?.closest('.exercise-card')
-    card?.querySelector<HTMLButtonElement>('.lmf-compact-summary')?.click()
+    const card = row?.closest('.active-exercise')
+    if (!card?.classList.contains('lmf-flow-active')) card?.querySelector<HTMLButtonElement>('.lmf-compact-summary')?.click()
     const setIndex = card && row ? Array.from(card.querySelectorAll('.set-row[data-set-id]')).indexOf(row) : -1
     if (setIndex >= 0) card?.querySelectorAll<HTMLButtonElement>('.lmf-set-tab')[setIndex]?.click()
     row?.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true })
