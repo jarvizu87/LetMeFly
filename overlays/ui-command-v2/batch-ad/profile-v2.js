@@ -17,8 +17,10 @@
   function profileHero() {
     const hashProfile = location.hash.replace(/^#\//, '').split(/[?#]/)[0] === 'profile'
     if (!hashProfile) return null
-    return [...document.querySelectorAll('.profile-hero')].find(visible)
-      || [...document.querySelectorAll('h1,h2,h3')].find((el) => /^profile$/i.test(text(el.textContent)) && visible(el))
+    // The compact layout hides the native title; its connected route anchor
+    // must still own the dossier so responsive styling cannot unmount the editor.
+    return document.querySelector('.profile-hero')
+      || [...document.querySelectorAll('h1,h2,h3')].find((el) => /^profile$/i.test(text(el.textContent)))
       || null
   }
 
@@ -449,8 +451,10 @@
     rendering = true
     try {
       const vault = await readVault()
-      if (!vault || !profileHero()) return
-      renderDossier(vault, root, anchor)
+      const currentAnchor = profileHero()
+      const currentRoot = profileRoot(currentAnchor)
+      if (!vault || !currentAnchor || !currentRoot) return
+      renderDossier(vault, currentRoot, currentAnchor)
     } finally { rendering = false }
   }
 

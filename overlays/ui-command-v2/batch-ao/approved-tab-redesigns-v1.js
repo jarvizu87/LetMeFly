@@ -248,7 +248,9 @@
         thumb.append(select)
       }
     }
-    if (!detail.dataset.exerciseName) selectReferenceExercise(library.querySelector('[data-library-card]'),detail)
+    const selectedCard=[...library.querySelectorAll('[data-library-card]')].find(card=>clean(card.querySelector('h3')?.textContent)===detail.dataset.exerciseName)
+    if (selectedCard) syncReferenceExerciseArt(selectedCard,detail)
+    else if (!detail.dataset.exerciseName) selectReferenceExercise(library.querySelector('[data-library-card]'),detail)
     updateExerciseSidebar(layout)
   }
 
@@ -257,19 +259,36 @@
     const name=clean(card.querySelector('h3')?.textContent)
     const record=window.LetMeFlyExerciseIntelligence?.getExercise(name)
     if (!record) return
-    if (detail.dataset.exerciseName===name) return
+    if (detail.dataset.exerciseName===name) { syncReferenceExerciseArt(card,detail); return }
     detail.dataset.exerciseName=name
     document.querySelectorAll('[data-library-card]').forEach(el=>el.classList.toggle('lmf-reference-selected',el===card))
-    const media=card.querySelector('.library-thumb')?.cloneNode(true)
-    media?.querySelectorAll('button').forEach(el=>el.remove())
-    if(media){media.classList.add('lmf-reference-detail-image');media.removeAttribute('id')}
     detail.innerHTML=`<h2>${escape(name)}</h2><div class="lmf-reference-detail-tags">${[...(record.movementRoles||[]).slice(0,1),...(record.equipment||[]).slice(0,2)].map(s=>`<span>${escape(s)}</span>`).join('')}</div><div class="lmf-reference-detail-tabs"><strong>Overview</strong><button type="button" data-reference-detail-action="info">Cues & Details</button><button type="button" data-reference-detail-action="substitute">Substitutions</button></div><dl><dt>Primary Muscles</dt><dd>${escape((record.primaryMuscles||[]).join(', ')||'—')}</dd><dt>Secondary Muscles</dt><dd>${escape((record.secondaryMuscles||[]).join(', ')||'—')}</dd><dt>Purpose</dt><dd>${escape(record.purpose||'—')}</dd><dt>Equipment</dt><dd>${escape((record.equipment||[]).join(', ')||'—')}</dd></dl><button type="button" class="lmf-reference-watch" data-reference-detail-action="watch">▶ Watch Exercise</button><button type="button" data-reference-detail-action="substitute">Find Substitutes</button><button type="button" data-reference-detail-action="info">Exercise Info</button>`
-    if(media)detail.prepend(media)
+    delete detail.dataset.referenceArt
+    syncReferenceExerciseArt(card,detail)
     for(const button of detail.querySelectorAll('[data-reference-detail-action]')){
       const selectors={watch:'[data-watch],[data-lmf-intel-watch]',info:'[data-exercise-info]',substitute:'[data-substitute]'}
       const original=card.querySelector(selectors[button.dataset.referenceDetailAction])
       button.disabled=!original||original.disabled
     }
+  }
+
+  function syncReferenceExerciseArt(card,detail) {
+    const source=card.querySelector('.library-thumb')
+    if(!source)return
+    const background=getComputedStyle(source).backgroundImage
+    const signature=JSON.stringify([source.dataset.exerciseArt,background,source.querySelector('img')?.currentSrc])
+    if(detail.dataset.referenceArt===signature)return
+    const media=source.cloneNode(true)
+    media.querySelectorAll('button').forEach(node=>node.remove())
+    media.removeAttribute('id')
+    media.classList.add('lmf-reference-detail-image')
+    // Artwork rules may be scoped to the original library card. Reuse the
+    // resolved image in this view without introducing a separate image mapping.
+    media.style.setProperty('background-image',background,'important')
+    const existing=detail.querySelector('.lmf-reference-detail-image')
+    if(existing)existing.replaceWith(media)
+    else detail.prepend(media)
+    detail.dataset.referenceArt=signature
   }
 
   function profileValue(key) {
@@ -364,6 +383,8 @@
       const more=nav.querySelector('a[href="#/more"]');nav.insertBefore(link,more)
     }
     const profile=nav.querySelector('.lmf-reference-profile-nav')
+    const more=nav.querySelector('a[href="#/more"]')
+    if(profile&&more&&profile.nextElementSibling!==more)nav.insertBefore(profile,more)
     if(profile)profile.classList.toggle('active',currentRoute()==='profile')
     for (const link of nav.querySelectorAll('.nav-item')) {
       const glyph=link.querySelector(':scope > span'),key=link.getAttribute('href')?.replace('#/','')
