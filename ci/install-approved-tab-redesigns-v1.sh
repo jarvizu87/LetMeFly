@@ -94,4 +94,9 @@ grep -Fq '/ui/approved-tab-redesigns-v1.css' "$INDEX"
 grep -Fq "'/ui/approved-tab-redesigns-v1.js'" "$SW"
 grep -Fq "'/ui/approved-tab-redesigns-v1.css'" "$SW"
 
+# The approved Train composition can re-render after the native Workout Flow.
+# Keep its visible Bar Loader action wired to the native loader API even when
+# the original exercise-actions button is no longer present in that DOM branch.
+bash "$ROOT_DIR/ci/install-train-bar-loader-bridge-v1.sh" "$DIST_DIR"
+
 echo "LetMeFly approved primary-route presentation bridge v1: PASS"
