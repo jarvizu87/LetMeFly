@@ -72,6 +72,7 @@ jobs:
           node --check ci/audit-coach-seven-athlete-scenarios-v1.mjs
           node --check overlays/ui-command-v2/batch-au/coach-core-intents-v2.js
           bash -n ci/run-seven-athlete-runtime-v2.sh
+          bash -n ci/run-seven-athlete-program-card-matrix-v2.sh
           bash -n ci/install-train-preview-parity-final-v1.sh
           bash -n ci/install-coach-core-intents-v2.sh
 
@@ -89,7 +90,7 @@ jobs:
           set -euo pipefail
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
-          node ci/audit-seven-athlete-program-card-matrix-v1.mjs "$PWD/.build-src/letmefly_app"
+          bash ci/run-seven-athlete-program-card-matrix-v2.sh "$PWD/.build-src/letmefly_app"
 
       - name: Exhaust Coach freeform scenarios across all seven athletes
         shell: bash
