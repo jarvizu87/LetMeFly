@@ -22,14 +22,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
-      - run: bash ci/build-command-v2-v2-1.sh
 
-      - name: Verify opening account surfaces are in the production artifact
+      - name: Reconstruct exact production candidate
+        run: bash ci/build-command-v2-v2-1.sh
+
+      - name: Install isolated account/device audit dependencies
+        run: npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts fake-indexeddb@6.2.5 playwright-core@1.55.0
+
+      - name: Verify opening Sign In / Register / Forgot Password / local-athlete surfaces in a real browser
         run: |
-          grep -Rq 'Sign in with your password' .build-src/letmefly_app/dist/assets
-          grep -Rq 'Create your LetMeFly account' .build-src/letmefly_app/dist/assets
-          grep -Rq 'Forgot password?' .build-src/letmefly_app/dist/assets
-          grep -Rq 'CREATE LOCAL ATHLETE' .build-src/letmefly_app/dist/assets
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >/tmp/letmefly-account-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 0.25
+          done
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          CHROME_BIN="$CHROME_BIN" node ci/audit-account-surface-browser-v1.mjs
 
       - name: Validate password sign-in, registration and recovery boundaries
         run: |
@@ -41,8 +52,6 @@ jobs:
         run: |
           bash ci/apply-phone-otp-v1.sh .build-src/letmefly_app
           npm --prefix .build-src/letmefly_app run typecheck
-
-      - run: npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts fake-indexeddb@6.2.5
 
       - name: Audit local-first bootstrap and interrupted-sync recovery
         run: node ci/audit-cloud-bootstrap-v2.mjs .build-src/letmefly_app
@@ -61,3 +70,11 @@ jobs:
 
       - name: Audit installed-PWA banner suppression and dismissal persistence
         run: node ci/audit-pwa-install.mjs
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: account-device-sync-audit
+          path: .build-src/letmefly_app/ACCOUNT_SURFACE_AUDIT
+          retention-days: 7
+          if-no-files-found: warn
