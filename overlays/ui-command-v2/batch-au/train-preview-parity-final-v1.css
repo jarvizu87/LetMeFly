@@ -7,10 +7,16 @@ html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-fina
   flex-direction:column!important;
   min-height:0!important;
 }
-html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-reference-preview-summary{
+/* Match/exceed the late one-open selector's specificity. That late layer hides
+   every child of non-selected preview cards, so a lower-specificity rule loaded
+   later is still not enough even with !important. */
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card:not(.lmf-reference-preview-active)>.lmf-reference-preview-summary,
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card.lmf-reference-preview-active>.lmf-reference-preview-summary{
   display:none!important;
 }
-html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-exercise-media{
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card:not(.lmf-reference-preview-active)>.lmf-exercise-media,
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card.lmf-reference-preview-active>.lmf-exercise-media{
+  display:block!important;
   position:relative!important;
   inset:auto!important;
   order:1!important;
@@ -26,13 +32,15 @@ html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-fina
 html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-exercise-media::after{
   display:none!important;
 }
-html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-title{
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card:not(.lmf-reference-preview-active)>.exercise-title,
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card.lmf-reference-preview-active>.exercise-title{
   display:block!important;
   order:2!important;
   min-height:0!important;
   padding:14px!important;
 }
-html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-actions{
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card:not(.lmf-reference-preview-active)>.exercise-actions,
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card.lmf-reference-preview-active>.exercise-actions{
   display:grid!important;
   order:3!important;
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
@@ -41,7 +49,8 @@ html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-fina
   margin:4px 14px 14px!important;
   gap:10px!important;
 }
-html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.prescription-block{
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card:not(.lmf-reference-preview-active)>.prescription-block,
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card.lmf-reference-preview-active>.prescription-block{
   display:block!important;
   order:4!important;
   margin:0 14px 14px!important;
@@ -52,7 +61,8 @@ html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-fina
 html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.prescription-block.lmf-preview-rich-source>:not(.lmf-preview-readonly-logger){
   display:none!important;
 }
-html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card .lmf-preview-readonly-logger{
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card:not(.lmf-reference-preview-active) .lmf-preview-readonly-logger,
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card.lmf-reference-preview-active .lmf-preview-readonly-logger{
   display:block!important;
 }
 @media(max-width:430px){
