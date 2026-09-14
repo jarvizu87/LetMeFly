@@ -1,0 +1,66 @@
+/* Final Train preview parity guard.
+   This layer intentionally loads after locked-art/train-block styling.
+   Future/non-current governed days must retain the same premium full-card
+   language as the current day while remaining read-only. */
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card[data-exercise-art]{
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-reference-preview-summary{
+  display:none!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-exercise-media{
+  position:relative!important;
+  inset:auto!important;
+  order:1!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  aspect-ratio:1/1!important;
+  background-size:contain!important;
+  background-position:center!important;
+  mask-image:none!important;
+  border-radius:0!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-exercise-media::after{
+  display:none!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-title{
+  display:block!important;
+  order:2!important;
+  min-height:0!important;
+  padding:14px!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-actions{
+  display:grid!important;
+  order:3!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  width:auto!important;
+  max-width:none!important;
+  margin:4px 14px 14px!important;
+  gap:10px!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.prescription-block{
+  display:block!important;
+  order:4!important;
+  margin:0 14px 14px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.prescription-block.lmf-preview-rich-source>:not(.lmf-preview-readonly-logger){
+  display:none!important;
+}
+html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card .lmf-preview-readonly-logger{
+  display:block!important;
+}
+@media(max-width:430px){
+  html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-actions{
+    margin-inline:10px!important;
+    gap:7px!important;
+  }
+  html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.prescription-block{
+    margin-inline:10px!important;
+  }
+}
