@@ -73,4 +73,10 @@ grep -Fq '/ui/crownforge-circuit-train-v1.js?v=2' "$INDEX"
 grep -Fq "'/ui/crownforge-circuit-train-v1.css'" "$SW"
 grep -Fq "'/ui/crownforge-circuit-train-v1.js'" "$SW"
 
-echo "LetMeFly circuit-first Train confirm-or-adjust UX + larger blended art: PASS"
+# This installer is the shared last-stage Train hook used by Command V2 and the
+# Netlify build. Apply the final preview parity and Coach intent guards here so
+# every build path audits the same final artifact.
+bash "$ROOT_DIR/ci/install-train-preview-parity-final-v1.sh" "$DIST"
+bash "$ROOT_DIR/ci/install-coach-core-intents-v2.sh" "$DIST"
+
+echo "LetMeFly circuit-first Train confirm-or-adjust UX + larger blended art + final parity/Coach guards: PASS"
