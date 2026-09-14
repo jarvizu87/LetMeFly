@@ -20,9 +20,9 @@ env:
 
 jobs:
   seven-athlete-runtime:
-    name: Seven athletes — behavioral, scale, isolation, chaos
+    name: Seven athletes — full app, all programs, Coach, scale, isolation, chaos
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - name: Checkout exact candidate under test
         uses: actions/checkout@v4
@@ -63,12 +63,19 @@ jobs:
           cd .build-src/letmefly_app
           npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
 
-      - name: Syntax-check seven-athlete runtime gate
+      - name: Syntax-check exhaustive release gates
         shell: bash
         run: |
           set -euo pipefail
           node --check ci/audit-seven-athlete-runtime.mjs
+          node --check ci/audit-seven-athlete-program-card-matrix-v1.mjs
+          node --check ci/audit-seven-athlete-route-sweep-v1.mjs
+          node --check ci/audit-coach-seven-athlete-scenarios-v1.mjs
+          node --check overlays/ui-command-v2/batch-au/coach-core-intents-v2.js
           bash -n ci/run-seven-athlete-runtime-v2.sh
+          bash -n ci/run-seven-athlete-program-card-matrix-v2.sh
+          bash -n ci/install-train-preview-parity-final-v1.sh
+          bash -n ci/install-coach-core-intents-v2.sh
 
       - name: Run all seven synthetic athletes through exact candidate UI
         shell: bash
@@ -77,6 +84,45 @@ jobs:
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
           bash ci/run-seven-athlete-runtime-v2.sh "$PWD/.build-src/letmefly_app"
+
+      - name: Sweep every major app route for all seven athletes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          node ci/audit-seven-athlete-route-sweep-v1.mjs "$PWD/.build-src/letmefly_app"
+
+      - name: Exhaust every governed program week day and rendered card
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          bash ci/run-seven-athlete-program-card-matrix-v2.sh "$PWD/.build-src/letmefly_app"
+
+      - name: Exhaust Coach freeform scenarios across all seven athletes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          node ci/audit-coach-seven-athlete-scenarios-v1.mjs "$PWD/.build-src/letmefly_app"
+
+      - name: Exhaust Coach decision-review and evidence states
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >"$RUNNER_TEMP/seven-athlete-coach-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..40}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && break
+            sleep 0.25
+          done
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          export LMF_AUDIT_BASE_URL="http://127.0.0.1:4173"
+          node ci/audit-coach-decisions-browser.mjs
 
       - name: Re-run governed substitution and safety mutation guard
         shell: bash
@@ -122,6 +168,10 @@ jobs:
           name: seven-athlete-release-audit-${{ github.run_id }}
           path: |
             .build-src/letmefly_app/SEVEN_ATHLETE_RELEASE_AUDIT
+            .build-src/letmefly_app/SEVEN_ATHLETE_ROUTE_SWEEP_V1
+            .build-src/letmefly_app/SEVEN_ATHLETE_PROGRAM_CARD_MATRIX_V1
+            .build-src/letmefly_app/COACH_SEVEN_ATHLETE_SCENARIOS_V1
+            .build-src/letmefly_app/COACH_DECISIONS_AUDIT
             .build-src/letmefly_app/WORKOUT_SUBSTITUTION_TODAY_BROWSER_AUDIT
             .build-src/letmefly_app/LIFECYCLE_DATABASE_faults
             .build-src/letmefly_app/LIFECYCLE_DATABASE_boundaries

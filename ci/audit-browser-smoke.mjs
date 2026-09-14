@@ -230,17 +230,19 @@ async function auditFuturePreview(page) {
     const visual = await card.evaluate((el) => {
       const media = el.querySelector('.lmf-exercise-media')
       const style = media && getComputedStyle(media)
-      return {before:getComputedStyle(el,'::before').display, position:style?.position, fit:style?.backgroundSize, height:media?.getBoundingClientRect().height}
+      return {before:getComputedStyle(el,'::before').display, position:style?.position, fit:style?.backgroundSize, height:media?.getBoundingClientRect().height, width:media?.getBoundingClientRect().width}
     })
     const details = card.locator(':scope > .prescription-block')
-    const rows = details.locator(':scope > .prescription-row')
+    const readonly = card.locator('.lmf-preview-readonly-logger').first()
+    const rows = details.locator('.prescription-row')
     const values = await rows.evaluateAll(nodes=>nodes.map(node=>({label:node.querySelector('strong')?.textContent.trim(),detail:node.querySelector('span')?.textContent.trim()})))
-    if (visual.before !== 'none' || visual.position !== 'absolute' || visual.fit !== 'contain' || visual.height > 210) {
-      fail('Future-day integrated exercise card', `unexpected art geometry: ${JSON.stringify(visual)}`)
-    } else if (!(await details.isVisible()) || !values.length || values.some(row=>!row.label||!row.detail)) {
-      fail('Future-day governed prescriptions', 'complete native set labels and prescriptions must remain visible')
+    const squareish = Number.isFinite(visual.width) && Number.isFinite(visual.height) && Math.abs(visual.width - visual.height) <= 4
+    if (visual.before !== 'none' || visual.position !== 'relative' || visual.fit !== 'contain' || visual.height < 240 || !squareish) {
+      fail('Future-day integrated exercise card', `unexpected full-card art geometry: ${JSON.stringify(visual)}`)
+    } else if (!(await details.isVisible()) || !(await readonly.isVisible()) || !values.length || values.some(row=>!row.label||!row.detail)) {
+      fail('Future-day governed prescriptions', 'full read-only set-card prescription must remain visible')
     } else {
-      pass('Future-day integrated exercise card', 'compact art region with native prescription table')
+      pass('Future-day integrated exercise card', 'full square premium art region with read-only prescription cards')
       pass('Future-day governed prescriptions', `${values.length} original set rows retained`)
     }
     const writeControls=card.locator('.set-input,[data-action="toggle-set"]')
