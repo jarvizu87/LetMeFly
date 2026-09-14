@@ -1,6 +1,8 @@
 const RED_FLAG_PATTERN = /\b(severe pain|acute trauma|cannot bear weight|can't bear weight|inability to bear weight|major instability|significant swelling|neurolog(?:ic|ical) symptoms?|numbness|new weakness|clearly worsening symptoms?|rapidly worsening)\b/i
 const HIP_PATTERN = /\b(anterior hip|hip pinching|deep hip flexion|deep squat(?:s|ting)?|hip discomfort)\b/i
 const KNEE_PATTERN = /\b(knee pain|loaded knee flexion|deep knee flexion|painful knee flexion)\b/i
+const GENERAL_PAIN_PATTERN = /\b(pain|painful|hurt|hurts|hurting|discomfort)\b/i
+const PROFILE_RELEVANT_PATTERN = /\b(pain|painful|hurt|hurts|hurting|discomfort|limitation|substitut|swap|replace|range|squat|knee|hip|train around)\b/i
 
 export function classifyCoachSafetyContext(value) {
   const text = String(value ?? '').trim()
@@ -8,6 +10,7 @@ export function classifyCoachSafetyContext(value) {
   if (RED_FLAG_PATTERN.test(text)) return 'red-flag'
   if (HIP_PATTERN.test(text)) return 'hip-limitation'
   if (KNEE_PATTERN.test(text)) return 'knee-limitation'
+  if (GENERAL_PAIN_PATTERN.test(text)) return 'general-limitation'
   return null
 }
 
@@ -33,6 +36,13 @@ export function coachSafetyResponse(kind) {
       body: 'Do not simply swap to another exercise that reproduces the same painful loaded or deep knee-flexion demand. If you use Substitute Today, choose an approved option that preserves the programmed purpose and stimulus while using a tolerable range and loading pattern. Keep the original prescription and substitution provenance intact. This is training-modification guidance, not a diagnosis. If weight bearing is difficult, the knee feels unstable, swelling is significant, symptoms are worsening, or there was acute trauma, stop training and seek professional evaluation.',
     }
   }
+  if (kind === 'general-limitation') {
+    return {
+      label: 'TRAINING MODIFICATION · NOT A DIAGNOSIS',
+      title: 'DO NOT TRAIN THROUGH PAIN',
+      body: 'Stop the movement or range that is causing pain. Do not choose a replacement only because it trains the same muscle; any Substitute Today option must preserve the programmed purpose while avoiding the provoking movement or range. This is training-modification guidance, not a diagnosis. If pain is severe, worsening, follows acute trauma, affects weight bearing, involves major instability or swelling, or includes neurological symptoms, stop the session and seek professional evaluation.',
+    }
+  }
   return null
 }
 
@@ -52,7 +62,7 @@ async function activeAthleteSafetyNotes() {
     })
     const athlete = rows.find(row => !row.deleted_at)
     const profile = athlete?.profile_context_v2 ?? {}
-    return [profile.coachingNotes, profile.exerciseAvoidances, profile.developmentPriorities]
+    return [profile.coachingNotes, profile.avoidExercises, profile.exerciseAvoidances, profile.developmentPriorities]
       .filter(Boolean).join(' ')
   } finally {
     db.close()
@@ -67,9 +77,39 @@ function renderSafetyResponse(response) {
   return true
 }
 
+async function resolveProfileSafety(question, fallbackKind = null) {
+  try {
+    const notes = await activeAthleteSafetyNotes()
+    const profileKind = classifyCoachSafetyContext(notes)
+    if (profileKind && profileKind !== 'general-limitation') {
+      renderSafetyResponse(coachSafetyResponse(profileKind))
+      return true
+    }
+    if (fallbackKind) return renderSafetyResponse(coachSafetyResponse(fallbackKind))
+    return false
+  } catch (error) {
+    console.warn('Coach safety context unavailable', error)
+    if (fallbackKind) return renderSafetyResponse(coachSafetyResponse(fallbackKind))
+    return false
+  }
+}
+
 function handleExplicitSafetyQuestion(question, event) {
   const kind = classifyCoachSafetyContext(question)
   if (!kind) return false
+
+  // Generic pain/hurt wording still belongs to Safety First. Claim the event
+  // synchronously so a later async substitution/exercise handler cannot overwrite
+  // the answer, then upgrade to a saved hip/knee limitation when the athlete
+  // profile provides one.
+  if (kind === 'general-limitation') {
+    event?.preventDefault?.()
+    event?.stopImmediatePropagation?.()
+    renderSafetyResponse(coachSafetyResponse(kind))
+    void resolveProfileSafety(question, kind)
+    return true
+  }
+
   const rendered = renderSafetyResponse(coachSafetyResponse(kind))
   if (!rendered) return false
   // Safety outranks descriptive exercise/substitution handlers. Prevent a generic
@@ -84,11 +124,8 @@ async function applyProfileSafetyContext(question) {
     // Explicit safety language is handled synchronously above. Profile notes are
     // supplemental context only and never mutate program/workout/private data.
     if (classifyCoachSafetyContext(question)) return
-    const notes = await activeAthleteSafetyNotes()
-    const kind = classifyCoachSafetyContext(notes)
-    if (!kind) return
-    const relevantQuestion = /\b(pain|hurt|discomfort|limitation|substitut|swap|replace|range|squat|knee|hip|train around)\b/i.test(String(question ?? ''))
-    if (relevantQuestion) renderSafetyResponse(coachSafetyResponse(kind))
+    if (!PROFILE_RELEVANT_PATTERN.test(String(question ?? ''))) return
+    await resolveProfileSafety(question)
   } catch (error) {
     console.warn('Coach safety context unavailable', error)
   }
