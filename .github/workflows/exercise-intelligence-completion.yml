@@ -26,10 +26,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
-      - name: Reconstruct exact production candidate
-        run: bash ci/build-command-v2-v2-1.sh
+      - name: Reconstruct exact final production candidate
+        run: |
+          python3 - <<'PY' > "$RUNNER_TEMP/assembly.sh"
+          import pathlib, tomllib
+          print('set -euo pipefail')
+          print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
+          PY
+          bash "$RUNNER_TEMP/assembly.sh"
       - name: Audit complete governed Exercise Intelligence surface
-        run: node ci/audit-exercise-intelligence-completion-v1.mjs .build-src/letmefly_app
+        run: node ci/audit-exercise-intelligence-completion-v1.mjs .build-src/letmefly_app --require
       - name: Publish completion evidence
         if: always()
         uses: actions/upload-artifact@v4
