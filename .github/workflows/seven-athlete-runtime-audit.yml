@@ -70,6 +70,7 @@ jobs:
           node --check ci/audit-seven-athlete-runtime.mjs
           node --check ci/audit-seven-athlete-program-card-matrix-v1.mjs
           node --check ci/audit-seven-athlete-route-sweep-v1.mjs
+          node --check ci/audit-exercise-library-art-key-browser-v1.mjs
           node --check ci/audit-coach-seven-athlete-scenarios-v1.mjs
           node --check overlays/ui-command-v2/batch-au/coach-core-intents-v2.js
           bash -n ci/run-seven-athlete-runtime-v2.sh
@@ -92,6 +93,22 @@ jobs:
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
           node ci/audit-seven-athlete-route-sweep-v1.mjs "$PWD/.build-src/letmefly_app"
+
+      - name: Prove Exercise library canonical private-art keys inside release gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4175 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >"$RUNNER_TEMP/seven-athlete-exercise-art-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..40}; do
+            curl -fsS http://127.0.0.1:4175/ >/dev/null && break
+            sleep 0.25
+          done
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          export LMF_AUDIT_BASE_URL="http://127.0.0.1:4175"
+          node ci/audit-exercise-library-art-key-browser-v1.mjs "$PWD/.build-src/letmefly_app"
 
       - name: Exhaust every governed program week day and rendered card
         shell: bash
@@ -169,6 +186,7 @@ jobs:
           path: |
             .build-src/letmefly_app/SEVEN_ATHLETE_RELEASE_AUDIT
             .build-src/letmefly_app/SEVEN_ATHLETE_ROUTE_SWEEP_V1
+            .build-src/letmefly_app/EXERCISE_LIBRARY_ART_KEY_AUDIT
             .build-src/letmefly_app/SEVEN_ATHLETE_PROGRAM_CARD_MATRIX_V1
             .build-src/letmefly_app/COACH_SEVEN_ATHLETE_SCENARIOS_V1
             .build-src/letmefly_app/COACH_DECISIONS_AUDIT

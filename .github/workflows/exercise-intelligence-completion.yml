@@ -17,7 +17,7 @@ permissions:
 jobs:
   completion:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     env:
       VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
@@ -34,6 +34,28 @@ jobs:
           print(tomllib.loads(pathlib.Path('netlify.toml').read_text())['build']['command'])
           PY
           bash "$RUNNER_TEMP/assembly.sh"
+      - name: Install isolated Exercise library browser-audit dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd .build-src/letmefly_app
+          npm install --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+      - name: Audit rendered Exercise library canonical private-art keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check ci/audit-exercise-library-art-key-browser-v1.mjs
+          python3 -m http.server 4175 --bind 127.0.0.1 --directory .build-src/letmefly_app/dist >"$RUNNER_TEMP/exercise-art-key-http.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in {1..40}; do
+            curl -fsS http://127.0.0.1:4175/ >/dev/null && break
+            sleep 0.25
+          done
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          export LMF_AUDIT_BASE_URL="http://127.0.0.1:4175"
+          node ci/audit-exercise-library-art-key-browser-v1.mjs .build-src/letmefly_app
       - name: Audit complete governed Exercise Intelligence surface
         run: node ci/audit-exercise-intelligence-completion-v1.mjs .build-src/letmefly_app --require
       - name: Publish completion evidence
@@ -41,5 +63,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: exercise-intelligence-completion-audit
-          path: .build-src/letmefly_app/EXERCISE_INTELLIGENCE_COMPLETION_AUDIT
+          path: |
+            .build-src/letmefly_app/EXERCISE_INTELLIGENCE_COMPLETION_AUDIT
+            .build-src/letmefly_app/EXERCISE_LIBRARY_ART_KEY_AUDIT
           retention-days: 14
