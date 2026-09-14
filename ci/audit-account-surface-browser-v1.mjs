@@ -34,10 +34,13 @@ try {
   if (await createLocal.isVisible().catch(() => false)) pass('Create Local Athlete is visible on opening screen')
   else fail('Create Local Athlete is visible on opening screen')
 
-  const importBackup = page.getByText(/^\s*Import Backup\s*$/i).first()
+  // Import Backup intentionally uses the native accessible label + hidden file
+  // input pattern, matching the existing Profile/Data & Backups Restore control.
+  const importBackup = page.locator('label[for="onboard-restore-file"]').first()
   const importInput = page.locator('#onboard-restore-file').first()
-  if (await importBackup.isVisible().catch(() => false)) pass('Import Backup is visible on opening screen')
-  else fail('Import Backup is visible on opening screen')
+  const importLabel = (await importBackup.innerText().catch(() => '')).trim()
+  if (await importBackup.isVisible().catch(() => false) && /Import Backup/i.test(importLabel)) pass('Import Backup is visible on opening screen')
+  else fail('Import Backup is visible on opening screen', `label=${importLabel || '(missing)'}`)
   const accept = await importInput.getAttribute('accept').catch(() => null)
   if (await importInput.count() && /json/i.test(accept || '')) pass('Import Backup is wired to a JSON file picker')
   else fail('Import Backup is wired to a JSON file picker', `accept=${accept}`)
