@@ -5,7 +5,11 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [hardening/account-device-sync-v1, hardening/exercise-intelligence-completion-v1, main]
+    branches: [hardening/exercise-intelligence-completion-v1, main]
+
+concurrency:
+  group: exercise-intelligence-completion-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
