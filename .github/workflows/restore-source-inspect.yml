@@ -1,0 +1,28 @@
+name: LetMeFly Restore Source Inspect
+
+on:
+  push:
+    branches: [hardening/account-device-sync-v1]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct source only
+        run: |
+          rm -rf .restore-inspect
+          mkdir -p .restore-inspect
+          unzip -q source/LETMEFLY_REBUILT_SOURCE_V5_4_UI_COMMAND_B4.zip -d .restore-inspect
+      - name: Print restore integration points
+        run: |
+          echo '--- main.ts restore/backup lines ---'
+          grep -nEi 'restore|backup|data & backup|import' .restore-inspect/src/main.ts | head -120 || true
+          echo '--- restore-service.ts ---'
+          sed -n '1,260p' .restore-inspect/src/restore/restore-service.ts
+          echo '--- restore-types.ts ---'
+          sed -n '1,220p' .restore-inspect/src/restore/restore-types.ts
