@@ -1,0 +1,44 @@
+name: LetMeFly Production Day 3 Circuit Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [qa/production-day3-circuit-smoke-v1]
+
+permissions:
+  contents: read
+
+jobs:
+  production-day3-circuit-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Install focused browser harness
+        run: |
+          mkdir -p .build-src/letmefly_app
+          npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+
+      - name: Run targeted production Day 3 circuit smoke
+        env:
+          LMF_AUDIT_BASE_URL: https://let-me-fly.netlify.app
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          CHROME_BIN="$CHROME_BIN" node ci/audit-production-day3-circuit-smoke.mjs
+
+      - name: Publish targeted smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-day3-circuit-smoke
+          path: .build-src/letmefly_app/PRODUCTION_DAY3_CIRCUIT_SMOKE
+          if-no-files-found: warn
+          retention-days: 7
