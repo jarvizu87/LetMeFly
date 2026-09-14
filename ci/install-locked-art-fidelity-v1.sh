@@ -100,4 +100,11 @@ grep -Fq '/ui/locked-art-fidelity-v1.css?v=10' "$INDEX"
 grep -Fq "'/ui/locked-art-fidelity-v1.css'" "$SW"
 grep -Fq "'/ui/raizen-black-crown-ascension-v1.svg'" "$SW"
 
+# In the full production pipeline the safe refresh/update layer is installed
+# earlier. Re-audit it here after branding, tab, color and locked-art layers have
+# finished so later presentation work cannot silently strip the PWA update path.
+if [[ -s "$DIST_DIR/ui/pwa-update-v1.js" ]]; then
+  node "$ROOT_DIR/ci/audit-pwa-update-control-v1.mjs" "$(dirname "$DIST_DIR")"
+fi
+
 echo "LetMeFly locked mockup Raizen/Fenrir art fidelity: PASS"
