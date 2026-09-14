@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Corrective Release — In-app PWA update control
+
+- Date: 2026-09-13
+- Main SHA: `5d9b0197dbd7a33f789796e9d5c52f31043f8f91`
+- Release scope: publish PR #103 so installed LetMeFly PWAs gain an athlete-safe in-app update path: Settings → App updates with manual CHECK NOW plus UPDATE NOW / RELOAD NOW states when appropriate; automatic checks on startup, foreground, reconnect, and interval; an update-ready banner; a release-distinct service-worker token; exact updater-script precaching; and safe service-worker activation/client claiming without uninstalling the app.
+- Required CI/audits: PR #103 exact-head 9/9 workflow pass, including Command V2 full build + real mobile/desktop browser audit, Seven-Athlete + Chaos/Resilience, workout persistence, Lifecycle Public UI, Maintenance Runtime Load + Bar Loader, Home Option 1, Cloud Sync Bootstrap Regression, Exercise Intelligence Completion, and Netlify Release Policy; plus integrated `main` 5/5 workflow pass at `5d9b0197dbd7a33f789796e9d5c52f31043f8f91`, including Command V2, Seven-Athlete, Cloud Sync, Exercise Intelligence Completion, and Netlify Release Policy.
+- Netlify production deploy count expected: 1
+- Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes and no athlete-private data changes. The updater does not clear localStorage, IndexedDB, workout history, profile state, TMs, readiness, PRs, or the private athlete vault. Existing pre-v1 installed PWAs may need one close/reopen or normal reload after this corrective release to render the new update controls; uninstall/reinstall is not required. Production remains held until this ledger-only release PR is intentionally merged through the explicit Git-linked production release gate.
+
 ## Release — Account/device sync + Exercise Intelligence completion
 
 - Date: 2026-09-13
