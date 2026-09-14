@@ -1,0 +1,1 @@
+Implementation note: the update controller is installed by `ci/install-command-refresh.sh` into the built `dist` shell and re-audited after final locked-art presentation layers. This keeps the feature outside governed program logic and private athlete storage while ensuring the final production artifact still contains the update path.
