@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Corrective Release — Train card parity + exhaustive Coach/release gate
+
+- Date: 2026-09-14
+- Main SHA: `89016d37ae7bff50a187d24b9676a7889804e79d`
+- Release scope: publish PR #105 so future/non-current Train days retain the approved full-card exercise presentation after all late UI layers; add athlete-aware Coach freeform handling for progress, Training Max, readiness, short-time, equipment, poor-session, and specialization questions; and make the Seven-Athlete release gate exhaustive across every major route, every governed program/week/day/card, both Coach scenario layers, substitution/safety, chaos/lifecycle boundaries, and synthetic-identity isolation.
+- Required CI/audits: PR #105 exact-head 10/10 workflow pass at `db62517985644556fde3fc8d64fcfd9fec0fdecd`, including the strengthened Seven-Athlete audit with 70/70 route mounts, 383 governed days, 4,682 rendered exercise cards, both Coach suites, substitution/safety, chaos/lifecycle, Command V2 real mobile/desktop browser audit, Black Crown v2.1, Maintenance Runtime Load + Bar Loader, Cloud Sync Bootstrap Regression, workout persistence, Lifecycle Public UI, Home Option 1, Exercise Intelligence Completion, and Netlify Release Policy; plus merged `main` 6/6 acceptance pass at `89016d37ae7bff50a187d24b9676a7889804e79d` covering Exercise Intelligence Completion, Command V2, Seven-Athlete, Black Crown v2.1, Cloud Sync Bootstrap Regression, and Netlify Release Policy.
+- Netlify production deploy count expected: 1
+- Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes and no athlete-private data changes. This release corrects final rendered Train preview parity, expands Coach intent coverage, and permanently strengthens the release gate so future green results require full-app and full-program rendered verification. Production publication is authorized only by `[release netlify]` on the final merge commit.
+
 ## Corrective Release — In-app PWA update control
 
 - Date: 2026-09-13
