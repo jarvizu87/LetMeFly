@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Release — Account/device sync + Exercise Intelligence completion
+
+- Date: 2026-09-13
+- Main SHA: `57747228ee51361b88d0ae6a83d1f6dbc8e4325d`
+- Release scope: publish the audited post-production batch from PR #99, PR #100, and PR #101: deterministic governed Crownforge Day 3 circuit acceptance coverage; Account + Device Sync hardening for Sign In / Register / Forgot Password, phone-to-desktop-to-phone propagation, simultaneous-edit preservation, local-first/offline recovery, fresh-device profile pull, vault-mismatch protection, and installed-PWA banner suppression; plus completion of the 112-exercise governed Exercise Intelligence catalog, Watch Exercise behavior, reviewed substitution coverage, safe video fallbacks, and neutral instructional fallback art for Machine Hip Abduction and Seated Band Hip Abduction.
+- Required CI/audits: integrated `main` 8/8 workflow pass at `57747228ee51361b88d0ae6a83d1f6dbc8e4325d`, including Command V2 full build + real mobile/desktop browser audit; Seven-Athlete + Chaos/Resilience; Crownforge v2.2; Black Crown v2.1; Cloud Sync Bootstrap Regression; Exercise Intelligence Audit; Exercise Intelligence Completion; and Netlify Release Policy.
+- Netlify production deploy count expected: 1
+- Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes. No athlete-private data is added to the public shell. Production remains held until this ledger-only release PR is intentionally merged with the explicit production release marker required by the Git-linked Netlify gate.
+
 ## Corrective Release — Crownforge circuit production integration
 
 - Date: 2026-09-13
