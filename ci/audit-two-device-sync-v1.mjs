@@ -25,6 +25,24 @@ const db = require(path.join(target, 'src/db/local-db.ts'))
 const { putEntityWithOutbox } = require(path.join(target, 'src/db/local-mutations.ts'))
 const { loadPushCandidates, acknowledge, applyRemoteChange } = require(path.join(target, 'src/sync/local-sync.ts'))
 
+// Local stores are camelCase; the real Supabase change feed emits public table
+// names. Exercise the same boundary the remote adapter and applyRemoteChange use.
+const remoteEntityType = Object.freeze({
+  athletes: 'athletes',
+  programInstances: 'program_instances',
+  trainingMaxHistory: 'training_max_history',
+  bodyweightEntries: 'bodyweight_entries',
+  readinessEntries: 'readiness_entries',
+  personalRecords: 'personal_records',
+  workoutSessions: 'workout_sessions',
+  workoutSets: 'workout_sets',
+})
+const toRemoteEntity = local => {
+  const remote = remoteEntityType[local]
+  assert.ok(remote, `Missing local-to-cloud entity mapping for ${local}`)
+  return remote
+}
+
 const athleteId = crypto.randomUUID()
 const cloud = new Map()
 let changeSeq = 0
@@ -45,14 +63,15 @@ async function pushAll() {
   assert.ok(candidates.length > 0, 'Expected queued device changes')
   for (const candidate of candidates) {
     const entry = candidate.entry
-    const key = `${entry.entityType}:${entry.entityId}`
+    const entityType = toRemoteEntity(entry.entityType)
+    const key = `${entityType}:${entry.entityId}`
     const previous = cloud.get(key)
     const revision = Number(previous?.revision || 0) + 1
     const row = {
       ...entry.payload,
       revision,
       updated_at: new Date().toISOString(),
-      ...(entry.entityType === 'athletes' ? { owner_user_id: 'disposable-owner' } : {}),
+      ...(entityType === 'athletes' ? { owner_user_id: 'disposable-owner' } : {}),
     }
     cloud.set(key, row)
     await acknowledge(candidate, {
@@ -164,15 +183,17 @@ await putEntityWithOutbox('bodyweightEntries', { ...localBody, weight: 223.9 }, 
 const pending = await loadPushCandidates(athleteId)
 const bodyCandidate = pending.find(item => item.entry.entityId === ids.body)
 assert.ok(bodyCandidate, 'Expected offline phone bodyweight change')
-const cloudKey = `${bodyCandidate.entry.entityType}:${ids.body}`
+const remoteType = toRemoteEntity(bodyCandidate.entry.entityType)
+const cloudKey = `${remoteType}:${ids.body}`
 const remoteBefore = cloud.get(cloudKey)
+assert.ok(remoteBefore, 'Expected bodyweight row in disposable cloud')
 const competing = { ...remoteBefore, weight: 225.1, revision: Number(remoteBefore.revision) + 1, updated_at: new Date().toISOString() }
 cloud.set(cloudKey, competing)
 changeSeq += 1
 const conflict = await applyRemoteChange(athleteId, {
   change_seq: changeSeq,
   athlete_id: athleteId,
-  entity_type: bodyCandidate.entry.entityType,
+  entity_type: remoteType,
   entity_id: ids.body,
   operation: 'upsert',
   entity_revision: competing.revision,
