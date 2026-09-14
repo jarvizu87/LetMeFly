@@ -6,13 +6,13 @@
     .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
   const SAFETY = /\b(severe pain|acute trauma|cannot bear weight|can't bear weight|major instability|significant swelling|neurolog(?:ic|ical)|numbness|new weakness|worsening symptoms?|hip pinching|anterior hip|knee pain|painful knee flexion)\b/i;
+  const SPECIALIZATION = /\b(specialization|weak point|chest progress|glute progress|yoke progress|trap progress|arms progress)\b/i;
   const PROGRESS = /\b(how am i progressing|progressing|my progress|getting stronger|improving|progress check)\b/i;
   const TM = /\b(training max|training maxes|change (?:my )?tm|change (?:my )?training max|update (?:my )?tm|update (?:my )?training max|should we change .*max)\b/i;
   const READINESS = /\b(readiness|how recovered|recovery today|sleep.*today|energy.*today|soreness.*today|stress.*today|fatigue.*today|tired today)\b/i;
   const TIME = /\b(short on time|compressed session|only have \d+|running late|limited time)\b/i;
   const EQUIPMENT = /\b(equipment.*(?:unavailable|missing|dont have|don't have|not available)|(?:dont have|don't have|no) .*equipment)\b/i;
   const POOR = /\b(bad session|poor session|rough session|one bad day|one poor session|two declines|two bad sessions|performance dropped)\b/i;
-  const SPECIALIZATION = /\b(specialization|weak point|chest progress|glute progress|yoke progress|trap progress|arms progress)\b/i;
 
   function questionFrom(control) {
     return control?.getAttribute?.('data-coach-prompt') || document.querySelector('#coach-question')?.value || '';
@@ -109,21 +109,26 @@
 
   async function handle(question) {
     if (!question.trim() || SAFETY.test(question)) return false;
-    if (PROGRESS.test(question)) return progressAnswer();
+    // Specific coaching domains must outrank broad wording. A question such as
+    // “How is my specialization work progressing?” contains “progressing,” but
+    // it is a specialization review first, not a generic progress summary.
+    if (SPECIALIZATION.test(question)) return situationalAnswer('specialization');
     if (TM.test(question)) return tmAnswer();
     if (READINESS.test(question)) return readinessAnswer();
     if (TIME.test(question)) return situationalAnswer('time');
     if (EQUIPMENT.test(question)) return situationalAnswer('equipment');
     if (POOR.test(question)) return situationalAnswer('poor');
-    if (SPECIALIZATION.test(question)) return situationalAnswer('specialization');
+    if (PROGRESS.test(question)) return progressAnswer();
     return false;
   }
+
+  const ROUTED_INTENTS = [SPECIALIZATION,TM,READINESS,TIME,EQUIPMENT,POOR,PROGRESS];
 
   window.addEventListener('click', (event) => {
     const control = event.target?.closest?.('.coach-shell [data-coach-prompt], .coach-shell [data-action="ask-coach"]');
     if (!control || control.disabled) return;
     const question = questionFrom(control);
-    if (![PROGRESS,TM,READINESS,TIME,EQUIPMENT,POOR,SPECIALIZATION].some(pattern => pattern.test(question)) || SAFETY.test(question)) return;
+    if (!ROUTED_INTENTS.some(pattern => pattern.test(question)) || SAFETY.test(question)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     void handle(question).catch(error => {
@@ -135,7 +140,7 @@
   window.addEventListener('keydown', (event) => {
     if (event.target?.id !== 'coach-question' || event.key !== 'Enter' || !(event.ctrlKey || event.metaKey) || event.isComposing) return;
     const question = event.target.value || '';
-    if (![PROGRESS,TM,READINESS,TIME,EQUIPMENT,POOR,SPECIALIZATION].some(pattern => pattern.test(question)) || SAFETY.test(question)) return;
+    if (!ROUTED_INTENTS.some(pattern => pattern.test(question)) || SAFETY.test(question)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     void handle(question).catch(error => {
