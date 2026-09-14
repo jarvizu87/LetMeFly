@@ -10,6 +10,7 @@ const payload = JSON.parse(fs.readFileSync(dataPath, 'utf8'))
 const exercises = Array.isArray(payload.exercises) ? payload.exercises : []
 const rules = Array.isArray(payload.substitutionRules) ? payload.substitutionRules : []
 const failures = []
+const metadataIncomplete = new Set()
 const direct = []
 const fallback = []
 const candidateDirect = []
@@ -35,24 +36,35 @@ for (const exercise of exercises) {
   const name = String(exercise.canonicalName || id)
   for (const field of ['canonicalName','sourcePrograms','movementRoles','trainingCategory','equipment','purpose','primaryMuscles','coachingCues','commonMistakes','reviewStatus','demo','thumbnail']) {
     const value = exercise[field]
-    if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) failures.push(`${name}: missing ${field}`)
+    if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
+      failures.push(`${name}: missing ${field}`)
+      metadataIncomplete.add(id)
+    }
   }
-  if (!Array.isArray(exercise.secondaryMuscles)) failures.push(`${name}: secondaryMuscles is not an array`)
+  if (!Array.isArray(exercise.secondaryMuscles)) {
+    failures.push(`${name}: secondaryMuscles is not an array`)
+    metadataIncomplete.add(id)
+  }
   if (exercise.reviewStatus !== 'READY FOR REVIEW') failures.push(`${name}: reviewStatus=${exercise.reviewStatus}`)
 
   const demo = exercise.demo || {}
   const url = String(demo.currentUrl || '')
   const candidate = String(demo.candidateDirectUrl || '')
-  if (candidate) candidateDirect.push({ id, name, candidateDirectUrl: candidate })
-  if (demo.candidateRequiresValidation !== false) failures.push(`${name}: demo still requires validation`)
+  if (candidate) candidateDirect.push({ id, name, candidateDirectUrl: candidate, candidateRequiresValidation: demo.candidateRequiresValidation })
+
   if (demo.currentStatus === 'direct-verified') {
     if (!/^https:\/\/(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)/.test(url)) failures.push(`${name}: invalid direct demo URL ${url}`)
+    if (demo.candidateRequiresValidation !== false) failures.push(`${name}: direct-verified demo still requires validation`)
     direct.push({ id, name, url })
   } else if (demo.currentStatus === 'search-fallback') {
     if (!url.startsWith('https://www.youtube.com/results?search_query=')) failures.push(`${name}: invalid search fallback ${url}`)
+    // A candidate direct URL may intentionally remain unpromoted while its safe
+    // exact-name search fallback is current. Do not turn review status into a fake
+    // validation just to make the coverage metric green.
+    if (candidate && demo.candidateRequiresValidation !== true) failures.push(`${name}: unpromoted candidate is not marked as requiring validation`)
     fallback.push({ id, name, url })
   } else failures.push(`${name}: unsupported demo status ${demo.currentStatus}`)
-  if (/vimeo\.com|drive\.google\.com/i.test(url)) failures.push(`${name}: forbidden legacy/private demo URL`)
+  if (/vimeo\.com|drive\.google\.com/i.test(url)) failures.push(`${name}: forbidden legacy/private current demo URL`)
 
   const thumb = exercise.thumbnail || {}
   if (!thumb.canonicalKey) failures.push(`${name}: missing thumbnail canonicalKey`)
@@ -103,7 +115,7 @@ const report = {
   schemaVersion: payload.schemaVersion,
   canonicalExercises: exercises.length,
   substitutionRules: rules.length,
-  metadataCoverage: `${exercises.length - failures.filter(x => x.includes(': missing ')).length}/${exercises.length}`,
+  metadataCoverage: `${exercises.length - metadataIncomplete.size}/${exercises.length}`,
   demoCoverage: { directVerified: direct.length, safeSearchFallback: fallback.length, candidateDirectUrlsNotPromoted: candidateDirect.length },
   artCoverage: { approvedSpecific: approvedSpecificArt.length, builtInExactFallback: builtInExactArt.length, neutralNonMisleadingFallback: neutralArt.length },
   substitutionCoverage: { primariesWithReviewedRules: substitutionPrimary.size, alternativesReferenced: substitutionAlternative.size, policy: 'No governed rule means no substitute is invented.' },
