@@ -18,19 +18,6 @@ const report = { result: 'PASS', failures: [], passes: [], observations: {} }
 const pass = (label, detail = '') => { report.passes.push({ label, detail }); console.log(`PASS  ${label}${detail ? ` — ${detail}` : ''}`) }
 const fail = (label, detail = '') => { report.result = 'FAIL'; report.failures.push({ label, detail }); console.log(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`) }
 
-async function visible(page, selector) {
-  const locator = page.locator(selector)
-  for (let i = 0; i < await locator.count(); i += 1) {
-    if (await locator.nth(i).isVisible().catch(() => false)) return locator.nth(i)
-  }
-  return null
-}
-
-async function textButton(page, text) {
-  const locator = page.getByRole('button', { name: text, exact: true })
-  return await visible(page, locator._selector || `button`)
-}
-
 const browser = await chromium.launch({ headless: true, executablePath: chromeBin, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
 const context = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true })
 const page = await context.newPage()
@@ -46,6 +33,14 @@ try {
   const createLocal = page.getByRole('button', { name: /CREATE LOCAL ATHLETE/i }).first()
   if (await createLocal.isVisible().catch(() => false)) pass('Create Local Athlete is visible on opening screen')
   else fail('Create Local Athlete is visible on opening screen')
+
+  const importBackup = page.getByText(/^\s*Import Backup\s*$/i).first()
+  const importInput = page.locator('#onboard-restore-file').first()
+  if (await importBackup.isVisible().catch(() => false)) pass('Import Backup is visible on opening screen')
+  else fail('Import Backup is visible on opening screen')
+  const accept = await importInput.getAttribute('accept').catch(() => null)
+  if (await importInput.count() && /json/i.test(accept || '')) pass('Import Backup is wired to a JSON file picker')
+  else fail('Import Backup is wired to a JSON file picker', `accept=${accept}`)
 
   const signIn = page.getByRole('button', { name: /^Sign In$/i }).first()
   const register = page.getByRole('button', { name: /^Register$/i }).first()
@@ -84,8 +79,9 @@ try {
     else fail('Forgot Password opens recovery UI without sending email')
   }
 
-  // The initial onboarding must remain non-destructive: this audit never submits
-  // account forms or creates a local athlete.
+  // This audit intentionally does not click Import Backup: the native file chooser
+  // and verified restore path are covered by source/restore contracts. It must also
+  // never submit account forms or create an athlete as a side effect.
   const athletes = await page.evaluate(async () => {
     if (typeof indexedDB.databases !== 'function') return []
     const dbs = await indexedDB.databases()
