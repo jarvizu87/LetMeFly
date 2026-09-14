@@ -39,35 +39,38 @@ const tmAliases = {
   overhead_press: 'overhead-press',
   power_clean: 'clean',
 }
-const fixtures = contract.athletes.map((row, index) => ({
-  ...row,
-  key: row.internalId,
-  weightUnit: row.units.weight,
-  viewport: viewports[row.internalId] ?? { width: 412, height: 915, mobile: true },
-  trainingMaxes: Object.fromEntries(
-    Object.entries(row.trainingMaxes).map(([key, value]) => [tmAliases[key] ?? key, [value, row.units.weight]])
-  ),
-  readinessUi: {
-    sleepQuality: row.readiness.sleep_quality,
-    soreness: row.readiness.soreness,
-    stress: row.readiness.stress,
-    energy: row.readiness.energy,
-    sleepHours: row.readiness.sleep_hours,
-    notes: row.readiness.notes ?? `Synthetic seven-athlete readiness marker ${row.internalId}`,
-  },
-  profile: {
-    primaryGoal: `QA-${row.internalId.toUpperCase()}-GOAL — ${row.primaryFailureDomain}`,
-    trainingHistory: `${row.role} synthetic release-audit athlete; no production identity or data.`,
-    developmentPriorities: row.requiredAssertions.slice(0, 3).join('; '),
-    equipmentAvailable: row.barbell.unit === 'kg'
-      ? 'Metric barbell and metric plate inventory'
-      : '45 lb barbell and standard plate inventory',
-    coachingNotes: row.internalId === 'qa_substitution'
-      ? 'QA-RURIK-SAFETY-MARKER — Reports anterior hip pinching with deep hip flexion and knee pain with loaded/deep knee flexion. Avoid provocative ranges; do not diagnose. Red flags require professional evaluation.'
-      : `QA-${row.internalId.toUpperCase()}-COACH-MARKER`,
-  },
-  index,
-}))
+const fixtures = contract.athletes.map((row, index) => {
+  const assertions = row.requiredAssertions ?? row.scenarios?.flatMap(scenario => scenario.requiredAssertions ?? []) ?? []
+  return {
+    ...row,
+    key: row.internalId,
+    weightUnit: row.units.weight,
+    viewport: viewports[row.internalId] ?? { width: 412, height: 915, mobile: true },
+    trainingMaxes: Object.fromEntries(
+      Object.entries(row.trainingMaxes).map(([key, value]) => [tmAliases[key] ?? key, [value, row.units.weight]])
+    ),
+    readinessUi: {
+      sleepQuality: row.readiness.sleep_quality,
+      soreness: row.readiness.soreness,
+      stress: row.readiness.stress,
+      energy: row.readiness.energy,
+      sleepHours: row.readiness.sleep_hours,
+      notes: row.readiness.notes ?? `Synthetic seven-athlete readiness marker ${row.internalId}`,
+    },
+    profile: {
+      primaryGoal: `QA-${row.internalId.toUpperCase()}-GOAL — ${row.primaryFailureDomain}`,
+      trainingHistory: `${row.role} synthetic release-audit athlete; no production identity or data.`,
+      developmentPriorities: assertions.slice(0, 3).join('; '),
+      equipment: row.barbell.unit === 'kg'
+        ? 'Metric barbell and metric plate inventory'
+        : '45 lb barbell and standard plate inventory',
+      coachingNotes: row.internalId === 'qa_substitution'
+        ? 'QA-RURIK-SAFETY-MARKER — Reports anterior hip pinching with deep hip flexion and knee pain with loaded/deep knee flexion. Avoid provocative ranges; do not diagnose. Red flags require professional evaluation.'
+        : `QA-${row.internalId.toUpperCase()}-COACH-MARKER`,
+    },
+    index,
+  }
+})
 
 const runtime = fs.mkdtempSync(path.join(app, '.qa-route-sweep-'))
 const entry = path.join(runtime, 'entry.ts')
