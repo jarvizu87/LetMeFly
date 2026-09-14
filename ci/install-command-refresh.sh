@@ -93,9 +93,9 @@ match = re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]", sw, re.S)
 if not match:
     raise SystemExit('service worker PRECACHE declaration not found')
 existing = re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
-asset = '/ui/pwa-update-v1.js'
-if asset not in existing:
-    existing.append(asset)
+for asset in ['/ui/pwa-update-v1.js', '/ui/pwa-update-v1.js?v=1']:
+    if asset not in existing:
+        existing.append(asset)
 replacement = 'const PRECACHE = [' + ', '.join(repr(value) for value in existing) + ']'
 sw = sw[:match.start()] + replacement + sw[match.end():]
 
@@ -117,10 +117,11 @@ grep -Fq '/ui/pwa-update-v1.js?v=1' "$INDEX"
 grep -Fq 'data-lmf-update-control' "$DIST/ui/pwa-update-v1.js"
 grep -Fq 'CHECK NOW' "$DIST/ui/pwa-update-v1.js"
 grep -Fq 'UPDATE NOW' "$DIST/ui/pwa-update-v1.js"
-grep -Fq 'registration.update()' "$DIST/ui/pwa-update-v1.js"
+grep -Fq 'reg.update()' "$DIST/ui/pwa-update-v1.js"
 grep -Fq 'controllerchange' "$DIST/ui/pwa-update-v1.js"
 grep -Fq 'LMF_SKIP_WAITING' "$DIST/ui/pwa-update-v1.js"
 grep -Fq "'/ui/pwa-update-v1.js'" "$SW"
+grep -Fq "'/ui/pwa-update-v1.js?v=1'" "$SW"
 grep -Fq 'const LMF_RELEASE_TOKEN = ' "$SW"
 grep -Fq "event.data.type === 'LMF_SKIP_WAITING'" "$SW"
 grep -Fq 'self.skipWaiting()' "$SW"
