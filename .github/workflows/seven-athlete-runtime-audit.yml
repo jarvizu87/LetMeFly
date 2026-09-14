@@ -69,6 +69,7 @@ jobs:
           set -euo pipefail
           node --check ci/audit-seven-athlete-runtime.mjs
           node --check ci/audit-seven-athlete-program-card-matrix-v1.mjs
+          node --check ci/audit-seven-athlete-route-sweep-v1.mjs
           node --check ci/audit-coach-seven-athlete-scenarios-v1.mjs
           node --check overlays/ui-command-v2/batch-au/coach-core-intents-v2.js
           bash -n ci/run-seven-athlete-runtime-v2.sh
@@ -83,6 +84,14 @@ jobs:
           export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
           test -n "$CHROME_BIN"
           bash ci/run-seven-athlete-runtime-v2.sh "$PWD/.build-src/letmefly_app"
+
+      - name: Sweep every major app route for all seven athletes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$CHROME_BIN"
+          node ci/audit-seven-athlete-route-sweep-v1.mjs "$PWD/.build-src/letmefly_app"
 
       - name: Exhaust every governed program week day and rendered card
         shell: bash
@@ -159,6 +168,7 @@ jobs:
           name: seven-athlete-release-audit-${{ github.run_id }}
           path: |
             .build-src/letmefly_app/SEVEN_ATHLETE_RELEASE_AUDIT
+            .build-src/letmefly_app/SEVEN_ATHLETE_ROUTE_SWEEP_V1
             .build-src/letmefly_app/SEVEN_ATHLETE_PROGRAM_CARD_MATRIX_V1
             .build-src/letmefly_app/COACH_SEVEN_ATHLETE_SCENARIOS_V1
             .build-src/letmefly_app/COACH_DECISIONS_AUDIT
