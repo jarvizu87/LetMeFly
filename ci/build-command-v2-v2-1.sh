@@ -45,6 +45,10 @@ bash "$ROOT_DIR/ci/apply-conflict-recovery-v1.sh" "$TARGET"
 # Native password access uses the existing account, session and sync boundaries.
 # No email/SMS request, provider purchase or account mutation occurs at build.
 bash "$ROOT_DIR/ci/apply-password-access-v1.sh" "$TARGET"
+# The first-run vault can also restore a verified LetMeFly JSON backup before a
+# local athlete exists. It delegates to the same validated/atomic restore handler
+# used by Profile > Data & Backups; no second restore implementation is created.
+bash "$ROOT_DIR/ci/apply-onboarding-backup-import-v1.sh" "$TARGET"
 
 # Activate only after the SMS provider and existing account number are verified.
 # No provider subscription, phone binding or account migration occurs at build.
@@ -97,6 +101,8 @@ grep -Fq "previousExercisePerformance" "$TARGET/src/services/workout-service.ts"
 grep -Fq "substitutionPerformanceLoggedAt" "$TARGET/src/services/workout-service.ts"
 grep -Fq "async finish(sessionId: string)" "$TARGET/src/main.ts"
 grep -Fq "await completeSelectedWorkout()" "$TARGET/src/main.ts"
+grep -Fq 'id="onboard-restore-file"' "$TARGET/src/main.ts"
+grep -Fq '> Import Backup</label>' "$TARGET/src/main.ts"
 
 cd "$TARGET"
 npm run audit:source
@@ -136,6 +142,7 @@ grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
 grep -Rq 'verified-clean-reference' dist/assets
 grep -Rq 'programmedRpe' dist/assets
+grep -Rq 'Import Backup' dist/assets
 # User-visible save confirmation must survive minification; local variable names do not.
 grep -Rq 'Set saved locally' dist/assets
 grep -Rq 'Using .* for this workout only\|for this workout only' dist/assets
@@ -146,4 +153,4 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" di
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with Black Crown v2.1 + Crownforge v2.2 + Crown Maintenance/Black Crown card fidelity + Crownforge circuit-first Train + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"
+echo "LetMeFly production build with account/device hardening + onboarding verified-backup import + Black Crown v2.1 + Crownforge v2.2 + Crown Maintenance/Black Crown card fidelity + Crownforge circuit-first Train + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"
