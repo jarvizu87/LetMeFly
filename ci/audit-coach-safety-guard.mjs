@@ -31,6 +31,16 @@ test('knee limitation has materially different guidance', () => {
   assert.match(knee.body, /substitution provenance/i)
 })
 
+test('generic pain wording stays inside safety before substitution guidance', () => {
+  const kind = classifyCoachSafetyContext('This hurts. What can I substitute?')
+  assert.equal(kind, 'general-limitation')
+  const response = coachSafetyResponse(kind)
+  assert.match(response.title, /do not train through pain/i)
+  assert.match(response.body, /programmed purpose/i)
+  assert.match(response.body, /not a diagnosis/i)
+  assert.match(response.body, /professional evaluation/i)
+})
+
 test('normal training questions are not intercepted', () => {
   assert.equal(classifyCoachSafetyContext('Can I increase the weight today?'), null)
   assert.equal(coachSafetyResponse(null), null)
