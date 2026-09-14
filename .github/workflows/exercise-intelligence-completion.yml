@@ -1,0 +1,35 @@
+name: LetMeFly Exercise Intelligence Completion
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [hardening/account-device-sync-v1, hardening/exercise-intelligence-completion-v1, main]
+
+permissions:
+  contents: read
+
+jobs:
+  completion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+      - name: Reconstruct exact production candidate
+        run: bash ci/build-command-v2-v2-1.sh
+      - name: Audit complete governed Exercise Intelligence surface
+        run: node ci/audit-exercise-intelligence-completion-v1.mjs .build-src/letmefly_app
+      - name: Publish completion evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exercise-intelligence-completion-audit
+          path: .build-src/letmefly_app/EXERCISE_INTELLIGENCE_COMPLETION_AUDIT
+          retention-days: 14
