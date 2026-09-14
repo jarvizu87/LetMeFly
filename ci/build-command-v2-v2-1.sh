@@ -88,6 +88,12 @@ bash "$ROOT_DIR/ci/apply-athlete-weight-unit-v1.sh" "$TARGET"
 bash "$ROOT_DIR/ci/apply-program-card-fidelity-v1.sh" "$TARGET"
 node "$ROOT_DIR/ci/audit-program-card-fidelity-v1.mjs" "$TARGET"
 
+# Exercise Intelligence completion: two newly governed lateral-glute movements had
+# correct metadata/videos/substitutions but no approved production thumbnail. Ship
+# exact neutral instructional illustrations as public-shell fallbacks. Approved
+# athlete-private art remains authoritative because its inline --exercise-art wins.
+bash "$ROOT_DIR/ci/apply-exercise-intelligence-completion-v1.sh" "$TARGET"
+
 # Assert the source-level persistence/count boundary before minification. Vite is
 # allowed to rename local identifiers such as refreshedStats in the final bundle.
 grep -Fq "const refreshedStats = state.workout ? completionStats(state.workout) : null" "$TARGET/src/main.ts"
@@ -103,6 +109,8 @@ grep -Fq "async finish(sessionId: string)" "$TARGET/src/main.ts"
 grep -Fq "await completeSelectedWorkout()" "$TARGET/src/main.ts"
 grep -Fq 'id="onboard-restore-file"' "$TARGET/src/main.ts"
 grep -Fq '> Import Backup</label>' "$TARGET/src/main.ts"
+grep -Fq '[data-exercise-art="machine-hip-abduction"]' "$TARGET/src/command-v2.css"
+grep -Fq '[data-exercise-art="seated-band-hip-abduction"]' "$TARGET/src/command-v2.css"
 
 cd "$TARGET"
 npm run audit:source
@@ -127,11 +135,14 @@ node "$ROOT_DIR/ci/audit-black-crown-v2-1.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-crownforge-v2-2.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-workout-substitution-today-v1.mjs" "$TARGET"
 node "$ROOT_DIR/ci/audit-program-card-fidelity-v1.mjs" "$TARGET"
+node "$ROOT_DIR/ci/audit-exercise-intelligence-completion-v1.mjs" "$TARGET"
 
 test -f dist/index.html
 test -f dist/service-worker.js
 test -s dist/ui/crownforge-circuit-train-v1.js
 test -s dist/ui/crownforge-circuit-train-v1.css
+test -s dist/ui/exercises/machine-hip-abduction.svg
+test -s dist/ui/exercises/seated-band-hip-abduction.svg
 grep -Fq '/ui/crownforge-circuit-train-v1.css?v=2' dist/index.html
 grep -Fq '/ui/crownforge-circuit-train-v1.js?v=2' dist/index.html
 grep -Fq '__LMF_CIRCUIT_TRAIN_V1__' dist/ui/crownforge-circuit-train-v1.js
@@ -140,6 +151,8 @@ grep -Fq 'lmf-circuit-movement-code' dist/ui/crownforge-circuit-train-v1.js
 grep -Rq 'Black Crown Revised' dist/assets
 grep -Rq 'Black Crown Revised v2.1' dist/assets
 grep -Rq 'Machine Hip Abduction' dist/assets
+grep -Rq 'seated-band-hip-abduction.svg' dist/assets
+grep -Rq 'machine-hip-abduction.svg' dist/assets
 grep -Rq 'verified-clean-reference' dist/assets
 grep -Rq 'programmedRpe' dist/assets
 grep -Rq 'Import Backup' dist/assets
@@ -153,4 +166,4 @@ grep -Fq "tabs.scrollTo({ left: Math.max(0, centered), behavior: 'smooth' })" di
 ! grep -Rq 'Black Crown Revised v2.0\.' dist/assets
 ! grep -R "service_role\|SUPABASE_SERVICE\|DATABASE_PASSWORD" dist
 
-echo "LetMeFly production build with account/device hardening + onboarding verified-backup import + Black Crown v2.1 + Crownforge v2.2 + Crown Maintenance/Black Crown card fidelity + Crownforge circuit-first Train + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"
+echo "LetMeFly production build with Exercise Intelligence completion + account/device hardening + onboarding verified-backup import + Black Crown v2.1 + Crownforge v2.2 + Crown Maintenance/Black Crown card fidelity + Crownforge circuit-first Train + Issue #50 workout fidelity + Issue #54 governed workout substitutions + awaited governed recap completion + live Review persistence refresh + vertical-scroll isolation: PASS"

@@ -1,0 +1,9 @@
+/* Exercise Intelligence completion v1 — exact neutral fallback art.
+   These are public instructional illustrations, not athlete-private images.
+   An approved private --exercise-art inline value remains authoritative and wins. */
+[data-exercise-art="machine-hip-abduction"]{
+  --exercise-art:url('/ui/exercises/machine-hip-abduction.svg');
+}
+[data-exercise-art="seated-band-hip-abduction"]{
+  --exercise-art:url('/ui/exercises/seated-band-hip-abduction.svg');
+}
