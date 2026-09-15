@@ -119,10 +119,12 @@
 
   function applySeed(input, value, kind) {
     if (!(input instanceof HTMLInputElement) || !value || !isBlank(input) || isUserEdited(input)) return false
+    // Do not emit synthetic input/change events here. The native app treats those
+    // as athlete edits and may re-render from the still-empty saved actual before
+    // the athlete has logged the set, erasing the display default. The native set
+    // button remains the authoritative persistence boundary and reads this value.
     input.value = String(value)
     input.dataset.lmfPrescriptionSeed = kind
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    input.dispatchEvent(new Event('change', { bubbles: true }))
     return true
   }
 
@@ -141,7 +143,10 @@
     }
 
     changed = applySeed(row.querySelector('.rpe-input'), rpeSeed(row), 'rpe') || changed
-    if (changed) row.dataset.lmfPrescriptionHydrated = 'true'
+    if (changed) {
+      row.dataset.lmfPrescriptionHydrated = 'true'
+      window.setTimeout(() => window.LetMeFlyWorkoutLoadDisplay?.refresh?.(), 0)
+    }
     return changed
   }
 
@@ -183,6 +188,7 @@
     window.addEventListener('hashchange', () => schedule(20))
     window.setTimeout(() => hydrateAll(document), 250)
     window.setTimeout(() => hydrateAll(document), 900)
+    window.setTimeout(() => hydrateAll(document), 1800)
 
     window.__LMF_WORKOUT_PRESCRIPTION_INPUT_HYDRATION_V1__ = Object.freeze({
       version: 1,
