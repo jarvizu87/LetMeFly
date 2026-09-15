@@ -118,12 +118,14 @@ try {
     const coach = rect('.lmf-home-v4-coach')
     const source = document.querySelector('[data-lmf-performance]')
     const summary = document.querySelector('.lmf-home-option1-performance-summary')
+    const navItems = [...document.querySelectorAll('.navbar .nav-item, .navbar [data-route], .navbar a, .navbar button')]
+      .filter((node) => node instanceof HTMLElement && getComputedStyle(node).display !== 'none' && node.getBoundingClientRect().width > 0)
     return {
       desktopFlag:document.documentElement.getAttribute('data-lmf-desktop-ui'),
       rail:rect('.navbar'),
       railPosition:position('.navbar'),
-      desktopBrand:rect('.lmf-desktop-brand'),
-      desktopBrandDisplay:display('.lmf-desktop-brand'),
+      visibleNavItems:navItems.length,
+      legacyDesktopBrandPresent:Boolean(document.querySelector('.lmf-desktop-brand')),
       homeTopBrandDisplay:display('.lmf-home-brand-lockup'),
       home:rect('.lmf-home-reference-v3'),
       hero:rect('.lmf-home-option1-hero'),
@@ -147,12 +149,13 @@ try {
   })
   report.layout = layout
 
-  check(layout.desktopFlag === 'true', 'Option 3 desktop shell is active on Home')
-  check(layout.railPosition === 'fixed' && (layout.rail?.width || 0) >= 175 && (layout.rail?.width || 0) <= 200, 'Desktop navigation remains the fixed Option 3 rail', `${Math.round(layout.rail?.width || 0)}px`)
-  check(layout.desktopBrandDisplay !== 'none' && Boolean(layout.desktopBrand), 'Desktop rail keeps the LetMeFly brand')
+  check(layout.desktopFlag === 'true', 'Responsive desktop state is active on Home')
+  check(layout.railPosition === 'fixed' && (layout.rail?.width || 0) >= 64 && (layout.rail?.width || 0) <= 96, 'Current compact desktop navigation stays fixed', `${Math.round(layout.rail?.width || 0)}px`)
+  check(layout.visibleNavItems >= 5, 'Current desktop navigation exposes the primary routes', `visible nav controls=${layout.visibleNavItems}`)
+  check(!layout.legacyDesktopBrandPresent, 'Retired Option 3 desktop-brand element is absent')
   check(layout.homeTopBrandDisplay === 'none', 'Home avoids duplicate desktop wordmark', `top Home brand display=${layout.homeTopBrandDisplay || 'missing'}`)
   check(Boolean(layout.home) && (layout.home?.width || 0) >= 1080 && (layout.home?.width || 0) <= 1245, 'Home expands into the desktop work area', `${Math.round(layout.home?.width || 0)}px`)
-  check(Boolean(layout.rail) && Boolean(layout.home) && layout.home.x >= layout.rail.right, 'Home content stays clear of the desktop rail', `${Math.round(layout.home?.x || 0)}px after rail ${Math.round(layout.rail?.right || 0)}px`)
+  check(Boolean(layout.rail) && Boolean(layout.home) && layout.home.x >= layout.rail.right, 'Home content stays clear of the desktop navigation', `${Math.round(layout.home?.x || 0)}px after nav ${Math.round(layout.rail?.right || 0)}px`)
   check(Boolean(layout.hero) && (layout.hero?.width || 0) >= 1000 && (layout.hero?.height || 0) >= 420, 'Combined hero scales as a desktop command surface', `${Math.round(layout.hero?.width || 0)}×${Math.round(layout.hero?.height || 0)}px`)
   check(Boolean(layout.command) && Boolean(layout.greeting) && layout.command.y >= layout.greeting.bottom && layout.command.width < layout.hero.width * .72, 'Workout card is inset below the greeting with landscape visible beside it')
   check(Boolean(layout.start) && layout.start.x >= layout.command.right && Math.abs(layout.start.bottom - layout.command.bottom) < 3 && layout.start.right <= layout.hero.right, 'Desktop Start action sits beside the workout card inside the hero')
@@ -184,4 +187,4 @@ try {
 }
 
 if (report.failures.length) process.exit(1)
-console.log('LetMeFly approved Option 1 Home desktop bridge audit: PASS')
+console.log('LetMeFly approved Option 1 Home desktop responsive-shell audit: PASS')
