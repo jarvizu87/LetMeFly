@@ -165,6 +165,31 @@
     return true
   }
 
+  function applyLoadSeed(input, load) {
+    if (!(input instanceof HTMLInputElement) || !load?.value || isUserEdited(input)) return false
+    const next = displayNumber(load.value)
+    const current = clean(input.value)
+    const existingSeed = clean(input.dataset.lmfPrescriptionSeed)
+
+    if (!current) {
+      input.value = next
+      input.dataset.lmfPrescriptionSeed = load.source === 'previous-actual' ? 'carried-load' : 'load'
+      return true
+    }
+
+    // Program defaults are provisional display values. If a completed prior set on
+    // the unchanged prescription later supplies a real athlete actual, that actual
+    // may replace the untouched program-seeded default. Manual edits and native
+    // saved actuals are never overwritten here.
+    if (load.source === 'previous-actual' && existingSeed === 'load' && current !== next) {
+      input.value = next
+      input.dataset.lmfPrescriptionSeed = 'carried-load'
+      return true
+    }
+
+    return false
+  }
+
   function hydrateRow(row) {
     if (!(row instanceof Element) || !row.matches('.set-row[data-set-id]') || isDone(row)) return false
 
@@ -176,7 +201,7 @@
     const load = loadSeed(row)
     if (load?.value > 0) {
       if (row.dataset.loadUnit !== load.unit) row.dataset.loadUnit = load.unit
-      changed = applySeed(row.querySelector('.load-input'), displayNumber(load.value), load.source === 'previous-actual' ? 'carried-load' : 'load') || changed
+      changed = applyLoadSeed(row.querySelector('.load-input'), load) || changed
     }
 
     changed = applySeed(row.querySelector('.rpe-input'), rpeSeed(row), 'rpe') || changed
