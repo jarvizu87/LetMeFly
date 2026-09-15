@@ -31,15 +31,28 @@ async function domain() {
   })
 }
 async function dismiss() {
-  const button=page.getByRole('button',{name:/^(Not now|Dismiss install prompt)$/i})
-  if(await button.isVisible().catch(()=>false))await button.tap()
+  // The install banner is outside this workout-lifecycle audit's scope. Dismiss
+  // it through the app's real click handler, but do not use pointer hit-testing:
+  // responsive rerenders can hide/move the banner between visibility detection
+  // and a Playwright tap. A transient banner must never abort the actual set,
+  // load, round, metric, persistence, or prescription-integrity assertions.
+  const banner=page.locator('#lmf-install-banner')
+  if(!await banner.isVisible().catch(()=>false))return
+  await banner.evaluate(node=>{
+    const button=node.querySelector('button.lmf-install-dismiss,[aria-label="Dismiss install prompt"]')
+    if(button instanceof HTMLElement)button.click()
+    else node.remove()
+  }).catch(()=>{})
+  await banner.waitFor({state:'hidden',timeout:1000}).catch(()=>{})
 }
 async function boot(day) {
   context=await browser.newContext({viewport:{width:412,height:915},isMobile:true,hasTouch:true,serviceWorkers:'block'})
   await context.route('**/*',route=>new URL(route.request().url()).origin==='http://127.0.0.1:4173'?route.continue():route.abort())
   page=await context.newPage();page.setDefaultTimeout(10000)
   await page.addLocatorHandler(page.locator('#lmf-install-banner'),async()=>{
-    await page.getByRole('button',{name:'Dismiss install prompt',exact:true}).tap()
+    // Locator handlers can race a responsive rerender. The helper is deliberately
+    // idempotent/non-throwing so a disappearing banner cannot poison the test.
+    await dismiss()
   })
   page.on('pageerror',error=>report.failures.push({label:'Runtime error',message:error.message}))
   await page.goto('http://127.0.0.1:4173/#/train')
@@ -96,7 +109,7 @@ async function revealControl(control) {
     const box=await control.boundingBox()
     if(!box)throw new Error('Workout control is not visible')
     const center=box.y+box.height/2
-    if(center>=110 && center<=790)return
+    if(center>=110&&center<=790)return
     await page.mouse.move(200,450)
     await page.mouse.wheel(0,center-450)
     await page.waitForTimeout(250)
@@ -129,7 +142,7 @@ async function advance(panel, previousId) {
   if(await rest.isVisible().catch(()=>false))await rest.tap()
   await page.waitForFunction(id=>{
     const panel=document.querySelector('.swipe-page.active-page')
-    return Boolean(panel?.querySelector('[data-lmf-rest-continue]')) || panel?.querySelector('.lmf-sequence-active .lmf-set-active')?.getAttribute('data-set-id')!==id
+    return Boolean(panel?.querySelector('[data-lmf-rest-continue]'))||panel?.querySelector('.lmf-sequence-active .lmf-set-active')?.getAttribute('data-set-id')!==id
   },previousId)
   if(await rest.isVisible().catch(()=>false))await rest.tap()
   // Set activation is asynchronous and has fallback callbacks through 1000 ms.
@@ -144,14 +157,14 @@ async function loadAndCircuit() {
   const panel=await section('Main Strength Circuit')
   const expected=await panel.locator('.exercise-stack > .active-exercise .exercise-title h3').allTextContents()
   assert.ok(expected.length>=2)
-  const seen=[]; let changed, same
+  const seen=[];let changed,same
   for(const title of expected) {
     const item=await active(panel);assert.equal(item.title,title);seen.push(item.title)
     const exerciseId=await item.card.getAttribute('data-exercise-id')
     const sets=baseline.workoutSets.filter(s=>s.workout_exercise_id===exerciseId).sort((a,b)=>a.set_number-b.set_number)
     const values={}
-    if(title==='Front Squat') {assert.notEqual(sets[0].load_value,sets[1].load_value);values.load=115;changed=sets[1]}
-    if(title==='Chest-Supported Row') {assert.equal(sets[0].load_value,sets[1].load_value);values.load=45;same=sets[1]}
+    if(title==='Front Squat'){assert.notEqual(sets[0].load_value,sets[1].load_value);values.load=115;changed=sets[1]}
+    if(title==='Chest-Supported Row'){assert.equal(sets[0].load_value,sets[1].load_value);values.load=45;same=sets[1]}
     await save(item.row,values)
     await advance(panel,item.id)
   }
@@ -161,7 +174,7 @@ async function loadAndCircuit() {
   assert.equal(next.title,expected[0]);assert.equal(next.id,changed.id)
   assert.equal(Number(await next.row.locator('.load-input').inputValue()),changed.load_value)
   pass('An intentional next-set prescription change overrides prior athlete load',{priorActual:115,nextPrescribed:changed.load_value})
-  for(let i=0;next.id!==same.id&&i<expected.length;i++) {await save(next.row);await advance(panel,next.id);next=await active(panel)}
+  for(let i=0;next.id!==same.id&&i<expected.length;i++){await save(next.row);await advance(panel,next.id);next=await active(panel)}
   assert.equal(next.id,same.id)
   assert.equal(Number(await next.row.locator('.load-input').inputValue()),45)
   const saved=await save(next.row,{reps:10,rpe:7})
@@ -188,7 +201,7 @@ async function roundsAndMetrics() {
     const item=await active(panel);assert.equal(item.title,title)
     const target=item.row.locator('.lmf-prescription-cell strong')
     const sideTarget=/1\s*\/\s*side/i.test(await target.textContent())
-    if(sideTarget) {assert.equal(await target.isVisible(),true);perSide=true}
+    if(sideTarget){assert.equal(await target.isVisible(),true);perSide=true}
     const saved=await save(item.row,sideTarget?{reps:1}:{})
     if(sideTarget)assert.equal(saved.reps,1)
     await advance(panel,item.id)
