@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "packId": "train-heroes-v1",
+  "status": "locked",
+  "lockedAt": "2026-09-14",
+  "purpose": "Official LetMeFly Train hero/cover art pack for Crownforge and Black Crown.",
+  "selectionPolicy": {
+    "rule": "Select by the governed workout/day's dominant training emphasis. Do not rotate randomly.",
+    "fallbackKey": "accessory-recovery-work-capacity",
+    "replacementPolicy": "Do not replace, reorder, repurpose, or silently substitute any v1 hero. Any intentional art change must create a new versioned pack or an explicit reviewed v1 revision.",
+    "programLogicIsolation": true,
+    "athleteDataIsolation": true
+  },
+  "source": {
+    "type": "approved-generated-art",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "aspectRatio": "16:9",
+    "characterContinuity": "Same recurring LetMeFly athlete identity and neon red/black/purple gym world across all nine images."
+  },
+  "heroes": [
+    {
+      "key": "squat-lower-strength",
+      "label": "Squat / Lower Strength",
+      "deliveryFile": "train-hero-v1-squat-lower-strength.webp",
+      "sourceSha256": "6bfba3b69280f6df8155b43319ac07e2e7ecc37a285df420236fbcf67bd40f07",
+      "useFor": ["squat", "lower-strength", "quad-dominant", "lower-body-strength"]
+    },
+    {
+      "key": "bench-upper-push",
+      "label": "Bench / Upper Push",
+      "deliveryFile": "train-hero-v1-bench-upper-push.webp",
+      "sourceSha256": "c0bec9edc490d6637a93854bf39f6daca3518934742ae7024030292d78afa7e9",
+      "useFor": ["bench", "upper-push", "chest", "horizontal-press"]
+    },
+    {
+      "key": "deadlift-posterior-chain",
+      "label": "Deadlift / Posterior Chain",
+      "deliveryFile": "train-hero-v1-deadlift-posterior-chain.webp",
+      "sourceSha256": "782dd35c1c139b1fc3eff1c69f11c4bce87193961c130c90737b59f2949de19c",
+      "useFor": ["deadlift", "hinge", "posterior-chain", "pull-strength"]
+    },
+    {
+      "key": "olympic-explosive",
+      "label": "Olympic / Explosive",
+      "deliveryFile": "train-hero-v1-olympic-explosive.webp",
+      "sourceSha256": "cdac06f12f037148e85c922cd61b333c6407b497348894f445432f8f45b015e6",
+      "useFor": ["olympic", "clean", "snatch", "high-pull", "explosive"]
+    },
+    {
+      "key": "conditioning-carries",
+      "label": "Conditioning / Carries",
+      "deliveryFile": "train-hero-v1-conditioning-carries.webp",
+      "sourceSha256": "de989452cbc6d87a3b28505b8daa7b2d9d1b3160c85f2319674d8638114c2f20",
+      "useFor": ["conditioning", "sled", "farmer-carry", "carry", "work-capacity"]
+    },
+    {
+      "key": "accessory-recovery-work-capacity",
+      "label": "Accessory / Recovery / Work Capacity",
+      "deliveryFile": "train-hero-v1-accessory-recovery-work-capacity.webp",
+      "sourceSha256": "5a67cf004bfb8ad94e5803bc9f223465a217b5852da2d7563d772b3d2be92fbf",
+      "useFor": ["accessory", "recovery", "mobility", "kettlebell", "mixed-work"]
+    },
+    {
+      "key": "yoke-trap-strength",
+      "label": "Yoke / Trap Strength",
+      "deliveryFile": "train-hero-v1-yoke-trap-strength.webp",
+      "sourceSha256": "f69e9046ef0c5aa7c15f8e92830ec2f10ceacfb4d833723ee9058c60ff143602",
+      "useFor": ["yoke", "trap-strength", "heavy-carry", "upper-back"]
+    },
+    {
+      "key": "overhead-vertical-strength",
+      "label": "Overhead / Vertical Strength",
+      "deliveryFile": "train-hero-v1-overhead-vertical-strength.webp",
+      "sourceSha256": "d31983785ab2cb245a47e7e46ad4da4de49913d2b813f056f304152fbaa4b7bf",
+      "useFor": ["ohp", "overhead-press", "push-press", "vertical-strength"]
+    },
+    {
+      "key": "realization-testing-crown-day",
+      "label": "Realization / Testing / Crown Day",
+      "deliveryFile": "train-hero-v1-realization-testing-crown-day.webp",
+      "sourceSha256": "55353b07744841988aa182670e39ef2bbff6a56fb3217149b4d7ac5bb96c629f",
+      "useFor": ["realization", "testing", "pr-attempt", "peak", "crown-day"]
+    }
+  ]
+}
