@@ -103,9 +103,17 @@ try {
     await page.waitForTimeout(1800)
     assert.equal(await page.locator('#lmf-install-banner').count(),0,'Dismissed install promotion stays hidden after reload')
     report.checks.push({width,check:'install-dismissal-survives-reload',status:'pass'})
-    const headerLogo=page.locator(width<1100?'.lmf-home-brand-lockup > img':'.navbar .lmf-official-brand-mark img')
-    await headerLogo.waitFor({state:'visible'})
-    assert.equal(await headerLogo.evaluate(img=>img.complete&&img.naturalWidth===512&&img.getBoundingClientRect().width>=64&&img.getAttribute('src').startsWith('/brand/letmefly-logo-display-512.png')),true,'The visible Home header displays the larger original PNG directly')
+    const homeBrand=page.locator('.lmf-home-brand-lockup > img')
+    await homeBrand.waitFor({state:width<1100?'visible':'attached'})
+    assert.equal(await homeBrand.evaluate(img=>img.complete&&img.naturalWidth===512&&img.getAttribute('src').startsWith('/brand/letmefly-logo-display-512.png')),true,'Home retains the approved original PNG brand asset directly')
+    if(width<1100){
+      assert.ok((await homeBrand.boundingBox())?.width>=64,'Mobile Home visibly displays the approved brand')
+    } else {
+      const desktopNav=page.locator('.navbar')
+      await desktopNav.waitFor({state:'visible'})
+      assert.equal(await desktopNav.evaluate(el=>getComputedStyle(el).position),'fixed','Desktop keeps the current compact fixed navigation')
+      assert.equal(await page.locator('.lmf-desktop-brand').count(),0,'Retired Option 3 desktop brand is absent')
+    }
 
     // An SVG may load successfully even when its embedded raster is corrupt.
     // Decode the actual delivered JPEG, not only the outer SVG element.
@@ -125,8 +133,15 @@ try {
       await page.goto(origin+'/#/'+route)
       await page.waitForFunction(r => document.documentElement.dataset.lmfApprovedRoute === r, route)
       await page.locator(selector).waitFor({state:'visible'})
-      const routeLogo=page.locator(width<1100?'.topbar .lmf-official-brand-mark img':'.navbar .lmf-official-brand-mark img')
-      assert.equal(await routeLogo.evaluate((img,min)=>img.complete&&img.naturalWidth>0&&img.getBoundingClientRect().width>=min,width<1100?52:64),true,route+' retains the larger header logo')
+      if(width<1100){
+        const routeLogo=page.locator('.topbar .lmf-official-brand-mark img')
+        assert.equal(await routeLogo.evaluate(img=>img.complete&&img.naturalWidth>0&&img.getBoundingClientRect().width>=52),true,route+' retains the larger mobile header logo')
+      } else {
+        const desktopNav=page.locator('.navbar')
+        assert.equal(await desktopNav.isVisible(),true,route+' retains current desktop navigation')
+        assert.equal(await desktopNav.evaluate(el=>getComputedStyle(el).position),'fixed',route+' keeps compact desktop navigation fixed')
+        assert.equal(await page.locator('.lmf-desktop-brand').count(),0,route+' does not restore the retired Option 3 desktop brand')
+      }
       assert.equal(await page.locator('.navbar .nav-item.active > span').first().evaluate(el=>getComputedStyle(el).color),'rgb(255, 64, 80)','Navigation uses the approved red selection accent')
       const expectedScene=scene==='progress'&&width<768?'progress-mobile':scene
       await page.waitForFunction(([selector,scene]) => getComputedStyle(document.querySelector(selector)).backgroundImage.includes(`/ui/mockup-scenes/${scene}.svg`), [selector,expectedScene])
@@ -255,6 +270,7 @@ try {
 
     await page.locator('[data-lmf-start]').click()
     await page.locator('.lmf-reference-train-hero').waitFor({state:'visible'})
+    if(width>=1100)assert.equal(await page.locator('[data-lmf-desktop-workspace], .lmf-desktop-flow-panel, .lmf-desktop-context-panel').count(),0,'Retired three-column desktop Train workspace remains absent')
     assert.equal(await page.locator('#swipe-viewport').getAttribute('data-lmf-section-navigation'),'intent-v1','Native section selection distinguishes navigation from focus scrolling')
     assert.equal(await page.locator('.lmf-reference-train-readiness > button').count(),4)
     assert.equal(await page.locator('.lmf-reference-train-hero img').evaluate(async img=>{await img.decode();return img.naturalWidth>0}),true)
@@ -296,21 +312,8 @@ try {
     })
     assert.equal(actionBounds,true,'Watch, Info and Substitute fit fully inside the preview card')
     if(width>=1100){
-      await page.waitForFunction(()=>document.querySelectorAll('.lmf-desktop-flow-item').length===document.querySelectorAll('.active-page .preview-card').length)
-      assert.deepEqual(await page.locator('.lmf-desktop-flow-copy b').allTextContents(),await beforeStart.locator('.exercise-title h3').allTextContents(),'Desktop flow shows every preview movement')
-      await page.locator('[data-lmf-desktop-exercise-index="2"]').click()
-      await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Glute Bridge ISO'&&document.querySelector('.lmf-desktop-context-body [data-lmf-desktop-v2-content] strong')?.textContent==='Glute Bridge ISO')
-      assert.equal(await page.locator('.lmf-desktop-context-body .lmf-desktop-live-set-grid').count(),0,'Preview context cannot fabricate a live set')
-      await page.locator('[data-lmf-desktop-v2-action="info"]').click()
-      await page.locator('#lmf-exercise-intelligence-modal .lmf-intel-modal').waitFor({state:'visible'})
-      await page.keyboard.press('Escape')
-      assert.equal(await page.locator('[data-lmf-desktop-exercise-index="0"]').evaluate(async button=>{
-        for(let i=0;i<12;i++)await new Promise(requestAnimationFrame)
-        return button.isConnected
-      }),true,'Unchanged desktop movement and picture nodes survive presentation refreshes')
-      await page.locator('[data-lmf-desktop-exercise-index="0"]').click()
-      await page.waitForFunction(()=>document.querySelector('.active-page .lmf-reference-preview-active h3')?.textContent==='Bike / Incline Walk'&&document.querySelector('.lmf-desktop-context-body [data-lmf-desktop-v2-content] strong')?.textContent==='Bike / Incline Walk')
-      assert.deepEqual(await beforeStart.locator('.prescription-block > .prescription-row').allTextContents(),prescriptionsBefore,'Desktop preview tools and selection preserve prescriptions')
+      assert.equal(await page.locator('[data-lmf-desktop-workspace], .lmf-desktop-flow-panel, .lmf-desktop-context-panel, [data-lmf-desktop-exercise-index], [data-lmf-desktop-v2-action]').count(),0,'Desktop preview uses only the approved native Train cards and tools')
+      assert.deepEqual(await beforeStart.locator('.prescription-block > .prescription-row').allTextContents(),prescriptionsBefore,'Desktop native preview selection preserves every governed prescription')
     }
     await beforeStart.first().evaluate(el=>window.scrollTo({top:scrollY+el.closest('.workout-panel').getBoundingClientRect().top-84,behavior:'instant'}))
     await page.screenshot({path:path.join(out,`train-before-start-${width}.png`)})
