@@ -4,16 +4,26 @@ on:
   pull_request:
     paths:
       - 'overlays/ui-command-v2/static/train-heroes-v1/**'
+      - 'overlays/ui-command-v2/batch-av/**'
       - 'docs/TRAIN_HERO_ART_PACK_V1_LOCKED.md'
+      - 'docs/TRAIN_HERO_RUNTIME_WIRING_PLAN_V1.md'
       - 'ci/validate-train-hero-art-pack-v1.mjs'
+      - 'ci/install-train-hero-runtime-v1.sh'
+      - 'ci/audit-train-hero-runtime-v1.mjs'
+      - 'netlify.toml'
       - '.github/workflows/train-hero-art-pack-v1-audit.yml'
   push:
     branches:
       - main
     paths:
       - 'overlays/ui-command-v2/static/train-heroes-v1/**'
+      - 'overlays/ui-command-v2/batch-av/**'
       - 'docs/TRAIN_HERO_ART_PACK_V1_LOCKED.md'
+      - 'docs/TRAIN_HERO_RUNTIME_WIRING_PLAN_V1.md'
       - 'ci/validate-train-hero-art-pack-v1.mjs'
+      - 'ci/install-train-hero-runtime-v1.sh'
+      - 'ci/audit-train-hero-runtime-v1.mjs'
+      - 'netlify.toml'
       - '.github/workflows/train-hero-art-pack-v1-audit.yml'
   workflow_dispatch:
 
@@ -27,10 +37,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Validate locked hero manifest
         run: node ci/validate-train-hero-art-pack-v1.mjs
+
+      - name: Validate deterministic runtime selector
+        run: node ci/audit-train-hero-runtime-v1.mjs
