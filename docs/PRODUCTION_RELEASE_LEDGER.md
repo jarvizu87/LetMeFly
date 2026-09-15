@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Corrective Release — Exercise Library private-art keys
+
+- Date: 2026-09-14
+- Main SHA: `d285905245b09558c88d39efbde6f477dedabff5`
+- Release scope: publish PR #107 so every resolved Exercise Library card is normalized to its governed Exercise Intelligence thumbnail canonical key, allowing the existing private-art loader to resolve the athlete's approved private exercise image instead of leaving older/program-driven cards on legacy art slugs.
+- Required CI/audits: PR #107 exact-head 10/10 workflow pass at `7f51c715fcdfd6b7e74def277eaea56296a1b9b4`, including Command V2 real mobile/desktop browser coverage, Seven-Athlete + Chaos/Resilience, Exercise Intelligence Audit + Completion, Cloud Sync Bootstrap Regression, Maintenance Runtime Load + Bar Loader, workout persistence, Lifecycle Public UI, Home Option 1, and Netlify Release Policy; live deploy-preview acceptance across all primary tabs and opening Sign In / Register / Forgot Password / local-athlete surfaces; plus integrated `main` 6/6 workflow pass at `d285905245b09558c88d39efbde6f477dedabff5`, including the 112-exercise canonical private-art browser proof inside both Exercise Intelligence Completion and the exhaustive Seven-Athlete release gate.
+- Netlify production deploy count expected: 1
+- Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes and no athlete-private data changes. The fix is presentation-only, does not rewrite image bytes or Supabase records, and keeps production publication gated to one explicit `[release netlify]` merge.
+
 ## Corrective Release — Train card parity + exhaustive Coach/release gate
 
 - Date: 2026-09-14
