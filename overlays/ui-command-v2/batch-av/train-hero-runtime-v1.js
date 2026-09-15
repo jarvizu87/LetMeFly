@@ -3,16 +3,17 @@
 
   const PACK_ID = 'train-heroes-v1'
   const FALLBACK_KEY = 'accessory-recovery-work-capacity'
+  const ROOT = '/ui/train-heroes-v1/'
   const HEROES = Object.freeze({
-    'squat-lower-strength': 'https://res.cloudinary.com/extor5az/image/upload/v1789449964/train-hero-v1-squat-lower-strength.webp',
-    'bench-upper-push': 'https://res.cloudinary.com/extor5az/image/upload/v1789449975/train-hero-v1-bench-upper-push.webp',
-    'deadlift-posterior-chain': 'https://res.cloudinary.com/extor5az/image/upload/v1789449985/train-hero-v1-deadlift-posterior-chain.webp',
-    'olympic-explosive': 'https://res.cloudinary.com/extor5az/image/upload/v1789449993/train-hero-v1-olympic-explosive.webp',
-    'conditioning-carries': 'https://res.cloudinary.com/extor5az/image/upload/v1789450003/train-hero-v1-conditioning-carries.webp',
-    'accessory-recovery-work-capacity': 'https://res.cloudinary.com/extor5az/image/upload/v1789450013/train-hero-v1-accessory-recovery-work-capacity.webp',
-    'yoke-trap-strength': 'https://res.cloudinary.com/extor5az/image/upload/v1789450022/train-hero-v1-yoke-trap-strength.webp',
-    'overhead-vertical-strength': 'https://res.cloudinary.com/extor5az/image/upload/v1789450031/train-hero-v1-overhead-vertical-strength.webp',
-    'realization-testing-crown-day': 'https://res.cloudinary.com/extor5az/image/upload/v1789450040/train-hero-v1-realization-testing-crown-day.webp',
+    'squat-lower-strength': ROOT + 'train-hero-v1-squat-lower-strength.webp',
+    'bench-upper-push': ROOT + 'train-hero-v1-bench-upper-push.webp',
+    'deadlift-posterior-chain': ROOT + 'train-hero-v1-deadlift-posterior-chain.webp',
+    'olympic-explosive': ROOT + 'train-hero-v1-olympic-explosive.webp',
+    'conditioning-carries': ROOT + 'train-hero-v1-conditioning-carries.webp',
+    'accessory-recovery-work-capacity': ROOT + 'train-hero-v1-accessory-recovery-work-capacity.webp',
+    'yoke-trap-strength': ROOT + 'train-hero-v1-yoke-trap-strength.webp',
+    'overhead-vertical-strength': ROOT + 'train-hero-v1-overhead-vertical-strength.webp',
+    'realization-testing-crown-day': ROOT + 'train-hero-v1-realization-testing-crown-day.webp',
   })
 
   const REALIZATION = /\b(?:testing|test day|1\s*rm|max(?:imum)?(?:\s+(?:effort|attempt))?|pr(?:\s+attempt)?|peak(?:ing)?|crown day|realization\s+(?:test|testing|peak|crown))\b/i
