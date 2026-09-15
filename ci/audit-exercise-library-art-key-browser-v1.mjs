@@ -259,7 +259,6 @@ try {
   })
 
   report.canonicalExercises = exerciseSnapshot.canonicalExercises
-  report.exerciseCards = document ? 0 : 0
   report.exerciseCards = await page.locator('.exercise-library [data-library-card]').count()
   report.uniqueCanonicalIds = new Set(exerciseSnapshot.rows.map(row => row.id)).size
   report.horizontalOverflow = { width: exerciseSnapshot.width, scrollWidth: exerciseSnapshot.scrollWidth }
