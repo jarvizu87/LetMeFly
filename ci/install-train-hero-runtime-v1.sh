@@ -19,12 +19,13 @@ node --check "$RUNTIME_SRC"
 node "$ROOT_DIR/ci/validate-train-hero-art-pack-v1.mjs"
 ! grep -Eq 'localStorage\.(setItem|removeItem)|sessionStorage\.(setItem|removeItem)|indexedDB|workoutSessions|programInstances|trainingMax|Math\.random' "$RUNTIME_SRC"
 grep -Fq "window.__LMF_TRAIN_HERO_V1__" "$RUNTIME_SRC"
-grep -Fq "data-lmf-train-hero-key" "$RUNTIME_SRC" || true
 
 mkdir -p "$OUT_DIR"
 
 fetch_hero() {
-  local file="$1" url="$2" tmp="$OUT_DIR/.${file}.tmp"
+  local file="$1"
+  local url="$2"
+  local tmp="$OUT_DIR/.${file}.tmp"
   curl -fsSL --retry 3 --retry-delay 1 --connect-timeout 15 "$url" -o "$tmp"
   test -s "$tmp" || { echo "Downloaded Train hero is empty: $file" >&2; exit 1; }
   FILE="$tmp" python3 - <<'PY'
