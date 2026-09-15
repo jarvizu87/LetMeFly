@@ -51,3 +51,9 @@ PY
 
 node --check "$TMP"
 node "$TMP" "$APP"
+
+# The base matrix proves every governed day/card renders. This companion audit
+# proves every parseable prescribed rep/load/RPE default can hydrate the editable
+# Workout Mode row, plus the two user-reported live-card regressions.
+node --check "$ROOT_DIR/ci/audit-workout-prescription-input-hydration-v1.mjs"
+node "$ROOT_DIR/ci/audit-workout-prescription-input-hydration-v1.mjs" "$APP"
