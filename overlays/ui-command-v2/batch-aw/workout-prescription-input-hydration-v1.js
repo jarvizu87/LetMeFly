@@ -26,6 +26,7 @@
     return Math.round(converted * 10) / 10
   }
   const displayNumber = value => Number.isInteger(value) ? String(value) : String(Math.round(value * 10) / 10)
+  const sameNumber = (a, b) => Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) < 0.001
 
   function prescriptionText(row) {
     return clean(
@@ -111,8 +112,7 @@
     return null
   }
 
-  function loadSeed(row) {
-    const preferredUnit = normalizeUnit(row?.dataset?.loadUnit) || 'lb'
+  function programLoadSeed(row, preferredUnit) {
     const signature = clean(row?.dataset?.programmedLoad)
     const defaultRaw = clean(row?.dataset?.programmedLoadDefault)
     const prescription = prescriptionText(row)
@@ -120,12 +120,6 @@
     if (/\b(?:body\s*weight|bodyweight|BW)\b/i.test(`${signature} ${prescription}`) && !weightTokens(`${signature} ${prescription}`).length) {
       return null
     }
-
-    // A completed prior actual on the same unchanged prescription outranks the
-    // untouched program default. This preserves existing load-carry semantics
-    // across rerenders while still letting a changed prescription win.
-    const carried = previousSamePrescriptionActual(row, preferredUnit)
-    if (carried) return carried
 
     const signatureNumeric = signature.match(/^\s*(\d+(?:\.\d+)?):\s*(lb|kg)\s*$/i)
     if (signatureNumeric) {
@@ -149,6 +143,23 @@
     return null
   }
 
+  function loadSeed(row) {
+    const preferredUnit = normalizeUnit(row?.dataset?.loadUnit) || 'lb'
+    const prescription = prescriptionText(row)
+    const signature = clean(row?.dataset?.programmedLoad)
+
+    if (/\b(?:body\s*weight|bodyweight|BW)\b/i.test(`${signature} ${prescription}`) && !weightTokens(`${signature} ${prescription}`).length) {
+      return null
+    }
+
+    // A completed prior actual on the same unchanged prescription outranks the
+    // untouched program default. This preserves existing load-carry semantics
+    // across rerenders while still letting a changed prescription win.
+    const carried = previousSamePrescriptionActual(row, preferredUnit)
+    if (carried) return carried
+    return programLoadSeed(row, preferredUnit)
+  }
+
   function rpeSeed(row) {
     const match = prescriptionText(row).match(/\bRPE\s*(\d+(?:\.\d+)?)/i)
     return match ? numberText(match[1]) : ''
@@ -165,7 +176,15 @@
     return true
   }
 
-  function applyLoadSeed(input, load) {
+  function stillAtProgramDefault(row, input) {
+    const current = Number(clean(input?.value))
+    if (!Number.isFinite(current)) return false
+    const preferredUnit = normalizeUnit(row?.dataset?.loadUnit) || 'lb'
+    const baseline = programLoadSeed(row, preferredUnit)
+    return Boolean(baseline?.value > 0 && sameNumber(current, baseline.value))
+  }
+
+  function applyLoadSeed(row, input, load) {
     if (!(input instanceof HTMLInputElement) || !load?.value || isUserEdited(input)) return false
     const next = displayNumber(load.value)
     const current = clean(input.value)
@@ -177,11 +196,11 @@
       return true
     }
 
-    // Program defaults are provisional display values. If a completed prior set on
-    // the unchanged prescription later supplies a real athlete actual, that actual
-    // may replace the untouched program-seeded default. Manual edits and native
-    // saved actuals are never overwritten here.
-    if (load.source === 'previous-actual' && existingSeed === 'load' && current !== next) {
+    // Program defaults are provisional display values. A rerender may recreate
+    // the input and drop our marker, so compare against the governed baseline too.
+    // A completed prior actual on the unchanged prescription may replace only that
+    // untouched baseline; manual edits and non-default saved actuals remain intact.
+    if (load.source === 'previous-actual' && (existingSeed === 'load' || stillAtProgramDefault(row, input)) && current !== next) {
       input.value = next
       input.dataset.lmfPrescriptionSeed = 'carried-load'
       return true
@@ -201,7 +220,7 @@
     const load = loadSeed(row)
     if (load?.value > 0) {
       if (row.dataset.loadUnit !== load.unit) row.dataset.loadUnit = load.unit
-      changed = applyLoadSeed(row.querySelector('.load-input'), load) || changed
+      changed = applyLoadSeed(row, row.querySelector('.load-input'), load) || changed
     }
 
     changed = applySeed(row.querySelector('.rpe-input'), rpeSeed(row), 'rpe') || changed
