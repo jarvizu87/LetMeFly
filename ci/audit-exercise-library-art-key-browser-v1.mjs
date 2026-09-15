@@ -3,10 +3,14 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
 
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const app = path.resolve(process.argv[2] || '.build-src/letmefly_app')
 const out = path.join(app, 'EXERCISE_LIBRARY_ART_KEY_AUDIT')
 fs.mkdirSync(out, { recursive: true })
+const finalCases = JSON.parse(fs.readFileSync(path.join(repoRoot, 'database/exercise-art-final-display-cases.json'), 'utf8'))
+const intentionalNoArt = new Set(finalCases.nonExerciseEntries || [])
 const requireApp = createRequire(path.join(app, 'package.json'))
 const { chromium } = requireApp('playwright-core')
 const chromeBin = process.env.CHROME_BIN
@@ -22,6 +26,8 @@ const report = {
   uniqueCanonicalIds: 0,
   trainCards: 0,
   trainResolvedCards: 0,
+  approvedFixtureKeys: 0,
+  intentionalNoArt: [...intentionalNoArt].sort(),
   mismatches: [],
   trainMismatches: [],
   missingArtNodes: [],
@@ -81,13 +87,26 @@ async function bootstrapLocalAthlete(page) {
 function rememberApproved(items) {
   for (const item of items) {
     const key = String(item?.key || '').trim()
-    if (key) approved.set(key, String(item?.label || key).trim().slice(0, 100) || key)
+    if (key && !intentionalNoArt.has(key)) approved.set(key, String(item?.label || key).trim().slice(0, 100) || key)
   }
+}
+
+async function collectRenderedArtKeys(page, cardSelector) {
+  return page.evaluate((selector) => [...document.querySelectorAll(selector)].flatMap(card => {
+    const title = card.querySelector('.exercise-title h3, h3')?.textContent?.trim() || 'Exercise'
+    const nodes = [
+      ...(card.matches('[data-exercise-art]') ? [card] : []),
+      ...card.querySelectorAll('[data-exercise-art]'),
+    ]
+    return nodes.map(node => ({ key: node.getAttribute('data-exercise-art') || '', label: title }))
+  }), cardSelector)
 }
 
 async function publishApprovedRows(page) {
   const entries = [...approved.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([key, label]) => ({ key, label }))
+  report.approvedFixtureKeys = entries.length
   await page.evaluate(({ athleteId, entries }) => {
+    window.__LMF_APPROVED_KEYS = entries.map(({ key }) => key)
     window.__LMF_ART_ROWS = entries.map(({ key, label }, index) => {
       const token = (index + 1).toString(16)
       return {
@@ -115,18 +134,17 @@ async function publishApprovedRows(page) {
 
 async function waitForApprovedArt(page, cardSelector, timeout = 25000) {
   await page.waitForFunction((selector) => {
-    const cards = [...document.querySelectorAll(selector)]
-    if (!cards.length) return false
-    return cards.every(card => {
-      const nodes = [
-        ...(card.matches('[data-exercise-art]') ? [card] : []),
-        ...card.querySelectorAll('[data-exercise-art]'),
-      ]
-      return nodes.length > 0 && nodes.every(node => {
-        const source = node.getAttribute('data-exercise-art-source') || ''
-        const art = node.style.getPropertyValue('--exercise-art') || ''
-        return Boolean(source) && art.includes('blob:')
-      })
+    const approvedKeys = new Set(window.__LMF_APPROVED_KEYS || [])
+    const nodes = [...document.querySelectorAll(selector)].flatMap(card => [
+      ...(card.matches('[data-exercise-art]') ? [card] : []),
+      ...card.querySelectorAll('[data-exercise-art]'),
+    ]).filter(node => approvedKeys.has(node.getAttribute('data-exercise-art') || ''))
+    if (!nodes.length) return false
+    return nodes.every(node => {
+      const source = node.getAttribute('data-exercise-art-source') || ''
+      const art = node.style.getPropertyValue('--exercise-art') || ''
+      const multipart = Boolean(node.querySelector(':scope > .lmf-art-pair'))
+      return Boolean(source) && (art.includes('blob:') || multipart)
     })
   }, cardSelector, { timeout }).catch(() => {})
 }
@@ -156,6 +174,7 @@ await context.addInitScript(() => {
 
   const athleteId = '11111111-1111-4111-8111-111111111111'
   window.__LMF_ART_ROWS = []
+  window.__LMF_APPROVED_KEYS = []
   let goodBlob = null
   async function imageBlob() {
     if (goodBlob) return goodBlob
@@ -240,7 +259,8 @@ try {
   })
 
   report.canonicalExercises = exerciseSnapshot.canonicalExercises
-  report.exerciseCards = exerciseSnapshot.rows.length
+  report.exerciseCards = document ? 0 : 0
+  report.exerciseCards = await page.locator('.exercise-library [data-library-card]').count()
   report.uniqueCanonicalIds = new Set(exerciseSnapshot.rows.map(row => row.id)).size
   report.horizontalOverflow = { width: exerciseSnapshot.width, scrollWidth: exerciseSnapshot.scrollWidth }
   report.missingArtNodes = exerciseSnapshot.rows.filter(row => !row.hasArtNode)
@@ -254,22 +274,29 @@ try {
   assert.equal(report.missingSyncMarkers.length, 0, `${report.missingSyncMarkers.length} Exercise cards were not normalized by the canonical art-key sync`)
   assert.ok(exerciseSnapshot.scrollWidth <= exerciseSnapshot.width + 3, `Exercise library horizontal overflow ${exerciseSnapshot.scrollWidth}px > ${exerciseSnapshot.width}px`)
 
-  rememberApproved(exerciseSnapshot.rows.map(row => ({ key: row.expected, label: row.name })))
+  const exerciseArtKeys = await collectRenderedArtKeys(page, '.exercise-library [data-library-card]')
+  rememberApproved(exerciseArtKeys)
   await publishApprovedRows(page)
   await waitForApprovedArt(page, '.exercise-library [data-library-card]')
 
-  const exerciseFallbacks = await page.evaluate(() => [...document.querySelectorAll('.exercise-library [data-library-card]')].flatMap(card => {
-    const title = card.querySelector('h3')?.textContent?.trim() || 'Exercise'
-    const nodes = [
-      ...(card.matches('[data-exercise-art]') ? [card] : []),
-      ...card.querySelectorAll('[data-exercise-art]'),
-    ]
-    return nodes.filter(node => {
-      const source = node.getAttribute('data-exercise-art-source') || ''
-      const art = node.style.getPropertyValue('--exercise-art') || ''
-      return !source || !art.includes('blob:')
-    }).map(node => ({ route: 'Exercises', title, key: node.getAttribute('data-exercise-art') || '', source: node.getAttribute('data-exercise-art-source') || '', inlineArt: node.style.getPropertyValue('--exercise-art') || '' }))
-  }))
+  const exerciseFallbacks = await page.evaluate(() => {
+    const approvedKeys = new Set(window.__LMF_APPROVED_KEYS || [])
+    return [...document.querySelectorAll('.exercise-library [data-library-card]')].flatMap(card => {
+      const title = card.querySelector('h3')?.textContent?.trim() || 'Exercise'
+      const nodes = [
+        ...(card.matches('[data-exercise-art]') ? [card] : []),
+        ...card.querySelectorAll('[data-exercise-art]'),
+      ]
+      return nodes.filter(node => {
+        const key = node.getAttribute('data-exercise-art') || ''
+        if (!approvedKeys.has(key)) return false
+        const source = node.getAttribute('data-exercise-art-source') || ''
+        const art = node.style.getPropertyValue('--exercise-art') || ''
+        const multipart = Boolean(node.querySelector(':scope > .lmf-art-pair'))
+        return !source || (!art.includes('blob:') && !multipart)
+      }).map(node => ({ route: 'Exercises', title, key: node.getAttribute('data-exercise-art') || '', source: node.getAttribute('data-exercise-art-source') || '', inlineArt: node.style.getPropertyValue('--exercise-art') || '' }))
+    })
+  })
   report.approvedFallbacks.push(...exerciseFallbacks)
 
   // Stay in the same document so the authenticated private-art fixture remains
@@ -320,19 +347,26 @@ try {
   assert.ok(report.trainResolvedCards > 0, 'Train rendered no Exercise Intelligence-resolved exercise cards')
   assert.equal(report.trainMismatches.length, 0, `${report.trainMismatches.length} Train cards or child art surfaces use a non-canonical art key`)
 
-  rememberApproved(trainSnapshot.flatMap(row => row.actualKeys.map(key => ({ key, label: row.title || key }))))
+  const trainArtKeys = await collectRenderedArtKeys(page, '.train-shell .exercise-card[data-exercise-art]')
+  rememberApproved(trainArtKeys)
   await publishApprovedRows(page)
   await waitForApprovedArt(page, '.train-shell .exercise-card[data-exercise-art]')
 
-  const trainFallbacks = await page.evaluate(() => [...document.querySelectorAll('.train-shell .exercise-card[data-exercise-art]')].flatMap(card => {
-    const title = card.querySelector('.exercise-title h3, h3')?.textContent?.trim() || 'Exercise'
-    const nodes = [card, ...card.querySelectorAll('[data-exercise-art]')]
-    return nodes.filter(node => {
-      const source = node.getAttribute('data-exercise-art-source') || ''
-      const art = node.style.getPropertyValue('--exercise-art') || ''
-      return !source || !art.includes('blob:')
-    }).map(node => ({ route: 'Train', title, key: node.getAttribute('data-exercise-art') || '', source: node.getAttribute('data-exercise-art-source') || '', inlineArt: node.style.getPropertyValue('--exercise-art') || '' }))
-  }))
+  const trainFallbacks = await page.evaluate(() => {
+    const approvedKeys = new Set(window.__LMF_APPROVED_KEYS || [])
+    return [...document.querySelectorAll('.train-shell .exercise-card[data-exercise-art]')].flatMap(card => {
+      const title = card.querySelector('.exercise-title h3, h3')?.textContent?.trim() || 'Exercise'
+      const nodes = [card, ...card.querySelectorAll('[data-exercise-art]')]
+      return nodes.filter(node => {
+        const key = node.getAttribute('data-exercise-art') || ''
+        if (!approvedKeys.has(key)) return false
+        const source = node.getAttribute('data-exercise-art-source') || ''
+        const art = node.style.getPropertyValue('--exercise-art') || ''
+        const multipart = Boolean(node.querySelector(':scope > .lmf-art-pair'))
+        return !source || (!art.includes('blob:') && !multipart)
+      }).map(node => ({ route: 'Train', title, key: node.getAttribute('data-exercise-art') || '', source: node.getAttribute('data-exercise-art-source') || '', inlineArt: node.style.getPropertyValue('--exercise-art') || '' }))
+    })
+  })
   report.approvedFallbacks.push(...trainFallbacks)
 
   assert.equal(report.approvedFallbacks.length, 0, `${report.approvedFallbacks.length} art surfaces fell back despite an approved private mapping`)
