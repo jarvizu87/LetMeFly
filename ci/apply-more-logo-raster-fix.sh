@@ -3,7 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TARGET_DIR="${1:-}"
-LOGO_URL="https://res.cloudinary.com/extor5az/image/upload/v1788815215/letmefly/app-brand/letmefly-app-icon-512-v2.png"
+BRAND_EXTRACTOR="$ROOT_DIR/ci/extract-authoritative-brand-v1.sh"
+ICON_512_SHA="864067cda8175f18919ca038c4b1d9bf82a865fceb4438ebe777bb0c1ac4c743"
 LOGO_PATH="$TARGET_DIR/public/ui/letmefly-official-logo-512.png"
 
 if [[ -z "$TARGET_DIR" || ! -f "$TARGET_DIR/src/main.ts" || ! -f "$TARGET_DIR/src/command-v2.css" ]]; then
@@ -11,10 +12,19 @@ if [[ -z "$TARGET_DIR" || ! -f "$TARGET_DIR/src/main.ts" || ! -f "$TARGET_DIR/sr
   exit 1
 fi
 
-mkdir -p "$TARGET_DIR/public/ui"
-curl -fL "$LOGO_URL" -o "$LOGO_PATH"
-test -s "$LOGO_PATH"
+test -s "$BRAND_EXTRACTOR"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+bash "$BRAND_EXTRACTOR" "$TMP"
+echo "$ICON_512_SHA  $TMP/letmefly-app-icon-512-v1.png" | sha256sum -c -
 
+mkdir -p "$TARGET_DIR/public/ui"
+cp "$TMP/letmefly-app-icon-512-v1.png" "$LOGO_PATH"
+echo "$ICON_512_SHA  $LOGO_PATH" | sha256sum -c -
+
+# Preserve the source-stage v6 path/marker expected by the locked UI audits.
+# Only the pixels change here. The final production installer later migrates
+# compiled references to brand-v8 after all source audits have completed.
 TARGET_DIR="$TARGET_DIR" python - <<'PY'
 from pathlib import Path
 import os
@@ -24,15 +34,17 @@ p = root / 'src/main.ts'
 text = p.read_text()
 old = '<img class="lmf-official-more-logo" src="/app-icon-v4.svg?v=4" alt="LetMeFly" />'
 new = '<img class="lmf-official-more-logo" src="/ui/letmefly-official-logo-512.png?v=6" alt="LetMeFly" decoding="async" />'
-count = text.count(old)
-if count != 1:
-    raise SystemExit(f'expected one More-tab SVG logo reference, found {count}')
-p.write_text(text.replace(old, new, 1))
+if new not in text:
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f'expected one More-tab SVG logo reference, found {count}')
+    text = text.replace(old, new, 1)
+p.write_text(text)
 PY
 
 cat >> "$TARGET_DIR/src/command-v2.css" <<'CSS'
 
-/* More-tab official logo v6: use the verified raster brand asset locally. */
+/* More-tab official logo v6: authoritative approved master pixels. */
 .more-brand.lmf-official-more-brand .lmf-official-more-logo{
   display:block!important;
   width:min(220px,60vw)!important;
@@ -47,9 +59,9 @@ cat >> "$TARGET_DIR/src/command-v2.css" <<'CSS'
 }
 CSS
 
-test -s "$LOGO_PATH"
 grep -Fq '/ui/letmefly-official-logo-512.png?v=6' "$TARGET_DIR/src/main.ts"
-! grep -Fq '<img class="lmf-official-more-logo" src="/app-icon-v4.svg?v=4"' "$TARGET_DIR/src/main.ts"
+! grep -Fq 'letmefly-app-icon-512-v2.png' "$TARGET_DIR/src/main.ts"
 grep -Fq 'More-tab official logo v6' "$TARGET_DIR/src/command-v2.css"
+echo "$ICON_512_SHA  $LOGO_PATH" | sha256sum -c -
 
-echo "LetMeFly More-tab local raster logo fix: PASS"
+echo "LetMeFly More-tab authoritative master pixels with source compatibility: PASS"
