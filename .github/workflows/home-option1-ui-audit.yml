@@ -39,8 +39,8 @@ jobs:
           bash ci/install-home-main-option1-v1.sh
           bash ci/install-profile-v2.sh
           bash ci/install-official-brand-v2.sh
-          # The approved desktop shell is production reality now. Install it in
-          # Home QA too so Option 1 is checked inside Option 3, not in isolation.
+          # Match production's responsive desktop state and legacy-workspace
+          # removal guard without restoring the retired three-column shell.
           bash ci/install-desktop-workspace-v1.sh
 
       - name: Install browser audit dependency

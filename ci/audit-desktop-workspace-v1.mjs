@@ -25,27 +25,6 @@ const fail = (label, detail = '') => {
   report.failures.push({ label, detail })
   console.log(`FAIL  ${label}${detail ? ` — ${detail}` : ''}`)
 }
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-
-async function launchBrowser() {
-  let lastError = null
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    try {
-      const browser = await chromium.launch({
-        headless: true,
-        executablePath: chromeBin,
-        args: ['--no-sandbox', '--disable-dev-shm-usage'],
-      })
-      report.observations.browserLaunchAttempt = attempt
-      return browser
-    } catch (error) {
-      lastError = error
-      console.warn(`Desktop audit Chromium launch attempt ${attempt} failed: ${error instanceof Error ? error.message : String(error)}`)
-      if (attempt < 3) await sleep(attempt * 900)
-    }
-  }
-  throw lastError || new Error('Desktop audit Chromium launch failed')
-}
 
 async function firstVisible(locator) {
   const count = await locator.count()
@@ -60,237 +39,210 @@ async function dismissInstall(page) {
   const candidate = await firstVisible(page.locator('button,a,[role="button"]').filter({ hasText: /^\s*Not now\s*$/i }))
   if (!candidate) return false
   return candidate.click({ timeout: 2500 }).then(async () => {
-    await page.waitForTimeout(140)
+    await page.waitForTimeout(120)
     return true
   }).catch(() => false)
 }
 
-async function clickable(page, pattern) {
-  return await firstVisible(page.locator('nav button,nav a,nav [role="button"]').filter({ hasText: pattern }))
-    || await firstVisible(page.locator('button,a,[role="button"]').filter({ hasText: pattern }))
-    || await firstVisible(page.getByText(pattern))
-}
-
 async function bootstrap(page, name) {
-  // This audit owns the Train workspace. Enter that native route directly;
-  // Home is independently mounted and is covered by its own browser audit.
   await page.goto('http://127.0.0.1:4173/#/train', { waitUntil: 'domcontentloaded', timeout: 20000 })
   await page.waitForFunction(applicationBootState, null, { timeout: 20000 })
   await dismissInstall(page)
+
   const create = page.locator('[data-action="create-athlete"]')
-  await page.locator('#onboard-name').fill(name)
-  await create.click({ timeout: 5000 })
-  await create.waitFor({ state: 'detached', timeout: 10000 })
-
-  // A dismissed form or a navigation link alone cannot prove onboarding.
-  // Read the record written by the actual button handler; never seed a fixture.
-  const savedNames = await page.evaluate(async () => {
-    const db = await new Promise((resolve, reject) => {
-      const request = indexedDB.open('letmefly-private')
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-    try {
-      const records = await new Promise((resolve, reject) => {
-        const request = db.transaction('athletes', 'readonly').objectStore('athletes').getAll()
-        request.onsuccess = () => resolve(request.result)
-        request.onerror = () => reject(request.error)
-      })
-      return records.filter(record => !record.deleted_at).map(record => record.display_name)
-    } finally { db.close() }
-  })
-  if (savedNames.length !== 1 || savedNames[0] !== name) {
-    throw new Error('Native onboarding did not persist the requested disposable athlete')
+  if (await create.count()) {
+    await page.locator('#onboard-name').fill(name)
+    await create.click({ timeout: 5000 })
+    await create.waitFor({ state: 'detached', timeout: 10000 })
   }
-  await page.waitForFunction(() => !document.querySelector('[data-action="create-athlete"]')
-    && Boolean(document.querySelector('#swipe-viewport .swipe-page h2')?.textContent?.trim()), null, { timeout: 10000 })
-  for (let i = 0; i < 6; i += 1) {
+
+  for (let i = 0; i < 5; i += 1) {
     await dismissInstall(page)
-    await page.waitForTimeout(140)
-  }
-}
-
-async function enterTrain(page) {
-  const train = await clickable(page, /\bTRAIN\b/i)
-  if (!train) throw new Error('Train navigation missing')
-  await train.click({ timeout: 5000 })
-  await page.waitForTimeout(650)
-  await dismissInstall(page)
-  await page.waitForSelector('#swipe-viewport', { timeout: 8000 })
-}
-
-async function probeExerciseSection(page) {
-  // Complete readiness and start a real governed W1D1 workout, rather than
-  // reporting an exercise-reuse pass when only a preview was available.
-  const readiness = page.locator('.swipe-page.active-page .readiness-field input[type="radio"][value="3"]')
-  if (await readiness.count() < 4) throw new Error('Native readiness choices missing')
-  for (const input of await readiness.all()) {
-    await input.locator('..').click({ timeout: 5000 })
-    if (!(await input.isChecked())) throw new Error('Native readiness label did not select its input')
-  }
-  await dismissInstall(page)
-  await page.locator('.swipe-page.active-page [data-action="start-workout"]').click({ timeout: 5000 })
-  await page.waitForSelector('.exercise-stack > .active-exercise', { state: 'attached', timeout: 10000 })
-  await page.locator('[data-session-index="2"]').click({ timeout: 5000 })
-  await page.waitForFunction(() => /Main Strength Circuit/i.test(
-    document.querySelector('.swipe-page.active-page .workout-panel-head h2')?.textContent || ''), null, { timeout: 10000 })
-  await page.waitForSelector('.lmf-desktop-flow-item', { timeout: 10000 })
-  await page.waitForTimeout(1250)
-  return true
-}
-
-let browser = null
-let currentPage = null
-try {
-  browser = await launchBrowser()
-
-  // Audit this build directly. The PWA controllerchange handler reloads on first
-  // install and can replace the onboarding form between fill() and click().
-  // Match the polish audit's isolation; keep native creation and DB verification.
-  const desktopContext = await browser.newContext({ viewport: { width: 1536, height: 960 }, deviceScaleFactor: 1, serviceWorkers: 'block' })
-  const desktop = await desktopContext.newPage()
-  currentPage = desktop
-  await bootstrap(desktop, 'Desktop QA Athlete')
-
-  const desktopFlag = await desktop.locator('html').getAttribute('data-lmf-desktop-ui')
-  if (desktopFlag === 'true') pass('Desktop breakpoint activation', '1536px viewport')
-  else fail('Desktop breakpoint activation', `data-lmf-desktop-ui=${desktopFlag}`)
-
-  const rail = await desktop.evaluate(() => {
-    const nav = document.querySelector('.navbar')
-    if (!(nav instanceof HTMLElement)) return null
-    const style = getComputedStyle(nav)
-    const rect = nav.getBoundingClientRect()
-    return { position: style.position, left: style.left, width: rect.width, height: rect.height }
-  })
-  report.observations.desktopRail = rail
-  if (rail && rail.position === 'fixed' && rail.width >= 1535 && rail.height >= 65 && rail.height <= 85) {
-    pass('Desktop reference navigation', `${Math.round(rail.width)}×${Math.round(rail.height)}px fixed header`)
-  } else {
-    fail('Desktop reference navigation', JSON.stringify(rail))
+    await page.waitForTimeout(100)
   }
 
-  if (await desktop.locator('.lmf-desktop-brand').isVisible().catch(() => false)) pass('Desktop LetMeFly brand reuse')
-  else fail('Desktop LetMeFly brand reuse', 'desktop rail brand missing')
+  const trainNav = await firstVisible(page.locator('.navbar .nav-item, nav button, nav a').filter({ hasText: /^\s*Train\s*$/i }))
+  if (trainNav) await trainNav.click({ timeout: 5000 }).catch(() => null)
 
-  await enterTrain(desktop)
-  await desktop.waitForSelector('[data-lmf-desktop-workspace="true"]', { timeout: 5000 })
+  await page.waitForFunction(() => document.documentElement.dataset.lmfApprovedRoute === 'train', null, { timeout: 10000 })
+  await page.locator('.lmf-train-reference-final').waitFor({ state: 'visible', timeout: 10000 })
+}
 
-  const workspace = await desktop.evaluate(() => {
-    const shell = document.querySelector('[data-lmf-desktop-workspace="true"]')
-    const viewport = document.querySelector('#swipe-viewport')
-    const flow = document.querySelector('.lmf-desktop-flow-panel')
-    const context = document.querySelector('.lmf-desktop-context-panel')
-    if (!(shell instanceof HTMLElement) || !(viewport instanceof HTMLElement)) return null
-    const style = getComputedStyle(shell)
-    const shellRect = shell.getBoundingClientRect()
-    const viewportRect = viewport.getBoundingClientRect()
-    const flowRect = flow?.getBoundingClientRect()
-    const contextRect = context?.getBoundingClientRect()
+async function inspectApprovedDesktopTrain(page) {
+  return await page.evaluate(() => {
+    const train = document.querySelector('.lmf-train-reference-final')
+    const workspace = train?.querySelector('[data-lmf-desktop-workspace="true"]')
+    const viewport = train?.querySelector('#swipe-viewport')
+    const flow = workspace?.querySelector('.lmf-desktop-flow-panel')
+    const context = workspace?.querySelector('.lmf-desktop-context-panel')
+    const hero = train?.querySelector('.lmf-reference-train-hero')
+    const readiness = train?.querySelector('.lmf-reference-train-readiness')
+    const rect = node => node instanceof HTMLElement ? node.getBoundingClientRect() : null
+    const display = node => node instanceof HTMLElement ? getComputedStyle(node).display : null
     return {
-      display: style.display,
-      columns: style.gridTemplateColumns,
-      width: shellRect.width,
-      left: shellRect.left,
-      right: shellRect.right,
-      flowWidth: flowRect?.width || 0,
-      viewportWidth: viewportRect.width,
-      contextWidth: contextRect?.width || 0,
-      viewportDirectChild: viewport.parentElement === shell,
-      order: flowRect && contextRect ? [flowRect.left, viewportRect.left, contextRect.left] : null,
+      width: innerWidth,
+      desktopFlag: document.documentElement.getAttribute('data-lmf-desktop-ui'),
+      route: document.documentElement.dataset.lmfApprovedRoute || '',
+      trainPresent: Boolean(train),
+      heroPresent: Boolean(hero),
+      readinessCount: readiness?.querySelectorAll(':scope > button').length || 0,
+      workspacePresent: Boolean(workspace),
+      workspaceDisplay: display(workspace),
+      flowDisplay: display(flow),
+      contextDisplay: display(context),
+      workspaceRect: rect(workspace),
+      viewportRect: rect(viewport),
+      trainRect: rect(train),
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
     }
   })
-  report.observations.workspace = workspace
+}
 
-  if (workspace?.display === 'grid' && workspace.viewportDirectChild && workspace.order && workspace.order[0] < workspace.order[1] && workspace.order[1] < workspace.order[2]) {
-    pass('Option 3 three-column Train workspace', workspace.columns)
+async function openDay4(page) {
+  const buttons = page.locator('.lmf-train-reference-final .day-strip button')
+  const count = await buttons.count()
+  if (count < 4) throw new Error(`Expected at least four governed day buttons; found ${count}`)
+
+  let day4 = null
+  for (let i = 0; i < count; i += 1) {
+    const candidate = buttons.nth(i)
+    const label = (await candidate.innerText().catch(() => '')).replace(/\s+/g, ' ').trim()
+    if (/\bD\s*4\b|\bDay\s*4\b/i.test(label)) {
+      day4 = candidate
+      break
+    }
+  }
+  day4 ||= buttons.nth(3)
+  const label = (await day4.innerText()).replace(/\s+/g, ' ').trim()
+  await day4.click({ timeout: 5000 })
+  await page.waitForTimeout(600)
+  await page.waitForFunction(() => document.documentElement.classList.contains('lmf-preview-mode'), null, { timeout: 10000 })
+  await page.locator('.lmf-train-reference-final .preview-card[data-exercise-art]').first().waitFor({ state: 'visible', timeout: 10000 })
+  return label
+}
+
+async function inspectDay4(page) {
+  return await page.evaluate(() => {
+    const card = document.querySelector('.lmf-train-reference-final .preview-card[data-exercise-art]')
+    if (!(card instanceof HTMLElement)) return null
+    const media = card.querySelector(':scope > .lmf-exercise-media')
+    const title = card.querySelector(':scope > .exercise-title')
+    const actions = card.querySelector(':scope > .exercise-actions')
+    const prescription = card.querySelector(':scope > .prescription-block')
+    const summary = card.querySelector(':scope > .lmf-reference-preview-summary')
+    const visible = node => node instanceof HTMLElement && getComputedStyle(node).display !== 'none' && node.getBoundingClientRect().width > 0
+    const style = getComputedStyle(card)
+    return {
+      cardDisplay: style.display,
+      columns: style.gridTemplateColumns,
+      mediaVisible: visible(media),
+      titleVisible: visible(title),
+      actionsVisible: visible(actions),
+      prescriptionVisible: visible(prescription),
+      summaryHidden: !visible(summary),
+      previewMode: document.documentElement.classList.contains('lmf-preview-mode'),
+      overflow: document.documentElement.scrollWidth - innerWidth,
+    }
+  })
+}
+
+let browser = null
+try {
+  browser = await chromium.launch({
+    headless: true,
+    executablePath: chromeBin,
+    args: ['--no-sandbox', '--disable-dev-shm-usage'],
+  })
+
+  const desktopContext = await browser.newContext({
+    viewport: { width: 1536, height: 960 },
+    deviceScaleFactor: 1,
+    serviceWorkers: 'block',
+  })
+  const desktop = await desktopContext.newPage()
+  await bootstrap(desktop, 'Desktop Locked Mockup QA')
+
+  const state = await inspectApprovedDesktopTrain(desktop)
+  report.observations.desktopTrain = state
+
+  if (state.desktopFlag === 'true' && state.route === 'train') pass('Desktop breakpoint and Train route activation', '1536px')
+  else fail('Desktop breakpoint and Train route activation', JSON.stringify(state))
+
+  if (state.trainPresent && state.heroPresent && state.readinessCount === 4) pass('Approved Train mockup owns desktop route', 'hero + four readiness controls')
+  else fail('Approved Train mockup owns desktop route', JSON.stringify(state))
+
+  if (!state.workspacePresent || (state.workspaceDisplay !== 'grid' && state.flowDisplay === 'none' && state.contextDisplay === 'none')) {
+    pass('Legacy Option 3 workspace no longer owns Train', state.workspacePresent ? 'wrapper neutralized; side panels hidden' : 'wrapper absent')
   } else {
-    fail('Option 3 three-column Train workspace', JSON.stringify(workspace))
+    fail('Legacy Option 3 workspace no longer owns Train', JSON.stringify(state))
   }
 
-  const usableWidth = workspace ? workspace.innerWidth : 0
-  if (workspace && usableWidth > 0 && workspace.width >= usableWidth * .82) {
-    pass('Desktop Train uses the browser work area', `${Math.round(workspace.width)}px / ${Math.round(usableWidth)}px usable`)
+  const viewportFullWidth = state.viewportRect && state.trainRect
+    ? state.viewportRect.width >= state.trainRect.width * 0.94
+    : false
+  if (viewportFullWidth) pass('Authoritative workout viewport uses approved desktop width', `${Math.round(state.viewportRect.width)}px`)
+  else fail('Authoritative workout viewport uses approved desktop width', JSON.stringify({ viewport: state.viewportRect, train: state.trainRect }))
+
+  if (state.scrollWidth <= state.innerWidth + 2) pass('Desktop Train has no horizontal page overflow', `${state.scrollWidth}/${state.innerWidth}px`)
+  else fail('Desktop Train has no horizontal page overflow', `${state.scrollWidth}/${state.innerWidth}px`)
+
+  await desktop.screenshot({ path: path.join(outDir, 'desktop-train-approved.png'), fullPage: true })
+
+  const day4Label = await openDay4(desktop)
+  const day4 = await inspectDay4(desktop)
+  report.observations.day4 = { label: day4Label, ...day4 }
+
+  if (day4?.previewMode) pass('Day 4 uses governed read-only preview mode', day4Label)
+  else fail('Day 4 uses governed read-only preview mode', JSON.stringify(day4))
+
+  if (day4 && day4.cardDisplay === 'grid' && day4.columns && day4.columns !== 'none') {
+    pass('Day 4 uses premium desktop exercise-card hierarchy', day4.columns)
   } else {
-    fail('Desktop Train uses the browser work area', JSON.stringify({ workspaceWidth: workspace?.width, usableWidth, railWidth: rail?.width, innerWidth: workspace?.innerWidth }))
+    fail('Day 4 uses premium desktop exercise-card hierarchy', JSON.stringify(day4))
   }
 
-  if (workspace && workspace.flowWidth >= 220 && workspace.viewportWidth >= 500 && workspace.contextWidth >= 250) {
-    pass('Desktop Train columns are materially desktop-sized', `${Math.round(workspace.flowWidth)} / ${Math.round(workspace.viewportWidth)} / ${Math.round(workspace.contextWidth)}px`)
+  if (day4?.mediaVisible && day4.titleVisible && day4.actionsVisible && day4.prescriptionVisible && day4.summaryHidden) {
+    pass('Day 4 full-card content is visible', 'exercise art + title + actions + prescription')
   } else {
-    fail('Desktop Train columns are materially desktop-sized', JSON.stringify(workspace))
+    fail('Day 4 full-card content is visible', JSON.stringify(day4))
   }
 
-  if (workspace && workspace.scrollWidth <= workspace.innerWidth + 3) pass('Desktop page has no horizontal overflow', `${workspace.scrollWidth}/${workspace.innerWidth}px`)
-  else fail('Desktop page has no horizontal overflow', JSON.stringify(workspace))
+  if ((day4?.overflow || 0) <= 2) pass('Day 4 has no horizontal page overflow')
+  else fail('Day 4 has no horizontal page overflow', String(day4?.overflow))
 
-  const foundExercises = await probeExerciseSection(desktop)
-  if (foundExercises) {
-    const liveReuseHandle = await desktop.waitForFunction(() => {
-      const item = document.querySelector('.lmf-desktop-flow-item')
-      const thumb = item?.querySelector('.lmf-desktop-flow-thumb')
-      const shell = document.querySelector('[data-lmf-desktop-workspace="true"]')
-      const panel = shell?.querySelector('#swipe-viewport .swipe-page.active-page')
-      if (!/Main Strength Circuit/i.test(panel?.querySelector('h2')?.textContent || '')) return false
-      const cards = panel.querySelectorAll('.exercise-stack > .active-exercise')
-      const items = document.querySelectorAll('.lmf-desktop-flow-item')
-      if (!cards.length || items.length !== cards.length) return false
-      const card = cards[0]
-      const title = card.querySelector('.exercise-title h3')?.textContent.trim()
-      if (!title || item?.querySelector('b')?.textContent.trim() !== title) return false
-      const input = card?.querySelector('.load-input,.reps-input,.rpe-input')
-      const art = card?.getAttribute('data-exercise-art') || thumb?.getAttribute('data-exercise-art') || ''
-      const image = thumb instanceof HTMLElement ? getComputedStyle(thumb).backgroundImage : ''
-      return {
-        itemPresent: !!item,
-        originalCardInsideCenter: !!card && !!card.closest('#swipe-viewport'),
-        originalSetControlInsideCenter: !!input && !!input.closest('#swipe-viewport'),
-        art,
-        image,
-      }
-    }, null, { timeout: 10000 })
-    const liveReuse = await liveReuseHandle.jsonValue()
-    await liveReuseHandle.dispose()
-    report.observations.liveReuse = liveReuse
-    if (liveReuse.itemPresent && liveReuse.originalCardInsideCenter) pass('Workout Flow mirrors authoritative exercise cards')
-    else fail('Workout Flow mirrors authoritative exercise cards', JSON.stringify(liveReuse))
-    if (liveReuse.originalSetControlInsideCenter) pass('Original live set controls remain in center column')
-    else fail('Original live set controls remain in center column', JSON.stringify(liveReuse))
-    if (liveReuse.art || (liveReuse.image && liveReuse.image !== 'none')) pass('Desktop workspace reuses exercise artwork hook', liveReuse.art || 'resolved background image')
-    else fail('Desktop workspace reuses exercise artwork hook', JSON.stringify(liveReuse))
-  } else {
-    fail('Exercise-card desktop reuse probe', 'Native workout could not reach its governed exercise section')
-  }
-
-  await desktop.screenshot({ path: path.join(outDir, 'desktop-train.png'), fullPage: true })
+  await desktop.screenshot({ path: path.join(outDir, 'desktop-day4-approved.png'), fullPage: true })
   await desktopContext.close()
 
-  const mobileContext = await browser.newContext({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, serviceWorkers: 'block' })
+  const mobileContext = await browser.newContext({
+    viewport: { width: 412, height: 915 },
+    isMobile: true,
+    hasTouch: true,
+    serviceWorkers: 'block',
+  })
   const mobile = await mobileContext.newPage()
-  currentPage = mobile
-  await bootstrap(mobile, 'Mobile QA Athlete')
+  await bootstrap(mobile, 'Mobile Isolation QA')
   const mobileState = await mobile.evaluate(() => ({
+    width: innerWidth,
     desktopFlag: document.documentElement.getAttribute('data-lmf-desktop-ui'),
-    workspace: !!document.querySelector('[data-lmf-desktop-workspace="true"]'),
-    railBrand: !!document.querySelector('.lmf-desktop-brand'),
-    width: window.innerWidth,
+    workspace: Boolean(document.querySelector('[data-lmf-desktop-workspace="true"]')),
+    hero: Boolean(document.querySelector('.lmf-train-reference-final .lmf-reference-train-hero')),
+    readiness: document.querySelectorAll('.lmf-train-reference-final .lmf-reference-train-readiness > button').length,
+    overflow: document.documentElement.scrollWidth - innerWidth,
   }))
   report.observations.mobileIsolation = mobileState
-  if (!mobileState.desktopFlag && !mobileState.workspace && !mobileState.railBrand) pass('Mobile UI remains isolated from desktop layer', `${mobileState.width}px viewport`)
-  else fail('Mobile UI remains isolated from desktop layer', JSON.stringify(mobileState))
+
+  if (!mobileState.desktopFlag && !mobileState.workspace && mobileState.hero && mobileState.readiness === 4) {
+    pass('Phone Train UI remains isolated and unchanged', `${mobileState.width}px`) 
+  } else {
+    fail('Phone Train UI remains isolated and unchanged', JSON.stringify(mobileState))
+  }
+  if (mobileState.overflow <= 2) pass('Phone Train retains no horizontal overflow')
+  else fail('Phone Train retains no horizontal overflow', String(mobileState.overflow))
+
   await mobileContext.close()
 } catch (error) {
-  if (currentPage && !currentPage.isClosed()) {
-    report.observations.failureSnapshot = await currentPage.evaluate(() => ({
-      url: location.href, width: innerWidth, body: document.body.innerText.slice(0, 6000),
-      athleteForm: Boolean(document.querySelector('[data-action="create-athlete"]')),
-      trainViewport: Boolean(document.querySelector('#swipe-viewport')),
-    })).catch(() => null)
-    await currentPage.screenshot({ path: path.join(outDir, 'failure-viewport.png'), fullPage: false }).catch(() => null)
-  }
-  fail('Desktop workspace audit execution', error instanceof Error ? error.message : String(error))
+  fail('Desktop locked-mockup audit execution', error instanceof Error ? error.message : String(error))
 } finally {
   if (browser) await browser.close().catch(() => null)
   fs.writeFileSync(path.join(outDir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`)

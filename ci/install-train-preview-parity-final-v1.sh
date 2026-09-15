@@ -13,7 +13,7 @@ from pathlib import Path
 import os,re
 p=Path(os.environ['INDEX']); text=p.read_text()
 text=re.sub(r'\s*<link rel="stylesheet" href="/ui/train-preview-parity-final-v1\.css(?:\?v=\d+)?">\s*','\n',text)
-text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/train-preview-parity-final-v1.css?v=1">\n</head>',text,count=1,flags=re.I)
+text=re.sub(r'</head>','  <link rel="stylesheet" href="/ui/train-preview-parity-final-v1.css?v=3">\n</head>',text,count=1,flags=re.I)
 p.write_text(text.rstrip()+'\n')
 PY
 SW="$SW" python3 - <<'PY'
@@ -22,7 +22,7 @@ import os,re
 p=Path(os.environ['SW']); text=p.read_text()
 m=re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]",text)
 if not m: raise SystemExit('service-worker.js PRECACHE declaration not found')
-existing=re.findall(r"['\"]([^'\"]+)['\"]",m.group(1)); required=['/ui/train-preview-parity-final-v1.css','/ui/train-preview-parity-final-v1.css?v=1']
+existing=re.findall(r"['\"]([^'\"]+)['\"]",m.group(1)); required=['/ui/train-preview-parity-final-v1.css','/ui/train-preview-parity-final-v1.css?v=3']
 assets=[]
 for value in [*existing,*required]:
   if value not in assets: assets.append(value)
@@ -30,8 +30,14 @@ replacement='const PRECACHE = ['+', '.join(repr(v) for v in assets)+']'
 text=text[:m.start()]+replacement+text[m.end():]
 p.write_text(text.rstrip()+'\n')
 PY
-grep -Fq '/ui/train-preview-parity-final-v1.css?v=1' "$INDEX"
+grep -Fq '/ui/train-preview-parity-final-v1.css?v=3' "$INDEX"
+grep -Fq 'No legacy desktop workspace is involved' "$DIST/ui/train-preview-parity-final-v1.css"
+grep -Fq 'Future governed days such as' "$DIST/ui/train-preview-parity-final-v1.css"
+grep -Fq 'Day 4 use the same premium desktop exercise-card hierarchy' "$DIST/ui/train-preview-parity-final-v1.css"
 grep -Fq 'html.lmf-preview-mode' "$DIST/ui/train-preview-parity-final-v1.css"
 grep -Fq '.lmf-preview-readonly-logger' "$DIST/ui/train-preview-parity-final-v1.css"
+! grep -Fq '.lmf-desktop-workspace' "$DIST/ui/train-preview-parity-final-v1.css"
+! grep -Fq '.lmf-desktop-flow-panel' "$DIST/ui/train-preview-parity-final-v1.css"
+! grep -Fq '.lmf-desktop-context-panel' "$DIST/ui/train-preview-parity-final-v1.css"
 grep -Fq "'/ui/train-preview-parity-final-v1.css'" "$SW"
-echo 'LetMeFly final Train preview parity guard: PASS'
+echo 'LetMeFly final Train preview parity + no-legacy desktop ownership guard: PASS'

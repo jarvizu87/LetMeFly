@@ -65,6 +65,50 @@ html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-fina
 html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card.lmf-reference-preview-active .lmf-preview-readonly-logger{
   display:block!important;
 }
+
+/* The approved Train surface owns desktop too. Future governed days such as
+   Day 4 use the same premium desktop exercise-card hierarchy as the current
+   workout while staying read-only. No legacy desktop workspace is involved. */
+@media(min-width:1100px){
+  html.lmf-preview-mode[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card[data-exercise-art]{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr)!important;
+    grid-template-rows:auto auto auto!important;
+    align-items:start!important;
+    overflow:hidden!important;
+    border-radius:8px!important;
+    background:#080d13!important;
+  }
+  html.lmf-preview-mode[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.lmf-exercise-media{
+    grid-column:2!important;
+    grid-row:1 / span 2!important;
+    order:initial!important;
+    min-height:190px!important;
+    max-height:250px!important;
+    align-self:stretch!important;
+    background-color:#050a0f!important;
+  }
+  html.lmf-preview-mode[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-title{
+    grid-column:1!important;
+    grid-row:1!important;
+    order:initial!important;
+    padding:16px 14px 10px!important;
+  }
+  html.lmf-preview-mode[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-actions{
+    grid-column:1!important;
+    grid-row:2!important;
+    order:initial!important;
+    align-self:end!important;
+    margin:4px 14px 14px!important;
+  }
+  html.lmf-preview-mode[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.prescription-block{
+    grid-column:1 / -1!important;
+    grid-row:3!important;
+    order:initial!important;
+    margin:0 14px 14px!important;
+  }
+}
+
 @media(max-width:430px){
   html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card>.exercise-actions{
     margin-inline:10px!important;

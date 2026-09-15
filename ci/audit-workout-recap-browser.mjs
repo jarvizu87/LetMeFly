@@ -10,9 +10,14 @@ const origin=process.env.LMF_AUDIT_BASE_URL || 'http://127.0.0.1:4173'
 const browser=await chromium.launch({executablePath:process.env.CHROME_BIN,headless:true,args:['--no-sandbox','--disable-dev-shm-usage']})
 const report={result:'RUNNING',checks:[],errors:[]}
 async function dismissInstall(page) {
-  const button=page.getByRole('button',{name:'Dismiss install prompt',exact:true})
-  await button.waitFor({state:'visible',timeout:5000}).catch(()=>{})
-  if(await button.isVisible())await button.click()
+  const banner=page.locator('#lmf-install-banner')
+  if(!await banner.isVisible().catch(()=>false))return
+  await banner.evaluate(node=>{
+    const button=node.querySelector('button.lmf-install-dismiss,[aria-label="Dismiss install prompt"]')
+    if(button instanceof HTMLElement)button.click()
+    else node.remove()
+  }).catch(()=>{})
+  await banner.waitFor({state:'hidden',timeout:1000}).catch(()=>{})
 }
 async function snapshot(page) {return page.evaluate(async()=>{
   const db=await new Promise((r,j)=>{const q=indexedDB.open('letmefly-private');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})
@@ -37,7 +42,7 @@ try {
     const exercise=page.locator('.active-exercise').filter({has:page.locator('h3',{hasText:/^Front Squat$/})})
     const row=exercise.locator('[data-set-id]').first()
     const setId=await row.getAttribute('data-set-id')
-    if(width===1440)await page.locator('[data-lmf-desktop-workspace] #swipe-viewport [data-set-id]').first().waitFor({state:'attached'})
+    if(width===1440)assert.equal(await page.locator('[data-lmf-desktop-workspace]').count(),0,'Retired desktop workspace stays absent during native recap logging')
     // Enter the target section through the same visible control an athlete uses.
     // Calling the review bridge during initial workout mounting can race the
     // viewport's readiness selection. The actual recap correction is tested below.
@@ -56,14 +61,7 @@ try {
     if(!await exercise.evaluate(el=>el.classList.contains('lmf-flow-active')))await exercise.locator('.lmf-compact-summary').click()
     assert.equal(await row.getAttribute('data-load-unit'),unit,'Visible load entry uses the athlete unit')
     await row.locator('.reps-input').fill('5');await row.locator('.load-input').fill('100')
-    if(width===1440) {
-      try { await page.waitForFunction(() => document.querySelector('[data-lmf-desktop-v2-load]')?.textContent?.trim()==='100 kg') }
-      catch (error) {
-        const visible=await page.evaluate(()=>({section:document.querySelector('.active-page h2')?.textContent,tools:document.querySelector('.lmf-desktop-context-panel')?.textContent,focused:document.activeElement?.className}))
-        await page.screenshot({path:path.join(out,'metric-tools-failure.png')})
-        throw new Error(`Metric tools did not follow the visible field: ${JSON.stringify(visible)}`,{cause:error})
-      }
-    }
+    assert.equal(await row.locator('.load-input').inputValue(),'100','Native load field retains the athlete-entered value without a duplicate desktop mirror')
     await row.locator('[data-action="toggle-set"]').click()
     await page.waitForFunction(id=>document.querySelector(`[data-set-id="${id}"] .set-check`)?.classList.contains('done'),setId)
     let data=await snapshot(page),sessionId=data.workoutSessions.find(s=>s.status==='in_progress').id
