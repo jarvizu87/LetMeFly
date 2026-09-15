@@ -1,0 +1,152 @@
+/* LetMeFly Desktop Shell Navigation v1
+   Corrective presentation-only layer for the approved responsive desktop shell.
+   Keeps the retired three-column Desktop Workspace absent and preserves the
+   existing Home/Train/Program/Progress/Exercises/Coach/Profile/More routes.
+   No athlete, workout, program, persistence, or coaching logic lives here. */
+
+@media (min-width: 1100px) {
+  html[data-lmf-desktop-ui="true"] {
+    --lmf-desktop-rail: 84px !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] body {
+    min-width: 0 !important;
+    padding: 0 0 0 var(--lmf-desktop-rail) !important;
+    background: #04090d !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] main {
+    width: 100% !important;
+    max-width: 1680px !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 18px 28px !important;
+  }
+
+  /* Desktop owns a compact left navigation rail. The native topbar remains
+     hidden so there is one navigation/header system rather than two. */
+  html[data-lmf-desktop-ui="true"] .topbar {
+    display: none !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar {
+    position: fixed !important;
+    z-index: 100 !important;
+    inset: 0 auto 0 0 !important;
+    width: var(--lmf-desktop-rail) !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 3px !important;
+    padding: 8px 6px 10px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    border: 0 !important;
+    border-right: 1px solid rgba(116, 71, 118, .62) !important;
+    border-radius: 0 !important;
+    background:
+      linear-gradient(180deg, rgba(11, 15, 21, .995), rgba(3, 7, 10, .995)),
+      #05090d !important;
+    box-shadow: 12px 0 34px rgba(0, 0, 0, .30) !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Lightweight brand mark only. Do not restore the retired .lmf-desktop-brand
+     element or any legacy workspace ownership. */
+  html[data-lmf-desktop-ui="true"] .navbar::before {
+    content: '' !important;
+    display: block !important;
+    flex: 0 0 56px !important;
+    width: 100% !important;
+    margin: 0 0 5px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, .07) !important;
+    background: url('/brand/letmefly-logo-display-512.png') center 4px / 42px 42px no-repeat !important;
+    pointer-events: none !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 61px !important;
+    display: flex !important;
+    flex: 0 0 61px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 6px 3px !important;
+    overflow: visible !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+    color: #98a3ae !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: .01em !important;
+    text-align: center !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item > span {
+    width: 24px !important;
+    height: 24px !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    color: #aab4be !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    text-align: center !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item > span > svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item:hover {
+    border-color: rgba(116, 135, 150, .26) !important;
+    color: #fff !important;
+    background: rgba(13, 22, 30, .92) !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item.active,
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item[aria-current="page"] {
+    border-color: rgba(255, 64, 80, .42) !important;
+    color: #fff !important;
+    background: linear-gradient(90deg, rgba(227, 27, 47, .20), rgba(227, 27, 47, .035)) !important;
+    box-shadow: inset 3px 0 0 #ff4050, 0 8px 20px rgba(0, 0, 0, .18) !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item.active > span,
+  html[data-lmf-desktop-ui="true"] .navbar .nav-item[aria-current="page"] > span {
+    color: #ff4050 !important;
+  }
+
+  html[data-lmf-desktop-ui="true"][data-lmf-approved-route="profile"] .navbar a[href="#/more"] {
+    border-color: transparent !important;
+    color: #98a3ae !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-lmf-desktop-ui="true"] .navbar .lmf-desktop-brand,
+  html[data-lmf-desktop-ui="true"] .navbar .lmf-desktop-rail-footer {
+    display: none !important;
+  }
+}
+
+/* Phone/tablet navigation is intentionally untouched. */
