@@ -1,0 +1,36 @@
+name: Train Hero Art Pack V1 Audit
+
+on:
+  pull_request:
+    paths:
+      - 'overlays/ui-command-v2/static/train-heroes-v1/**'
+      - 'docs/TRAIN_HERO_ART_PACK_V1_LOCKED.md'
+      - 'ci/validate-train-hero-art-pack-v1.mjs'
+      - '.github/workflows/train-hero-art-pack-v1-audit.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'overlays/ui-command-v2/static/train-heroes-v1/**'
+      - 'docs/TRAIN_HERO_ART_PACK_V1_LOCKED.md'
+      - 'ci/validate-train-hero-art-pack-v1.mjs'
+      - '.github/workflows/train-hero-art-pack-v1-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-train-hero-pack-v1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate locked hero manifest
+        run: node ci/validate-train-hero-art-pack-v1.mjs
