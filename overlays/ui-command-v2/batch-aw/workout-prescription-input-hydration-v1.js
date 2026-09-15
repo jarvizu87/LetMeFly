@@ -80,6 +80,37 @@
     return tokens
   }
 
+  function previousSamePrescriptionActual(row, preferredUnit) {
+    const card = row?.closest?.('.active-exercise')
+    if (!(card instanceof Element)) return null
+    const rows = [...card.querySelectorAll('.set-row[data-set-id]')]
+    const targetIndex = rows.indexOf(row)
+    if (targetIndex <= 0) return null
+    const targetSignature = clean(row.dataset.programmedLoad)
+
+    for (let index = targetIndex - 1; index >= 0; index -= 1) {
+      const previous = rows[index]
+      if (!isDone(previous)) continue
+      const previousInput = previous.querySelector('.load-input')
+      const raw = clean(previousInput?.value)
+      const value = Number(raw)
+      if (!Number.isFinite(value) || value <= 0) continue
+
+      const previousSignature = clean(previous.dataset.programmedLoad)
+      // Match the already-governed Workout Logging carry rule exactly:
+      // any intentional prescription-signature change blocks carry-forward.
+      if ((targetSignature || previousSignature) && targetSignature !== previousSignature) return null
+
+      const fromUnit = normalizeUnit(previous.dataset.loadUnit) || preferredUnit
+      return {
+        value: convertWeight(value, fromUnit, preferredUnit),
+        unit: preferredUnit,
+        source: 'previous-actual',
+      }
+    }
+    return null
+  }
+
   function loadSeed(row) {
     const preferredUnit = normalizeUnit(row?.dataset?.loadUnit) || 'lb'
     const signature = clean(row?.dataset?.programmedLoad)
@@ -90,23 +121,29 @@
       return null
     }
 
+    // A completed prior actual on the same unchanged prescription outranks the
+    // untouched program default. This preserves existing load-carry semantics
+    // across rerenders while still letting a changed prescription win.
+    const carried = previousSamePrescriptionActual(row, preferredUnit)
+    if (carried) return carried
+
     const signatureNumeric = signature.match(/^\s*(\d+(?:\.\d+)?):\s*(lb|kg)\s*$/i)
     if (signatureNumeric) {
       const value = Number(signatureNumeric[1])
       const from = normalizeUnit(signatureNumeric[2])
-      return { value: convertWeight(value, from, preferredUnit), unit: preferredUnit }
+      return { value: convertWeight(value, from, preferredUnit), unit: preferredUnit, source: 'program' }
     }
 
     const tokens = weightTokens(`${signature} ${prescription}`)
     if (tokens.length) {
       const exact = tokens.find(token => token.unit === preferredUnit)
       const chosen = exact || tokens[0]
-      return { value: convertWeight(chosen.value, chosen.unit, preferredUnit), unit: preferredUnit }
+      return { value: convertWeight(chosen.value, chosen.unit, preferredUnit), unit: preferredUnit, source: 'program' }
     }
 
     const defaultValue = Number(defaultRaw)
     if (Number.isFinite(defaultValue) && defaultValue > 0) {
-      return { value: defaultValue, unit: preferredUnit }
+      return { value: defaultValue, unit: preferredUnit, source: 'program' }
     }
 
     return null
@@ -139,7 +176,7 @@
     const load = loadSeed(row)
     if (load?.value > 0) {
       if (row.dataset.loadUnit !== load.unit) row.dataset.loadUnit = load.unit
-      changed = applySeed(row.querySelector('.load-input'), displayNumber(load.value), 'load') || changed
+      changed = applySeed(row.querySelector('.load-input'), displayNumber(load.value), load.source === 'previous-actual' ? 'carried-load' : 'load') || changed
     }
 
     changed = applySeed(row.querySelector('.rpe-input'), rpeSeed(row), 'rpe') || changed
