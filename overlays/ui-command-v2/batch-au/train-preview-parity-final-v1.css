@@ -66,47 +66,10 @@ html.lmf-preview-mode[data-lmf-approved-route='train'] .lmf-train-reference-fina
   display:block!important;
 }
 
-/* Locked-mockup desktop ownership correction.
-   Desktop Workspace v1 predates the later approved Train mockup and used to
-   force the real workout viewport into a separate three-column shell. Keep the
-   authoritative viewport and controls, but let the approved Train surface own
-   the desktop presentation so desktop and mobile no longer diverge into two
-   competing UI systems. */
+/* The approved Train surface owns desktop too. Future governed days such as
+   Day 4 use the same premium desktop exercise-card hierarchy as the current
+   workout while staying read-only. No legacy desktop workspace is involved. */
 @media(min-width:1100px){
-  html[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-workspace{
-    display:block!important;
-    width:100%!important;
-    min-width:0!important;
-    margin:0!important;
-    gap:0!important;
-  }
-  html[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-flow-panel,
-  html[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-context-panel{
-    display:none!important;
-  }
-  html[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-workspace>#swipe-viewport{
-    display:block!important;
-    grid-column:auto!important;
-    width:100%!important;
-    max-width:none!important;
-    min-width:0!important;
-    margin:0!important;
-    padding:0 0 18px!important;
-    border:0!important;
-    border-radius:0!important;
-    background:transparent!important;
-    box-shadow:none!important;
-  }
-  html[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-desktop-workspace>#swipe-viewport>.swipe-page{
-    flex:0 0 100%!important;
-    width:100%!important;
-    min-width:100%!important;
-    max-width:100%!important;
-    box-sizing:border-box!important;
-  }
-
-  /* Future governed days such as Day 4 use the same premium desktop card
-     hierarchy as the current workout while staying read-only. */
   html.lmf-preview-mode[data-lmf-desktop-ui='true'][data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .preview-card[data-exercise-art]{
     display:grid!important;
     grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr)!important;
