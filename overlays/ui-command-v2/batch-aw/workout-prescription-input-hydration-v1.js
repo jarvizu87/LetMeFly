@@ -136,7 +136,7 @@
 
     const load = loadSeed(row)
     if (load?.value > 0) {
-      row.dataset.loadUnit = load.unit
+      if (row.dataset.loadUnit !== load.unit) row.dataset.loadUnit = load.unit
       changed = applySeed(row.querySelector('.load-input'), displayNumber(load.value), 'load') || changed
     }
 
