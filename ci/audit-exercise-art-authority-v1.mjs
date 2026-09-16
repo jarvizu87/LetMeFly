@@ -14,6 +14,7 @@ for (const file of [indexPath, authorityCssPath, authorityJsPath]) {
 
 const index = fs.readFileSync(indexPath, 'utf8')
 const authorityCss = fs.readFileSync(authorityCssPath, 'utf8')
+const executableAuthorityCss = authorityCss.replace(/\/\*[\s\S]*?\*\//g, '')
 const authorityJs = fs.readFileSync(authorityJsPath, 'utf8')
 const allCss = fs.readdirSync(path.join(dist, 'assets'))
   .filter(name => name.endsWith('.css'))
@@ -31,14 +32,13 @@ if (index.indexOf('/ui/exercise-art-authority-v1.css?v=1') < index.indexOf('/ui/
   throw new Error('Exact exercise-art authority CSS is not after the approved Exercises layer')
 }
 
-const authoritySelector = "html[data-lmf-approved-route='exercises'] body\\n.lmf-approved-exercises-layout-v1 .exercise-library\\n.library-card .library-thumb[data-exercise-art]"
-if (!authorityCss.includes("html[data-lmf-approved-route='exercises'] body") ||
-    !authorityCss.includes('.library-card .library-thumb[data-exercise-art]') ||
-    !authorityCss.includes('var(--exercise-art,var(--v2-mountain))!important')) {
+if (!executableAuthorityCss.includes("html[data-lmf-approved-route='exercises'] body") ||
+    !executableAuthorityCss.includes('.library-card .library-thumb[data-exercise-art]') ||
+    !executableAuthorityCss.includes('var(--exercise-art,var(--v2-mountain))!important')) {
   throw new Error('Exact exercise-art authority rule is incomplete')
 }
-if (authorityCss.includes('--v2-lifter') || authorityCss.includes('train-lifter')) {
-  throw new Error('Exact exercise-art authority must never reference the generic lifter image')
+if (executableAuthorityCss.includes('--v2-lifter') || executableAuthorityCss.includes('train-lifter')) {
+  throw new Error('Exact exercise-art authority executable CSS must never reference the generic lifter image')
 }
 if (!authorityJs.includes("attributeFilter: ['style', 'data-exercise-art', 'data-exercise-art-source', 'data-exercise-art-parts']")) {
   throw new Error('Selected exercise detail is not watching asynchronous exact-art resolution')
