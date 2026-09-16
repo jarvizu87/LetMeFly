@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Release — Workout Mode hydration + desktop shell + whole-gym Bar Loader
+
+- Date: 2026-09-15
+- Main SHA: `46150b7975c4b1bed17e344456851ac78bf64726`
+- Release scope: publish PR #113 so governed Crownforge, Crown Maintenance, and Black Crown prescriptions hydrate blank Workout Mode logging controls without rewriting program definitions; preserve saved/completed athlete actuals and same-prescription carry-forward precedence; ship the corrected compact desktop shell/navigation; and support confirmed whole-gym Bar Loader inventories up to 24 pairs per denomination instead of the former 12-pair ceiling.
+- Required CI/audits: PR #113 exact-head 10/10 workflow pass at `cdb5bfcaff530d9b07cb71ccd9c8223b6193c32c`, including Command V2 production-style browser audit, Seven-Athlete exhaustive program/week/day/card + Coach + substitution/safety + chaos/lifecycle + synthetic-identity isolation, Cloud Sync Bootstrap Regression, Desktop Shell Navigation, Exercise Intelligence Completion, Lifecycle Public UI, workout persistence, Home Option 1, Maintenance Runtime Load + Bar Loader, Netlify Release Policy, and explicit 24-pair whole-gym Bar Loader contract proof; plus integrated `main` 6/6 workflow pass at `46150b7975c4b1bed17e344456851ac78bf64726`, covering Cloud Sync Bootstrap Regression, Desktop Shell Navigation, Exercise Intelligence Completion, Netlify Release Policy, Command V2 full production/browser audit, and the complete Seven-Athlete release audit.
+- Netlify production deploy count expected: 1
+- Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes and no workout-history, profile, Training Max, readiness, progression, or private-athlete data writes are introduced by this release. Production publication is authorized only by `[release netlify]` on this ledger-only release merge.
+
 ## Corrective Release — Exercise Library private-art keys
 
 - Date: 2026-09-14
