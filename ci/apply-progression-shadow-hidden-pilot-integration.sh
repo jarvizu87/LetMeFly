@@ -60,7 +60,7 @@ export const progressionShadowHiddenPilotManifest = Object.freeze({
   ] as const),
   visibilityEnabled: false as const,
   autoApplyAllowed: false as const,
-  crownstormEnabled: false as const,
+  gamificationEnabled: false as const,
   networkAccessAdded: false as const,
   canonicalWritesAdded: false as const,
   programMutationAdded: false as const,
