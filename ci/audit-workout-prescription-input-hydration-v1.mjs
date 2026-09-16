@@ -131,6 +131,22 @@ async function syntheticAudit(page, sets) {
     const api = window.__LMF_WORKOUT_PRESCRIPTION_INPUT_HYDRATION_V1__
     const numberFrom = value => /\d+(?:\.\d+)?/.test(String(value ?? ''))
     const weightFrom = value => /(\d+(?:\.\d+)?)\s*(?:kg|kgs|lb|lbs)\b/i.test(String(value ?? ''))
+    const primaryEligible = set => {
+      const raw = set.kind === 'distance' ? set.distance : set.kind === 'duration' ? set.duration : set.reps
+      if (!numberFrom(raw)) return false
+      if (set.kind !== 'reps') return true
+      const segments = String(set.summary || '').split(/\s*•\s*/).map(value => value.trim()).filter(Boolean)
+      return segments.some(value => {
+        if (!/\d/.test(value)) return false
+        if (/\bsets?\b/i.test(value)) return false
+        if (/\bRPE\b/i.test(value)) return false
+        if (/\b(?:kg|kgs|lb|lbs)\b/i.test(value)) return false
+        if (/%/.test(value)) return false
+        if (/\b(?:sec|secs|second|seconds|min|mins|minute|minutes|hr|hrs|hour|hours)\b/i.test(value)) return false
+        if (/^\d+(?:\.\d+)?\s*m(?:\b|\/)/i.test(value)) return false
+        return true
+      })
+    }
     const out = []
     for (const set of sets) {
       const kind = set.kind
@@ -146,11 +162,13 @@ async function syntheticAudit(page, sets) {
       row.innerHTML = `<div class="set-target-cell lmf-prescription-cell"><strong>${set.summary}</strong></div><div class="set-field reps-field"><input class="set-input ${kind === 'reps' ? 'reps-input' : 'metric-input'}"></div><div class="set-field load-field"><input class="set-input load-input"></div><div class="set-field rpe-field"><input class="set-input rpe-input"></div><button class="set-check"></button>`
       document.body.appendChild(row)
       api.hydrateRow(row)
+      const expectPrimary = primaryEligible(set)
       out.push({
         primary: row.querySelector(kind === 'reps' ? '.reps-input' : '.metric-input')?.value || '',
         load: row.querySelector('.load-input')?.value || '',
         rpe: row.querySelector('.rpe-input')?.value || '',
-        expectPrimary: numberFrom(kind === 'distance' ? set.distance : kind === 'duration' ? set.duration : set.reps),
+        expectPrimary,
+        manualPrimary: kind === 'reps' && numberFrom(set.reps) && !expectPrimary,
         expectLoad: set.loadValue != null || weightFrom(set.loadText),
         expectRpe: numberFrom(set.rpe),
       })
@@ -166,6 +184,9 @@ async function syntheticAudit(page, sets) {
       report.parseable.primary += 1
       if (result.primary) report.hydrated.primary += 1
       else report.defects.push({ type: 'primary', program: set.program, week: set.week, day: set.day, exercise: set.exercise, prescription: summary(set) })
+    }
+    if (result.manualPrimary && result.primary) {
+      report.defects.push({ type: 'manual-primary-autofilled', program: set.program, week: set.week, day: set.day, exercise: set.exercise, prescription: summary(set), actual: result.primary })
     }
     if (result.expectLoad) {
       report.parseable.load += 1
