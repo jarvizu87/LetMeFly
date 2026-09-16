@@ -76,35 +76,83 @@ Yellow effective-prescription handling stays explicit and historical-source comp
 
 Missing or invalid linked readiness becomes `unknown`; it is never replaced by a newer readiness record. Strength qualification remains deliberately `false` until a dedicated current-source classification rule is reviewed rather than inferred.
 
-Stage 3 passed:
+Stage 3 passed exact-current reconstruction, current data-contract inspection, read-only evidence mapping, substitution provenance, Green/Yellow fixtures, future/inactive decision rejection, extra/duplicate set cases, foreign/missing readiness/session cases, typecheck, candidate build, Crownstorm absence, and privileged-secret guards.
 
-- exact-current-source reconstruction
-- current data-contract inspection
-- read-only evidence mapping audit
-- substitution provenance cases
-- Green and Yellow fixtures
-- future/inactive decision rejection
-- extra/duplicate set cases
-- foreign/missing readiness/session cases
+## Stage 4 — isolated append-only original-hook journal
+
+Stage 4 is implemented and green.
+
+It persists only derived Shadow pilot evidence in the isolated IndexedDB database `letmefly.progression.shadow.pilot.v1`. This is not canonical athlete/workout state.
+
+Stage 4 guarantees:
+
+- original-hook receipts are append-only via object-store `add`
+- identical replay returns the immutable original receipt
+- changed replay evidence fails closed instead of replacing history
+- receipts carry deterministic SHA-256 evidence digests
+- receipts survive module/app reload through isolated IndexedDB
+- no canonical DB writes, cloud sync, network access, UI, governed-program dependency, or Crownstorm dependency
+- journal failure stays inside the same fail-open post-completion Shadow boundary
+
+Stage 4 passed persistence, replay, conflict, reload, typecheck, candidate-build, Crownstorm-absence, and privileged-secret guards.
+
+## Stage 5 — immutable provenance + finalized human-review evidence
+
+Stage 5 is implemented and green.
+
+It adds a separate isolated pilot-review ledger at `letmefly.progression.shadow.pilot.review.v1`. The ledger stores only Shadow QA provenance and finalized human-review evidence; it does not become a second training database.
+
+Original-hook provenance is captured only after the immutable Stage-4 receipt exists. Each provenance record binds:
+
+- athlete/workout identity
+- workout completion/readiness state
+- the immutable Stage-4 original-receipt digest
+- a SHA-256 digest of the exact mapped prescription/outcome review
+- a deterministic provenance digest over those facts
+
+Provenance is append-only and replay-safe. Identical replay returns the original record; changed mapped evidence or a forged/non-matching receipt fails closed.
+
+Human review is deliberately **not** called by the workout-completion hook. A controlled reviewer must explicitly finalize it later. The finalized review is add-once, digest-bound to the original receipt and provenance, and cannot be edited in place. An identical replay returns the original review; different later evidence is rejected instead of overwriting history.
+
+The Stage-5 rebuilt pilot-review status is reconstructed from receipt + provenance + human evidence rather than trusting a cached final flag. Even a matching human `agree` cannot:
+
+- suppress a technical failure
+- promote a decision-coverage failure
+- authorize visible progression
+- enable auto-apply
+- mutate the workout or governed prescription
+
+`visibilityAuthorized` and `autoApplyAllowed` remain hard-locked false in this stage.
+
+Stage 5 passed:
+
+- exact-current production reconstruction
+- provenance append-only/replay checks
+- forged-receipt rejection
+- changed-mapping conflict rejection
+- finalized human-review add-once/replay checks
+- changed finalized-review overwrite rejection
+- rebuild from machine + human evidence
+- technical-failure cannot be hidden by human agreement
+- reload persistence
+- proof that human review never mutates the Stage-4 original receipt
 - TypeScript typecheck
 - production candidate build
 - Crownstorm absence guard
 - privileged-secret absence guard
 
-## Stage 4 — isolated append-only pilot evidence journal
+## Next stage — pilot operations hardening
 
-Next, persist only derived Shadow pilot evidence in a separate, private pilot journal so a real completed-workout review survives reload. This journal must not modify or duplicate canonical LetMeFly workout authority.
+The next current-main layer should port only the non-gamified runtime-v10 operational controls needed for the real pilot:
 
-Stage 4 must remain:
+- append-only review dispositions for genuine human-review mistakes
+- replacement-workout policy instead of rewriting immutable evidence
+- pilot backlog/coverage reporting
+- tamper-evident pilot audit export
 
-- append-only / replay-safe
-- isolated from `workoutSessions`, `workoutExercises`, `workoutSets`, readiness, profile, TMs, program instances, and sync outbox
-- fail-open relative to workout completion
-- invisible in normal UI
-- non-networked initially
-- incapable of enabling Crownstorm or visible progression
+A disposition must never suppress technical failure. Export/restore and explicit operator authorization remain separate gates before any visible progression surface.
 
-Historical runtime-v6 through runtime-v10 remain reference material for immutable original-hook receipts, provenance, human review, dispositions, backlog reporting, and audit export. They are not merged directly.
+Historical runtime-v6 through runtime-v10 remain reference material only; they are not merged directly.
 
 ## Hard boundaries
 
@@ -123,7 +171,7 @@ The authoritative `program-progression-service.ts` remains the only current owne
 
 ## Real-world pilot acceptance
 
-The pilot is **not accepted** merely because CI is green. Real-workout evidence is still required. Historical runtime-v10 acceptance intent remains the reference for later operational hardening, including immutable receipts/provenance, replay/idempotency, human review, export/restore, and explicit operator authorization before any visible progression surface.
+The pilot is **not accepted** merely because CI is green. Real-workout evidence is still required. Historical runtime-v10 acceptance intent remains the reference for later operational hardening, including immutable receipts/provenance, replay/idempotency, human review, disposition/replacement handling, export/restore, and explicit operator authorization before any visible progression surface.
 
 A real RED workout is not manufactured for QA; RED remains a separate controlled safety-review case before broad rollout.
 
