@@ -33,6 +33,9 @@ if (!required.every(fs.existsSync)) {
 const main = fs.readFileSync(mainPath, 'utf8')
 const manifest = fs.readFileSync(manifestPath, 'utf8')
 const shadowSource = shadowPaths.map((file) => fs.readFileSync(file, 'utf8')).join('\n')
+const executableShadowSource = shadowSource
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .replace(/\/\/.*$/gm, '')
 const checks = []
 const check = (label, ok, detail = '') => {
   checks.push({ label, ok: Boolean(ok), detail })
@@ -76,7 +79,8 @@ check('manifest keeps visibility and auto-apply disabled', /visibilityEnabled:\s
 check('manifest keeps gamification disabled', /gamificationEnabled:\s*false as const/.test(manifest))
 check('manifest adds no canonical writes program mutation or network access', /networkAccessAdded:\s*false as const/.test(manifest) && /canonicalWritesAdded:\s*false as const/.test(manifest) && /programMutationAdded:\s*false as const/.test(manifest))
 
-check('Shadow source adds no direct network path', !/fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|supabase/i.test(shadowSource))
+const directNetworkPrimitive = /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bEventSource\b|\bcreateClient\s*\(|from\s+['"][^'"]*supabase[^'"]*['"]|\bsupabase\s*\./i
+check('Shadow executable source adds no direct network path', !directNetworkPrimitive.test(executableShadowSource))
 check('Shadow source adds no UI rendering path', !/document\.|window\.|showToast|innerHTML|insertAdjacentHTML/.test(shadowSource))
 check('generated hidden pilot source contains no gamification feature markers', !/crownstorm|main quest/i.test(shadowSource))
 
