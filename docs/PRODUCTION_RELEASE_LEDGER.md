@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Release — Exercise Library artwork cascade + Seven-Athlete safety QA
+
+- Date: 2026-09-16
+- Main SHA: `c9dffd2676eeebe1590b041932580d2efab2e70e`
+- Release scope: publish the fully audited integrated `main` batch containing the Exercise Library artwork cascade correction so exact governed exercise images are no longer overridden by generic category artwork, plus PR #119's QA-only Seven-Athlete correction so the synthetic safety-profile athlete is required to receive the safety-first hip-flexion response while still preserving governed substitution intent. The QA correction changes no production app source, athlete data, program prescription, Training Max, readiness, workout history, progression behavior, or exercise-image logic.
+- Required CI/audits: PR #119 head `39d17a52113067d81d9962b54b945ff623cb8208` passed all 9 triggered checks: Seven-Athlete, Command V2, Exercise Intelligence Completion, Workout Persistence Diagnostic, Lifecycle Public UI, Desktop Shell Navigation, Approved Home Option 1, Cloud Sync Bootstrap Regression, and Netlify Release Policy. Integrated `main` content at `7a3f4af68585a8d30d2892223864d24a00aeedb6` then passed all 6 push-validation workflows with no failures: Netlify Release Policy, Cloud Sync Bootstrap Regression, Exercise Intelligence Completion, Desktop Shell Navigation, Command V2 full build plus real mobile/desktop browser audit, and the complete Seven-Athlete release audit including every governed program/week/day/card, Coach scenarios, substitution/safety mutation guard, chaos/lifecycle boundaries, synthetic-identity isolation, and canonical private-art key proof. Current `main` SHA `c9dffd2676eeebe1590b041932580d2efab2e70e` is a marker-only parent with the same audited tree.
+- Netlify production deploy count expected: 1
+- Notes: this release is presentation/QA focused. Back Squat, Bench Press, and Backward Sled Drag are the targeted live Exercise Library acceptance examples for the artwork cascade correction. Visible progression/Crownstorm/automatic progression changes remain out of scope; the hidden Progression Shadow pilot remains observational and requires genuine real-workout evidence before any visible activation. Production publication is authorized only by `[release netlify]` on this ledger-only release merge.
+
 ## Release — Hidden real-workout Progression Shadow pilot
 
 - Date: 2026-09-16
