@@ -8,6 +8,8 @@ on:
       - 'ci/apply-progression-shadow-review-engine-v2.sh'
       - 'ci/audit-progression-shadow-review-engine-v2.mjs'
       - 'ci/inspect-progression-shadow-stage3-contracts.mjs'
+      - 'ci/apply-progression-shadow-read-adapter-v3.sh'
+      - 'ci/audit-progression-shadow-read-adapter-v3.mjs'
       - 'docs/PROGRESSION_SHADOW_CURRENT_MAIN.md'
       - '.github/workflows/progression-shadow-current-main-audit.yml'
   workflow_dispatch:
@@ -48,6 +50,12 @@ jobs:
 
       - name: Audit Green Yellow Red evidence rules and pilot gates
         run: node --experimental-strip-types ci/audit-progression-shadow-review-engine-v2.mjs .build-src/letmefly_app
+
+      - name: Apply Stage-3 read-only canonical-data adapter
+        run: bash ci/apply-progression-shadow-read-adapter-v3.sh .build-src/letmefly_app
+
+      - name: Audit Stage-3 real-workout evidence mapping
+        run: node --experimental-strip-types ci/audit-progression-shadow-read-adapter-v3.mjs .build-src/letmefly_app
 
       - name: Typecheck Shadow against final reconstructed source
         run: npm --prefix .build-src/letmefly_app run typecheck
