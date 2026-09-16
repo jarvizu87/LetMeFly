@@ -12,6 +12,8 @@ on:
       - 'ci/audit-progression-shadow-read-adapter-v3.mjs'
       - 'ci/apply-progression-shadow-pilot-journal-v4.sh'
       - 'ci/audit-progression-shadow-pilot-journal-v4.mjs'
+      - 'ci/apply-progression-shadow-provenance-review-v5.sh'
+      - 'ci/audit-progression-shadow-provenance-review-v5.mjs'
       - 'docs/PROGRESSION_SHADOW_CURRENT_MAIN.md'
       - '.github/workflows/progression-shadow-current-main-audit.yml'
   workflow_dispatch:
@@ -67,6 +69,12 @@ jobs:
 
       - name: Audit Stage-4 original-hook receipt persistence
         run: node --experimental-strip-types ci/audit-progression-shadow-pilot-journal-v4.mjs .build-src/letmefly_app
+
+      - name: Apply Stage-5 immutable provenance and human-review ledger
+        run: bash ci/apply-progression-shadow-provenance-review-v5.sh .build-src/letmefly_app
+
+      - name: Audit Stage-5 provenance and human-review evidence
+        run: node --experimental-strip-types ci/audit-progression-shadow-provenance-review-v5.mjs .build-src/letmefly_app
 
       - name: Typecheck Shadow against final reconstructed source
         run: npm --prefix .build-src/letmefly_app run typecheck
