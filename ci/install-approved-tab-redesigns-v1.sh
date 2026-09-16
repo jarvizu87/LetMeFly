@@ -28,7 +28,16 @@ node --check "$ART_AUTH_JS_SOURCE"
 ! grep -Eq 'programInstances|trainingMaxHistory|workoutSessions|personalRecords|bodyweightEntries' "$JS_SOURCE"
 ! grep -Eq 'background-image:[^;]*exercise-art|url\([^)]*exercise[^)]*\)' "$CSS_SOURCE"
 ! grep -Eq 'localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|setItem\(|supabase|\.from\(|\.insert\(|\.update\(|\.delete\(' "$ART_AUTH_JS_SOURCE"
-! grep -Eq 'train-lifter|--v2-lifter' "$ART_AUTH_CSS_SOURCE"
+ART_AUTH_CSS_SOURCE="$ART_AUTH_CSS_SOURCE" python - <<'PY'
+from pathlib import Path
+import os
+import re
+
+css = Path(os.environ['ART_AUTH_CSS_SOURCE']).read_text()
+executable = re.sub(r'/\*[\s\S]*?\*/', '', css)
+if re.search(r'train-lifter|--v2-lifter', executable):
+    raise SystemExit('exact exercise-art authority executable CSS must not reference generic lifter art')
+PY
 grep -Fq 'exact-art-authority-v1' "$ART_AUTH_CSS_SOURCE"
 grep -Fq 'var(--exercise-art,var(--v2-mountain))!important' "$ART_AUTH_CSS_SOURCE"
 grep -Fq "attributeFilter: ['style', 'data-exercise-art', 'data-exercise-art-source', 'data-exercise-art-parts']" "$ART_AUTH_JS_SOURCE"
