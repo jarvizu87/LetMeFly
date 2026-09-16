@@ -1,0 +1,40 @@
+/* LetMeFly Exercise Art Authority v1
+   Bug fix: category presentation must never replace an exact exercise image.
+   A legacy barbell/sled rule paints --v2-lifter over library thumbs. When a
+   canonical data-exercise-art key exists, the private-art variable is the image
+   authority. Missing private art falls back to the neutral mountain, never a
+   different exercise photo. Presentation only; no athlete/program data writes. */
+
+html[data-lmf-approved-route='exercises'] body
+.lmf-approved-exercises-layout-v1 .exercise-library
+.library-card .library-thumb[data-exercise-art]{
+  background-image:
+    linear-gradient(180deg,rgba(1,5,8,.03) 0%,rgba(1,5,8,.08) 48%,rgba(1,5,8,.72) 100%),
+    var(--exercise-art,var(--v2-mountain))!important;
+  background-position:center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  filter:none!important;
+}
+
+/* Multi-part private art renders its own component grid and must not expose a
+   category fallback underneath it. */
+html[data-lmf-approved-route='exercises'] body
+.lmf-approved-exercises-layout-v1 .exercise-library
+.library-card .library-thumb[data-exercise-art][data-exercise-art-parts]{
+  background-image:none!important;
+}
+
+/* The selected-exercise inspector clones the canonical thumb. Keep its own
+   fallback neutral too; the companion JS refreshes it as soon as private art
+   resolves so it cannot retain a stale category image. */
+html[data-lmf-approved-route='exercises'] body
+.lmf-reference-exercise-detail .lmf-reference-detail-image[data-exercise-art]{
+  background-position:center!important;
+  background-size:cover!important;
+  background-repeat:no-repeat!important;
+  filter:none!important;
+}
+
+/* Regression marker: exact-art-authority-v1. Category tags may style borders,
+   text and framing, but never the background image of an exact exercise key. */
