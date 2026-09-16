@@ -15,8 +15,8 @@ cat > "$TARGET/src/services/progression-shadow-pilot-journal.ts" <<'TS'
  *
  * This database is NOT canonical athlete/workout state. It stores only derived
  * QA evidence proving what the original post-completion Shadow hook observed.
- * There is no localStorage fallback, cloud sync, UI, program mutation, or
- * overwrite path.
+ * There is no secondary key-value storage fallback, cloud sync, UI, program
+ * mutation, or overwrite path.
  */
 import type { ProgressionShadowEvidenceBuildResult } from './progression-shadow-evidence-builder'
 
