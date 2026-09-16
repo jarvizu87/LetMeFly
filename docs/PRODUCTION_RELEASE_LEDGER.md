@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Release — Exercise Library artwork cascade + Seven-Athlete safety QA
+
+- Date: 2026-09-16
+- Main SHA: `c9dffd2676eeebe1590b041932580d2efab2e70e`
+- Release scope: publish the fully audited integrated `main` batch containing the Exercise Library artwork cascade correction so exact governed exercise images are no longer overridden by generic category artwork, plus PR #119's QA-only Seven-Athlete correction so the synthetic safety-profile athlete is required to receive the safety-first hip-flexion response while still preserving governed substitution intent. The QA correction changes no production app source, athlete data, program prescription, Training Max, readiness, workout history, progression behavior, or exercise-image logic.
+- Required CI/audits: PR #119 head `39d17a52113067d81d9962b54b945ff623cb8208` passed all 9 triggered checks: Seven-Athlete, Command V2, Exercise Intelligence Completion, Workout Persistence Diagnostic, Lifecycle Public UI, Desktop Shell Navigation, Approved Home Option 1, Cloud Sync Bootstrap Regression, and Netlify Release Policy. Integrated `main` content at `7a3f4af68585a8d30d2892223864d24a00aeedb6` then passed all 6 push-validation workflows with no failures: Netlify Release Policy, Cloud Sync Bootstrap Regression, Exercise Intelligence Completion, Desktop Shell Navigation, Command V2 full build plus real mobile/desktop browser audit, and the complete Seven-Athlete release audit including every governed program/week/day/card, Coach scenarios, substitution/safety mutation guard, chaos/lifecycle boundaries, synthetic-identity isolation, and canonical private-art key proof. Current `main` SHA `c9dffd2676eeebe1590b041932580d2efab2e70e` is a marker-only parent with the same audited tree.
+- Netlify production deploy count expected: 1
+- Notes: this release is presentation/QA focused. Back Squat, Bench Press, and Backward Sled Drag are the targeted live Exercise Library acceptance examples for the artwork cascade correction. Visible progression/Crownstorm/automatic progression changes remain out of scope; the hidden Progression Shadow pilot remains observational and requires genuine real-workout evidence before any visible activation. Production publication is authorized only by `[release netlify]` on this ledger-only release merge.
+
 ## Release — Hidden real-workout Progression Shadow pilot
 
 - Date: 2026-09-16
@@ -54,7 +63,7 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Date: 2026-09-13
 - Main SHA: `5d9b0197dbd7a33f789796e9d5c52f31043f8f91`
 - Release scope: publish PR #103 so installed LetMeFly PWAs gain an athlete-safe in-app update path: Settings → App updates with manual CHECK NOW plus UPDATE NOW / RELOAD NOW states when appropriate; automatic checks on startup, foreground, reconnect, and interval; an update-ready banner; a release-distinct service-worker token; exact updater-script precaching; and safe service-worker activation/client claiming without uninstalling the app.
-- Required CI/audits: PR #103 exact-head 9/9 workflow pass, including Command V2 full build + real mobile/desktop browser audit, Seven-Athlete + Chaos/Resilience, workout persistence, Lifecycle Public UI, Maintenance Runtime Load + Bar Loader, Home Option 1, Cloud Sync Bootstrap Regression, Exercise Intelligence Completion, and Netlify Release Policy; plus integrated `main` 5/5 workflow pass at `5d9b0197dbd7a33f789796e9d5c52f31043f8f91`, including Command V2, Seven-Athlete, Cloud Sync, Exercise Intelligence Completion, and Netlify Release Policy.
+- Required CI/audits: PR #103 exact-head 9/9 workflow pass, including Command V2 full build + real mobile/desktop browser audit, Seven-Athlete + Chaos/Resilience, workout persistence, Lifecycle Public UI, Maintenance Runtime Load + Bar Loader, Home Option 1, Cloud Sync Bootstrap Regression, Exercise Intelligence Completion, and Netlify Release Policy; plus integrated `main` 5/5 workflow pass at `5d9b0197db7a33f789796e9d5c52f31043f8f91`, including Command V2, Seven-Athlete, Cloud Sync, Exercise Intelligence Completion, and Netlify Release Policy.
 - Netlify production deploy count expected: 1
 - Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes and no athlete-private data changes. The updater does not clear localStorage, IndexedDB, workout history, profile state, TMs, readiness, PRs, or the private athlete vault. Existing pre-v1 installed PWAs may need one close/reopen or normal reload after this corrective release to render the new update controls; uninstall/reinstall is not required. Production remains held until this ledger-only release PR is intentionally merged through the explicit Git-linked production release gate.
 
@@ -72,7 +81,7 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Date: 2026-09-13
 - Main SHA: `1721a81b2a2de0b616159660c6047cb0106aad5a`
 - Release scope: publish PR #97 so the Crownforge circuit-first Train JS/CSS is installed inside the authoritative shared Command V2 production artifact instead of relying on a trailing deployment-only step.
-- Required CI/audits: PR #97 exact-head suite; Command V2 full build and real browser audit; Crownforge v2.2; Black Crown v2.1; Crown Maintenance runtime load + Bar Loader; workout persistence; Workout Substitute Today; Seven-Athlete + Chaos/Resilience; Lifecycle Public UI; Home Option 1; cloud bootstrap regression; Netlify release policy; static circuit artifact assertions; and governed Crownforge Day 3 structured-round browser regression.
+- Required CI/audits: PR #97 exact-head suite; Command V2 full build and real browser audit; Crownforge v2.2; Black Crown v2.1; Crown Maintenance runtime load + Bar Loader; workout persistence/recovery; Workout Substitute Today; Seven-Athlete + Chaos/Resilience; Lifecycle Public UI; Home Option 1; cloud bootstrap regression; Netlify release policy; static circuit artifact assertions; and governed Crownforge Day 3 structured-round browser regression.
 - Netlify production deploy count expected: 1
 - Notes: no Crownforge, Crown Maintenance, or Black Crown prescription changes. The earlier live smoke test incorrectly expected A1/A2/A3 badges on Week 1 Day 1 even though that section is not governed as `group_type=round`. The corrective release ensures the circuit presentation layer ships consistently so true governed round sections can render their CIRCUIT strip and movement codes.
 
