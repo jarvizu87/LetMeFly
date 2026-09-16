@@ -10,21 +10,13 @@ The older Progression Shadow draft PRs remain historical source material only. T
 
 Stage 1 installs a small observational module into the reconstructed app only during its dedicated audit workflow.
 
-On a completed workout it may receive:
-
-- completed workout/session ID
-- athlete ID
-- governed program key
-- completed week/day
-- completion timestamp
-
 The completion hook is after canonical workout persistence and before the existing authoritative program progression call. It is fail-open: a Shadow exception cannot block workout completion or Crownforge → Crown Maintenance → Black Crown progression.
 
 Stage 1 passed against the exact current production reconstruction.
 
 ## Stage 2 — pure evidence/review engine
 
-Stage 2 ports the non-gamified Green / Yellow / Red evidence rules as a pure module. It still does not read or write the database. A later adapter may feed it trusted completed-workout, readiness, and explicit coaching-decision evidence.
+Stage 2 ports the non-gamified Green / Yellow / Red evidence rules as a pure module.
 
 Preserved rules from the historical Shadow pilot:
 
@@ -51,14 +43,75 @@ Stage 2 also carries the real-pilot gate as pure review logic:
 - when a strength review is explicitly required, multiple qualifying sessions must span at least 21 elapsed days
 - passing evidence still cannot automatically enable visible progression
 
-XP, levels, quests, streaks, and Crownstorm are intentionally **not** part of Stage 2. Those belong to a later isolated gamification-validation layer after the evidence adapter is trustworthy.
+Stage 2 passed its dedicated Green / Yellow / Red audit against the current production reconstruction.
+
+## Stage 3 — current-data read-only adapter
+
+Stage 3 is implemented and green.
+
+It reads only the canonical records for the exact completed workout:
+
+- `workoutSessions` by completed session ID
+- the session-linked `readinessEntries` row via `workoutSessions.readiness_id`
+- `workoutExercises` by exact session
+- `workoutSets` by exact session
+- `coachingDecisions` by exact session
+
+It deliberately does **not** use `latestReadiness()`, so a later readiness check-in cannot rewrite the evidence for an older workout.
+
+Programmed work identity comes from the immutable `prescription_snapshot`, including `prescribedExerciseKey`, source priority, and `sourceSets`. A performed substitution may change the performed exercise identity, but it does not rewrite the programmed source identity used for adherence review.
+
+Completed work units are counted from completed canonical set rows only. Reps and load are not used as a proxy for completed sets. Extra logged sets stay outside the governed completion numerator; duplicate/malformed canonical set joins fail technical health closed.
+
+Yellow effective-prescription handling stays explicit and historical-source compatible:
+
+- decision type must be `effective_prescription_adjustment`
+- decision status must be `active`
+- it must belong to the same athlete and exact workout session
+- it must link to the exact workout exercise
+- its effective time must be at or before workout completion
+- the latest valid decision wins
+- future, inactive, deleted, foreign, malformed, or wrong-type records do not silently alter the target
+- source-optional work still cannot become core adherence
+
+Missing or invalid linked readiness becomes `unknown`; it is never replaced by a newer readiness record. Strength qualification remains deliberately `false` until a dedicated current-source classification rule is reviewed rather than inferred.
+
+Stage 3 passed:
+
+- exact-current-source reconstruction
+- current data-contract inspection
+- read-only evidence mapping audit
+- substitution provenance cases
+- Green and Yellow fixtures
+- future/inactive decision rejection
+- extra/duplicate set cases
+- foreign/missing readiness/session cases
+- TypeScript typecheck
+- production candidate build
+- Crownstorm absence guard
+- privileged-secret absence guard
+
+## Stage 4 — isolated append-only pilot evidence journal
+
+Next, persist only derived Shadow pilot evidence in a separate, private pilot journal so a real completed-workout review survives reload. This journal must not modify or duplicate canonical LetMeFly workout authority.
+
+Stage 4 must remain:
+
+- append-only / replay-safe
+- isolated from `workoutSessions`, `workoutExercises`, `workoutSets`, readiness, profile, TMs, program instances, and sync outbox
+- fail-open relative to workout completion
+- invisible in normal UI
+- non-networked initially
+- incapable of enabling Crownstorm or visible progression
+
+Historical runtime-v6 through runtime-v10 remain reference material for immutable original-hook receipts, provenance, human review, dispositions, backlog reporting, and audit export. They are not merged directly.
 
 ## Hard boundaries
 
 Progression Shadow must not:
 
-- write IndexedDB, localStorage, sessionStorage, or Supabase
-- call network services
+- write canonical LetMeFly athlete/workout/program data
+- call Supabase or other network services from the Shadow lane
 - mutate the active program instance or governed program definitions
 - change training maxes, workout history, readiness, profile, or sync state
 - render UI, show toasts, or change navigation
@@ -67,17 +120,6 @@ Progression Shadow must not:
 - block workout completion or authoritative progression if Shadow throws
 
 The authoritative `program-progression-service.ts` remains the only current owner of Crownforge → Crown Maintenance → Black Crown progression.
-
-## Stage 3 — current-data read-only adapter
-
-After Stage 2 is green, connect the pure review engine to current private data using read-only queries only:
-
-- completed workout/session skeleton and completed set actuals
-- readiness record valid for that workout
-- explicit coaching/program-authorized effective-target decisions when Yellow changes exist
-- governed source priority and prescribed units
-
-The adapter must not create a second athlete-data authority. It should derive a review from canonical LetMeFly records and return evidence to the Shadow module.
 
 ## Real-world pilot acceptance
 
