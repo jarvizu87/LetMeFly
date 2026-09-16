@@ -29,8 +29,9 @@ export function resolveBarbellSettings(defaults, saved, preference) {
   }
   // A list of denominations provides no evidence about the number of pairs.
   // An explicit saved pairs object may supply them; otherwise ask once in UI.
+  // Whole-gym inventories may legitimately exceed a rack-sized 12-pair count.
   const counts = object(barbell.pairs) ? barbell.pairs : null
-  result[confirmedKey] = Boolean(counts && plates.every(plate => Number.isInteger(counts[String(plate)]) && counts[String(plate)] >= 0 && counts[String(plate)] <= 12))
+  result[confirmedKey] = Boolean(counts && plates.every(plate => Number.isInteger(counts[String(plate)]) && counts[String(plate)] >= 0 && counts[String(plate)] <= 24))
   if (result[confirmedKey]) for (const plate of result[`knownPlates${suffix}`]) result[pairsKey][String(plate)] = counts[String(plate)]
   return result
 }
