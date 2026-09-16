@@ -7,6 +7,7 @@ on:
       - 'ci/audit-progression-shadow-current-v1.mjs'
       - 'ci/apply-progression-shadow-review-engine-v2.sh'
       - 'ci/audit-progression-shadow-review-engine-v2.mjs'
+      - 'ci/inspect-progression-shadow-stage3-contracts.mjs'
       - 'docs/PROGRESSION_SHADOW_CURRENT_MAIN.md'
       - '.github/workflows/progression-shadow-current-main-audit.yml'
   workflow_dispatch:
@@ -32,6 +33,9 @@ jobs:
 
       - name: Reconstruct exact current production source
         run: bash ci/build-command-v2-v2-1.sh
+
+      - name: Inspect current Stage-3 data contracts
+        run: node ci/inspect-progression-shadow-stage3-contracts.mjs .build-src/letmefly_app
 
       - name: Apply hidden current-main Shadow pilot foundation
         run: bash ci/apply-progression-shadow-current-v1.sh .build-src/letmefly_app
