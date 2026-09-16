@@ -5,6 +5,8 @@ on:
     paths:
       - 'ci/apply-progression-shadow-current-v1.sh'
       - 'ci/audit-progression-shadow-current-v1.mjs'
+      - 'ci/apply-progression-shadow-review-engine-v2.sh'
+      - 'ci/audit-progression-shadow-review-engine-v2.mjs'
       - 'docs/PROGRESSION_SHADOW_CURRENT_MAIN.md'
       - '.github/workflows/progression-shadow-current-main-audit.yml'
   workflow_dispatch:
@@ -36,6 +38,12 @@ jobs:
 
       - name: Audit Shadow authority and fail-open boundaries
         run: node ci/audit-progression-shadow-current-v1.mjs .build-src/letmefly_app
+
+      - name: Apply Stage-2 pure review engine
+        run: bash ci/apply-progression-shadow-review-engine-v2.sh .build-src/letmefly_app
+
+      - name: Audit Green Yellow Red evidence rules and pilot gates
+        run: node --experimental-strip-types ci/audit-progression-shadow-review-engine-v2.mjs .build-src/letmefly_app
 
       - name: Typecheck Shadow against final reconstructed source
         run: npm --prefix .build-src/letmefly_app run typecheck
