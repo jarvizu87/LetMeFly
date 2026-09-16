@@ -3,6 +3,7 @@ name: Progression Shadow Current-Main Audit
 on:
   pull_request:
     paths:
+      - 'netlify.toml'
       - 'ci/apply-progression-shadow-current-v1.sh'
       - 'ci/audit-progression-shadow-current-v1.mjs'
       - 'ci/apply-progression-shadow-review-engine-v2.sh'
@@ -20,6 +21,7 @@ on:
       - 'ci/audit-progression-shadow-restore-authorization-v7.mjs'
       - 'ci/apply-progression-shadow-hidden-pilot-integration.sh'
       - 'ci/audit-progression-shadow-hidden-pilot-integration.mjs'
+      - 'ci/audit-progression-shadow-production-wiring.mjs'
       - 'docs/PROGRESSION_SHADOW_CURRENT_MAIN.md'
       - '.github/workflows/progression-shadow-current-main-audit.yml'
   workflow_dispatch:
@@ -42,6 +44,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
+
+      - name: Audit production Netlify Shadow wiring
+        run: node ci/audit-progression-shadow-production-wiring.mjs netlify.toml
 
       - name: Reconstruct exact current production source
         run: bash ci/build-command-v2-v2-1.sh
