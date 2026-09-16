@@ -18,6 +18,8 @@ on:
       - 'ci/audit-progression-shadow-pilot-operations-v6.mjs'
       - 'ci/apply-progression-shadow-restore-authorization-v7.sh'
       - 'ci/audit-progression-shadow-restore-authorization-v7.mjs'
+      - 'ci/apply-progression-shadow-hidden-pilot-integration.sh'
+      - 'ci/audit-progression-shadow-hidden-pilot-integration.mjs'
       - 'docs/PROGRESSION_SHADOW_CURRENT_MAIN.md'
       - '.github/workflows/progression-shadow-current-main-audit.yml'
   workflow_dispatch:
@@ -91,6 +93,12 @@ jobs:
 
       - name: Audit Stage-7 restore round trip and authorization boundary
         run: node --experimental-strip-types ci/audit-progression-shadow-restore-authorization-v7.mjs .build-src/letmefly_app
+
+      - name: Apply hidden real-workout pilot integration boundary
+        run: bash ci/apply-progression-shadow-hidden-pilot-integration.sh .build-src/letmefly_app
+
+      - name: Audit hidden real-workout pilot integration boundary
+        run: node ci/audit-progression-shadow-hidden-pilot-integration.mjs .build-src/letmefly_app
 
       - name: Typecheck Shadow against final reconstructed source
         run: npm --prefix .build-src/letmefly_app run typecheck
