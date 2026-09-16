@@ -13,6 +13,15 @@ Do not update it for ordinary feature/fix work. Update it only when accumulated,
 - Netlify production deploy count expected: 1
 - Notes:
 
+## Release — Hidden real-workout Progression Shadow pilot
+
+- Date: 2026-09-16
+- Main SHA: `89a8870d02b227087adc989a27505e9fc0d5992b`
+- Release scope: publish the fully audited PR #116 integration so genuine completed workouts can produce hidden, local-only Progression Shadow evidence after canonical workout completion while `program-progression-service.ts` remains the only authoritative program-progression owner. The release includes Green/Yellow/RED evidence review, exact completed-workout/readiness/prescription mapping, append-only original-hook receipts, SHA-256 provenance, finalized human review, review dispositions and replacement-workout linkage, backlog/coverage reporting, tamper-evident audit export, verified restore, explicit operator-authorization records, and the hidden real-workout production wiring. The pilot remains observational and invisible: no progression UI activation, no auto-apply, no Crownstorm/gamification, and no program/TM/readiness/profile/history rewrite.
+- Required CI/audits: PR #116 exact production-wired head `0c35695ee430a0e95e2a6a02ba1ee7d21664be73` passed the expanded 12/12 release suite, including Progression Shadow production-wiring + Stages 1–7 + Hidden Pilot typecheck/build/secret/gamification guards, Command V2 full production/mobile/desktop browser audit, Seven-Athlete exhaustive program/week/day/card + Coach + substitution/safety + chaos/lifecycle + synthetic-identity isolation, Lifecycle Public UI, Workout Persistence, Cloud Sync Bootstrap Regression, Exercise Intelligence Completion, Desktop Shell Navigation, Train Hero Art Pack V1, Black Crown v2.1 Production Audit, Home Option 1, and Netlify Release Policy. The exact-head Netlify deploy preview also reached READY. Integrated `main` at `89a8870d02b227087adc989a27505e9fc0d5992b` then passed all 8 push-validation workflows with no failures before this release checkpoint was created.
+- Netlify production deploy count expected: 1
+- Notes: Shadow failures remain fail-open and cannot block canonical workout completion or governed program progression. Shadow storage remains isolated from the canonical athlete database and has no direct Supabase/network path; evidence produced on one device remains local to that device in this first pilot. Visible progression still requires separate genuine real-workout acceptance and explicit authorization. Production publication is authorized only by `[release netlify]` on this ledger-only release merge.
+
 ## Release — Workout Mode hydration + desktop shell + whole-gym Bar Loader
 
 - Date: 2026-09-15
