@@ -20,14 +20,16 @@ test('explicit device overrides win and unconfirmed drafts stay unconfirmed', ()
   assert.equal(result.inventoryConfirmedLb, true)
   assert.equal(resolveBarbellSettings(defaults, { ...saved, inventoryConfirmedLb: false }, preference).inventoryConfirmedLb, false)
 })
-test('explicit saved pair counts support calculation; malformed or absent counts do not', () => {
-  const counts = { '45': 2, '25': 1, '10': 2, '5': 1, '2.5': 1 }
+test('explicit saved pair counts support whole-gym inventory; malformed, excessive, or absent counts do not', () => {
+  const counts = { '45': 24, '25': 12, '10': 12, '5': 8, '2.5': 8 }
   const withCounts = structuredClone(preference); withCounts.preferences.barbell.pairs = counts
   const result = resolveBarbellSettings(defaults, null, withCounts)
   assert.equal(result.inventoryConfirmedLb, true)
   for (const [plate, count] of Object.entries(counts)) assert.equal(result.pairsLb[plate], count)
-  withCounts.preferences.barbell.pairs['10'] = 2.5
-  assert.equal(resolveBarbellSettings(defaults, null, withCounts).inventoryConfirmedLb, false)
+  const malformed = structuredClone(withCounts); malformed.preferences.barbell.pairs['10'] = 2.5
+  assert.equal(resolveBarbellSettings(defaults, null, malformed).inventoryConfirmedLb, false)
+  const excessive = structuredClone(withCounts); excessive.preferences.barbell.pairs['45'] = 25
+  assert.equal(resolveBarbellSettings(defaults, null, excessive).inventoryConfirmedLb, false)
 })
 test('old auto-saved default inventory is ignored; older changed counts remain an unconfirmed draft', () => {
   const oldDefaults = resolveBarbellSettings(defaults, structuredClone(defaults), preference)
