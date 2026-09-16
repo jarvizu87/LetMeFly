@@ -43,12 +43,29 @@ old="""  function protectedProgramLoad(row, card) {
     markCarryNote(row, load)
     return true
   }"""
-new="""  function programmedLoadSignature(row) {
-    return String(row?.dataset?.programmedLoad || '').trim()
+new="""  function programmedLoadDefault(row) {
+    const explicit = String(row?.dataset?.programmedLoadDefault || '').trim()
+    if (explicit) return explicit
+
+    // Some governed sets intentionally retain their fixed load only as immutable
+    // prescription text (for example `40 lb DBs`) and therefore have no numeric
+    // programmedLoadDefault attribute. Treat that text as the same program default
+    // the athlete sees on the card so a later same-prescription actual can carry.
+    const prescription = text(row?.querySelector('.lmf-prescription-cell strong')) || text(row?.querySelector('.set-target-cell strong'))
+    const preferredUnit = String(row?.dataset?.loadUnit || '').trim().toLowerCase()
+    const tokens = [...prescription.matchAll(/(\\d+(?:\\.\\d+)?)\\s*(kg|kgs|lb|lbs)\\b/ig)]
+    if (!tokens.length) return ''
+    const exact = preferredUnit ? tokens.find(match => String(match[2] || '').toLowerCase().startsWith(preferredUnit)) : null
+    return String((exact || tokens[0])?.[1] || '')
   }
 
-  function programmedLoadDefault(row) {
-    return String(row?.dataset?.programmedLoadDefault || '').trim()
+  function programmedLoadSignature(row) {
+    const explicit = String(row?.dataset?.programmedLoad || '').trim()
+    if (explicit) return explicit
+    const fallback = programmedLoadDefault(row)
+    if (!fallback) return ''
+    const unit = String(row?.dataset?.loadUnit || '').trim().toLowerCase() || 'display'
+    return `${fallback}:${unit}`
   }
 
   function previousActualLoad(card, targetRow) {
@@ -112,6 +129,8 @@ p.write_text(s)
 PY
 node --check "$JS"
 grep -Fq "programmedLoadSignature" "$JS"
+grep -Fq "programmedLoadDefault" "$JS"
+grep -Fq "lmf-prescription-cell" "$JS"
 grep -Fq "targetStillAtProgramDefault" "$JS"
 grep -Fq "currentSignature !== previous.signature" "$JS"
 echo "Issue #50 Workout Logging load-carry fidelity patch: PASS"

@@ -19,6 +19,21 @@ async function dismissInstall(page) {
   }).catch(()=>{})
   await banner.waitFor({state:'hidden',timeout:1000}).catch(()=>{})
 }
+async function openNativeToolsForAudit(page) {
+  // The recap audit verifies persisted History behavior, not the disclosure's
+  // pointer geometry. Progress can rerender while analytics settle and the fixed
+  // navigation/install shell can briefly cover its summary. Persist the same key
+  // the product uses, then open the current details node atomically in-page.
+  await page.evaluate(()=>{
+    localStorage.setItem('lmf-progress-native-tools-open-v1','true')
+    const tools=document.querySelector('#lmf-pg-native-tools')
+    if(tools instanceof HTMLDetailsElement)tools.open=true
+  })
+  await page.waitForFunction(()=>{
+    const tools=document.querySelector('#lmf-pg-native-tools')
+    return tools instanceof HTMLDetailsElement&&tools.open
+  },null,{timeout:10000})
+}
 async function snapshot(page) {return page.evaluate(async()=>{
   const db=await new Promise((r,j)=>{const q=indexedDB.open('letmefly-private');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})
   try {const names=['athletes','athletePreferences','programInstances','workoutSessions','workoutExercises','workoutSets','syncOutbox'];return await new Promise((r,j)=>{const tx=db.transaction(names,'readonly'),data={};tx.oncomplete=()=>r(data);tx.onerror=()=>j(tx.error);for(const n of names){const q=tx.objectStore(n).getAll();q.onsuccess=()=>data[n]=q.result}})}finally{db.close()}
@@ -95,9 +110,10 @@ try {
     await page.locator('.lmf-recap-dialog').screenshot({path:path.join(out,`saved-recap-${width}.png`)})
     await page.locator('[data-recap-history]').click();await page.reload();await page.waitForFunction(applicationBootState);await dismissInstall(page)
     const history=page.locator(`.history-list [data-workout-recap="${sessionId}"]`)
-    // Native history is inside the existing Progress tools disclosure.
-    const historyTools=page.locator('#lmf-pg-native-tools');await historyTools.waitFor({state:'visible'})
-    if(!await historyTools.evaluate(el=>el.open))await historyTools.locator(':scope > summary').click()
+    // Native history is inside the existing Progress tools disclosure. Persist
+    // its normal product state rather than testing a transient pointer target.
+    await page.locator('#lmf-pg-native-tools').waitFor({state:'visible'})
+    await openNativeToolsForAudit(page)
     await history.click();await page.locator('[data-recap-session]').waitFor()
     assert.equal(await page.locator('[data-recap-session]').getAttribute('data-recap-session'),sessionId)
     assert.equal(await page.locator('[data-recap-volume]').innerText(),expectedVolume)
@@ -130,7 +146,7 @@ try {
     await page.locator('.lmf-panel').screenshot({path:path.join(out,`matching-mountains-${width}.png`)})
     await page.locator('[data-recap-close]').first().click();await page.reload();await page.waitForFunction(applicationBootState);await dismissInstall(page)
     await page.locator('#lmf-recap-archive').waitFor({state:'attached'})
-    if(!await historyTools.evaluate(el=>el.open))await historyTools.locator(':scope > summary').click()
+    await openNativeToolsForAudit(page)
     await page.locator('#lmf-recap-archive > summary').click()
     assert.equal(await page.locator(`.history-list [data-workout-recap="comparison-${sessionId}"]`).count(),0,'Older session falls outside native recent eight')
     await page.locator(`#lmf-recap-archive [data-workout-recap="comparison-${sessionId}"]`).click()

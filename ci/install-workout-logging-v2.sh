@@ -61,7 +61,12 @@ node --check "$DIST/ui/workout-logging-v2.js"
 grep -Fq 'programmedLoadSignature' "$DIST/ui/workout-logging-v2.js"
 grep -Fq 'targetStillAtProgramDefault' "$DIST/ui/workout-logging-v2.js"
 
-echo "LetMeFly Workout Logging v2 auto-advance + Issue #50 governed load carry + compact mobile logging: PASS"
+# User-reported live-card gap: the governed prescription was visible but unfinished
+# editable rows could still open blank. Seed those blanks from the immutable card
+# prescription without changing native persistence or any program definition.
+bash "$ROOT_DIR/ci/install-workout-prescription-input-hydration-v1.sh" "$DIST"
+
+echo "LetMeFly Workout Logging v2 auto-advance + Issue #50 governed load carry + prescription input hydration + compact mobile logging: PASS"
 
 # Saved-set recovery is an additive ergonomics layer. It never bypasses the
 # native set toggle or changes program prescriptions.

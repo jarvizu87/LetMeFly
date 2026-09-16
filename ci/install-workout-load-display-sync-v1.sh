@@ -28,6 +28,37 @@ mkdir -p "$DIST_DIR/ui"
 cp "$JS_SOURCE" "$DIST_DIR/ui/workout-load-display-sync-v1.js"
 cp "$CSS_SOURCE" "$DIST_DIR/ui/workout-load-display-sync-v1.css"
 
+# The smart Bar Loader is installed immediately before this companion layer.
+# Expand only its inventory quantity ceiling from a rack-sized 12 pairs to a
+# whole-gym 24 pairs. Keep the visual plate stack clipped at 12 chips so very
+# heavy loads remain readable; the +N indicator continues to represent extras.
+BAR_LOADER="$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+test -s "$BAR_LOADER" || { echo "Installed Bar Loader runtime is missing: $BAR_LOADER" >&2; exit 1; }
+BAR_LOADER="$BAR_LOADER" python3 - <<'PY'
+from pathlib import Path
+import os
+p = Path(os.environ['BAR_LOADER'])
+s = p.read_text()
+solver = "Math.min(12, Number.parseInt(pairs[String(denom)] ?? 0, 10) || 0)"
+entry = "Math.min(12, Number.parseInt(input.value || '0', 10) || 0)"
+if s.count(solver) != 1:
+    raise SystemExit(f'Expected one Bar Loader solver pair ceiling, found {s.count(solver)}')
+if s.count(entry) != 2:
+    raise SystemExit(f'Expected two Bar Loader inventory entry ceilings, found {s.count(entry)}')
+if s.count('max="12"') != 1:
+    raise SystemExit(f'Expected one Bar Loader inventory input max, found {s.count("max=\"12\"")}')
+s = s.replace(solver, "Math.min(24, Number.parseInt(pairs[String(denom)] ?? 0, 10) || 0)", 1)
+s = s.replace(entry, "Math.min(24, Number.parseInt(input.value || '0', 10) || 0)")
+s = s.replace('max="12"', 'max="24"', 1)
+p.write_text(s)
+PY
+node --check "$BAR_LOADER"
+grep -Fq 'max="24"' "$BAR_LOADER"
+grep -Fq "Math.min(24, Number.parseInt(pairs[String(denom)]" "$BAR_LOADER"
+grep -Fq "Math.min(24, Number.parseInt(input.value" "$BAR_LOADER"
+# Visual clipping is intentionally still 12 plates per side.
+grep -Fq 'const clipped = all.slice(0, 12)' "$BAR_LOADER"
+
 DIST_DIR="$DIST_DIR" python - <<'PY'
 from pathlib import Path
 import os
@@ -69,4 +100,4 @@ grep -Fq '/ui/workout-load-display-sync-v1.js' "$DIST_DIR/index.html"
 grep -Fq 'data-lmf-live-load' "$DIST_DIR/ui/workout-load-display-sync-v1.css"
 grep -Fq 'per side:' "$DIST_DIR/ui/workout-load-display-sync-v1.js"
 
-echo "LetMeFly mobile load legibility + live inline bar-load sync: PASS"
+echo "LetMeFly mobile load legibility + live inline bar-load sync + 24-pair whole-gym inventory capacity: PASS"
