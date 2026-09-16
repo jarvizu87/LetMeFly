@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
 
 const root = path.resolve(process.argv[2] || '.build-src/letmefly_app')
 const dist = path.join(root, 'dist')
@@ -11,6 +12,8 @@ const required = [
   'service-worker.js',
   'ui/approved-tab-redesigns-v1.js',
   'ui/approved-tab-redesigns-v1.css',
+  'ui/exercise-art-authority-v1.js',
+  'ui/exercise-art-authority-v1.css',
 ]
 for (const relative of required) {
   assert(fs.existsSync(path.join(dist, relative)), `Missing approved-tab redesign asset: ${relative}`)
@@ -26,7 +29,13 @@ for (const asset of ['/ui/approved-tab-redesigns-v1.js','/ui/approved-tab-redesi
   assert(index.includes(asset), `index.html missing ${asset}`)
   assert(sw.includes(asset), `service-worker PRECACHE missing ${asset}`)
 }
+for (const asset of ['/ui/exercise-art-authority-v1.js?v=1','/ui/exercise-art-authority-v1.css?v=1']) {
+  assert(index.includes(asset), `index.html missing ${asset}`)
+  assert(sw.includes(asset), `service-worker PRECACHE missing ${asset}`)
+}
 assert(index.indexOf('/ui/app-consistency-v1.css') < index.indexOf('/ui/approved-tab-redesigns-v1.css'), 'Approved tab CSS must load after app consistency CSS')
+assert(index.indexOf('/ui/approved-tab-redesigns-v1.css') < index.indexOf('/ui/exercise-art-authority-v1.css?v=1'), 'Exact exercise-art authority CSS must load after approved Exercises CSS')
+assert(index.indexOf('/ui/approved-tab-redesigns-v1.js') < index.indexOf('/ui/exercise-art-authority-v1.js?v=1'), 'Exact exercise-art authority JS must load after approved Exercises JS')
 
 for (const route of ['home','train','program','progress','exercises','coach','profile','more']) {
   assert(js.includes(`'${route}'`), `Approved presentation layer missing primary route tag: ${route}`)
@@ -56,7 +65,11 @@ for (const marker of [
 for (const forbidden of ['localStorage','sessionStorage','indexedDB','fetch(','XMLHttpRequest','setItem(','programInstances','trainingMaxHistory','workoutSessions','personalRecords','bodyweightEntries']) {
   assert(!js.includes(forbidden), `Approved redesign presentation layer contains forbidden data/state API: ${forbidden}`)
 }
-assert(!/background-image:[^;]*exercise-art/.test(css), 'Approved redesign layer must not replace governed exercise art')
+assert(!/background-image:[^;]*exercise-art/.test(css), 'Approved redesign base layer must not replace governed exercise art')
 assert(!/url\([^)]*exercise[^)]*\)/i.test(css), 'Approved redesign CSS must not introduce alternate exercise image sources')
+
+// Run the dedicated regression that proves a barbell/sled category image cannot
+// outrank an exact canonical data-exercise-art surface.
+execFileSync(process.execPath, [path.resolve('ci/audit-exercise-art-authority-v1.mjs'), root], { stdio: 'inherit' })
 
 console.log('Approved primary-route presentation and redesign audit: PASS')
