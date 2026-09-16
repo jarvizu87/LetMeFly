@@ -61,7 +61,13 @@ try{
     await ask(page,'What should I focus on during this set?',/Set Focus|FOCUS ON/i,'exercise focus');
     await ask(page,'Why am I doing this exercise?',/Why Front Squat|EXERCISE ROLE|PROGRAM CONTEXT/i,'exercise why');
     await ask(page,'What muscles does this exercise work?',/Muscle Emphasis|PRIMARY|SECONDARY/i,'exercise muscles');
-    await ask(page,'What can I substitute for Front Squat?',/Substitution Guidance|AVAILABLE TO CONSIDER|PROGRAM PRESCRIPTION LOCKED/i,'exercise substitution');row.checks.push('exercise-intelligence')
+    if(fixture.internalId==='qa_substitution'){
+      const safetySub=await ask(page,'What can I substitute for Front Squat?',/AVOID PROVOCATIVE DEEP HIP FLEXION|NOT A DIAGNOSIS/i,'safety-priority exercise substitution');
+      assert.match(safetySub,/Substitute Today|approved option|programmed movement role|stimulus/i,'safety-priority response must still preserve governed substitution intent');
+      row.checks.push('exercise-intelligence-safety-priority')
+    }else{
+      await ask(page,'What can I substitute for Front Squat?',/Substitution Guidance|AVAILABLE TO CONSIDER|PROGRAM PRESCRIPTION LOCKED/i,'exercise substitution');row.checks.push('exercise-intelligence')
+    }
 
     await ask(page,'I have anterior hip pinching in deep squats. What should I do?',/AVOID PROVOCATIVE DEEP HIP FLEXION|NOT A DIAGNOSIS/i,'hip safety');
     await ask(page,'My knee pain gets worse with loaded deep knee flexion. What should I do?',/AVOID PAINFUL LOADED OR DEEP KNEE FLEXION|NOT A DIAGNOSIS/i,'knee safety');
