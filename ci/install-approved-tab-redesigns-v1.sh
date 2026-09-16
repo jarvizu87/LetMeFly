@@ -6,22 +6,32 @@ DIST_DIR="${1:-$ROOT_DIR/.build-src/letmefly_app/dist}"
 SOURCE_DIR="$ROOT_DIR/overlays/ui-command-v2/batch-ao"
 JS_SOURCE="$SOURCE_DIR/approved-tab-redesigns-v1.js"
 CSS_SOURCE="$SOURCE_DIR/approved-tab-redesigns-v1.css"
+ART_AUTH_JS_SOURCE="$SOURCE_DIR/exercise-art-authority-v1.js"
+ART_AUTH_CSS_SOURCE="$SOURCE_DIR/exercise-art-authority-v1.css"
 JS_OUT="$DIST_DIR/ui/approved-tab-redesigns-v1.js"
 CSS_OUT="$DIST_DIR/ui/approved-tab-redesigns-v1.css"
+ART_AUTH_JS_OUT="$DIST_DIR/ui/exercise-art-authority-v1.js"
+ART_AUTH_CSS_OUT="$DIST_DIR/ui/exercise-art-authority-v1.css"
 INDEX="$DIST_DIR/index.html"
 SW="$DIST_DIR/service-worker.js"
 
-for required in "$JS_SOURCE" "$CSS_SOURCE" "$INDEX" "$SW"; do
+for required in "$JS_SOURCE" "$CSS_SOURCE" "$ART_AUTH_JS_SOURCE" "$ART_AUTH_CSS_SOURCE" "$INDEX" "$SW"; do
   test -s "$required"
 done
 
 node --check "$JS_SOURCE"
+node --check "$ART_AUTH_JS_SOURCE"
 
 # This is a visual/navigation bridge. It must not become a second data or
-# program engine and must not replace governed exercise artwork.
+# program engine. Exact exercise art is explicitly protected from category art.
 ! grep -Eq 'localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|setItem\(|\.write\(' "$JS_SOURCE"
 ! grep -Eq 'programInstances|trainingMaxHistory|workoutSessions|personalRecords|bodyweightEntries' "$JS_SOURCE"
 ! grep -Eq 'background-image:[^;]*exercise-art|url\([^)]*exercise[^)]*\)' "$CSS_SOURCE"
+! grep -Eq 'localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|setItem\(|supabase|\.from\(|\.insert\(|\.update\(|\.delete\(' "$ART_AUTH_JS_SOURCE"
+! grep -Eq 'train-lifter|--v2-lifter' "$ART_AUTH_CSS_SOURCE"
+grep -Fq 'exact-art-authority-v1' "$ART_AUTH_CSS_SOURCE"
+grep -Fq 'var(--exercise-art,var(--v2-mountain))!important' "$ART_AUTH_CSS_SOURCE"
+grep -Fq "attributeFilter: ['style', 'data-exercise-art', 'data-exercise-art-source', 'data-exercise-art-parts']" "$ART_AUTH_JS_SOURCE"
 grep -Fq "new Set(['home', 'train', 'program', 'progress', 'exercises', 'coach', 'profile', 'more'])" "$JS_SOURCE"
 grep -Fq 'lmf-approved-program-tabs-v1' "$JS_SOURCE"
 grep -Fq 'lmf-progress-worldbar-v1' "$JS_SOURCE"
@@ -38,7 +48,10 @@ grep -Fq '@media(max-width:720px)' "$CSS_SOURCE"
 mkdir -p "$DIST_DIR/ui"
 cp "$JS_SOURCE" "$JS_OUT"
 cp "$CSS_SOURCE" "$CSS_OUT"
+cp "$ART_AUTH_JS_SOURCE" "$ART_AUTH_JS_OUT"
+cp "$ART_AUTH_CSS_SOURCE" "$ART_AUTH_CSS_OUT"
 node --check "$JS_OUT"
+node --check "$ART_AUTH_JS_OUT"
 
 INDEX="$INDEX" python - <<'PY'
 from pathlib import Path
@@ -49,6 +62,8 @@ p = Path(os.environ['INDEX'])
 text = p.read_text()
 css = '<link rel="stylesheet" href="/ui/approved-tab-redesigns-v1.css">'
 js = '<script defer src="/ui/approved-tab-redesigns-v1.js"></script>'
+art_css = '<link rel="stylesheet" href="/ui/exercise-art-authority-v1.css?v=1">'
+art_js = '<script defer src="/ui/exercise-art-authority-v1.js?v=1"></script>'
 
 if css not in text:
     if not re.search(r'</head>', text, re.I):
@@ -59,11 +74,25 @@ if js not in text:
         raise SystemExit('index.html is missing </body>')
     text = re.sub(r'</body>', f'  {js}\n</body>', text, count=1, flags=re.I)
 
+# Install the exact-art authority after the approved Exercises layer. Its unique
+# versioned URLs force installed PWAs to fetch this fix instead of reusing stale
+# category-art CSS/JS from an older app-shell cache.
+text = re.sub(r'\s*<link rel="stylesheet" href="/ui/exercise-art-authority-v1\.css(?:\?v=\d+)?">\s*', '\n', text)
+text = re.sub(r'\s*<script defer src="/ui/exercise-art-authority-v1\.js(?:\?v=\d+)?"></script>\s*', '\n', text)
+if not re.search(r'</head>', text, re.I) or not re.search(r'</body>', text, re.I):
+    raise SystemExit('index.html is missing document boundaries')
+text = re.sub(r'</head>', f'  {art_css}\n</head>', text, count=1, flags=re.I)
+text = re.sub(r'</body>', f'  {art_js}\n</body>', text, count=1, flags=re.I)
+
 # The approved tab layer is intentionally late in the cascade: it completes
 # the locked mockups without changing the earlier feature/data layers.
 consistency = '/ui/app-consistency-v1.css'
 if consistency in text and text.index(consistency) > text.index('/ui/approved-tab-redesigns-v1.css'):
     raise SystemExit('approved-tab-redesigns-v1.css must load after app-consistency-v1.css')
+if text.index('/ui/exercise-art-authority-v1.css?v=1') < text.index('/ui/approved-tab-redesigns-v1.css'):
+    raise SystemExit('exercise-art authority must load after approved tab redesign CSS')
+if text.index('/ui/exercise-art-authority-v1.js?v=1') < text.index('/ui/approved-tab-redesigns-v1.js'):
+    raise SystemExit('exercise-art authority must load after approved tab redesign JS')
 
 p.write_text(text.rstrip() + '\n')
 PY
@@ -79,7 +108,14 @@ match = re.search(r"const\s+PRECACHE\s*=\s*\[([^\]]*)\]", text)
 if not match:
     raise SystemExit('service-worker.js PRECACHE declaration not found')
 existing = re.findall(r"['\"]([^'\"]+)['\"]", match.group(1))
-required = ['/ui/approved-tab-redesigns-v1.js','/ui/approved-tab-redesigns-v1.css']
+required = [
+    '/ui/approved-tab-redesigns-v1.js',
+    '/ui/approved-tab-redesigns-v1.css',
+    '/ui/exercise-art-authority-v1.js',
+    '/ui/exercise-art-authority-v1.js?v=1',
+    '/ui/exercise-art-authority-v1.css',
+    '/ui/exercise-art-authority-v1.css?v=1',
+]
 assets = []
 for value in [*existing, *required]:
     if value not in assets:
@@ -91,7 +127,13 @@ PY
 
 grep -Fq '/ui/approved-tab-redesigns-v1.js' "$INDEX"
 grep -Fq '/ui/approved-tab-redesigns-v1.css' "$INDEX"
+grep -Fq '/ui/exercise-art-authority-v1.js?v=1' "$INDEX"
+grep -Fq '/ui/exercise-art-authority-v1.css?v=1' "$INDEX"
 grep -Fq "'/ui/approved-tab-redesigns-v1.js'" "$SW"
 grep -Fq "'/ui/approved-tab-redesigns-v1.css'" "$SW"
+grep -Fq "'/ui/exercise-art-authority-v1.js?v=1'" "$SW"
+grep -Fq "'/ui/exercise-art-authority-v1.css?v=1'" "$SW"
+grep -Fq 'exact-art-authority-v1' "$ART_AUTH_CSS_OUT"
+node --check "$ART_AUTH_JS_OUT"
 
-echo "LetMeFly approved primary-route presentation bridge v1: PASS"
+echo "LetMeFly approved primary-route presentation bridge + exact exercise-art authority v1: PASS"
