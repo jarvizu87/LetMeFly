@@ -45,4 +45,33 @@ async function refreshBarbellSettings(): Promise<void> {
 '''
 p.write_text(s)
 PY
+
+# Whole-gym inventories can exceed the older rack-sized 12-pair ceiling. Keep
+# the plate diagram clipped for readability, but let the utility store and use
+# up to 24 pairs of any denomination so a large powerlifting gym can be modeled
+# once without future inventory edits.
+LOADER="$TARGET/public/ui/smart-names-bar-loader-v1.js"
+test -s "$LOADER" || { echo "Missing Bar Loader runtime target: $LOADER" >&2; exit 1; }
+LOADER="$LOADER" python3 - <<'PY'
+from pathlib import Path
+import os
+p = Path(os.environ['LOADER'])
+s = p.read_text()
+solver = "Math.min(12, Number.parseInt(pairs[String(denom)] ?? 0, 10) || 0)"
+entry = "Math.min(12, Number.parseInt(input.value || '0', 10) || 0)"
+if s.count(solver) != 1:
+    raise SystemExit(f'Expected one solver pair ceiling, found {s.count(solver)}')
+if s.count(entry) != 2:
+    raise SystemExit(f'Expected two inventory entry ceilings, found {s.count(entry)}')
+if s.count('max="12"') != 1:
+    raise SystemExit(f'Expected one inventory input max, found {s.count("max=\"12\"")}')
+s = s.replace(solver, "Math.min(24, Number.parseInt(pairs[String(denom)] ?? 0, 10) || 0)", 1)
+s = s.replace(entry, "Math.min(24, Number.parseInt(input.value || '0', 10) || 0)")
+s = s.replace('max="12"', 'max="24"', 1)
+p.write_text(s)
+PY
+grep -Fq 'max="24"' "$LOADER"
+grep -Fq "Math.min(24, Number.parseInt(pairs[String(denom)]" "$LOADER"
+grep -Fq "Math.min(24, Number.parseInt(input.value" "$LOADER"
+
 node --test "$ROOT_DIR/ci/audit-barbell-settings.mjs"
