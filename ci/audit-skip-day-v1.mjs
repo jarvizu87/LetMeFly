@@ -81,36 +81,35 @@ async function prepareAthlete() {
   })
 }
 
-async function currentFixture() {
-  return page.evaluate(async () => {
+async function currentFixture(athleteId) {
+  return page.evaluate(async athleteId => {
     const Q = window.__SKIP_QA__
-    const athlete = (await Q.db.getAllFromIndex('athletes', 'by-updated-at'))[0]
-    const instance = await Q.athlete.getCurrentProgramInstance(athlete.id)
-    return { athleteId: athlete.id, instanceId: instance.id, program: instance.program_key, week: Number(instance.current_week), day: Number(String(instance.current_day_key).replace('day-', '')) }
-  })
+    const instance = await Q.athlete.getCurrentProgramInstance(athleteId)
+    if (!instance) throw new Error('Disposable athlete has no active program')
+    return { athleteId, instanceId: instance.id, program: instance.program_key, week: Number(instance.current_week), day: Number(String(instance.current_day_key).replace('day-', '')) }
+  }, athleteId)
 }
 
-async function setLast(program) {
-  return page.evaluate(async program => {
+async function setLast(athleteId, program) {
+  return page.evaluate(async ({ athleteId, program }) => {
     const Q = window.__SKIP_QA__
-    const athlete = (await Q.db.getAllFromIndex('athletes', 'by-updated-at'))[0]
     const defs = { crownforge: Q.programs.CROWNFORGE, 'crown-maintenance': Q.programs.CROWN_MAINTENANCE, 'black-crown': Q.programs.BLACK_CROWN }
     const week = defs[program].weekData.at(-1)
     const day = week.days.at(-1)
-    await Q.progression.setIntentionalProgramPosition(athlete.id, program, week.week, day.day, 'disposable-skip-boundary')
+    await Q.progression.setIntentionalProgramPosition(athleteId, program, week.week, day.day, 'disposable-skip-boundary')
     return { week: week.week, day: day.day }
-  }, program)
+  }, { athleteId, program })
 }
 
-async function skipService() {
-  return page.evaluate(async () => {
+async function skipService(athleteId) {
+  return page.evaluate(async athleteId => {
     const Q = window.__SKIP_QA__
-    const athlete = (await Q.db.getAllFromIndex('athletes', 'by-updated-at'))[0]
-    const instance = await Q.athlete.getCurrentProgramInstance(athlete.id)
+    const instance = await Q.athlete.getCurrentProgramInstance(athleteId)
+    if (!instance) throw new Error('Disposable athlete has no active program')
     const week = Number(instance.current_week)
     const day = Number(String(instance.current_day_key).replace('day-', ''))
-    return Q.progression.skipCurrentProgramDay(athlete.id, instance.program_key, week, day)
-  })
+    return Q.progression.skipCurrentProgramDay(athleteId, instance.program_key, week, day)
+  }, athleteId)
 }
 
 async function test(label, fn) {
@@ -133,9 +132,9 @@ async function test(label, fn) {
 
 try {
   await test('Service skip advances one governed day without workout history', async () => {
-    await prepareAthlete()
+    const { athleteId } = await prepareAthlete()
     const before = await readDb()
-    await skipService()
+    await skipService(athleteId)
     const after = await readDb()
     eq(activePosition(after).map(row => row.slice(0, 3)), [['crownforge', 1, 'day-2']], 'Next governed position')
     eq(after.workoutSessions, before.workoutSessions, 'No workout session created')
@@ -162,8 +161,8 @@ try {
   })
 
   await test('Skip Day is blocked once a workout is in progress', async () => {
-    await prepareAthlete()
-    const fixture = await currentFixture()
+    const { athleteId } = await prepareAthlete()
+    const fixture = await currentFixture(athleteId)
     await page.evaluate(async fixture => {
       const Q = window.__SKIP_QA__
       const day = Q.programs.CROWNFORGE.weekData.find(w => w.week === fixture.week).days.find(d => d.day === fixture.day)
@@ -181,8 +180,8 @@ try {
   })
 
   await test('Pending completed workout blocks Skip Day and preserves recovery intent', async () => {
-    await prepareAthlete()
-    const fixture = await currentFixture()
+    const { athleteId } = await prepareAthlete()
+    const fixture = await currentFixture(athleteId)
     const sessionId = await page.evaluate(async fixture => {
       const Q = window.__SKIP_QA__
       const day = Q.programs.CROWNFORGE.weekData.find(w => w.week === fixture.week).days.find(d => d.day === fixture.day)
@@ -203,7 +202,10 @@ try {
   })
 
   await test('Skipping terminal Crownforge day preserves Maintenance handoff', async () => {
-    await prepareAthlete(); await setLast('crownforge'); await skipService(); const after = await readDb()
+    const { athleteId } = await prepareAthlete()
+    await setLast(athleteId, 'crownforge')
+    await skipService(athleteId)
+    const after = await readDb()
     eq(activePosition(after).map(row => row.slice(0, 3)), [['crown-maintenance', 1, 'day-1']], 'Crownforge terminal handoff')
     assert(after.programEvents.some(e => e.event_type === 'program-day-skipped'), 'Terminal Crownforge skip event exists')
     assert(after.programEvents.some(e => e.event_type === 'crownforge-complete-maintenance-start' && e.event_payload?.terminal_day_skipped === true), 'Maintenance handoff is explicitly tagged')
@@ -211,24 +213,31 @@ try {
   })
 
   await test('Skipping terminal Maintenance day opens Black Crown entry gate', async () => {
-    await prepareAthlete(); await setLast('crownforge')
-    await page.evaluate(async () => { const Q = window.__SKIP_QA__, a = (await Q.db.getAllFromIndex('athletes', 'by-updated-at'))[0], i = await Q.athlete.getCurrentProgramInstance(a.id); const w=Number(i.current_week), d=Number(String(i.current_day_key).replace('day-','')); await Q.progression.skipCurrentProgramDay(a.id,'crownforge',w,d) })
-    await setLast('crown-maintenance'); await skipService(); const after = await readDb()
+    const { athleteId } = await prepareAthlete()
+    await setLast(athleteId, 'crownforge')
+    await skipService(athleteId)
+    await setLast(athleteId, 'crown-maintenance')
+    await skipService(athleteId)
+    const after = await readDb()
     const active = after.programInstances.find(row => row.status === 'active')
     assert(active?.program_key === 'crown-maintenance' && active.current_phase_key === 'black-crown-entry', 'Maintenance terminal skip opens entry gate')
     assert(after.programEvents.some(e => e.event_type === 'black-crown-entry-gate-opened' && e.event_payload?.terminal_day_skipped === true), 'Entry gate event tagged as terminal skip')
   })
 
   await test('Skipping terminal Black Crown day completes without inventing a program', async () => {
-    await prepareAthlete(); await setLast('crownforge')
-    await page.evaluate(async () => { const Q=window.__SKIP_QA__,a=(await Q.db.getAllFromIndex('athletes','by-updated-at'))[0],i=await Q.athlete.getCurrentProgramInstance(a.id);await Q.progression.skipCurrentProgramDay(a.id,'crownforge',Number(i.current_week),Number(String(i.current_day_key).replace('day-',''))) })
-    await setLast('crown-maintenance'); await skipService()
-    await page.evaluate(async () => {
-      const Q=window.__SKIP_QA__,a=(await Q.db.getAllFromIndex('athletes','by-updated-at'))[0]
-      const lifts=Object.fromEntries(['front-squat','back-squat','bench-press','deadlift'].map(key=>[key,{verified1RmLb:200,readiness:'green'}]))
-      await Q.progression.activateBlackCrownFromEntry(a.id,{lifts,optionalOHP:{verified1RmLb:100,readiness:'green'}})
-    })
-    await setLast('black-crown'); await skipService(); const after = await readDb()
+    const { athleteId } = await prepareAthlete()
+    await setLast(athleteId, 'crownforge')
+    await skipService(athleteId)
+    await setLast(athleteId, 'crown-maintenance')
+    await skipService(athleteId)
+    await page.evaluate(async athleteId => {
+      const Q = window.__SKIP_QA__
+      const lifts = Object.fromEntries(['front-squat', 'back-squat', 'bench-press', 'deadlift'].map(key => [key, { verified1RmLb: 200, readiness: 'green' }]))
+      await Q.progression.activateBlackCrownFromEntry(athleteId, { lifts, optionalOHP: { verified1RmLb: 100, readiness: 'green' } })
+    }, athleteId)
+    await setLast(athleteId, 'black-crown')
+    await skipService(athleteId)
+    const after = await readDb()
     eq(activePosition(after), [], 'No invented next program')
     assert(after.programEvents.some(e => e.event_type === 'black-crown-program-complete' && e.event_payload?.terminal_day_skipped === true), 'Black Crown terminal completion tagged as skip')
     eq(after.workoutSessions.length, 0, 'Black Crown terminal skip creates no workout history')
