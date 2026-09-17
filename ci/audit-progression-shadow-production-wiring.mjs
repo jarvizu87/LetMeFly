@@ -12,6 +12,8 @@ if (!commandMatch) {
 const command = commandMatch[1]
 const steps = [
   'bash ci/build-command-v2-v2-1.sh',
+  'bash ci/apply-skip-day-v1.sh .build-src/letmefly_app',
+  'bash ci/apply-unskip-day-v1.sh .build-src/letmefly_app',
   'bash ci/apply-progression-shadow-current-v1.sh .build-src/letmefly_app',
   'bash ci/apply-progression-shadow-review-engine-v2.sh .build-src/letmefly_app',
   'bash ci/apply-progression-shadow-read-adapter-v3.sh .build-src/letmefly_app',
@@ -57,7 +59,8 @@ if (failures.length) {
 }
 
 console.log('Progression Shadow production wiring audit: PASS')
-console.log('- base production reconstruction precedes Shadow')
+console.log('- base production reconstruction precedes governed Skip and Unskip recovery overlays')
+console.log('- Skip and Unskip each appear exactly once before Shadow')
 console.log('- Stages 1–7 and hidden integration appear exactly once and in order')
 console.log('- hidden integration is audited, typechecked, and rebuilt before UI installers')
 console.log('- Netlify publish directory remains unchanged')
