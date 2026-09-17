@@ -1,0 +1,46 @@
+name: Skip Day Audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  skip-day:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+
+      - name: Build LetMeFly with governed Skip Day
+        run: bash ci/build-command-v2-v2-1-skip-day.sh
+
+      - name: Install disposable browser audit dependency
+        run: npm install --prefix .build-src/letmefly_app --no-save --package-lock=false --ignore-scripts playwright-core@1.55.0
+
+      - name: Audit Skip Day behavior and safety boundaries
+        run: |
+          CHROME_BIN="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME_BIN"
+          CHROME_BIN="$CHROME_BIN" node ci/audit-skip-day-v1.mjs .build-src/letmefly_app
+
+      - name: Publish Skip Day audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: letmefly-skip-day-audit
+          path: .build-src/letmefly_app/SKIP_DAY_AUDIT
+          if-no-files-found: warn
+          retention-days: 14
