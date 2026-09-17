@@ -6,6 +6,8 @@ on:
       - 'netlify.toml'
       - 'ci/apply-skip-day-v1.sh'
       - 'ci/audit-skip-day-v1.mjs'
+      - 'ci/apply-unskip-day-v1.sh'
+      - 'ci/audit-unskip-day-v1.mjs'
       - 'ci/apply-progression-shadow-current-v1.sh'
       - 'ci/audit-progression-shadow-current-v1.mjs'
       - 'ci/apply-progression-shadow-review-engine-v2.sh'
@@ -55,6 +57,9 @@ jobs:
 
       - name: Apply governed Skip Day before Shadow
         run: bash ci/apply-skip-day-v1.sh .build-src/letmefly_app
+
+      - name: Apply governed Unskip Day before Shadow
+        run: bash ci/apply-unskip-day-v1.sh .build-src/letmefly_app
 
       - name: Inspect current Stage-3 data contracts
         run: node ci/inspect-progression-shadow-stage3-contracts.mjs .build-src/letmefly_app
