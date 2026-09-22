@@ -28,6 +28,7 @@ for(const exercise of data.exercises){
 }
 for(const name of ['Goblet Squat','Belt Squat','DB Bench Press','Dumbbell RDL','Smith Squat','Landmine Press','Split Squat','Cable Pull-Through','Bike / Incline Walk','Pull-Up or Lat Pulldown'])assert.equal(classify(name).barbell,false,name)
 for(const name of ['Front Squat Governed Attempts','Back Squat Governed Attempts','Bench Press Governed Attempts','Deadlift Governed Attempts','Close-Grip/Pause Bench Press','JM Press','Box Squat','Snatch-Grip RDL'])assert.equal(classify(name).barbell,true,name)
+assert.equal(classify('Forward Sled Push').cardio,false,'Loaded conditioning retains its load field')
 assert.equal(classify('Lateral Raise').dumbbell,false,'Mixed-equipment movement does not assume dumbbells')
 assert.equal(classify('Lateral Raise','15 lb DBs').dumbbell,true,'Explicit prescription establishes dumbbells')
 const {build}=await import(pathToFileURL(path.join(app,'node_modules/vite/dist/node/index.js')))

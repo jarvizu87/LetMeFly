@@ -13,7 +13,6 @@
     const dumbbell = /\b(?:dbs?|dumbbells?)\b/i.test(value+' '+prescription)
       || (!choice && equipment.length === 1 && /^dumbbell$/i.test(equipment[0]))
     const cardio = equipment.some(item => /^cardio machine$/i.test(item))
-      || /conditioning|recovery/i.test(exercise?.trainingCategory || '')
       || /^(?:bike|stationary bike|incline walk|walking|row|elliptical)(?:\s*(?:\/|or)\s*(?:bike|stationary bike|incline walk|walking|walk|row|elliptical))*$/i.test(value)
     return {barbell, dumbbell, cardio}
   }
