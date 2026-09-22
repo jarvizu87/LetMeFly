@@ -226,7 +226,10 @@
     changed = applySeed(row.querySelector('.rpe-input'), rpeSeed(row), 'rpe') || changed
     if (changed) {
       row.dataset.lmfPrescriptionHydrated = 'true'
-      window.setTimeout(() => window.LetMeFlyWorkoutLoadDisplay?.refresh?.(), 0)
+      window.setTimeout(() => {
+        window.LetMeFlyWorkoutLoadDisplay?.refresh?.()
+        window.dispatchEvent(new Event('lmf:prescription-inputs-hydrated'))
+      }, 0)
     }
     return changed
   }
@@ -241,7 +244,8 @@
   }
 
   function schedule(delay = 0) {
-    if (refreshTimer) window.clearTimeout(refreshTimer)
+    // Coalesce without postponing indefinitely while other UI observers update.
+    if (refreshTimer) return
     refreshTimer = window.setTimeout(() => {
       refreshTimer = 0
       hydrateAll(document)

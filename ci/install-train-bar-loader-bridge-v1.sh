@@ -20,6 +20,7 @@ new_hidden = """    const exerciseNameForLoader = text(card.querySelector('.exer
     const barbellForLoader = !/\\b(db|dumbbell|kb|kettlebell|cable|machine|sled|bodyweight|band|plate)\\b/i.test(exerciseNameForLoader)
       && /\\b(barbell|front squat|back squat|squat|bench press|deadlift|rdl|romanian deadlift|overhead press|ohp|push press|strict press|good morning|hip thrust|rack pull|clean|snatch|high pull|jerk|bar row|bent[- ]over row)\\b/i.test(exerciseNameForLoader)
     loader.hidden = !barbellForLoader || (!loaderSource && !window.LetMeFlyBarLoader?.open)
+    if (loaderSource) loaderSource.hidden = !barbellForLoader
 """
 if old_hidden not in text:
     raise SystemExit('Train reference Bar Loader visibility patch point missing')
