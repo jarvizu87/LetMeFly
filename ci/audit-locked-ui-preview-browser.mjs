@@ -405,16 +405,17 @@ try {
       const geometry=await card.evaluate(el=>{
         const rect=selector=>{const r=el.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}}
         const media=el.querySelector('.lmf-exercise-media'),style=getComputedStyle(media)
-        return {title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
+        return {image:rect('.lmf-exercise-media'),title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
       })
       assert.equal(geometry.blockNumber,String(sectionIndex),'The block heading retains the real section number')
       assert.equal(geometry.imagePosition,'absolute','Original blended card art is retained at every viewport')
       assert.equal(geometry.imageFit,'contain','The source picture retains its proportions')
       assert.equal(geometry.imagePointerEvents,'none','Art never intercepts workout controls')
       if(size<768){
-        assert.ok(Math.abs(geometry.rest.y-geometry.title.y)<25,'Phone rest timer retains its original top-right position')
-        assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.y-geometry.load.y)<2,'Phone history and bar loading share a row')
-        assert.ok(geometry.history.y>=Math.max(geometry.title.bottom,geometry.rest.bottom)-1,'Phone history clears the complete heading and timer')
+        assert.ok(geometry.rest.y>=Math.max(geometry.image.bottom,geometry.title.bottom)-1,'Phone rest timer sits below the artwork and heading')
+        assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.bottom-geometry.load.bottom)<2,'Phone bar loader fills the lower right beside history')
+        assert.ok(geometry.load.y>=geometry.rest.bottom-1,'Bar loading follows the timer without overlap')
+        assert.ok(geometry.history.y>=geometry.title.bottom-1,'Phone history starts below the heading')
         assert.ok(geometry.cue.y>=Math.max(geometry.history.bottom,geometry.load.bottom)-1,'Coaching clears both columns')
         assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Phone logging retains its original position below coaching')
         const headingRight=await card.locator('.exercise-title>div').evaluate(el=>el.getBoundingClientRect().right)
@@ -438,7 +439,7 @@ try {
       await page.screenshot({path:path.join(out,`train-block-controls-${size}.png`)})
       blockLayouts.push({width:size,...geometry})
     }
-    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,privateImages:'Not verified in disposable signed-out data',checks:['Numbered block heading','Art container uses proportional fit and edge masking','Phone controls stacked without overlap','Desktop table beside load panel','Native exercise paging preserves sets']})
+    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,privateImages:'Not verified in disposable signed-out data',checks:['Numbered block heading','Art container uses proportional fit and edge masking','Phone timer below artwork and bar loader bottom-aligned beside history','Desktop table beside load panel','Native exercise paging preserves sets']})
     // Full-page/element capture can temporarily resize the native carousel.
     // Capture the real viewport without changing its size or horizontal scroll.
     await card.evaluate(el=>window.scrollTo({top:scrollY+el.getBoundingClientRect().top-90,behavior:'instant'}))
