@@ -408,10 +408,12 @@ try {
         return {lastSetBottom:el.querySelector('.lmf-reference-set-history>button:last-child').getBoundingClientRect().bottom,titleContentBottom:Math.max(...[...el.querySelector('.exercise-title').children].map(child=>child.getBoundingClientRect().bottom)),image:rect('.lmf-exercise-media'),title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
       })
       assert.equal(geometry.blockNumber,String(sectionIndex),'The block heading retains the real section number')
-      assert.equal(geometry.imagePosition,'absolute','Original blended card art is retained at every viewport')
+      assert.equal(geometry.imagePosition,size<768?'relative':'absolute','Phone artwork is contained by the header grid')
       assert.equal(geometry.imageFit,'contain','The source picture retains its proportions')
       assert.equal(geometry.imagePointerEvents,'none','Art never intercepts workout controls')
       if(size<768){
+        assert.ok(geometry.image.height>=150 && geometry.image.height<=geometry.title.height+1,'Artwork has a visible size bounded by the heading')
+        assert.ok(geometry.imageMask.includes('linear-gradient'),'Phone artwork retains its blended edges')
         assert.ok(geometry.rest.y>=Math.max(geometry.image.bottom,geometry.title.bottom)-1,'Phone rest timer sits below the artwork and heading')
         assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.bottom-geometry.load.bottom)<2,'Phone bar loader fills the lower right beside history')
         assert.ok(geometry.load.y>=geometry.rest.bottom-1,'Bar loading follows the timer without overlap')
