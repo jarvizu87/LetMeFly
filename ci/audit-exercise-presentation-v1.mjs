@@ -17,6 +17,10 @@ const names=new Map()
 for(const exercise of data.exercises)for(const name of [exercise.canonicalName,...exercise.aliases||[]])names.set(name.toLowerCase(),exercise)
 const window={LetMeFlyExerciseIntelligence:{getExercise:name=>names.get(name.toLowerCase())}}
 vm.runInNewContext(fs.readFileSync('overlays/ui-command-v2/batch-v/exercise-presentation-v1.js','utf8'),{window})
+// The helper is concatenated with the existing utility; test that exact boundary.
+const document={readyState:'loading',addEventListener(){}}
+vm.runInNewContext(fs.readFileSync('overlays/ui-command-v2/batch-v/exercise-presentation-v1.js','utf8')+fs.readFileSync('overlays/ui-command-v2/batch-v/smart-names-bar-loader-v1.js','utf8'),{window,document})
+assert.equal(typeof window.LetMeFlyBarLoader.open,'function')
 const classify=window.LetMeFlyExercisePresentation.classify
 for(const exercise of data.exercises){
   if(exercise.equipment.length && !exercise.equipment.includes('Barbell'))assert.equal(classify(exercise.canonicalName).barbell,false,exercise.canonicalName+' must not show barbell tools')

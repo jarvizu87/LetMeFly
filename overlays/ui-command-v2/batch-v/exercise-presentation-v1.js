@@ -18,4 +18,4 @@
     return {barbell, dumbbell, cardio}
   }
   window.LetMeFlyExercisePresentation = Object.freeze({classify})
-})()
+})();
