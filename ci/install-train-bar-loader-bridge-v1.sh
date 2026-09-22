@@ -17,8 +17,7 @@ text = p.read_text()
 old_hidden = """    loader.hidden = !loaderSource
 """
 new_hidden = """    const exerciseNameForLoader = text(card.querySelector('.exercise-title h3'))
-    const barbellForLoader = !/\\b(db|dumbbell|kb|kettlebell|cable|machine|sled|bodyweight|band|plate)\\b/i.test(exerciseNameForLoader)
-      && /\\b(barbell|front squat|back squat|squat|bench press|deadlift|rdl|romanian deadlift|overhead press|ohp|push press|strict press|good morning|hip thrust|rack pull|clean|snatch|high pull|jerk|bar row|bent[- ]over row)\\b/i.test(exerciseNameForLoader)
+    const barbellForLoader = window.LetMeFlyExercisePresentation?.classify(exerciseNameForLoader).barbell === true
     loader.hidden = !barbellForLoader || (!loaderSource && !window.LetMeFlyBarLoader?.open)
     if (loaderSource) loaderSource.hidden = !barbellForLoader
 """

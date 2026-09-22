@@ -59,11 +59,7 @@
   }
 
   function isBarbellExercise(name) {
-    const value = clean(name).toLowerCase()
-    if (!value) return false
-    if (/\b(db|dumbbell|kb|kettlebell|cable|machine|sled|bodyweight|band|plate)\b/.test(value)) return false
-    if (/\bbarbell\b/.test(value)) return true
-    return /\b(front squat|back squat|squat|bench press|deadlift|rdl|romanian deadlift|overhead press|ohp|push press|strict press|good morning|hip thrust|rack pull|clean|snatch|high pull|jerk|bar row|bent[- ]over row)\b/.test(value)
+    return window.LetMeFlyExercisePresentation?.classify(name).barbell === true
   }
 
   function unitForRow(row, settings) {
@@ -251,6 +247,7 @@
     })
     observer.observe(document.documentElement, { childList: true, subtree: true })
 
+    window.addEventListener('lmf:exercise-intelligence-ready', () => scheduleSync(0))
     window.addEventListener('hashchange', () => scheduleSync(0))
     window.addEventListener('storage', (event) => {
       if (event.key === STORAGE_KEY) scheduleSync(0)

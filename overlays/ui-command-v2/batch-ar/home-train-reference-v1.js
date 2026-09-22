@@ -173,15 +173,16 @@
     if (!rows.length) return
     const exerciseName = text(card.querySelector('.exercise-title h3'))
     const intelligence = window.LetMeFlyExerciseIntelligence?.getExercise?.(exerciseName)
-    const equipment = (intelligence?.equipment || []).join(' ')
-    const dumbbell = /dumbbell|\bDBs?\b/i.test(`${equipment} ${exerciseName} ${rows[0].dataset.programmedLoad || ''}`)
+    const presentation = window.LetMeFlyExercisePresentation?.classify(exerciseName, rows[0].dataset.programmedLoad) || {}
+    const dumbbell = presentation.dumbbell === true
     card.dataset.lmfLoadBasis = dumbbell ? 'per-dumbbell' : 'total'
     for (const row of rows) {
       const label = row.querySelector('.load-field > label')
       if (dumbbell) setText(label, `Load (${row.dataset.loadUnit || 'lb'}/DB)`)
+      else if (/\/DB/.test(text(label))) setText(label, 'Load')
       // A legacy zero percentage is a no-load sentinel on cardio rows only.
       // Keep saved prescriptions intact; normalize only their visible text.
-      if (/^(?:Bike \/ Incline Walk|Stationary Bike|Incline Walk|Walking)$/i.test(exerciseName)) {
+      if (presentation.cardio || (['duration', 'distance'].includes(row.dataset.prescriptionKind) && !Number(row.dataset.programmedLoadDefault) && !/\d\s*(?:lb|kg)\b/i.test(row.dataset.programmedLoad || ''))) {
         const target = row.querySelector('.set-target-cell strong')
         if (target) setText(target, text(target).split(/\s*•\s*/).filter(part => !/^0(?:\.0+)?%$/.test(part)).join(' • '))
         row.dataset.hasLoad = 'false'
