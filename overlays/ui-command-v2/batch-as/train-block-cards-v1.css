@@ -365,9 +365,9 @@ html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history{grid-column:1!important;grid-row:2/4!important;margin:0 4px 10px 8px!important;min-width:0!important;align-self:start!important;padding:4px!important}
   /* A longer set list fills the shared column with real rows, not an empty
      bordered tail. Short lists retain their natural height. */
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history:has(>button:nth-of-type(4)){display:flex!important;flex-direction:column!important;align-self:stretch!important;gap:0!important}
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history:has(>button:nth-of-type(4))>.lmf-reference-set-head{flex:0 0 24px!important}
-  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history:has(>button:nth-of-type(4))>button{flex:1 0 44px!important;display:grid!important;align-items:center!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .active-exercise.lmf-flow-active>.lmf-reference-set-history:has(>button:nth-of-type(4)){display:flex!important;flex-direction:column!important;align-self:stretch!important;gap:0!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .active-exercise.lmf-flow-active>.lmf-reference-set-history:has(>button:nth-of-type(4))>.lmf-reference-set-head{flex:0 0 24px!important}
+  html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .active-exercise.lmf-flow-active>.lmf-reference-set-history:has(>button:nth-of-type(4))>button{flex:1 0 44px!important;display:grid!important;align-items:center!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-head,
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history>button{grid-template-columns:16px minmax(0,1.4fr) minmax(0,.8fr) 23px 13px!important;font-size:10px!important;gap:3px!important}
   html[data-lmf-approved-route='train'] .lmf-train-reference-final .lmf-reference-block .lmf-reference-set-history>button{min-height:44px!important}
