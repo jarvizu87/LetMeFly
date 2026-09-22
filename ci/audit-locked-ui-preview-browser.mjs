@@ -408,15 +408,17 @@ try {
         return {title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
       })
       assert.equal(geometry.blockNumber,String(sectionIndex),'The block heading retains the real section number')
-      assert.equal(geometry.imagePosition,size<768?'relative':'absolute','Phone art has its own space; desktop retains blended art')
+      assert.equal(geometry.imagePosition,'absolute','Original blended card art is retained at every viewport')
       assert.equal(geometry.imageFit,'contain','The source picture retains its proportions')
       assert.equal(geometry.imagePointerEvents,'none','Art never intercepts workout controls')
       if(size<768){
-        assert.ok(geometry.rest.y>=geometry.title.bottom,'Phone timer does not overlap the exercise heading')
-        assert.ok(geometry.load.y>=geometry.rest.bottom-1,'Phone loading guidance follows the timer')
-        assert.ok(geometry.logger.y>=geometry.load.bottom-1,'Phone logging follows loading guidance')
-        assert.ok(geometry.history.y>=geometry.logger.bottom-1,'Phone logging precedes set history')
-        assert.ok(geometry.cue.y>=geometry.history.bottom-1,'Phone coaching follows history')
+        assert.ok(Math.abs(geometry.rest.y-geometry.title.y)<25,'Phone rest timer retains its original top-right position')
+        assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.y-geometry.load.y)<2,'Phone history and bar loading share a row')
+        assert.ok(geometry.history.y>=Math.max(geometry.title.bottom,geometry.rest.bottom)-1,'Phone history clears the complete heading and timer')
+        assert.ok(geometry.cue.y>=Math.max(geometry.history.bottom,geometry.load.bottom)-1,'Coaching clears both columns')
+        assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Phone logging retains its original position below coaching')
+        const headingRight=await card.locator('.exercise-title>div').evaluate(el=>el.getBoundingClientRect().right)
+        assert.ok(headingRight<=geometry.rest.x,'Phone title never extends into the timer')
         assert.equal(await page.evaluate(()=>{const el=document.createElement('div');el.className='toast';document.body.appendChild(el);const value=getComputedStyle(el).pointerEvents;el.remove();return value}),'none','Save feedback cannot intercept logging taps')
       }else{
         assert.ok(geometry.imageMask.includes('linear-gradient'),'Desktop picture edges fade into the card')
