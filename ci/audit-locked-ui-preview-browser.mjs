@@ -405,7 +405,7 @@ try {
       const geometry=await card.evaluate(el=>{
         const rect=selector=>{const r=el.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}}
         const media=el.querySelector('.lmf-exercise-media'),style=getComputedStyle(media)
-        return {image:rect('.lmf-exercise-media'),title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
+        return {lastSetBottom:el.querySelector('.lmf-reference-set-history>button:last-child').getBoundingClientRect().bottom,titleContentBottom:Math.max(...[...el.querySelector('.exercise-title').children].map(child=>child.getBoundingClientRect().bottom)),image:rect('.lmf-exercise-media'),title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
       })
       assert.equal(geometry.blockNumber,String(sectionIndex),'The block heading retains the real section number')
       assert.equal(geometry.imagePosition,'absolute','Original blended card art is retained at every viewport')
@@ -418,10 +418,8 @@ try {
         assert.ok(geometry.history.y>=geometry.title.bottom-1,'Phone history starts below the heading')
         assert.ok(geometry.cue.y>=Math.max(geometry.history.bottom,geometry.load.bottom)-1,'Coaching clears both columns')
         assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Phone logging retains its original position below coaching')
-        const lastSetBottom=await card.locator('.lmf-reference-set-history>button').last().evaluate(el=>el.getBoundingClientRect().bottom)
-        assert.ok(geometry.history.bottom-lastSetBottom<=8,'Set rows fill the history panel without an empty tail')
-        const titleContentBottom=await card.locator('.exercise-title').evaluate(el=>Math.max(...[...el.children].map(child=>child.getBoundingClientRect().bottom)))
-        assert.ok(geometry.title.bottom-titleContentBottom<=16,'Heading has no fixed-height empty footer')
+        assert.ok(geometry.history.bottom-geometry.lastSetBottom<=8,'Set rows fill the history panel without an empty tail')
+        assert.ok(geometry.title.bottom-geometry.titleContentBottom<=16,'Heading has no fixed-height empty footer')
         const headingRight=await card.locator('.exercise-title>div').evaluate(el=>el.getBoundingClientRect().right)
         assert.ok(headingRight<=geometry.rest.x,'Phone title never extends into the timer')
         assert.equal(await page.evaluate(()=>{const el=document.createElement('div');el.className='toast';document.body.appendChild(el);const value=getComputedStyle(el).pointerEvents;el.remove();return value}),'none','Save feedback cannot intercept logging taps')
