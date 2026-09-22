@@ -405,18 +405,25 @@ try {
       const geometry=await card.evaluate(el=>{
         const rect=selector=>{const r=el.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom,width:r.width,height:r.height}}
         const media=el.querySelector('.lmf-exercise-media'),style=getComputedStyle(media)
-        return {title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
+        return {lastSetBottom:el.querySelector('.lmf-reference-set-history>button:last-child').getBoundingClientRect().bottom,titleContentBottom:Math.max(...[...el.querySelector('.exercise-title').children].map(child=>child.getBoundingClientRect().bottom)),image:rect('.lmf-exercise-media'),title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
       })
       assert.equal(geometry.blockNumber,String(sectionIndex),'The block heading retains the real section number')
-      assert.equal(geometry.imagePosition,size<768?'relative':'absolute','Phone art has its own space; desktop retains blended art')
+      assert.equal(geometry.imagePosition,size<768?'relative':'absolute','Phone artwork is contained by the header grid')
       assert.equal(geometry.imageFit,'contain','The source picture retains its proportions')
       assert.equal(geometry.imagePointerEvents,'none','Art never intercepts workout controls')
       if(size<768){
-        assert.ok(geometry.rest.y>=geometry.title.bottom,'Phone timer does not overlap the exercise heading')
-        assert.ok(geometry.load.y>=geometry.rest.bottom-1,'Phone loading guidance follows the timer')
-        assert.ok(geometry.logger.y>=geometry.load.bottom-1,'Phone logging follows loading guidance')
-        assert.ok(geometry.history.y>=geometry.logger.bottom-1,'Phone logging precedes set history')
-        assert.ok(geometry.cue.y>=geometry.history.bottom-1,'Phone coaching follows history')
+        assert.ok(geometry.image.height>=150 && geometry.image.height<=geometry.title.height+1,'Artwork has a visible size bounded by the heading')
+        assert.ok(geometry.imageMask.includes('linear-gradient'),'Phone artwork retains its blended edges')
+        assert.ok(geometry.rest.y>=Math.max(geometry.image.bottom,geometry.title.bottom)-1,'Phone rest timer sits below the artwork and heading')
+        assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.bottom-geometry.load.bottom)<2,'Phone bar loader fills the lower right beside history')
+        assert.ok(geometry.load.y>=geometry.rest.bottom-1,'Bar loading follows the timer without overlap')
+        assert.ok(geometry.history.y>=geometry.title.bottom-1,'Phone history starts below the heading')
+        assert.ok(geometry.cue.y>=Math.max(geometry.history.bottom,geometry.load.bottom)-1,'Coaching clears both columns')
+        assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Phone logging retains its original position below coaching')
+        assert.ok(geometry.history.bottom-geometry.lastSetBottom<=8,'Set rows fill the history panel without an empty tail')
+        assert.ok(geometry.title.bottom-geometry.titleContentBottom<=16,'Heading has no fixed-height empty footer')
+        const headingRight=await card.locator('.exercise-title>div').evaluate(el=>el.getBoundingClientRect().right)
+        assert.ok(headingRight<=geometry.rest.x,'Phone title never extends into the timer')
         assert.equal(await page.evaluate(()=>{const el=document.createElement('div');el.className='toast';document.body.appendChild(el);const value=getComputedStyle(el).pointerEvents;el.remove();return value}),'none','Save feedback cannot intercept logging taps')
       }else{
         assert.ok(geometry.imageMask.includes('linear-gradient'),'Desktop picture edges fade into the card')
@@ -436,7 +443,7 @@ try {
       await page.screenshot({path:path.join(out,`train-block-controls-${size}.png`)})
       blockLayouts.push({width:size,...geometry})
     }
-    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,privateImages:'Not verified in disposable signed-out data',checks:['Numbered block heading','Art container uses proportional fit and edge masking','Phone controls stacked without overlap','Desktop table beside load panel','Native exercise paging preserves sets']})
+    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,privateImages:'Not verified in disposable signed-out data',checks:['Numbered block heading','Art container uses proportional fit and edge masking','Phone timer below artwork and bar loader bottom-aligned beside history','Desktop table beside load panel','Native exercise paging preserves sets']})
     // Full-page/element capture can temporarily resize the native carousel.
     // Capture the real viewport without changing its size or horizontal scroll.
     await card.evaluate(el=>window.scrollTo({top:scrollY+el.getBoundingClientRect().top-90,behavior:'instant'}))
