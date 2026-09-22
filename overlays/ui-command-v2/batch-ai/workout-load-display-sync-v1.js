@@ -59,14 +59,11 @@
   }
 
   function isBarbellExercise(name) {
-    const value = clean(name).toLowerCase()
-    if (!value) return false
-    if (/\b(db|dumbbell|kb|kettlebell|cable|machine|sled|bodyweight|band|plate)\b/.test(value)) return false
-    if (/\bbarbell\b/.test(value)) return true
-    return /\b(front squat|back squat|squat|bench press|deadlift|rdl|romanian deadlift|overhead press|ohp|push press|strict press|good morning|hip thrust|rack pull|clean|snatch|high pull|jerk|bar row|bent[- ]over row)\b/.test(value)
+    return window.LetMeFlyExercisePresentation?.classify(name).barbell === true
   }
 
   function unitForRow(row, settings) {
+    if (/^(lb|kg)$/.test(row.dataset.loadUnit || '')) return row.dataset.loadUnit
     const helper = clean(row.querySelector('.load-field small')?.textContent).toLowerCase()
     if (/\bkg\b/.test(helper)) return 'kg'
     if (/\blb\b/.test(helper)) return 'lb'
@@ -96,7 +93,7 @@
     let states = new Map([[0, { combo: {}, count: 0 }]])
     denominations.forEach((denom) => {
       const denomInt = Math.round(denom * scale)
-      const maxPairs = Math.max(0, Math.min(12, Number.parseInt(pairs[String(denom)] ?? 0, 10) || 0))
+      const maxPairs = Math.max(0, Math.min(24, Number.parseInt(pairs[String(denom)] ?? 0, 10) || 0))
       const next = new Map(states)
       states.forEach((state, weight) => {
         for (let count = 1; count <= maxPairs; count += 1) {
@@ -182,7 +179,7 @@
     line.classList.remove('is-empty')
     line.dataset.lmfLiveLoad = formatWeight(target)
     if (settings[unit === 'kg' ? 'inventoryConfirmedKg' : 'inventoryConfirmedLb'] === false) {
-      writeText(strong, `${formatWeight(selectedBar)} ${unit} bar • confirm plate counts in Bar Loader`)
+      writeText(strong, `${formatWeight(selectedBar)} ${unit} bar • ${formatWeight(Math.max(0, (target - minimum) / 2))} ${unit} per side${collars ? ` + ${formatWeight(collars)} ${unit} collars total` : ''} • confirm plate counts in Bar Loader`)
       line.dataset.lmfLoadExact = 'false'
       return
     }
@@ -250,6 +247,7 @@
     })
     observer.observe(document.documentElement, { childList: true, subtree: true })
 
+    window.addEventListener('lmf:exercise-intelligence-ready', () => scheduleSync(0))
     window.addEventListener('hashchange', () => scheduleSync(0))
     window.addEventListener('storage', (event) => {
       if (event.key === STORAGE_KEY) scheduleSync(0)

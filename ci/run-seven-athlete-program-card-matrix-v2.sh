@@ -46,6 +46,29 @@ if source.count(old) != 1:
     raise SystemExit(f'Expected one matrix preview-state boundary, found {source.count(old)}')
 source = source.replace(old, new, 1)
 
+# Every governed day is checked at a phone viewport for this repair.
+source = source.replace('{width:1440,height:1000}', '{width:390,height:844}')
+layout_check = """
+async function assertMobileCardLayout(page,row){
+  const failures=await page.evaluate(()=>[...document.querySelectorAll('.workout-panel .preview-card')].flatMap(card=>{
+    const title=card.querySelector('.exercise-title h3'),bounds=card.getBoundingClientRect(),errors=[]
+    if(!bounds.width)return errors
+    if(title&&title.clientWidth&&title.scrollWidth>title.clientWidth+2)errors.push(title.textContent+': title overflows')
+    for(const button of card.querySelectorAll('.exercise-actions button')){
+      const rect=button.getBoundingClientRect()
+      if(rect.width&&(rect.left<bounds.left-2||rect.right>bounds.right+2))errors.push(title?.textContent+': action overflows')
+    }
+    for(const field of card.querySelectorAll('.prescription-row')){
+      if(field.clientWidth&&field.scrollWidth>field.clientWidth+2)errors.push(title?.textContent+': prescription overflows')
+    }
+    return errors
+  }))
+  assert.deepEqual(failures,[],`${row.program} W${row.week} D${row.day}: phone card geometry`)
+}
+"""
+source = source.replace("try{assert.equal(contract.athletes.length,7);", layout_check + "\ntry{assert.equal(contract.athletes.length,7);")
+source = source.replace('await assertPreview(slot.page,row,currentDay);slot.checked++', 'await assertPreview(slot.page,row,currentDay);await assertMobileCardLayout(slot.page,row);slot.checked++')
+
 Path(os.environ['TMP']).write_text(source)
 PY
 

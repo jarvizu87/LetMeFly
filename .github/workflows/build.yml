@@ -251,6 +251,7 @@ jobs:
             fi
           }
 
+          run_browser_audit exercise-presentation node ci/audit-exercise-presentation-v1.mjs
           run_browser_audit browser-smoke node ci/audit-browser-smoke.mjs
           run_browser_audit home-progress-route-isolation node ci/audit-home-progress-route-isolation.mjs
           run_browser_audit progress-tab-scroll node ci/audit-progress-tab-scroll-browser.mjs

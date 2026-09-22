@@ -202,7 +202,7 @@ if summary_marker not in main:
   const loadText = String(perf.programmedLoadText ?? '').trim()
   const percentage = Number(perf.percentage)
   if (loadText) parts.push(loadText)
-  else if (Number.isFinite(percentage)) {
+  else if (Number.isFinite(percentage) && percentage > 0) {
     const percent = percentage > 0 && percentage <= 1 ? percentage * 100 : percentage
     parts.push(`${Number.isInteger(percent) ? percent : Number(percent.toFixed(1))}%`)
   }

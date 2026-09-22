@@ -171,6 +171,34 @@
   function summary(card) {
     const rows = [...card.querySelectorAll('.set-table .set-row')]
     if (!rows.length) return
+    const exerciseName = text(card.querySelector('.exercise-title h3'))
+    const intelligence = window.LetMeFlyExerciseIntelligence?.getExercise?.(exerciseName)
+    const presentation = window.LetMeFlyExercisePresentation?.classify(exerciseName, rows[0].dataset.programmedLoad) || {}
+    const dumbbell = presentation.dumbbell === true
+    card.dataset.lmfLoadBasis = dumbbell ? 'per-dumbbell' : 'total'
+    for (const row of rows) {
+      const label = row.querySelector('.load-field > label')
+      if (dumbbell) setText(label, `Load (${row.dataset.loadUnit || 'lb'}/DB)`)
+      else if (/\/DB/.test(text(label))) setText(label, 'Load')
+      // A legacy zero percentage is a no-load sentinel on cardio rows only.
+      // Keep saved prescriptions intact; normalize only their visible text.
+      if (presentation.cardio || (['duration', 'distance'].includes(row.dataset.prescriptionKind) && !Number(row.dataset.programmedLoadDefault) && !/\d\s*(?:lb|kg)\b/i.test(row.dataset.programmedLoad || ''))) {
+        const target = row.querySelector('.set-target-cell strong')
+        if (target) setText(target, text(target).split(/\s*•\s*/).filter(part => !/^0(?:\.0+)?%$/.test(part)).join(' • '))
+        row.dataset.hasLoad = 'false'
+      }
+    }
+    const status = card.querySelector('.exercise-source-status')
+    if (intelligence?.demo?.currentStatus === 'direct-source-library') setText(status, 'Direct source video')
+    // Search results are useful but must never be labeled as a verified demo.
+    const fallbackVideo = /search fallback|plan-linked|tutorial search/i.test(text(status))
+    if (fallbackVideo) setText(status, 'Tutorial search · direct demo pending')
+    card.querySelectorAll('[data-watch]').forEach(button => {
+      if (fallbackVideo && !button.classList.contains('icon-btn')) setText(button, 'FIND TUTORIAL')
+      if (fallbackVideo) setAttr(button, 'aria-label', `Find ${exerciseName} tutorial`)
+    })
+    // Read after hydration so the mirrored table cannot retain blank defaults.
+    rows.forEach(row => window.__LMF_WORKOUT_PRESCRIPTION_INPUT_HYDRATION_V1__?.hydrateRow?.(row))
     const table = ensure(card, '.lmf-reference-set-history','div','lmf-reference-set-history','')
     const values = rows.map(row => {
       const completed = Boolean(row.querySelector('.set-check.done'))
@@ -178,7 +206,7 @@
       const load = row.querySelector('.load-input')?.value
       const metric = row.querySelector('.metric-input') || row.querySelector('.reps-input')
       const metricLabel = row.dataset.prescriptionKind === 'reps' ? 'reps' : row.dataset.metricUnit || ''
-      return {id:row.dataset.setId,kind:row.dataset.prescriptionKind,number:text(row.querySelector('.set-label strong')),load:load ? `${load} ${unit}`.trim() : '—',amount:metric?.value ? `${metric.value}${metricLabel === 'reps' ? '' : ` ${metricLabel}`}` : '—',rpe:row.querySelector('.rpe-input')?.value || '—',completed,selected:row.classList.contains('lmf-set-active')}
+      return {id:row.dataset.setId,kind:row.dataset.prescriptionKind,number:text(row.querySelector('.set-label strong')),load:load ? `${load} ${unit}${dumbbell ? '/DB' : ''}`.trim() : '—',amount:metric?.value ? `${metric.value}${metricLabel === 'reps' ? '' : ` ${metricLabel}`}` : '—',rpe:row.querySelector('.rpe-input')?.value || '—',completed,selected:row.classList.contains('lmf-set-active')}
     })
     const signature = JSON.stringify(values)
     if (table.dataset.signature !== signature) {
@@ -437,6 +465,8 @@
       }
       queue()
     })
+    window.addEventListener('lmf:prescription-inputs-hydrated', queue)
+    window.addEventListener('letmefly:exercise-intelligence-ready', queue)
     window.addEventListener('hashchange',() => {
       cancelAnimationFrame(cardAlignmentFrame)
       cardAlignmentFrame = 0

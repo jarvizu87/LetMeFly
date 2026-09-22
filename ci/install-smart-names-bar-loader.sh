@@ -46,7 +46,7 @@ grep -Fq ".lmf-bar-inventory" "$CSS_SOURCE"
 grep -Fq "@media (max-width: 360px)" "$CSS_SOURCE"
 
 mkdir -p "$DIST_DIR/ui"
-cp "$JS_SOURCE" "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
+cat "$ROOT_DIR/overlays/ui-command-v2/batch-v/exercise-presentation-v1.js" "$JS_SOURCE" > "$DIST_DIR/ui/smart-names-bar-loader-v1.js"
 cp "$CSS_SOURCE" "$DIST_DIR/ui/smart-names-bar-loader-v1.css"
 
 # Active workout cards are intentionally re-rendered by Workout Flow and by the
