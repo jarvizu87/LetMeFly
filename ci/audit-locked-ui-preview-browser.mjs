@@ -456,6 +456,36 @@ try {
     assert.ok((await page.locator('.lmf-reference-upcoming [data-reference-section]').count())>0,'Upcoming blocks retain native section navigation')
     assert.match(await page.locator('.lmf-reference-upcoming [data-reference-section] strong').first().innerText(),/^Block \d+ — /,'Collapsed cards retain real numbered block headings')
     report.checks.push({route:'train',width,result:'PASS',checks:['Live workout banner','Four readiness controls','Native workout flow','Every set represented','Original set selection','Load unit follows athlete','Bar loader opens','Rest timer starts, pauses, resets','Native set logging reflected','Upcoming blocks','No overflow']})
+    // Reproduce the two non-barbell screenshot cases using a disposable athlete.
+    if(width<768){
+      for(const name of ['Chest-Supported Row','Bike / Incline Walk']){
+        const movement=page.locator('.active-exercise').filter({has:page.locator('.exercise-title h3',{hasText:new RegExp('^'+name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$')})}).first()
+        const paneIndex=await movement.evaluate(el=>Array.from(document.querySelectorAll('#swipe-viewport > .swipe-page')).indexOf(el.closest('.swipe-page')))
+        await page.locator(`#session-track [data-session-index="${paneIndex}"]`).click()
+        if(!(await movement.getAttribute('class')).includes('lmf-flow-active'))await movement.locator('.lmf-compact-summary').click()
+        await movement.locator('.set-row.lmf-set-active').waitFor({state:'visible'})
+        assert.equal(await movement.locator('.lmf-reference-load-card').isVisible(),false,name+' hides bar-only loading guidance')
+        assert.equal(await movement.locator('[data-reference-load-bar]').isVisible(),false,name+' hides the bar loader action')
+        if(name==='Chest-Supported Row'){
+          const input=movement.locator('.set-row.lmf-set-active .load-input')
+          await page.waitForFunction(()=>Number(document.querySelector('.active-page .lmf-flow-active .lmf-set-active .load-input')?.value)>0)
+          assert.match(await movement.locator('.lmf-reference-set-history').innerText(),/kg\/DB/,'Dumbbell history labels each dumbbell')
+          await input.fill('19')
+          await movement.locator('[data-reference-timer-reset]').click()
+          assert.equal(await input.inputValue(),'19','UI refresh preserves edited dumbbell load')
+        }else{
+          assert.doesNotMatch(await movement.locator('.set-row.lmf-set-active .set-target-cell').innerText(),/(?:^|\s)0%/,'Cardio hides the no-load percentage sentinel')
+        }
+        for(const phoneWidth of [360,412]){
+          await page.setViewportSize({width:phoneWidth,height:950})
+          await page.locator(`#session-track [data-session-index="${paneIndex}"]`).click()
+          assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' fits phone width')
+          await movement.locator('.set-table').evaluate(el=>window.scrollTo({top:scrollY+el.getBoundingClientRect().top-95,behavior:'instant'}))
+          await page.screenshot({path:path.join(out,`train-${name==='Chest-Supported Row'?'dumbbell':'cardio'}-${phoneWidth}.png`)})
+        }
+      }
+      report.checks.push({route:'train-non-barbell',width,result:'PASS',checks:['Dumbbell load hydration and per-dumbbell units','Edited loads preserved','Bar loader hidden for cardio and dumbbells','Cardio percentage sentinel hidden','360px and 412px screenshots']})
+    }
     await page.goto(origin+'/#/home')
     await page.waitForFunction(()=>document.querySelector('.lmf-home-reference-final [data-lmf-home-readiness="stress"]')?.textContent==='5/5')
     assert.equal(await page.locator('.lmf-home-reference-final [data-lmf-home-readiness="sleep_quality"]').innerText(),'4/5')
