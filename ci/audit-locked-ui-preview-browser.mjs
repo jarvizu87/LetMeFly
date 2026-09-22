@@ -408,13 +408,22 @@ try {
         return {title:rect('.exercise-title'),rest:rect('.lmf-reference-rest-timer'),history:rect('.lmf-reference-set-history'),load:rect('.lmf-reference-load-card'),logger:rect('.set-table'),cue:rect('.lmf-reference-coaching-cue'),imagePosition:style.position,imageFit:style.backgroundSize,imageMask:style.maskImage,imagePointerEvents:style.pointerEvents,blockNumber:el.closest('.workout-panel').querySelector('h2').dataset.referenceBlockNumber,overflow:document.documentElement.scrollWidth-innerWidth}
       })
       assert.equal(geometry.blockNumber,String(sectionIndex),'The block heading retains the real section number')
-      assert.equal(geometry.imagePosition,'absolute','The original picture blends into the composition')
+      assert.equal(geometry.imagePosition,size<768?'relative':'absolute','Phone art has its own space; desktop retains blended art')
       assert.equal(geometry.imageFit,'contain','The source picture retains its proportions')
-      assert.ok(geometry.imageMask.includes('linear-gradient'),'Picture edges fade into the card')
-      assert.equal(geometry.imagePointerEvents,'none','Blended art never intercepts workout controls')
-      assert.ok(Math.abs(geometry.rest.y-geometry.title.y)<25,'Rest timer shares the title/art region')
-      assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.y-geometry.load.y)<2,'Set table and load panel share one row at every phone/desktop size')
-      assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Native logging stays below coaching guidance')
+      assert.equal(geometry.imagePointerEvents,'none','Art never intercepts workout controls')
+      if(size<768){
+        assert.ok(geometry.rest.y>=geometry.title.bottom,'Phone timer does not overlap the exercise heading')
+        assert.ok(geometry.load.y>=geometry.rest.bottom-1,'Phone loading guidance follows the timer')
+        assert.ok(geometry.logger.y>=geometry.load.bottom-1,'Phone logging follows loading guidance')
+        assert.ok(geometry.history.y>=geometry.logger.bottom-1,'Phone logging precedes set history')
+        assert.ok(geometry.cue.y>=geometry.history.bottom-1,'Phone coaching follows history')
+        assert.equal(await page.evaluate(()=>{const el=document.createElement('div');el.className='toast';document.body.appendChild(el);const value=getComputedStyle(el).pointerEvents;el.remove();return value}),'none','Save feedback cannot intercept logging taps')
+      }else{
+        assert.ok(geometry.imageMask.includes('linear-gradient'),'Desktop picture edges fade into the card')
+        assert.ok(Math.abs(geometry.rest.y-geometry.title.y)<25,'Desktop rest timer shares the title/art region')
+        assert.ok(geometry.history.right<=geometry.load.x+1 && Math.abs(geometry.history.y-geometry.load.y)<2,'Desktop set table and load panel share one row')
+        assert.ok(geometry.logger.y>=geometry.cue.bottom-1,'Desktop logging stays below coaching guidance')
+      }
       assert.ok(geometry.overflow<=1,`Block card has no horizontal overflow at ${size}px`)
       const compactRows=await page.locator('.active-page .lmf-flow-compact').evaluateAll(cards=>cards.map(card=>{
         const button=card.querySelector('.lmf-compact-summary'),name=button?.querySelector('.lmf-compact-copy')
@@ -427,7 +436,7 @@ try {
       await page.screenshot({path:path.join(out,`train-block-controls-${size}.png`)})
       blockLayouts.push({width:size,...geometry})
     }
-    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,privateImages:'Not verified in disposable signed-out data',checks:['Numbered block heading','Art container uses proportional fit and edge masking','Rest timer beside title','Set table beside load panel','Native exercise paging preserves sets']})
+    report.checks.push({route:'train-block-layout',width,result:'PASS',layouts:blockLayouts,privateImages:'Not verified in disposable signed-out data',checks:['Numbered block heading','Art container uses proportional fit and edge masking','Phone controls stacked without overlap','Desktop table beside load panel','Native exercise paging preserves sets']})
     // Full-page/element capture can temporarily resize the native carousel.
     // Capture the real viewport without changing its size or horizontal scroll.
     await card.evaluate(el=>window.scrollTo({top:scrollY+el.getBoundingClientRect().top-90,behavior:'instant'}))
