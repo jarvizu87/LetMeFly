@@ -4,6 +4,14 @@ import assert from 'node:assert/strict'
 import path from 'node:path'
 import {pathToFileURL} from 'node:url'
 const app=path.resolve('.build-src/letmefly_app')
+const {default:ts}=await import(pathToFileURL(path.join(app,'node_modules/typescript/lib/typescript.js')))
+const installer=fs.readFileSync('ci/apply-program-card-fidelity-v1.sh','utf8')
+const start=installer.indexOf('function workoutPrescriptionSummary(perf:')
+assert.ok(start>=0)
+const summarySource=installer.slice(start,installer.indexOf('\n}',start)+2)
+const summary=vm.runInNewContext(ts.transpile(summarySource,{target:ts.ScriptTarget.ES2022})+';workoutPrescriptionSummary')
+for(const percentage of [null,undefined,0,''])assert.equal(summary({programmedReps:'12',percentage}),'12','Absent load percentage must not appear as 0%')
+for(const percentage of [0.75,75])assert.equal(summary({programmedReps:'5',percentage}),'5 • 75%','Real percentage prescriptions remain intact')
 const data=JSON.parse(fs.readFileSync(path.join(app,'dist/data/exercise-intelligence-v1.json')))
 const names=new Map()
 for(const exercise of data.exercises)for(const name of [exercise.canonicalName,...exercise.aliases||[]])names.set(name.toLowerCase(),exercise)
